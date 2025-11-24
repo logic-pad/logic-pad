@@ -32,7 +32,7 @@ export default memo(function ThemeSwitcher() {
         role="listbox"
       >
         {SUPPORTED_THEMES.map(([themeChoice]) => (
-          <li key={themeChoice}>
+          <li key={themeChoice} className="relative">
             <input
               type="radio"
               name="theme-dropdown"
@@ -45,6 +45,15 @@ export default memo(function ThemeSwitcher() {
               value={themeChoice}
               onChange={e => switchTheme(e.currentTarget.value)}
             />
+            <div
+              data-theme={themeChoice}
+              className="absolute right-4 top-1 bottom-1 flex items-center gap-1 p-1 bg-neutral rounded-md pointer-events-none"
+            >
+              <div className="h-full w-2 bg-base-100 rounded-sm"></div>
+              <div className="h-full w-2 bg-primary rounded-sm"></div>
+              <div className="h-full w-2 bg-secondary rounded-sm"></div>
+              <div className="h-full w-2 bg-accent rounded-sm"></div>
+            </div>
           </li>
         ))}
       </ul>
