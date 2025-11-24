@@ -1,3 +1,8 @@
+# 0.25.3
+
+- The No Loops rule now only highlights the looped tiles instead of all tiles of the looped color
+- Fixed No Loops rule crashing on wrap-around grids
+
 # 0.25.2
 
 - Fixed No Loops rule not satisfied in some cases

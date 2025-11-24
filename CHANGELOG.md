@@ -1,3 +1,8 @@
+# 24/11/2025
+
+- The No Loops rule now only highlights the looped tiles
+- Fixed No Loops rule crashing on wrap-around grids
+
 # 22/11/2025
 
 - Added No Loops rule

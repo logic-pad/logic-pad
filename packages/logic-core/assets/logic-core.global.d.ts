@@ -746,6 +746,7 @@ declare global {
     get isSingleton(): boolean;
   }
   export declare const NEIGHBOR_OFFSETS: Position$1[];
+  export declare const NEIGHBOR_OFFSETS_8: Position$1[];
   export declare class GridData {
     readonly width: number;
     readonly height: number;

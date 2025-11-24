@@ -1,5 +1,5 @@
 import { AnyConfig, ConfigType } from '../config.js';
-import GridData, { NEIGHBOR_OFFSETS } from '../grid.js';
+import GridData, { NEIGHBOR_OFFSETS, NEIGHBOR_OFFSETS_8 } from '../grid.js';
 import { array } from '../dataHelper.js';
 import { Color, Position, RuleState, State } from '../primitives.js';
 import Rule, { SearchVariant } from './rule.js';
@@ -80,50 +80,161 @@ export default class NoLoopsRule extends Rule {
   }
 
   public validateGrid(grid: GridData): RuleState {
+    // wrap-around grids require special consideration because the "islands" assumption of the
+    // algorithm below does not hold
+    if (grid.wrapAround.value) {
+      const visited = array(grid.width, grid.height, (i, j) => {
+        const tile = grid.getTile(i, j);
+        return (
+          !tile.exists ||
+          (tile.color !== this.color && tile.color !== Color.Gray)
+        );
+      });
+      while (true) {
+        const seed = grid.find(
+          (tile, x, y) => !visited[y][x] && tile.color === this.color
+        );
+        if (!seed) break;
+        let invalid = false;
+        const positions: Position[] = [];
+        const stack: [Position, Position | null][] = [[seed, null]];
+        while (stack.length > 0) {
+          const [{ x, y }, from] = stack.pop()!;
+          const { x: arrX, y: arrY } = grid.toArrayCoordinates(x, y);
+          positions.push({ x: arrX, y: arrY });
+          if (visited[arrY][arrX]) {
+            invalid = true;
+            continue;
+          }
+          visited[arrY][arrX] = true;
+          for (const offset of NEIGHBOR_OFFSETS) {
+            if (-offset.x === from?.x && -offset.y === from?.y) continue;
+            const next = { x: x + offset.x, y: y + offset.y };
+            if (grid.isPositionValid(next.x, next.y)) {
+              const nextTile = grid.getTile(next.x, next.y);
+              if (nextTile.exists && nextTile.color === this.color)
+                stack.push([next, offset]);
+            }
+          }
+        }
+        if (invalid) {
+          return {
+            state: State.Error,
+            positions,
+          };
+        }
+      }
+      return {
+        state: visited.some(row => row.some(v => !v))
+          ? State.Incomplete
+          : State.Satisfied,
+      };
+    }
+
+    // special handling for 2x2 loops
+    for (let y = 0; y < grid.height; y++) {
+      for (let x = 0; x < grid.width; x++) {
+        const tlTile = grid.getTile(x, y);
+        const trTile = grid.getTile(x + 1, y);
+        const blTile = grid.getTile(x, y + 1);
+        const brTile = grid.getTile(x + 1, y + 1);
+        if (
+          tlTile.exists &&
+          tlTile.color === this.color &&
+          trTile.exists &&
+          trTile.color === this.color &&
+          blTile.exists &&
+          blTile.color === this.color &&
+          brTile.exists &&
+          brTile.color === this.color
+        ) {
+          const positions: Position[] = [
+            grid.toArrayCoordinates(x, y),
+            grid.toArrayCoordinates(x + 1, y),
+            grid.toArrayCoordinates(x, y + 1),
+            grid.toArrayCoordinates(x + 1, y + 1),
+          ];
+          return {
+            state: State.Error,
+            positions,
+          };
+        }
+      }
+    }
+
+    // general case for non-wrap-around grids: a loop must form an elcosed island that does not touch the grid edge
     const visited = array(grid.width, grid.height, (i, j) => {
       const tile = grid.getTile(i, j);
-      return (
-        !tile.exists || (tile.color !== this.color && tile.color !== Color.Gray)
-      );
+      return tile.exists && tile.color === this.color;
     });
+    const shape = array(grid.width, grid.height, () => false);
+    let complete = true;
     while (true) {
       const seed = grid.find(
-        (tile, x, y) => !visited[y][x] && tile.color === this.color
+        (tile, x, y) =>
+          !visited[y][x] && (!tile.exists || tile.color !== this.color)
       );
+      shape.forEach(row => row.fill(false));
       if (!seed) break;
-      let invalid = false;
-      const positions: Position[] = [];
-      const stack: [Position, Position | null][] = [[seed, null]];
+      let isIsland = true;
+      const stack: Position[] = [seed];
       while (stack.length > 0) {
-        const [{ x, y }, from] = stack.pop()!;
+        const { x, y } = stack.pop()!;
         const { x: arrX, y: arrY } = grid.toArrayCoordinates(x, y);
-        positions.push({ x, y });
+        const tile = grid.getTile(x, y);
+        if (tile.exists && tile.color === Color.Gray) {
+          complete = false;
+        }
         if (visited[arrY][arrX]) {
-          invalid = true;
           continue;
         }
         visited[arrY][arrX] = true;
-        for (const offset of NEIGHBOR_OFFSETS) {
-          if (-offset.x === from?.x && -offset.y === from?.y) continue;
+        for (const offset of NEIGHBOR_OFFSETS_8) {
           const next = { x: x + offset.x, y: y + offset.y };
+          const arrPos = grid.toArrayCoordinates(next.x, next.y);
           if (grid.isPositionValid(next.x, next.y)) {
             const nextTile = grid.getTile(next.x, next.y);
-            if (nextTile.exists && nextTile.color === this.color)
-              stack.push([next, offset]);
+            shape[arrPos.y][arrPos.x] = true;
+            if (!nextTile.exists || nextTile.color !== this.color) {
+              stack.push(arrPos);
+            }
+          } else {
+            isIsland = false;
           }
         }
       }
-      if (invalid) {
+      if (isIsland) {
+        const loopPositions: Position[] = [];
+        for (let y = 0; y < grid.height; y++) {
+          for (let x = 0; x < grid.width; x++) {
+            if (shape[y][x]) {
+              if (
+                x > 0 &&
+                y > 0 &&
+                x < grid.width - 1 &&
+                y < grid.height - 1 &&
+                shape[y][x - 1] &&
+                shape[y - 1][x] &&
+                shape[y][x + 1] &&
+                shape[y + 1][x] &&
+                shape[y - 1][x - 1] &&
+                shape[y - 1][x + 1] &&
+                shape[y + 1][x - 1] &&
+                shape[y + 1][x + 1]
+              )
+                continue;
+              loopPositions.push({ x, y });
+            }
+          }
+        }
         return {
           state: State.Error,
-          positions,
+          positions: loopPositions,
         };
       }
     }
     return {
-      state: visited.some(row => row.some(v => !v))
-        ? State.Incomplete
-        : State.Satisfied,
+      state: complete ? State.Satisfied : State.Incomplete,
     };
   }
 

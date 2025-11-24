@@ -16,7 +16,7 @@ import { handlesSetGrid, invokeSetGrid } from './data/events/onSetGrid.js';
 import { handlesSymbolDisplay } from './data/events/onSymbolDisplay.js';
 import { handlesSymbolMerge } from './data/events/onSymbolMerge.js';
 import { handlesSymbolValidation } from './data/events/onSymbolValidation.js';
-import GridData, { NEIGHBOR_OFFSETS } from './data/grid.js';
+import GridData, { NEIGHBOR_OFFSETS, NEIGHBOR_OFFSETS_8 } from './data/grid.js';
 import GridConnections from './data/gridConnections.js';
 import GridZones from './data/gridZones.js';
 import Instruction from './data/instruction.js';
@@ -153,6 +153,7 @@ export {
   handlesSymbolValidation,
   GridData,
   NEIGHBOR_OFFSETS,
+  NEIGHBOR_OFFSETS_8,
   GridConnections,
   GridZones,
   Instruction,
