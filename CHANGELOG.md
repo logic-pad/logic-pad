@@ -2,6 +2,8 @@
 
 - The No Loops rule now only highlights the looped tiles
 - Fixed No Loops rule crashing on wrap-around grids
+- You can now use cmd+enter or ctrl+enter to add a new line in comments
+- You can now preview theme colors in the theme switcher
 
 # 22/11/2025
 
