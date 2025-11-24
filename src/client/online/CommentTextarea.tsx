@@ -68,14 +68,28 @@ export default memo(function CommentTextarea({
         maxLength={5000}
         allowSpaceInQuery={true}
         forceSuggestionsAboveCursor={true}
-        className="bg-base-100 text-base-content text-sm h-fit min-h-12 [&_textarea]:focus:outline-hidden"
+        className="bg-base-100 text-base-content text-sm h-fit min-h-12 max-h-30 [&_textarea]:focus:outline-hidden"
         customSuggestionsContainer={children => (
           <div className="bg-base-300 text-base-content px-4">{children}</div>
         )}
         onKeyDown={e => {
-          if (e.key === 'Enter' && !e.shiftKey) {
+          if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
             sendComment();
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const textarea = inputRef.current;
+            if (textarea) {
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              const newValue =
+                content.substring(0, start) + '\n' + content.substring(end);
+              setContent(newValue);
+              // Move the cursor
+              requestAnimationFrame(() => {
+                textarea.selectionStart = textarea.selectionEnd = start + 1;
+              });
+            }
           }
         }}
       >
