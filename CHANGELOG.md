@@ -1,3 +1,9 @@
+# 30/11/2025
+
+- Grid validation now runs automatically when a puzzle is loaded
+- Fixed repeated server errors in the collection sidebar for loved collections
+- Fixed missing grid validation when editing a published puzzle
+
 # 24/11/2025
 
 - The No Loops rule now only highlights the looped tiles
