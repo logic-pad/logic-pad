@@ -74,7 +74,7 @@ export const Route = createLazyFileRoute('/_layout')({
             >
               <img
                 src="/logo.svg"
-                className="w-8 h-8 inline-block"
+                className="w-8 h-8 inline-block grayscale"
                 alt="Logic Pad logo"
               />
               Logic Pad

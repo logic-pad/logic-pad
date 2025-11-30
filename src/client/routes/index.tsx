@@ -120,11 +120,16 @@ export const Route = createFileRoute('/')({
               <div className="flex flex-wrap shrink-0 grow-0 justify-center gap-8">
                 <div className="relative w-32 h-32 inline-block">
                   <div className="absolute w-0 h-0 top-1/2 left-1/2 logo-glow fade-in-slow"></div>
-                  <img
-                    src="/logo.svg"
-                    className="absolute inset-0"
-                    alt="Logic Pad logo"
-                  />
+                  <div
+                    className="absolute inset-0 w-fit h-fit tooltip tooltip-bottom"
+                    data-tip="Stay safe from fire."
+                  >
+                    <img
+                      src="/logo.svg"
+                      className="grayscale"
+                      alt="Logic Pad logo"
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-4">
                   <h1
