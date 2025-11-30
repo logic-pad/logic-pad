@@ -76,8 +76,9 @@ export default memo(function GridContext({
 
   useEffect(() => {
     clearHistory(grid);
+    validateGrid(grid, solution);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [validateGrid]);
 
   const setGridRaw = (newGrid: GridData, sol?: GridData | null) => {
     newGrid = invokeSetGrid(grid, newGrid, sol === undefined ? solution : sol);
