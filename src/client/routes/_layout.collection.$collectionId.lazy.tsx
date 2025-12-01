@@ -60,6 +60,7 @@ import {
 import Avatar from '../online/Avatar';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import Skeleton from '../components/Skeleton';
+import { TbLayoutGrid } from 'react-icons/tb';
 
 interface CollectionPuzzlesProps {
   collectionBrief: CollectionBrief;
@@ -568,6 +569,12 @@ export const Route = createLazyFileRoute('/_layout/collection/$collectionId')({
         </section>
         <UserCard user={collectionBrief.creator} />
         <div className="flex gap-4 items-center flex-wrap">
+          {collectionBrief.puzzleCount !== null && (
+            <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
+              <TbLayoutGrid className="inline-block me-2" size={14} />
+              {pluralize(collectionBrief.puzzleCount)`puzzle``puzzles`}
+            </span>
+          )}
           {collectionBrief.status === ResourceStatus.Public && (
             <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
               <FaUser className="inline-block me-2" size={14} />
