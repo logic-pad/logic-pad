@@ -22,6 +22,7 @@ import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
 import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
 import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
 import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
+import { Route as LayoutColorRouteImport } from './../routes/_layout.color'
 import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
 import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
 import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
@@ -112,6 +113,13 @@ const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
   import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
+)
+const LayoutColorRoute = LayoutColorRouteImport.update({
+  id: '/color',
+  path: '/color',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.color.lazy').then((d) => d.Route),
 )
 const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
   id: '/solve/',
@@ -230,6 +238,7 @@ const ModeratorModProfileUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -259,6 +268,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
   '/rules': typeof LayoutRulesRoute
@@ -288,6 +298,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
+  '/_layout/color': typeof LayoutColorRoute
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
   '/_layout/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/_layout/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -319,6 +330,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/color'
     | '/my-follows'
     | '/my-stuff'
     | '/privacy-policy'
@@ -348,6 +360,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/color'
     | '/my-follows'
     | '/privacy-policy'
     | '/rules'
@@ -376,6 +389,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/_layout'
+    | '/_layout/color'
     | '/_layout/my-follows'
     | '/_layout/my-stuff'
     | '/_layout/privacy-policy'
@@ -502,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/my-follows'
       fullPath: '/my-follows'
       preLoaderRoute: typeof LayoutMyFollowsRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/color': {
+      id: '/_layout/color'
+      path: '/color'
+      fullPath: '/color'
+      preLoaderRoute: typeof LayoutColorRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/solve/': {
@@ -645,6 +666,7 @@ const LayoutSearchRouteWithChildren = LayoutSearchRoute._addFileChildren(
 )
 
 interface LayoutLazyRouteChildren {
+  LayoutColorRoute: typeof LayoutColorRoute
   LayoutMyFollowsRoute: typeof LayoutMyFollowsRoute
   LayoutMyStuffRoute: typeof LayoutMyStuffRouteWithChildren
   LayoutPrivacyPolicyRoute: typeof LayoutPrivacyPolicyRoute
@@ -665,6 +687,7 @@ interface LayoutLazyRouteChildren {
 }
 
 const LayoutLazyRouteChildren: LayoutLazyRouteChildren = {
+  LayoutColorRoute: LayoutColorRoute,
   LayoutMyFollowsRoute: LayoutMyFollowsRoute,
   LayoutMyStuffRoute: LayoutMyStuffRouteWithChildren,
   LayoutPrivacyPolicyRoute: LayoutPrivacyPolicyRoute,

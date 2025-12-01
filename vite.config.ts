@@ -179,6 +179,9 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    rollupOptions: {
+      external: ['@terrazzo/tiles'],
+    },
   },
   define: {
     'import.meta.env.VITE_PACKAGE_VERSION': JSON.stringify(commitHash),

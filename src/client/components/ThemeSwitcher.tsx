@@ -47,12 +47,18 @@ export default memo(function ThemeSwitcher() {
             />
             <div
               data-theme={themeChoice}
-              className="absolute right-4 top-1 bottom-1 flex items-center gap-1 p-1 bg-neutral rounded-md pointer-events-none"
+              className="absolute right-4 top-1 bottom-1 w-12 rounded-md overflow-hidden pointer-events-none"
             >
-              <div className="h-full w-2 bg-base-100 rounded-sm"></div>
-              <div className="h-full w-2 bg-primary rounded-sm"></div>
-              <div className="h-full w-2 bg-secondary rounded-sm"></div>
-              <div className="h-full w-2 bg-accent rounded-sm"></div>
+              <div className="absolute inset-0 flex flex-col">
+                <div className="flex-1 bg-neutral"></div>
+                <div className="flex-1 bg-base-100"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center gap-1 p-1">
+                <div className="h-full w-2 bg-accent rounded-sm"></div>
+                <div className="h-full w-2 bg-primary rounded-sm"></div>
+                <div className="h-full w-2 bg-secondary rounded-sm"></div>
+                <div className="h-full w-2 bg-info rounded-sm"></div>
+              </div>
             </div>
           </li>
         ))}
