@@ -115,7 +115,7 @@ export default memo(function UserRestrictions({
           onClick={() =>
             modPrompt(
               promptHandle,
-              "Modifying user's restrictions. Please explain why this action is being taken. This message will be logged with the action."
+              "Modifying user's restrictions. Please explain why this action is being taken. This message will be sent to the user and logged with the action."
             )
               .then(message =>
                 saveRestrictions.mutate([userId, newRestrictions, message])

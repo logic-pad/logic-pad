@@ -594,7 +594,7 @@ export const api = {
     message: string
   ) => {
     return await axios
-      .put<UserRestrictions>(`/moderation/user/${userId}/restrictions`, {
+      .post<UserRestrictions>(`/moderation/user/${userId}/restrictions`, {
         restrictions,
         message,
       })
@@ -649,8 +649,72 @@ export const api = {
     message: string
   ) => {
     await axios
-      .put(`/moderation/user/${userId}/status`, {
+      .post(`/moderation/user/${userId}/status`, {
         status,
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveUserDescription: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveUserName: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/name/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdatePuzzle: async (
+    action: 'unpublish' | 'delete',
+    puzzleId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/puzzle/${puzzleId}/${action}`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemovePuzzleDescription: async (puzzleId: string, message: string) => {
+    await axios
+      .post(`/moderation/puzzle/${puzzleId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdateCollection: async (
+    action: 'unpublish' | 'delete',
+    collectionId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/collection/${collectionId}/${action}`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveCollectionDescription: async (
+    collectionId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/collection/${collectionId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdateComment: async (
+    action: 'remove' | 'delete',
+    commentId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/comment/${commentId}/${action}`, {
         message,
       })
       .catch(rethrowError);

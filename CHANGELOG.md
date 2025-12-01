@@ -1,6 +1,7 @@
 # 1/12/2025
 
 - Reworked all color themes again to improve contrast
+- Fixed notification layout when there are many notifications
 
 # 30/11/2025
 
