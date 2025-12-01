@@ -1,3 +1,7 @@
+# 1/12/2025
+
+- Reworked all color themes again to improve contrast
+
 # 30/11/2025
 
 - Grid validation now runs automatically when a puzzle is loaded

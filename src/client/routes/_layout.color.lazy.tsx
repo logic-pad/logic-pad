@@ -246,15 +246,15 @@ export const Route = createLazyFileRoute('/_layout/color')({
             </div>
           </div>
           <div className="w-full flex gap-12">
-            <div className="flex flex-col gap-2 bg-base-100 p-4 rounded-md shadow-lg">
+            <div className="flex flex-col gap-2 bg-base-100 text-base-content p-4 rounded-md shadow-lg">
               <span className="capitalize">{selectedColor}</span>
               <ColorPicker
                 color={selectedColorValue}
                 setColor={setSelectedColorValue}
               />
             </div>
-            <div className="flex-1 bg-base-100 p-4 rounded-md shadow-lg overflow-auto">
-              <pre>{css.trim()}</pre>
+            <div className="flex-1 bg-base-100 text-base-content p-4 rounded-md shadow-lg overflow-auto">
+              <pre>{css.trim().replace(/undefined/g, '0')}</pre>
             </div>
           </div>
         </div>
