@@ -115,7 +115,10 @@ export default memo(function Grid({
   }, [grid, size, canvasCtx, colorInfo, tileConnections, scale]);
 
   return (
-    <div className={cn('relative', className)} style={containerStyle}>
+    <div
+      className={cn('relative select-none', className)}
+      style={containerStyle}
+    >
       <canvas
         ref={canvasRef}
         width={grid.width * size * scale}
