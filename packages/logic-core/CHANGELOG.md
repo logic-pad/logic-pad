@@ -1,3 +1,11 @@
+# 0.26.0
+
+- Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
+  - This is now supported by the backtrack and universal solvers
+- Removed the z3 solver
+- Changed `Solver.isInstructionSupported` to include grid data as parameter
+- More edge cases involving lotuses/galaxies are now marked as supported by the cspuz solver
+
 # 0.25.3
 
 - The No Loops rule now only highlights the looped tiles instead of all tiles of the looped color

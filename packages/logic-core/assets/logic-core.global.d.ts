@@ -2391,7 +2391,7 @@ declare global {
      *
      * @param instructionId The unique identifier of the instruction.
      */
-    isInstructionSupported(instructionId: string): boolean;
+    isInstructionSupported(_grid: GridData, instruction: Instruction): boolean;
     /**
      * Check if the solver supports the given grid. This methid is frequently called when the user changes the grid, and
      * the result is used to enable or disable the "Solve" button.
@@ -2413,7 +2413,7 @@ declare global {
     readonly supportsCancellation = true;
     private static readonly nonAdditiveInstructions;
     isGridSupported(grid: GridData): boolean;
-    isInstructionSupported(instructionId: string): boolean;
+    isInstructionSupported(grid: GridData, instruction: Instruction): boolean;
     protected isEnvironmentSupported(): Promise<boolean>;
     private fillSolution;
     private fixGrid;
@@ -2440,7 +2440,7 @@ declare global {
     readonly description =
       'Solves puzzles pretty fast using backtracking with optimizations. Support most rules and symbols (including underclued).';
     protected createWorker(): Worker;
-    isInstructionSupported(instructionId: string): boolean;
+    isInstructionSupported(_grid: GridData, instruction: Instruction): boolean;
   }
   export declare enum BTTile {
     Empty = 0,
@@ -2497,6 +2497,10 @@ declare global {
     pos: Position$1,
     score?: number | undefined
   ): CheckResult;
+  export declare function checkSubtilePlacement(
+    grid: BTGridData,
+    pos: Position$1
+  ): CheckResult | false | undefined;
   export declare class BanPatternBTModule extends BTModule {
     instr: BanPatternRule;
     constructor(instr: BanPatternRule);
@@ -2969,7 +2973,7 @@ declare global {
       'A blazingly fast WebAssembly solver that supports most rules and symbols (including underclued).';
     protected createWorker(): Worker;
     isGridSupported(grid: GridData): boolean;
-    isInstructionSupported(instructionId: string): boolean;
+    isInstructionSupported(grid: GridData, instruction: Instruction): boolean;
     isEnvironmentSupported(): Promise<boolean>;
   }
   export declare function gridToJson(grid: GridData): PuzzleData$1;
@@ -2979,7 +2983,6 @@ declare global {
     readonly description =
       'A backtracking solver that supports all rules and symbols (including underclued) but is less optimized.';
     protected createWorker(): Worker;
-    isInstructionSupported(instructionId: string): boolean;
   }
   export declare abstract class CustomSymbol
     extends Symbol$1

@@ -64,7 +64,7 @@ import { getShapeVariants, normalizeShape, positionsToShape, sanitizePatternGrid
 import { allSolvers } from './data/solver/allSolvers.js';
 import AutoSolver from './data/solver/auto/autoSolver.js';
 import BacktrackSolver from './data/solver/backtrack/backtrackSolver.js';
-import BTModule, { BTGridData, BTTile, IntArray2D, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
+import BTModule, { BTGridData, BTTile, IntArray2D, checkSubtilePlacement, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
 import BanPatternBTModule from './data/solver/backtrack/rules/banPattern.js';
 import CellCountBTModule from './data/solver/backtrack/rules/cellCount.js';
 import ConnectAllBTModule from './data/solver/backtrack/rules/connectAll.js';
@@ -222,6 +222,7 @@ export {
   BTGridData,
   BTTile,
   IntArray2D,
+  checkSubtilePlacement,
   colorToBTTile,
   createOneTileResult,
   getOppositeColor,
