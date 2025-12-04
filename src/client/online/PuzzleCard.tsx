@@ -163,17 +163,17 @@ export default memo(function PuzzleCard({
       {...(dragDroppable ? attributes : {})}
       {...(dragDroppable ? listeners : {})}
       className={cn(
-        'w-[320px] h-[116px] hover:z-50 shrink-0 grow-0',
+        'w-[320px] h-[116px] [:hover]:z-50 shrink-0 grow-0',
         dragDroppable && 'touch-none'
       )}
     >
       <RootComponent
         preload={false}
         className={cn(
-          'relative w-full h-full hover:h-fit hover:min-h-fit flex gap-4 items-center px-4 py-2 rounded-xl shadow-md wrapper hover:shadow-xl transition-all text-base-content',
+          'relative w-full h-full [:hover]:h-fit flex gap-4 items-center px-4 py-2 rounded-xl shadow-md wrapper [:hover]:shadow-xl [:hover]:outline-2 -outline-offset-2 outline-accent transition-all text-base-content',
           puzzle.status === ResourceStatus.Private
-            ? `bg-base-300/50 hover:bg-base-100`
-            : 'bg-base-300 hover:bg-base-100',
+            ? `bg-base-300/50 [:hover]:bg-base-100`
+            : 'bg-base-300 [:hover]:bg-base-100',
           isDragging && 'pointer-events-none'
         )}
         role="button"

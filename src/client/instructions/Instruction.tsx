@@ -93,53 +93,60 @@ export default memo(function Instruction({
                   : 'bg-error'
           )}
         ></div>
-        <div
-          className={cn(
-            'text-center py-1 px-2 flex grow justify-center items-center text-neutral-content',
-            responsive
-              ? 'text-sm lg:text-base'
-              : large
-                ? 'text-base'
-                : 'text-sm'
-          )}
-        >
-          <AnnotatedText>{instruction.explanation}</AnnotatedText>
-        </div>
-        <div
-          className={cn(
-            'shrink-0 relative flex items-center justify-center py-1',
-            responsive
-              ? 'min-h-[calc(16px*4)] lg:min-h-[calc(30px*4)] min-w-[calc(16px*5)] lg:min-w-[calc(30px*5)]'
-              : large
-                ? 'min-h-[calc(30px*4)] min-w-[calc(30px*5)]'
-                : 'min-h-[calc(16px*4)] min-w-[calc(16px*5)]'
-          )}
-        >
-          {exampleGrid && (
-            <Grid
-              type="canvas"
-              size={
-                (exampleGrid.width === 1 && exampleGrid.height === 1
-                  ? 56
-                  : 28) / (isLargeScreen ? 1 : 2) // special case for rules with a single symbol as thumbnail
-              }
-              grid={exampleGrid}
-              editable={false}
+        <div className="flex flex-col">
+          <div className="self-stretch -mr-2 ps-2 bg-primary/10 text-neutral-content">
+            <AnnotatedText>{'For each *zone*:'}</AnnotatedText>
+          </div>
+          <div className="flex">
+            <div
+              className={cn(
+                'text-center py-1 px-2 flex grow justify-center items-center text-neutral-content',
+                responsive
+                  ? 'text-sm lg:text-base'
+                  : large
+                    ? 'text-base'
+                    : 'text-sm'
+              )}
             >
-              {exampleGrid.symbols.size > 0 ? (
-                <SymbolOverlay
+              <AnnotatedText>{instruction.explanation}</AnnotatedText>
+            </div>
+            <div
+              className={cn(
+                'shrink-0 relative flex items-center justify-center py-1',
+                responsive
+                  ? 'min-h-[calc(16px*4)] lg:min-h-[calc(30px*4)] min-w-[calc(16px*5)] lg:min-w-[calc(30px*5)]'
+                  : large
+                    ? 'min-h-[calc(30px*4)] min-w-[calc(30px*5)]'
+                    : 'min-h-[calc(16px*4)] min-w-[calc(16px*5)]'
+              )}
+            >
+              {exampleGrid && (
+                <Grid
+                  type="canvas"
+                  size={
+                    (exampleGrid.width === 1 && exampleGrid.height === 1
+                      ? 56
+                      : 28) / (isLargeScreen ? 1 : 2) // special case for rules with a single symbol as thumbnail
+                  }
                   grid={exampleGrid}
-                  solution={null}
                   editable={false}
-                />
-              ) : null}
-              <InstructionPartOutlet
-                grid={exampleGrid}
-                placement={PartPlacement.GridOverlay}
-              />
-              <GridZoneOverlay grid={exampleGrid} />
-            </Grid>
-          )}
+                >
+                  {exampleGrid.symbols.size > 0 ? (
+                    <SymbolOverlay
+                      grid={exampleGrid}
+                      solution={null}
+                      editable={false}
+                    />
+                  ) : null}
+                  <InstructionPartOutlet
+                    grid={exampleGrid}
+                    placement={PartPlacement.GridOverlay}
+                  />
+                  <GridZoneOverlay grid={exampleGrid} />
+                </Grid>
+              )}
+            </div>
+          </div>
         </div>
         {children}
       </div>
