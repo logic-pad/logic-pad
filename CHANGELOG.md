@@ -1,5 +1,6 @@
 # 4/12/2025
 
+- Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
 - Improved card style for better readability and touchscreen support
 
 # 1/12/2025
