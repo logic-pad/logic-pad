@@ -10,7 +10,7 @@ import deferredRedirect from '../router/deferredRedirect';
 import { router } from '../router/router';
 
 const defaultOnline = true;
-const apiVersionRange = '17.x';
+const apiVersionRange = '18.x';
 
 export interface OnlineContext {
   /**
