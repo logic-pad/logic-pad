@@ -142,7 +142,11 @@ function translateToBTGridData(grid: GridData): BTGridData {
       module = new BanPatternBTModule(rule as BanPatternRule);
     } else if (rule.id === symbolsPerRegionInstance.id) {
       const allSymbols: Symbol[] = [];
-      grid.symbols.forEach(symbols => allSymbols.push(...symbols));
+      grid.symbols.forEach(symbols =>
+        allSymbols.push(
+          ...symbols.filter(symbol => symbol.necessaryForCompletion)
+        )
+      );
 
       module = new SymbolsPerRegionBTModule(
         rule as SymbolsPerRegionRule,
