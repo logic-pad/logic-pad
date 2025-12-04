@@ -1,7 +1,14 @@
 # 4/12/2025
 
 - Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
+  - This is now supported by the backtrack and universal solvers
+- Removed the z3 solver
 - Improved card style for better readability and touchscreen support
+- The tile tool can now be dragged across tiles
+- The cspuz solver can now be used in more edge cases involving lotuses/galaxies
+- The solver support indicator now accurately reflects whether the selected symbol is supported in its current placement
+- Fixed the backtrack solver counting non-logic symbols (e.g. the hidden symbol) in symbols per region rule
+- Fixed text highlight being triggered by double-clicking on the grid in Firefox
 
 # 1/12/2025
 
