@@ -90,12 +90,6 @@ await generateImports({
       import: 'instance',
       glob: ['./**/*.ts', '!./index.ts'],
     },
-    {
-      cwd: 'src/data/solver/z3/modules',
-      generated: 'modules.gen.ts',
-      import: 'instance',
-      glob: ['./**/*.ts', '!./index.ts'],
-    },
   ],
 });
 

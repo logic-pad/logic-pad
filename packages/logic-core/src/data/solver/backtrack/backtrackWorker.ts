@@ -7,7 +7,9 @@ import BanPatternRule, {
 import CellCountRule, {
   instance as cellCountInstance,
 } from '../../rules/cellCountRule.js';
-import ConnectAllRule from '../../rules/connectAllRule.js';
+import ConnectAllRule, {
+  instance as connectAllInstance,
+} from '../../rules/connectAllRule.js';
 import RegionAreaRule, {
   instance as regionAreaInstance,
 } from '../../rules/regionAreaRule.js';
@@ -51,7 +53,6 @@ import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
 import TileData from '../../tile.js';
-import { instance as connectAllInstance } from '../z3/modules/connectAllModule.js';
 import BTModule, { BTGridData, BTTile, IntArray2D, Rating } from './data.js';
 import BanPatternBTModule from './rules/banPattern.js';
 import CellCountBTModule from './rules/cellCount.js';

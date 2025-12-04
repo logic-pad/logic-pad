@@ -88,19 +88,6 @@ import { gridToJson } from './data/solver/cspuz/jsonify.js';
 import EventIteratingSolver from './data/solver/eventIteratingSolver.js';
 import Solver from './data/solver/solver.js';
 import UniversalSolver from './data/solver/universal/universalSolver.js';
-import AreaNumberModule from './data/solver/z3/modules/areaNumberModule.js';
-import CellCountModule from './data/solver/z3/modules/cellCountModule.js';
-import ConnectAllModule from './data/solver/z3/modules/connectAllModule.js';
-import DartModule from './data/solver/z3/modules/dartModule.js';
-import { allZ3Modules } from './data/solver/z3/modules/index.js';
-import LetterModule from './data/solver/z3/modules/letterModule.js';
-import MyopiaModule from './data/solver/z3/modules/myopiaModule.js';
-import RegionAreaModule from './data/solver/z3/modules/regionAreaModule.js';
-import ViewpointModule from './data/solver/z3/modules/viewpointModule.js';
-import Z3Module from './data/solver/z3/modules/z3Module.js';
-import { convertDirection } from './data/solver/z3/utils.js';
-import Z3Solver from './data/solver/z3/z3Solver.js';
-import Z3SolverContext from './data/solver/z3/z3SolverContext.js';
 import AreaNumberSymbol from './data/symbols/areaNumberSymbol.js';
 import CustomIconSymbol from './data/symbols/customIconSymbol.js';
 import CustomSymbol from './data/symbols/customSymbol.js';
@@ -261,19 +248,6 @@ export {
   EventIteratingSolver,
   Solver,
   UniversalSolver,
-  AreaNumberModule,
-  CellCountModule,
-  ConnectAllModule,
-  DartModule,
-  allZ3Modules,
-  LetterModule,
-  MyopiaModule,
-  RegionAreaModule,
-  ViewpointModule,
-  Z3Module,
-  convertDirection,
-  Z3Solver,
-  Z3SolverContext,
   AreaNumberSymbol,
   CustomIconSymbol,
   CustomSymbol,

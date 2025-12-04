@@ -5,7 +5,6 @@ import { tanstackRouter } from '@tanstack/router-vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import { replaceCodePlugin } from 'vite-plugin-replace';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { execSync } from 'child_process';
 import vercel from 'vite-plugin-vercel';
 
@@ -14,18 +13,6 @@ const commitHash = execSync('git rev-parse HEAD').toString().trim();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/z3-solver/build/z3-built.js',
-          dest: 'assets',
-        },
-        {
-          src: 'node_modules/z3-solver/build/z3-built.wasm',
-          dest: 'assets',
-        },
-      ],
-    }),
     replaceCodePlugin({
       replacements: [
         {
@@ -47,14 +34,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       outDir: '.vercel/output/static',
-      includeAssets: [
-        'favicon.ico',
-        '*.svg',
-        '*.png',
-        'assets/z3-built.js',
-        'assets/z3-built.wasm',
-        'assets/z3-built.worker.js',
-      ],
+      includeAssets: ['favicon.ico', '*.svg', '*.png'],
       workbox: {
         globIgnores: ['**/node_modules/**/*', '**/_moderator*'],
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
@@ -157,7 +137,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@logic-pad/core', 'logic-pad-solver-core'],
-    include: ['event-iterator', 'z3-solver'],
+    include: ['event-iterator'],
   },
   resolve: {
     alias: [
