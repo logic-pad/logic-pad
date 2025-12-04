@@ -84,35 +84,19 @@ export default abstract class Symbol
     const maxX = Math.ceil(this.x);
     const maxY = Math.ceil(this.y);
     let color = Color.Gray;
-    let tile = grid.getTile(minX, minY);
-    if (!tile.exists) return false;
-    if (tile.color !== Color.Gray) color = tile.color;
-    tile = grid.getTile(maxX, minY);
-    if (
-      !tile.exists ||
-      (color !== Color.Gray &&
-        tile.color !== Color.Gray &&
-        color !== tile.color)
-    )
-      return false;
-    if (tile.color !== Color.Gray) color = tile.color;
-    tile = grid.getTile(minX, maxY);
-    if (
-      !tile.exists ||
-      (color !== Color.Gray &&
-        tile.color !== Color.Gray &&
-        color !== tile.color)
-    )
-      return false;
-    if (tile.color !== Color.Gray) color = tile.color;
-    tile = grid.getTile(maxX, maxY);
-    if (
-      !tile.exists ||
-      (color !== Color.Gray &&
-        tile.color !== Color.Gray &&
-        color !== tile.color)
-    )
-      return false;
+    for (let i = 0; i < 4; i++) {
+      const x = i % 2 === 0 ? minX : maxX;
+      const y = i < 2 ? minY : maxY;
+      const tile = grid.getTile(x, y);
+      if (!tile.exists) return false;
+      if (tile.color !== Color.Gray) {
+        if (color === Color.Gray) {
+          color = tile.color;
+        } else if (color !== tile.color) {
+          return false;
+        }
+      }
+    }
     return true;
   }
 }

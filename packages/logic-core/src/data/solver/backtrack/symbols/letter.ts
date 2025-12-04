@@ -4,6 +4,7 @@ import BTModule, {
   BTGridData,
   BTTile,
   CheckResult,
+  checkSubtilePlacement,
   IntArray2D,
 } from '../data.js';
 
@@ -38,6 +39,9 @@ export default class LetterBTModule extends BTModule {
 
     for (let id = 0; id < this.letters.length; id++) {
       for (const symbol of this.letters[id]) {
+        const checkResult = checkSubtilePlacement(grid, symbol);
+        if (checkResult !== undefined) return checkResult;
+
         const symbolX = Math.floor(symbol.x);
         const symbolY = Math.floor(symbol.y);
 
