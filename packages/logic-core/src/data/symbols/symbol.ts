@@ -1,7 +1,7 @@
 import { GridResizeHandler } from '../events/onGridResize.js';
 import GridData from '../grid.js';
 import Instruction from '../instruction.js';
-import { Mode, State } from '../primitives.js';
+import { Color, Mode, State } from '../primitives.js';
 
 export default abstract class Symbol
   extends Instruction
@@ -70,6 +70,50 @@ export default abstract class Symbol
 
   public withPosition(x: number, y: number): this {
     return this.copyWith({ x, y });
+  }
+
+  /**
+   * For symbols that can be placed between tiles, this method implements the default validation logic,
+   * which requires all tiles touching the symbol to be either gray or of the same color.
+   */
+  protected validateSubtilePlacement(grid: GridData) {
+    if (this.placementStep >= 1) return true;
+    const minX = Math.floor(this.x);
+    const minY = Math.floor(this.y);
+    if (minX === this.x && minY === this.y) return true;
+    const maxX = Math.ceil(this.x);
+    const maxY = Math.ceil(this.y);
+    let color = Color.Gray;
+    let tile = grid.getTile(minX, minY);
+    if (!tile.exists) return false;
+    if (tile.color !== Color.Gray) color = tile.color;
+    tile = grid.getTile(maxX, minY);
+    if (
+      !tile.exists ||
+      (color !== Color.Gray &&
+        tile.color !== Color.Gray &&
+        color !== tile.color)
+    )
+      return false;
+    if (tile.color !== Color.Gray) color = tile.color;
+    tile = grid.getTile(minX, maxY);
+    if (
+      !tile.exists ||
+      (color !== Color.Gray &&
+        tile.color !== Color.Gray &&
+        color !== tile.color)
+    )
+      return false;
+    if (tile.color !== Color.Gray) color = tile.color;
+    tile = grid.getTile(maxX, maxY);
+    if (
+      !tile.exists ||
+      (color !== Color.Gray &&
+        tile.color !== Color.Gray &&
+        color !== tile.color)
+    )
+      return false;
+    return true;
   }
 }
 

@@ -112,6 +112,7 @@ export default class OffByXRule
   ): State | undefined {
     if (symbol instanceof NumberSymbol) {
       const counts = symbol.countTiles(grid);
+      if (counts === null) return State.Error;
       if (
         counts.completed > symbol.number + this.number ||
         counts.possible < symbol.number - this.number ||
