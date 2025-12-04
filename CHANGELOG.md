@@ -1,3 +1,7 @@
+# 4/12/2025
+
+- Improved card style for better readability and touchscreen support
+
 # 1/12/2025
 
 - Reworked all color themes again to improve contrast
