@@ -2,7 +2,7 @@ import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompre
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { array } from '@logic-pad/core/data/dataHelper';
 import { Puzzle, PuzzleData } from '@logic-pad/core/data/puzzle';
-import { SolutionHandling } from './linkLoader';
+import { SolutionHandling } from './linkLoaderValidator';
 import { PuzzleFull } from '../online/data';
 import { useSuspenseQuery } from '@tanstack/react-query';
 

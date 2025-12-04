@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import { PiCheckerboardFill } from 'react-icons/pi';
 import { TbLayoutGridRemove, TbLayoutGrid } from 'react-icons/tb';
-import { PuzzleType } from '@logic-pad/core/index';
+import { type PuzzleType } from '@logic-pad/core/data/primitives';
 import { BsQuestionSquare } from 'react-icons/bs';
 import Difficulty from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
@@ -17,6 +17,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Link, LinkComponentProps } from '@tanstack/react-router';
 import SupporterBadge from '../components/SupporterBadge';
+
+type PuzzleTypeString = `${PuzzleType}`;
 
 export interface PuzzleCardProps extends Partial<LinkComponentProps> {
   puzzle: PuzzleBrief;
@@ -26,15 +28,15 @@ export interface PuzzleCardProps extends Partial<LinkComponentProps> {
   children?: ReactNode;
 }
 
-function getIconForType(type: PuzzleType) {
+function getIconForType(type: PuzzleTypeString) {
   switch (type) {
-    case PuzzleType.Music:
+    case 'music':
       return FaMusic;
-    case PuzzleType.Pattern:
+    case 'pattern':
       return PiCheckerboardFill;
-    case PuzzleType.Underclued:
+    case 'underclued':
       return TbLayoutGridRemove;
-    case PuzzleType.Logic:
+    case 'logic':
       return TbLayoutGrid;
   }
 }
@@ -44,13 +46,13 @@ export const PuzzleIcon = memo(function PuzzleIcon({
   className,
   size,
 }: {
-  types: PuzzleType[];
+  types: PuzzleTypeString[];
   className?: string;
   size: number;
 }) {
-  if (types.includes(PuzzleType.Underclued)) {
+  if (types.includes('underclued')) {
     // "Logic" tag is added for searching in underclued puzzles, no need to display both
-    types = types.filter(type => type !== PuzzleType.Logic);
+    types = types.filter(type => type !== 'logic');
   }
   const styles = useMemo(
     () => ({

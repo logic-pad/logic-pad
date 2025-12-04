@@ -1,6 +1,7 @@
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { memo } from 'react';
-import useLinkLoader, { SolutionHandling } from '../router/linkLoader';
+import { SolutionHandling } from '../router/linkLoaderValidator';
+import useLinkLoader from '../router/linkLoader';
 import PuzzleEditorScreen from '../screens/PuzzleEditorScreen';
 import { IoWarningOutline } from 'react-icons/io5';
 import MainContext from '../router/MainContext';

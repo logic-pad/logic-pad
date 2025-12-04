@@ -3,25 +3,26 @@ import { memo, RefObject, useMemo, useRef, useSyncExternalStore } from 'react';
 import { useRouteProtection } from '../router/useRouteProtection';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import { FaExternalLinkAlt, FaTrash, FaUpload } from 'react-icons/fa';
-import {
-  allSolvers,
-  Compressor,
-  GridData,
-  Serializer,
-  validateGrid,
-  validatePuzzleChecklist,
-} from '@logic-pad/core/index';
 import PQueue from 'p-queue';
 import Loading from '../components/Loading';
 import Difficulty from '../metadata/Difficulty';
 import PuzzleEditorModal, {
   PuzzleEditorRef,
 } from '../editor/PuzzleEditorModal';
-import { Puzzle, PuzzleMetadata } from '@logic-pad/core/data/puzzle';
+import {
+  Puzzle,
+  PuzzleMetadata,
+  validatePuzzleChecklist,
+} from '@logic-pad/core/data/puzzle';
 import { cn } from '../uiHelper';
 import toast from 'react-hot-toast';
 import { useOnline } from '../contexts/OnlineContext';
 import { api } from '../online/api';
+import { allSolvers } from '@logic-pad/core/data/solver/allSolvers';
+import GridData from '@logic-pad/core/data/grid';
+import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
+import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
+import validateGrid from '@logic-pad/core/data/validate';
 
 const defaultSolver = [...allSolvers.values()][0];
 

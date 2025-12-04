@@ -22,7 +22,7 @@ import PointerCaptureOverlay, {
 import handleTileClick from '../grid/handleTileClick';
 import { SymbolProps } from '../symbols';
 import GridData from '@logic-pad/core/data/grid';
-import { NumberSymbol } from '@logic-pad/core/index.ts';
+import NumberSymbol from '@logic-pad/core/data/symbols/numberSymbol';
 
 export interface SymbolToolProps extends HTMLProps<HTMLDivElement> {
   name: string;

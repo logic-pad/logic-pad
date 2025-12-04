@@ -20,7 +20,7 @@ import {
 } from 'react';
 import { cn } from '../uiHelper';
 import SymbolData from '@logic-pad/core/data/symbols/symbol';
-import { Rule } from '@logic-pad/core/index';
+import Rule from '@logic-pad/core/data/rules/rule';
 
 export interface SymbolOverlayProps {
   grid: GridData;

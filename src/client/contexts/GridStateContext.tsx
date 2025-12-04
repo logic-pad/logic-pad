@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { GridState, State } from '@logic-pad/core/data/primitives';
 import { GridValidator } from '@logic-pad/core/data/validateAsync';
-import { GridData } from '@logic-pad/core/index';
+import GridData from '@logic-pad/core/data/grid';
 
 interface GridStateContext {
   state: GridState;

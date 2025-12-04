@@ -10,7 +10,7 @@ import PerfectionScreen from '../../screens/PerfectionScreen';
 import { instance as foresightInstance } from '@logic-pad/core/data/rules/foresightRule';
 import EditContext, { EditConsumer } from '../../contexts/EditContext';
 import { useDelta } from 'react-delta-hooks';
-import { GridData } from '@logic-pad/core/index';
+import GridData from '@logic-pad/core/data/grid';
 import { Puzzle, PuzzleMetadata } from '@logic-pad/core/data/puzzle';
 import { invokeSetGrid } from '@logic-pad/core/data/events/onSetGrid';
 import FullScreenModal from '../../components/FullScreenModal';

@@ -9,7 +9,6 @@ import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompre
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { useGrid } from '../contexts/GridContext';
 import deferredRedirect from '../router/deferredRedirect';
-import { SolutionHandling } from '../router/linkLoader';
 import { useOnline } from '../contexts/OnlineContext';
 import RatedDifficulty from '../metadata/RatedDifficulty';
 import { api, ApiError, queryClient } from '../online/api';
@@ -17,6 +16,7 @@ import { useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
 import { pluralize, safeClipboard, toRelativeDate } from '../uiHelper';
 import CommentSidebar from '../online/CommentSidebar';
+import { SolutionHandling } from '../router/linkLoaderValidator';
 
 // million-ignore
 const SignInWithProgress = memo(function SignInWithProgress() {

@@ -3,9 +3,6 @@ import { Suspense, lazy, memo, useEffect, useState } from 'react';
 import QuickAccessBar from '../components/QuickAccessBar';
 import Changelog from '../components/Changelog';
 import Loading from '../components/Loading';
-import GridData from '@logic-pad/core/data/grid';
-import GridConnections from '@logic-pad/core/data/gridConnections';
-import useLinkLoader from '../router/linkLoader';
 import PWAPrompt from '../components/PWAPrompt';
 import toast from 'react-hot-toast';
 import deferredRedirect from '../router/deferredRedirect';
@@ -19,6 +16,7 @@ import NavigationSkip from '../components/NavigationSkip';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
+  const { GridData, GridConnections } = await import('@logic-pad/core');
 
   const grid = GridData.create([
     '.nwww',
@@ -79,7 +77,6 @@ export const Route = createFileRoute('/')({
   component: memo(function Home() {
     const navigate = useNavigate();
     const { isOnline, me } = useOnline();
-    useLinkLoader('index', { cleanUrl: true, allowEmpty: true });
     useEffect(() => {
       let toastId: string | undefined;
       void (async () => {

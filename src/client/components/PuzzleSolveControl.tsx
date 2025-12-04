@@ -4,7 +4,7 @@ import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import deferredRedirect from '../router/deferredRedirect.ts';
 import { useGridState } from '../contexts/GridStateContext.tsx';
-import { State } from '@logic-pad/core/index.ts';
+import { State } from '@logic-pad/core/data/primitives';
 import onlineSolveTracker from '../router/onlineSolveTracker.ts';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { api, ApiError, queryClient } from '../online/api.ts';
