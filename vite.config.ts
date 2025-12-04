@@ -159,8 +159,12 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    rollupOptions: {
-      external: ['@terrazzo/tiles'],
+    rolldownOptions: {
+      external: [
+        '@terrazzo/tiles',
+        '@terrazzo/react-color-picker',
+        '@terrazzo/use-color',
+      ],
     },
   },
   define: {
