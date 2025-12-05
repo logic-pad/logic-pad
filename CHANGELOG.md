@@ -7,6 +7,7 @@
 - The tile tool can now be dragged across tiles
 - The cspuz solver can now be used in more edge cases involving lotuses/galaxies
 - The solver support indicator now accurately reflects whether the selected symbol is supported in its current placement
+- Optimized symbols per region rule in the auto solver
 - Fixed the backtrack solver counting non-logic symbols (e.g. the hidden symbol) in symbols per region rule
 - Fixed text highlight being triggered by double-clicking on the grid in Firefox
 

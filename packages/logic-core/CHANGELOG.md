@@ -1,3 +1,7 @@
+# 0.26.1
+
+- Added unsupported symbol to work with the auto solver
+
 # 0.26.0
 
 - Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color

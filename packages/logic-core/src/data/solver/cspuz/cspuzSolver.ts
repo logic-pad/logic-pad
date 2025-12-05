@@ -22,6 +22,7 @@ import LotusSymbol, {
 import { instance as minesweeperInstance } from '../../symbols/minesweeperSymbol.js';
 import { instance as viewpointInstance } from '../../symbols/viewpointSymbol.js';
 import { instance as connectAllInstance } from '../../rules/connectAllRule.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import EventIteratingSolver from '../eventIteratingSolver.js';
 import GridData from '../../grid.js';
 import { Color } from '../../primitives.js';
@@ -48,6 +49,7 @@ export default class CspuzSolver extends EventIteratingSolver {
     offByXInstance.id,
     undercluedInstance.id,
     symbolsPerRegionInstance.id,
+    unsupportedInstance.id,
   ];
 
   public readonly id = 'cspuz';
@@ -70,6 +72,14 @@ export default class CspuzSolver extends EventIteratingSolver {
 
     // special handling for fixed gray tiles
     if (grid.getTileCount(true, true, Color.Gray) > 0) {
+      return false;
+    }
+
+    // the solver doesn't count symbols correctly if some symbols are unsupported
+    if (
+      grid.findSymbol(symbol => symbol.id === unsupportedInstance.id) &&
+      grid.findRule(rule => rule.id === symbolsPerRegionInstance.id)
+    ) {
       return false;
     }
 

@@ -106,6 +106,7 @@ import MinesweeperSymbol from './data/symbols/minesweeperSymbol.js';
 import MyopiaSymbol from './data/symbols/myopiaSymbol.js';
 import NumberSymbol from './data/symbols/numberSymbol.js';
 import Symbol from './data/symbols/symbol.js';
+import UnsupportedSymbol from './data/symbols/unsupportedSymbol.js';
 import ViewpointSymbol from './data/symbols/viewpointSymbol.js';
 import TileData from './data/tile.js';
 import TileConnections from './data/tileConnections.js';
@@ -267,6 +268,7 @@ export {
   MyopiaSymbol,
   NumberSymbol,
   Symbol,
+  UnsupportedSymbol,
   ViewpointSymbol,
   TileData,
   TileConnections,

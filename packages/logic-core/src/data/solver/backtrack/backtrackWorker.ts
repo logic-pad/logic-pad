@@ -52,6 +52,7 @@ import Symbol from '../../symbols/symbol.js';
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import TileData from '../../tile.js';
 import BTModule, { BTGridData, BTTile, IntArray2D, Rating } from './data.js';
 import BanPatternBTModule from './rules/banPattern.js';
@@ -109,6 +110,8 @@ function translateToBTGridData(grid: GridData): BTGridData {
       } else if (id === focusInstance.id) {
         module = new FocusBTModule(symbol as FocusSymbol);
       } else if (id === letterInstance.id) {
+        continue;
+      } else if (id === unsupportedInstance.id) {
         continue;
       }
 

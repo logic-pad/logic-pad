@@ -3,7 +3,6 @@ import { Color, State } from '../../primitives.js';
 import { instance as lyingSymbolInstance } from '../../rules/lyingSymbolRule.js';
 import { instance as offByXInstance } from '../../rules/offByXRule.js';
 import { instance as wrapAroundInstance } from '../../rules/wrapAroundRule.js';
-import { instance as symbolsPerRegionInstance } from '../../rules/symbolsPerRegionRule.js';
 import { instance as areaNumberInstance } from '../../symbols/areaNumberSymbol.js';
 import { instance as letterInstance } from '../../symbols/letterSymbol.js';
 import { allSolvers } from '../allSolvers.js';
@@ -11,6 +10,7 @@ import Solver from '../solver.js';
 import UndercluedRule from '../../rules/undercluedRule.js';
 import validateGrid from '../../validate.js';
 import Instruction from '../../instruction.js';
+import UnsupportedSymbol from '../../symbols/unsupportedSymbol.js';
 
 export default class AutoSolver extends Solver {
   public readonly id = 'auto';
@@ -26,7 +26,6 @@ export default class AutoSolver extends Solver {
     offByXInstance.id,
     lyingSymbolInstance.id,
     wrapAroundInstance.id,
-    symbolsPerRegionInstance.id,
   ]);
 
   public isGridSupported(grid: GridData): boolean {
@@ -150,14 +149,18 @@ export default class AutoSolver extends Solver {
               for (const [id, symbolList] of symbols.entries()) {
                 symbols.set(
                   id,
-                  symbolList.filter(
-                    symbol =>
-                      // special handling: do not delete area number and letter symbols as they can be solved
-                      // underclued even if the solver doesn't fully support them
+                  symbolList.map(symbol => {
+                    // special handling: do not delete area number and letter symbols as they can be solved
+                    // underclued even if the solver doesn't fully support them
+                    if (
                       symbol.id === areaNumberInstance.id ||
-                      symbol.id === letterInstance.id ||
-                      solver.isInstructionSupported(progressGrid, symbol)
-                  )
+                      symbol.id === letterInstance.id
+                    )
+                      return symbol;
+                    if (solver.isInstructionSupported(progressGrid, symbol))
+                      return symbol;
+                    return new UnsupportedSymbol(symbol.x, symbol.y);
+                  })
                 );
               }
               return symbols;

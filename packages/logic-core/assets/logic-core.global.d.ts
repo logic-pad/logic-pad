@@ -3206,6 +3206,21 @@ declare global {
     }): this;
   }
   export declare const allSymbols: Map<string, Symbol$1>;
+  /**
+   * A marker for symbols not supported by the current solver.
+   * Solvers should count these symbols in the symbols per region rule but otherwise ignore them.
+   */
+  export declare class UnsupportedSymbol extends Symbol$1 {
+    readonly title = 'Unsupported Symbol';
+    private static readonly CONFIGS;
+    private static readonly EXAMPLE_GRID;
+    get id(): string;
+    get explanation(): string;
+    get configs(): readonly AnyConfig[] | null;
+    createExampleGrid(): GridData;
+    validateSymbol(_grid: GridData, _solution: GridData | null): State;
+    copyWith({ x, y }: { x?: number; y?: number }): this;
+  }
   export declare function aggregateState(
     rules: readonly RuleState[],
     grid: GridData,

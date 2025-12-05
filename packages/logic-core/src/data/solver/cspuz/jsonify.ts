@@ -30,6 +30,7 @@ import MinesweeperSymbol, {
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import TileData from '../../tile.js';
 import GridData from '../../grid.js';
 
@@ -184,6 +185,8 @@ export function gridToJson(grid: GridData): PuzzleData {
         type: 'galaxy',
         tiles,
       });
+    } else if (rule === unsupportedInstance.id) {
+      continue;
     } else if (symbols.some(s => s.necessaryForCompletion)) {
       throw new Error(`Unknown symbol type: ${rule}`);
     }
