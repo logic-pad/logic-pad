@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_layout/color')({
-  loader: () => {
+  beforeLoad: () => {
     if (import.meta.env.PROD) {
       throw notFound();
     }
