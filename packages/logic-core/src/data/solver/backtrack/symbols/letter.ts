@@ -41,7 +41,8 @@ export default class LetterBTModule extends BTModule {
       for (const symbol of this.letters[id]) {
         const checkResult = checkSubtilePlacement(grid, symbol);
         if (checkResult !== undefined) return checkResult;
-
+      }
+      for (const symbol of this.letters[id]) {
         const symbolX = Math.floor(symbol.x);
         const symbolY = Math.floor(symbol.y);
 
