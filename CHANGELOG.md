@@ -2,6 +2,7 @@
 
 - Added sound effects to tile clicks and puzzle solves
   - You can adjust the volume in site settings
+- Fixed incorrect site title in some pages
 
 # 4/12/2025
 
