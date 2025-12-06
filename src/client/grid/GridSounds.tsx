@@ -46,19 +46,25 @@ export default memo(function GridSounds() {
         }
       }
       if (placedTiles > 0 && removedTiles === 0) {
-        sfx.place.stop();
-        sfx.place.start();
+        if (sfx.place.loaded) {
+          sfx.place.stop();
+          sfx.place.start();
+        }
       } else if (removedTiles > 0 && placedTiles === 0) {
-        sfx.remove.stop();
-        sfx.remove.start();
+        if (sfx.remove.loaded) {
+          sfx.remove.stop();
+          sfx.remove.start();
+        }
       }
     }
     previousGrid.current = grid;
   }, [grid, sfxVolume]);
   useEffect(() => {
     if (sfxVolume > 0 && State.isSatisfied(state.final)) {
-      sfx.complete.stop();
-      sfx.complete.start();
+      if (sfx.complete.loaded) {
+        sfx.complete.stop();
+        sfx.complete.start();
+      }
     }
   }, [state.final, sfxVolume]);
   return null;
