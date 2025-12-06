@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, Suspense, useEffect, useRef, useState } from 'react';
 import StateRing from './StateRing.tsx';
 import { useGrid } from '../contexts/GridContext.tsx';
 import Grid from './Grid';
@@ -17,6 +17,8 @@ import ErrorOverlay from './ErrorOverlay';
 import { usePinch } from '@use-gesture/react';
 import GridZoneOverlay from './GridZoneOverlay.tsx';
 import { useSettings } from '../contexts/SettingsContext.tsx';
+
+const GridSounds = React.lazy(() => import('./GridSounds.tsx'));
 
 export interface MainGridProps {
   useToolboxClick: boolean;
@@ -146,6 +148,9 @@ export default memo(function MainGrid({
       {...bind()}
       className="tour-grid"
     >
+      <Suspense fallback={null}>
+        <GridSounds />
+      </Suspense>
       <Grid
         size={Math.round(tileConfig.tileSize * scale)}
         grid={grid}

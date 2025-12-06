@@ -1,3 +1,8 @@
+# 6/12/2025
+
+- Added sound effects to tile clicks and puzzle solves
+  - You can adjust the volume in site settings
+
 # 4/12/2025
 
 - Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
