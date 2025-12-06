@@ -24,6 +24,7 @@ export default memo(function GridSounds() {
   }, [sfxVolume]);
   useEffect(() => {
     if (
+      sfxVolume > 0 &&
       previousGrid.current &&
       !previousGrid.current.colorEquals(grid) &&
       previousGrid.current.width === grid.width &&
@@ -45,17 +46,20 @@ export default memo(function GridSounds() {
         }
       }
       if (placedTiles > 0 && removedTiles === 0) {
+        sfx.place.stop();
         sfx.place.start();
       } else if (removedTiles > 0 && placedTiles === 0) {
+        sfx.remove.stop();
         sfx.remove.start();
       }
     }
     previousGrid.current = grid;
-  }, [grid]);
+  }, [grid, sfxVolume]);
   useEffect(() => {
-    if (State.isSatisfied(state.final)) {
+    if (sfxVolume > 0 && State.isSatisfied(state.final)) {
+      sfx.complete.stop();
       sfx.complete.start();
     }
-  }, [state.final]);
+  }, [state.final, sfxVolume]);
   return null;
 });
