@@ -40,12 +40,14 @@ export default memo(function AccountControl() {
     );
   }
   if (isPending) {
-    <button
-      className="btn btn-square ms-4 px-4 shrink-0 w-fit"
-      aria-label="Loading"
-    >
-      <Loading className="w-8 h-8" />
-    </button>;
+    return (
+      <button
+        className="btn btn-square ms-4 px-4 shrink-0 w-fit"
+        aria-label="Loading"
+      >
+        <Loading className="w-20 h-8" />
+      </button>
+    );
   }
   if (!me) {
     if (location.pathname === '/create') {
