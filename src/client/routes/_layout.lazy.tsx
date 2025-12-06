@@ -1,15 +1,21 @@
 import { Link, Outlet, createLazyFileRoute } from '@tanstack/react-router';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import QuickAccessBar from '../components/QuickAccessBar';
 import { useMediaQuery } from 'react-responsive';
 import { RiMenu2Fill } from 'react-icons/ri';
 import PWAPrompt from '../components/PWAPrompt';
 import { useOnline } from '../contexts/OnlineContext';
 import NavigationSkip from '../components/NavigationSkip';
+import { FaInfo } from 'react-icons/fa';
+import deferredRedirect from '../router/deferredRedirect';
+import { router } from '../router/router';
 
 export const Route = createLazyFileRoute('/_layout')({
   component: memo(function Layout() {
-    const { isOnline } = useOnline();
+    const { isOnline, me, isPending } = useOnline();
+    const [showSignInPrompt, setShowSignInPrompt] = useState(
+      sessionStorage.getItem('showSignInPrompt') !== 'false'
+    );
     const isLargeMedia = useMediaQuery({ minWidth: 1024 });
     const navLinks = [
       <Link
@@ -84,6 +90,37 @@ export const Route = createLazyFileRoute('/_layout')({
               <div className="opacity-80">Go online for more features</div>
             )}
           </nav>
+          {!isPending && !me && showSignInPrompt && (
+            <div className="alert alert-soft py-1 px-2 max-[1440px]:hidden shrink-0">
+              <FaInfo size={16} />
+              <span>
+                Consider{' '}
+                <a
+                  className="link"
+                  onClick={() => {
+                    void deferredRedirect.setAndNavigate(
+                      router.state.location,
+                      {
+                        to: '/auth',
+                      }
+                    );
+                  }}
+                >
+                  signing in
+                </a>{' '}
+                for a better experience
+              </span>
+              <button
+                className="btn btn-sm btn-square btn-ghost"
+                onClick={() => {
+                  setShowSignInPrompt(false);
+                  sessionStorage.setItem('showSignInPrompt', 'false');
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <QuickAccessBar className="xl:basis-[320px] grow shrink justify-end" />
         </header>
         <span
