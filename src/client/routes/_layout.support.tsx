@@ -15,10 +15,9 @@ export const paymentHistoryQueryOptions = bidirectionalInfiniteQuery(
 );
 
 export const Route = createFileRoute('/_layout/support')({
-  loader: async () => {
+  loader: () => {
     try {
-      await queryClient.ensureQueryData(supporterPricesQueryOptions);
-      void queryClient.ensureInfiniteQueryData(paymentHistoryQueryOptions);
+      void queryClient.ensureQueryData(supporterPricesQueryOptions);
     } catch (error) {
       toast.error((error as Error).message);
       throw redirect({

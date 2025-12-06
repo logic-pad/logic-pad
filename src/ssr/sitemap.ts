@@ -45,6 +45,7 @@ export default async function handler(
     priority: 0.2,
   });
   smStream.write({ url: '/auth', changefreq: 'monthly', priority: 0.5 });
+  smStream.write({ url: '/support', changefreq: 'monthly', priority: 0.5 });
 
   let puzzles: SitemapEntry[] | null = null;
   let puzzleCount = 0;

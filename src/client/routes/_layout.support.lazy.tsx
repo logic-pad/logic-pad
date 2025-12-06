@@ -2,13 +2,12 @@ import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 import { memo, useEffect, useState } from 'react';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import Footer from '../components/Footer';
-import { useInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import {
   paymentHistoryQueryOptions,
   supporterPricesQueryOptions,
 } from './_layout.support';
 import { api } from '../online/api';
-import { useRouteProtection } from '../router/useRouteProtection';
 import { useOnline } from '../contexts/OnlineContext';
 import SupporterMedal from '../components/SupporterMedal';
 import { toRelativeDate } from '../uiHelper';
@@ -16,18 +15,19 @@ import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import Loading from '../components/Loading';
 import { FaCheckCircle } from 'react-icons/fa';
 import { router } from '../router/router';
+import deferredRedirect from '../router/deferredRedirect';
 
 export const Route = createLazyFileRoute('/_layout/support')({
   component: memo(function RouteComponent() {
-    useRouteProtection('login');
     const navigate = useNavigate();
     const { me } = useOnline();
     const [successAlert] = useState(
       () => router.state.location.hash === 'success'
     );
-    const { data: supporterPrices } = useSuspenseQuery(
-      supporterPricesQueryOptions
-    );
+    const { data: supporterPrices } = useQuery({
+      ...supporterPricesQueryOptions,
+      enabled: !!me,
+    });
     const paymentHistory = useInfiniteQuery({
       ...paymentHistoryQueryOptions,
       enabled: !!me,
@@ -47,29 +47,35 @@ export const Route = createLazyFileRoute('/_layout/support')({
         className="gap-20 items-center max-w-[900px]!"
         footer={<Footer />}
       >
-        <div className="flex self-stretch items-center flex-wrap justify-center mt-12 gap-8 *:shrink-0">
-          <div className="flex flex-col gap-8 flex-1 min-w-96">
-            <div className="text-4xl text-accent">Supporting Logic Pad</div>
-            <div className="text-lg">
-              {me?.supporterUntil
-                ? new Date(me.supporterUntil) > new Date()
-                  ? `Your supporter status expires ${toRelativeDate(new Date(me?.supporterUntil), 'day')} (${new Date(me?.supporterUntil).toLocaleDateString()})`
-                  : `Your supporter status expired ${toRelativeDate(new Date(me?.supporterUntil), 'day')}`
-                : `You haven't ever had supporter status`}
+        {me ? (
+          <div className="flex self-stretch items-center flex-wrap justify-center mt-12 gap-8 *:shrink-0">
+            <div className="flex flex-col gap-8 flex-1 min-w-96">
+              <div className="text-4xl text-accent">Supporting Logic Pad</div>
+              <div className="text-lg">
+                {me?.supporterUntil
+                  ? new Date(me.supporterUntil) > new Date()
+                    ? `Your supporter status expires ${toRelativeDate(new Date(me?.supporterUntil), 'day')} (${new Date(me?.supporterUntil).toLocaleDateString()})`
+                    : `Your supporter status expired ${toRelativeDate(new Date(me?.supporterUntil), 'day')}`
+                  : `You haven't ever had supporter status`}
+              </div>
+              <progress
+                className="progress progress-accent h-4 w-full"
+                value={
+                  me?.supporterUntil
+                    ? new Date(me?.supporterUntil).getTime() -
+                      new Date().getTime()
+                    : 0
+                }
+                max={1000 * 60 * 60 * 24 * 365}
+              ></progress>
             </div>
-            <progress
-              className="progress progress-accent h-4 w-full"
-              value={
-                me?.supporterUntil
-                  ? new Date(me?.supporterUntil).getTime() -
-                    new Date().getTime()
-                  : 0
-              }
-              max={1000 * 60 * 60 * 24 * 365}
-            ></progress>
+            <SupporterMedal supporter={me?.supporter ?? 0} />
           </div>
-          <SupporterMedal supporter={me?.supporter ?? 0} />
-        </div>
+        ) : (
+          <div className="flex self-stretch items-center flex-wrap justify-center mt-12 gap-8 *:shrink-0">
+            <div className="text-4xl text-accent">Supporting Logic Pad</div>
+          </div>
+        )}
 
         {successAlert && !!me && (
           <div className="alert alert-success max-w-lg flex gap-4 items-center">
@@ -175,115 +181,141 @@ export const Route = createLazyFileRoute('/_layout/support')({
           </div>
         </div>
 
-        {/* Pricing Section */}
-        <div>
-          <h2 className="text-3xl font-semibold text-accent mb-4 text-center">
-            Choose Your Support Level
-          </h2>
-          <p className="text-sm text-base-content/70 mb-6 text-center">
-            All prices are in {supporterPrices[0]?.currency || 'USD'}
-          </p>
-          <div className="flex flex-wrap justify-center gap-6">
-            {supporterPrices.map(price => (
-              <div
-                key={price.priceId}
-                className="p-6 rounded-lg shadow-md bg-base-100 hover:bg-base-200 text-base-content hover:shadow-lg transition-all"
-              >
-                <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold mb-2">
-                    {price.months} Month{price.months > 1 ? 's' : ''}
-                  </h3>
-                  <div className="text text-base-content/70 mb-2">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: price.currency,
-                    }).format(price.price / price.months)}{' '}
-                    × {price.months} months
+        {/* Pricing Section / Call to action */}
+        {me ? (
+          <div>
+            <h2 className="text-3xl font-semibold text-accent mb-4 text-center">
+              Choose Your Support Level
+            </h2>
+            {supporterPrices && (
+              <p className="text-sm text-base-content/70 mb-6 text-center">
+                All prices are in {supporterPrices[0]?.currency || 'USD'}
+              </p>
+            )}
+            <div className="flex flex-wrap justify-center gap-6">
+              {supporterPrices ? (
+                supporterPrices.map(price => (
+                  <div
+                    key={price.priceId}
+                    className="p-6 rounded-lg shadow-md bg-base-100 hover:bg-base-200 text-base-content hover:shadow-lg transition-all"
+                  >
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold mb-2">
+                        {price.months} Month{price.months > 1 ? 's' : ''}
+                      </h3>
+                      <div className="text text-base-content/70 mb-2">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: price.currency,
+                        }).format(price.price / price.months)}{' '}
+                        × {price.months} months
+                      </div>
+                      <div className="text-2xl font-bold text-accent">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: price.currency,
+                        }).format(price.price)}
+                      </div>
+                      <div className="text-xs text-base-content/60">total</div>
+                    </div>
+                    <button
+                      className="w-full btn btn-primary"
+                      onClick={() => {
+                        api.checkoutSupporter(
+                          price.priceId,
+                          window.location.origin + '/support#success',
+                          window.location.origin + '/support'
+                        );
+                      }}
+                    >
+                      Support Logic Pad
+                    </button>
                   </div>
-                  <div className="text-2xl font-bold text-accent">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: price.currency,
-                    }).format(price.price)}
-                  </div>
-                  <div className="text-xs text-base-content/60">total</div>
-                </div>
-                <button
-                  className="w-full btn btn-primary"
-                  onClick={() => {
-                    api.checkoutSupporter(
-                      price.priceId,
-                      window.location.origin + '/support#success',
-                      window.location.origin + '/support'
-                    );
-                  }}
-                >
-                  Support Logic Pad
-                </button>
-              </div>
-            ))}
+                ))
+              ) : (
+                <Loading className="w-full h-48" />
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col items-center gap-6">
+            <h2 className="text-3xl font-semibold text-accent mb-4 text-center">
+              Sign in to Support Logic Pad
+            </h2>
+            <button
+              className="btn btn-lg btn-primary shrink-0 w-fit"
+              onClick={async () => {
+                await deferredRedirect.setAndNavigate(router.state.location, {
+                  to: '/auth',
+                });
+              }}
+            >
+              Sign in / sign up
+            </button>
+          </div>
+        )}
 
         {/* Payment History Section */}
-        <div className="p-6 self-stretch flex flex-col items-center">
-          <h2 className="text-3xl font-semibold text-accent mb-6 text-center">
-            Payment History
-          </h2>
-          {paymentHistory.data?.pages[0].results.length ? (
-            <div className="overflow-x-auto max-w-full w-fit">
-              <div className="flex flex-col gap-2 items-center w-fit">
-                <table className="table table-zebra">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Order ID</th>
-                      <th>Items</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentHistory.data.pages.map(page =>
-                      page.results.map(payment => (
-                        <tr key={payment.id}>
-                          <td>
-                            {new Date(payment.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="font-mono max-w-32 overflow-x-hidden">
-                            {payment.order}
-                          </td>
-                          <td className="min-w-32">
-                            {payment.items.join(', ')}
-                          </td>
-                          <td>
-                            {new Intl.NumberFormat('en-US', {
-                              style: 'currency',
-                              currency: payment.currency,
-                            }).format(payment.amount / 100)}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-                {paymentHistory.isFetching ? (
-                  <Loading className="w-4 h-4" />
-                ) : paymentHistory.hasNextPage ? (
-                  <InfiniteScrollTrigger
-                    onLoadMore={async () =>
-                      await paymentHistory.fetchNextPage()
-                    }
-                    className="btn-sm"
-                  />
-                ) : null}
+        {me && (
+          <div className="p-6 self-stretch flex flex-col items-center">
+            <h2 className="text-3xl font-semibold text-accent mb-6 text-center">
+              Payment History
+            </h2>
+            {paymentHistory.data?.pages[0].results.length ? (
+              <div className="overflow-x-auto max-w-full w-fit">
+                <div className="flex flex-col gap-2 items-center w-fit">
+                  <table className="table table-zebra">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Order ID</th>
+                        <th>Items</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentHistory.data.pages.map(page =>
+                        page.results.map(payment => (
+                          <tr key={payment.id}>
+                            <td>
+                              {new Date(payment.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="font-mono max-w-32 overflow-x-hidden">
+                              {payment.order}
+                            </td>
+                            <td className="min-w-32">
+                              {payment.items.join(', ')}
+                            </td>
+                            <td>
+                              {new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: payment.currency,
+                              }).format(payment.amount / 100)}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                  {paymentHistory.isFetching ? (
+                    <Loading className="w-4 h-4" />
+                  ) : paymentHistory.hasNextPage ? (
+                    <InfiniteScrollTrigger
+                      onLoadMore={async () =>
+                        await paymentHistory.fetchNextPage()
+                      }
+                      className="btn-sm"
+                    />
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-base-content/70">
-              No payment history found.
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="text-center text-base-content/70">
+                No payment history found.
+              </div>
+            )}
+          </div>
+        )}
       </ResponsiveLayout>
     );
   }),
