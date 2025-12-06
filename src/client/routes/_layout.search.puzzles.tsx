@@ -27,4 +27,11 @@ export const Route = createFileRoute('/_layout/search/puzzles')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `Search Puzzles - Logic Pad`,
+      },
+    ],
+  }),
 });

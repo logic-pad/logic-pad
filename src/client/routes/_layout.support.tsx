@@ -26,4 +26,11 @@ export const Route = createFileRoute('/_layout/support')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `Supporting Logic Pad - Logic Pad`,
+      },
+    ],
+  }),
 });

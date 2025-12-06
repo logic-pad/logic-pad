@@ -27,4 +27,11 @@ export const Route = createFileRoute('/_layout/my-stuff/collections')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `My Collections - Logic Pad`,
+      },
+    ],
+  }),
 });

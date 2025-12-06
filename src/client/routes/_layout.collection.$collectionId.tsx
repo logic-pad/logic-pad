@@ -37,13 +37,14 @@ export const Route = createFileRoute('/_layout/collection/$collectionId')({
     deps: { sort?: 'asc' | 'desc' };
   }) => {
     try {
-      await queryClient.ensureQueryData(
+      const collectionBrief = await queryClient.ensureQueryData(
         collectionQueryOptions(params.collectionId)
       );
       // we can render the page and suspend while waiting for this
       void queryClient.ensureInfiniteQueryData(
         collectionInfiniteQueryOptions(params.collectionId, sort)
       );
+      return collectionBrief;
     } catch (error) {
       toast.error((error as Error).message);
       throw redirect({
@@ -51,4 +52,11 @@ export const Route = createFileRoute('/_layout/collection/$collectionId')({
       });
     }
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      {
+        title: `${loaderData?.title ?? 'Untitled'} - Logic Pad`,
+      },
+    ],
+  }),
 });

@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './../routes/__root'
 import { Route as AuthRouteImport } from './../routes/auth'
 import { Route as IndexRouteImport } from './../routes/index'
 import { Route as OauthCallbackRouteImport } from './../routes/oauth.callback'
+import { Route as LayoutUploaderRouteImport } from './../routes/_layout.uploader'
 import { Route as LayoutTermsRouteImport } from './../routes/_layout.terms'
 import { Route as LayoutSupportRouteImport } from './../routes/_layout.support'
 import { Route as LayoutSettingsRouteImport } from './../routes/_layout.settings'
@@ -40,7 +41,6 @@ import { Route as LayoutCollectionCollectionIdRouteImport } from './../routes/_l
 import { Route as ModeratorModProfileUserIdRouteImport } from './../routes/_moderator.mod.profile.$userId'
 
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
-const LayoutUploaderLazyRouteImport = createFileRoute('/_layout/uploader')()
 
 const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
@@ -56,18 +56,18 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutUploaderLazyRoute = LayoutUploaderLazyRouteImport.update({
+const OauthCallbackRoute = OauthCallbackRouteImport.update({
+  id: '/oauth/callback',
+  path: '/oauth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
   id: '/uploader',
   path: '/uploader',
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
   import('./../routes/_layout.uploader.lazy').then((d) => d.Route),
 )
-const OauthCallbackRoute = OauthCallbackRouteImport.update({
-  id: '/oauth/callback',
-  path: '/oauth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LayoutTermsRoute = LayoutTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -247,8 +247,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
   '/support': typeof LayoutSupportRoute
   '/terms': typeof LayoutTermsRoute
+  '/uploader': typeof LayoutUploaderRoute
   '/oauth/callback': typeof OauthCallbackRoute
-  '/uploader': typeof LayoutUploaderLazyRoute
   '/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -275,8 +275,8 @@ export interface FileRoutesByTo {
   '/settings': typeof LayoutSettingsRoute
   '/support': typeof LayoutSupportRoute
   '/terms': typeof LayoutTermsRoute
+  '/uploader': typeof LayoutUploaderRoute
   '/oauth/callback': typeof OauthCallbackRoute
-  '/uploader': typeof LayoutUploaderLazyRoute
   '/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -307,8 +307,8 @@ export interface FileRoutesById {
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/support': typeof LayoutSupportRoute
   '/_layout/terms': typeof LayoutTermsRoute
+  '/_layout/uploader': typeof LayoutUploaderRoute
   '/oauth/callback': typeof OauthCallbackRoute
-  '/_layout/uploader': typeof LayoutUploaderLazyRoute
   '/_layout/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/_layout/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/_layout/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -339,8 +339,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/terms'
-    | '/oauth/callback'
     | '/uploader'
+    | '/oauth/callback'
     | '/collection/$collectionId'
     | '/create/$puzzleId'
     | '/my-stuff/collections'
@@ -367,8 +367,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/terms'
-    | '/oauth/callback'
     | '/uploader'
+    | '/oauth/callback'
     | '/collection/$collectionId'
     | '/create/$puzzleId'
     | '/my-stuff/collections'
@@ -398,8 +398,8 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/support'
     | '/_layout/terms'
-    | '/oauth/callback'
     | '/_layout/uploader'
+    | '/oauth/callback'
     | '/_layout/collection/$collectionId'
     | '/_layout/create/$puzzleId'
     | '/_layout/my-stuff/collections'
@@ -448,19 +448,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/uploader': {
-      id: '/_layout/uploader'
-      path: '/uploader'
-      fullPath: '/uploader'
-      preLoaderRoute: typeof LayoutUploaderLazyRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
     '/oauth/callback': {
       id: '/oauth/callback'
       path: '/oauth/callback'
       fullPath: '/oauth/callback'
       preLoaderRoute: typeof OauthCallbackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_layout/uploader': {
+      id: '/_layout/uploader'
+      path: '/uploader'
+      fullPath: '/uploader'
+      preLoaderRoute: typeof LayoutUploaderRouteImport
+      parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/terms': {
       id: '/_layout/terms'
@@ -675,7 +675,7 @@ interface LayoutLazyRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutSupportRoute: typeof LayoutSupportRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
-  LayoutUploaderLazyRoute: typeof LayoutUploaderLazyRoute
+  LayoutUploaderRoute: typeof LayoutUploaderRoute
   LayoutCollectionCollectionIdRoute: typeof LayoutCollectionCollectionIdRoute
   LayoutCreatePuzzleIdRoute: typeof LayoutCreatePuzzleIdRoute
   LayoutPerfectionPuzzleIdRoute: typeof LayoutPerfectionPuzzleIdRoute
@@ -696,7 +696,7 @@ const LayoutLazyRouteChildren: LayoutLazyRouteChildren = {
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutSupportRoute: LayoutSupportRoute,
   LayoutTermsRoute: LayoutTermsRoute,
-  LayoutUploaderLazyRoute: LayoutUploaderLazyRoute,
+  LayoutUploaderRoute: LayoutUploaderRoute,
   LayoutCollectionCollectionIdRoute: LayoutCollectionCollectionIdRoute,
   LayoutCreatePuzzleIdRoute: LayoutCreatePuzzleIdRoute,
   LayoutPerfectionPuzzleIdRoute: LayoutPerfectionPuzzleIdRoute,

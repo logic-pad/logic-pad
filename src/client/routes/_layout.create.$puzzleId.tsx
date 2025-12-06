@@ -27,4 +27,11 @@ export const Route = createFileRoute('/_layout/create/$puzzleId')({
       });
     }
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      {
+        title: `${loaderData?.title ?? 'Untitled'} - Puzzle Editor - Logic Pad`,
+      },
+    ],
+  }),
 });

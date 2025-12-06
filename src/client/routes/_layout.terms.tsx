@@ -13,4 +13,11 @@ export const Route = createFileRoute('/_layout/terms')({
       </ResponsiveLayout>
     );
   }),
+  head: () => ({
+    meta: [
+      {
+        title: `Terms of Service - Logic Pad`,
+      },
+    ],
+  }),
 });

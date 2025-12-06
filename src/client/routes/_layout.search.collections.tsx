@@ -27,4 +27,11 @@ export const Route = createFileRoute('/_layout/search/collections')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `Search Collections - Logic Pad`,
+      },
+    ],
+  }),
 });

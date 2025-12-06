@@ -1,16 +1,22 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router';
+import { HeadContent, Outlet, createRootRoute } from '@tanstack/react-router';
 import ThemeContext from '../contexts/ThemeContext.tsx';
 import TanStackDevTools from '../router/TanStackDevTools';
 import { memo } from 'react';
 import { Toaster } from 'react-hot-toast';
-import DocumentTitle from '../components/DocumentTitle.tsx';
 
 export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      {
+        title: 'Logic Pad',
+      },
+    ],
+  }),
   component: memo(function Root() {
     return (
       <ThemeContext>
         <div className="h-dvh w-dvw overflow-y-auto overflow-x-hidden bg-neutral text-neutral-content">
-          <DocumentTitle>Logic Pad</DocumentTitle>
+          <HeadContent />
           <Toaster
             toastOptions={{
               className: '!bg-base-100 !text-base-content',

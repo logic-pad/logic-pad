@@ -6,4 +6,11 @@ export const Route = createFileRoute('/_layout/color')({
       throw notFound();
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `Color Palette - Logic Pad`,
+      },
+    ],
+  }),
 });

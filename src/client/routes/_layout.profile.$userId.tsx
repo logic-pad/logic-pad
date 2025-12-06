@@ -19,9 +19,12 @@ export const Route = createFileRoute('/_layout/profile/$userId')({
   remountDeps: ({ params }) => params.userId,
   loader: async ({ params }) => {
     try {
-      await queryClient.ensureQueryData(userBriefQueryOptions(params.userId));
+      const userBrief = await queryClient.ensureQueryData(
+        userBriefQueryOptions(params.userId)
+      );
       // We can show the brief data immediately while loading the details
       void queryClient.ensureQueryData(userDetailQueryOptions(params.userId));
+      return userBrief;
     } catch (error) {
       toast.error((error as Error).message);
       throw redirect({
@@ -29,4 +32,11 @@ export const Route = createFileRoute('/_layout/profile/$userId')({
       });
     }
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      {
+        title: `${loaderData?.name ?? 'User Profile'} - Logic Pad`,
+      },
+    ],
+  }),
 });

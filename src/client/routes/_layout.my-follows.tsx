@@ -35,4 +35,11 @@ export const Route = createFileRoute('/_layout/my-follows')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `My Follows - Logic Pad`,
+      },
+    ],
+  }),
 });

@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/_layout/settings')({
+export const Route = createFileRoute('/_layout/uploader')({
   head: () => ({
     meta: [
       {
-        title: `Account Settings - Logic Pad`,
+        title: `Puzzle Uploader - Logic Pad`,
       },
     ],
   }),
