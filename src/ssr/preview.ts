@@ -5,13 +5,22 @@ import { createCanvas, loadImage } from '@napi-rs/canvas';
 // TODO: A dirty hack to get around import.meta.env being undefined in vite-plugin-vercel v9
 axios.defaults.baseURL = process.env.VITE_API_ENDPOINT;
 
-export const isr = { expiration: 60 * 60 * 12 };
+const urlRegex = /^\/api\/preview\/([^/]+)\/([^/]+)/;
 
 export default async function handler(
   request: VercelRequest,
   response: VercelResponse
 ) {
-  const { type, resourceId } = request.query;
+  if (!request.url) {
+    response.status(404).send('Not Found');
+    return;
+  }
+  const match = request.url.match(urlRegex);
+  if (!match) {
+    response.status(404).send('Not Found');
+    return;
+  }
+  const [, type, resourceId] = match;
 
   if (
     type !== 'puzzle' ||
