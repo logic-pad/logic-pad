@@ -37,14 +37,13 @@ export const Route = createFileRoute('/_layout/collection/$collectionId')({
     deps: { sort?: 'asc' | 'desc' };
   }) => {
     try {
-      const collectionBrief = await queryClient.ensureQueryData(
-        collectionQueryOptions(params.collectionId)
-      );
       // we can render the page and suspend while waiting for this
       void queryClient.ensureInfiniteQueryData(
         collectionInfiniteQueryOptions(params.collectionId, sort)
       );
-      return collectionBrief;
+      return await queryClient.ensureQueryData(
+        collectionQueryOptions(params.collectionId)
+      );
     } catch (error) {
       toast.error((error as Error).message);
       throw redirect({
