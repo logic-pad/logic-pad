@@ -5,6 +5,7 @@ import {
   loadImage,
   SKRSContext2D,
   GlobalFonts,
+  Path2D,
 } from '@napi-rs/canvas';
 import fontPath from '../../public/palatino.ttf';
 
@@ -20,14 +21,17 @@ function getLines(
   text: string,
   maxWidth: number,
   maxLines: number = Infinity
-): string[] {
+): [string[], number] {
   const words = text.split(' ');
   const lines = [];
   let currentLine = words[0];
+  let height = 0;
 
   for (let i = 1; i < words.length; i++) {
     const word = words[i];
-    const width = ctx.measureText(currentLine + ' ' + word).width;
+    const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } =
+      ctx.measureText(currentLine + ' ' + word);
+    height = actualBoundingBoxAscent + actualBoundingBoxDescent;
     if (width < maxWidth) {
       currentLine += ' ' + word;
     } else {
@@ -42,7 +46,7 @@ function getLines(
     lines[maxLines - 1] =
       lines[maxLines - 1].substring(0, lines[maxLines - 1].length - 3) + '...';
   }
-  return lines;
+  return [lines, height];
 }
 
 export default async function handler(
@@ -94,19 +98,19 @@ export default async function handler(
     logoSize
   );
   ctx.fillStyle = '#00d3bb';
-  ctx.font = '32px Palatino';
+  ctx.font = '48px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(
     'Logic Pad',
-    margin + logoSize + margin,
+    margin + logoSize + 16,
     canvas.height - logoSize / 2 - margin
   );
   const textWidth = ctx.measureText('Logic Pad').width;
   ctx.fillStyle = '#e4e4e7';
   ctx.fillText(
     'Puzzle',
-    margin + logoSize + margin + textWidth + 16,
+    margin + logoSize + 16 + textWidth + 16,
     canvas.height - logoSize / 2 - margin
   );
 
@@ -115,11 +119,60 @@ export default async function handler(
   ctx.font = '64px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  const titleLines = getLines(ctx, puzzle.title, canvas.width - margin * 2, 2);
-  const lineHeight = 70;
+  const [titleLines, lineHeight] = getLines(
+    ctx,
+    puzzle.title,
+    canvas.width - margin * 2,
+    2
+  );
   titleLines.forEach((line, index) => {
     ctx.fillText(line, margin, margin + index * lineHeight);
   });
+
+  // Author name
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = '48px Palatino';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(
+    `by ${puzzle.creator.name}`
+  );
+  const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+  ctx.fillText(
+    `by ${puzzle.creator.name}`,
+    margin,
+    margin + titleLines.length * lineHeight + 24
+  );
+
+  // Difficulty
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.translate(
+    margin,
+    margin + titleLines.length * lineHeight + 24 + authorHeight + 32
+  );
+  if (puzzle.designDifficulty === 0) {
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#e4e4e7';
+    ctx.fillText('Unrated', 0, 0);
+  } else {
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = '#00d3bb';
+    let path: Path2D;
+    if (puzzle.designDifficulty > 5) {
+      path = new Path2D(
+        'm96 153.044-58.779 26.243 7.02-63.513L.894 68.481l63.117-13.01L96 0l31.989 55.472 63.117 13.01-43.347 47.292 7.02 63.513z'
+      );
+    } else {
+      path = new Path2D('M100,0 A100,100 0 1,0 100,200 A100,100 0 1,0 100,0');
+    }
+    for (let i = 0; i <= puzzle.designDifficulty % 5; i++) {
+      ctx.fill(path, 'evenodd');
+      ctx.translate(200, 0);
+    }
+  }
+  ctx.resetTransform();
 
   const buffer = canvas.toBuffer('image/png');
   response.status(200).send(buffer);
