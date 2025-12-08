@@ -176,9 +176,9 @@ export default async function handler(
   ctx.resetTransform();
 
   // Stats
-  ctx.globalAlpha = 0.75;
+  ctx.globalAlpha = 1;
   ctx.fillStyle = '#e4e4e7';
-  ctx.font = '36px Palatino';
+  ctx.font = '42px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   let statsX = margin + 240 * 5 * 0.2 + margin;
@@ -192,19 +192,19 @@ export default async function handler(
     (200 * 0.2) / 2;
   ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
   statsX += statsWidth + 16;
-  ctx.globalAlpha = 0.65;
-  ctx.font = '24px Palatino';
+  ctx.globalAlpha = 0.75;
+  ctx.font = '36px Palatino';
   statsWidth = ctx.measureText('Solves').width;
   ctx.fillText('Solves', statsX, statsY);
   statsX += statsWidth + 48;
 
-  ctx.globalAlpha = 0.75;
-  ctx.font = '36px Palatino';
+  ctx.globalAlpha = 1;
+  ctx.font = '42px Palatino';
   statsWidth = ctx.measureText(puzzle.loveCount.toString()).width;
   ctx.fillText(puzzle.loveCount.toString(), statsX, statsY);
   statsX += statsWidth + 16;
-  ctx.globalAlpha = 0.65;
-  ctx.font = '24px Palatino';
+  ctx.globalAlpha = 0.75;
+  ctx.font = '36px Palatino';
   statsWidth = ctx.measureText('Loves').width;
   ctx.fillText('Loves', statsX, statsY);
 
