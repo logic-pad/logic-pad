@@ -113,7 +113,7 @@ export default defineConfig({
         destination: '/api/preview/[type]/[resourceId]',
         buildOptions: {
           loader: {
-            '.node': 'file',
+            '.node': 'copy',
           },
         },
       },
