@@ -152,7 +152,7 @@ export default async function handler(
     margin,
     margin + titleLines.length * lineHeight + 24 + authorHeight + 32
   );
-  ctx.scale(0.25, 0.25);
+  ctx.scale(0.2, 0.2);
   if (puzzle.designDifficulty === 0) {
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = '#e4e4e7';
@@ -170,10 +170,43 @@ export default async function handler(
     }
     for (let i = 0; i <= puzzle.designDifficulty % 5; i++) {
       ctx.fill(path, 'evenodd');
-      ctx.translate(220, 0);
+      ctx.translate(240, 0);
     }
   }
   ctx.resetTransform();
+
+  // Stats
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = '36px Palatino';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  let statsX = margin + 240 * 5 * 0.2 + margin;
+  let statsWidth = ctx.measureText(puzzle.solveCount.toString()).width;
+  const statsY =
+    margin +
+    titleLines.length * lineHeight +
+    24 +
+    authorHeight +
+    32 +
+    (200 * 0.2) / 2;
+  ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 0.65;
+  ctx.font = '24px Palatino';
+  statsWidth = ctx.measureText('Solves').width;
+  ctx.fillText('Solves', statsX, statsY);
+  statsX += statsWidth + 48;
+
+  ctx.globalAlpha = 0.75;
+  ctx.font = '36px Palatino';
+  statsWidth = ctx.measureText(puzzle.loveCount.toString()).width;
+  ctx.fillText(puzzle.loveCount.toString(), statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 0.65;
+  ctx.font = '24px Palatino';
+  statsWidth = ctx.measureText('Loves').width;
+  ctx.fillText('Loves', statsX, statsY);
 
   const buffer = canvas.toBuffer('image/png');
   response.status(200).send(buffer);
