@@ -110,7 +110,7 @@ export default defineConfig({
       },
       {
         source: './src/ssr/preview.ts',
-        destination: '/preview/[type]/[resourceId]',
+        destination: '/api/preview/[type]/[resourceId]',
         buildOptions: {
           loader: {
             '.node': 'file',
