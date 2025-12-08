@@ -1,11 +1,30 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { api, axios } from '../client/online/api';
-import { createCanvas, loadImage } from '@napi-rs/canvas';
+import { createCanvas, loadImage, SKRSContext2D } from '@napi-rs/canvas';
 
 // TODO: A dirty hack to get around import.meta.env being undefined in vite-plugin-vercel v9
 axios.defaults.baseURL = process.env.VITE_API_ENDPOINT;
 
 const urlRegex = /^\/api\/preview\/([^/]+)\/([^/]+)/;
+
+function getLines(ctx: SKRSContext2D, text: string, maxWidth: number) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const width = ctx.measureText(currentLine + ' ' + word).width;
+    if (width < maxWidth) {
+      currentLine += ' ' + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+  return lines;
+}
 
 export default async function handler(
   request: VercelRequest,
@@ -39,7 +58,7 @@ export default async function handler(
   const ctx = canvas.getContext('2d');
 
   // Background
-  ctx.fillStyle = 'oklch(0.35325 0.02201 256.39)';
+  ctx.fillStyle = '#343c47';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Site logo
@@ -50,13 +69,18 @@ export default async function handler(
   ctx.drawImage(logo, 64, canvas.height - logoSize - 64, logoSize, logoSize);
 
   // Puzzle title
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = 'white';
   ctx.font = 'bold 64pt Sans-serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  const title =
-    puzzle.title.length > 30 ? puzzle.title.slice(0, 27) + '...' : puzzle.title;
-  ctx.fillText(title, canvas.width - 64, canvas.height / 2);
+  const titleLines = getLines(ctx, puzzle.title, canvas.width - 256 - 64);
+
+  const lineHeight = 80;
+  const titleYStart =
+    canvas.height / 2 - ((titleLines.length - 1) * lineHeight) / 2;
+  titleLines.forEach((line, index) => {
+    ctx.fillText(line, canvas.width - 64, titleYStart + index * lineHeight);
+  });
 
   const buffer = canvas.toBuffer('image/png');
   response.status(200).send(buffer);
