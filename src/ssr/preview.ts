@@ -170,7 +170,7 @@ export default async function handler(
     }
     for (let i = 0; i <= puzzle.designDifficulty % 5; i++) {
       ctx.fill(path, 'evenodd');
-      ctx.translate(200, 0);
+      ctx.translate(220, 0);
     }
   }
   ctx.resetTransform();
