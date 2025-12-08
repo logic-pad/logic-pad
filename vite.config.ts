@@ -118,6 +118,15 @@ export default defineConfig({
           },
         },
       },
+      {
+        source: './src/ssr/solve.ts',
+        destination: '/solve/[puzzleId]',
+        buildOptions: {
+          loader: {
+            '.html': 'text',
+          },
+        },
+      },
     ],
     rewrites: [{ source: '/((?!api).*)', destination: '/' }],
     headers: [

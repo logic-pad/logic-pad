@@ -94,6 +94,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.5.0",
+    "isbot": "^5.1.32",
     "jiti": "^2.6.1",
     "postcss": "^8.4.35",
     "prettier": "^3.6.2",
