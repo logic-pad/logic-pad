@@ -149,7 +149,8 @@ export default async function handler(
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.translate(margin, flowY);
-  ctx.scale(0.2, 0.2);
+  const difficultyScale = 0.22;
+  ctx.scale(difficultyScale, difficultyScale);
   if (puzzle.designDifficulty === 0) {
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = '#e4e4e7';
@@ -178,9 +179,9 @@ export default async function handler(
   ctx.font = '42px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  let statsX = margin + 240 * 5 * 0.2 + margin;
+  let statsX = margin + 240 * 5 * difficultyScale + margin;
   let statsWidth = ctx.measureText(puzzle.solveCount.toString()).width;
-  const statsY = flowY + (200 * 0.2) / 2;
+  const statsY = flowY + (200 * difficultyScale) / 2;
   ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
   statsX += statsWidth + 16;
   ctx.globalAlpha = 0.75;
