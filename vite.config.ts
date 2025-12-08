@@ -128,7 +128,7 @@ export default defineConfig({
         },
       },
     ],
-    rewrites: [{ source: '/((?!api).*)', destination: '/' }],
+    rewrites: [{ source: '/((?!api|solve/\\w+).*)', destination: '/' }],
     headers: [
       {
         source: '/(.*)',
