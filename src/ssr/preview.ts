@@ -132,15 +132,15 @@ export default async function handler(
   // Author name
   ctx.globalAlpha = 0.75;
   ctx.fillStyle = '#e4e4e7';
-  ctx.font = '48px Palatino';
+  ctx.font = '36px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   const { actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(
-    `by ${puzzle.creator.name}`
+    puzzle.creator.name
   );
   const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
   ctx.fillText(
-    `by ${puzzle.creator.name}`,
+    puzzle.creator.name,
     margin,
     margin + titleLines.length * lineHeight + 24
   );
@@ -152,6 +152,7 @@ export default async function handler(
     margin,
     margin + titleLines.length * lineHeight + 24 + authorHeight + 32
   );
+  ctx.scale(0.25, 0.25);
   if (puzzle.designDifficulty === 0) {
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = '#e4e4e7';
