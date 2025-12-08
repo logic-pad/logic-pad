@@ -27,11 +27,10 @@ export default async function handler(
     typeof resourceId !== 'string' ||
     resourceId.length === 0
   ) {
-    response.status(400).send('Bad Request');
+    response.status(404).send('Not Found');
     return;
   }
-  response.setHeader('Content-Type', 'text/xml');
-  response.setHeader('Content-Encoding', 'gzip');
+  response.setHeader('Content-Type', 'image/png');
   response.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
   const puzzle = await api.getPuzzleBriefForSolve(resourceId);
