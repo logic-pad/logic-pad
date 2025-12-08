@@ -15,7 +15,7 @@ export default async function handler(
   response.setHeader('Content-Type', 'text/html');
   response.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
-  if (!request.headers['user-agent'] || isbot(request.headers['user-agent'])) {
+  if (!request.headers['user-agent'] || !isbot(request.headers['user-agent'])) {
     response.send(indexHtml);
     return;
   }
