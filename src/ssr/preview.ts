@@ -154,6 +154,7 @@ export default async function handler(
   if (puzzle.designDifficulty === 0) {
     ctx.globalAlpha = 0.75;
     ctx.fillStyle = '#e4e4e7';
+    ctx.font = '36px Palatino';
     ctx.fillText('Unrated', 0, 0);
   } else {
     ctx.globalAlpha = 1.0;
