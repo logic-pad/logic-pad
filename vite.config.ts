@@ -108,6 +108,15 @@ export default defineConfig({
         source: './src/ssr/sitemap.ts',
         destination: '/sitemap.xml',
       },
+      {
+        source: './src/ssr/preview.ts',
+        destination: '/preview/[type]/[resourceId]',
+        buildOptions: {
+          loader: {
+            '.node': 'file',
+          },
+        },
+      },
     ],
     rewrites: [{ source: '/(.*)', destination: '/' }],
     headers: [
@@ -139,6 +148,16 @@ export default defineConfig({
     exclude: ['@logic-pad/core', 'logic-pad-solver-core'],
     include: ['event-iterator'],
   },
+  build: {
+    sourcemap: true,
+    rolldownOptions: {
+      external: [
+        '@terrazzo/tiles',
+        '@terrazzo/react-color-picker',
+        '@terrazzo/use-color',
+      ],
+    },
+  },
   resolve: {
     alias: [
       {
@@ -156,16 +175,6 @@ export default defineConfig({
         ),
       },
     ],
-  },
-  build: {
-    sourcemap: true,
-    rolldownOptions: {
-      external: [
-        '@terrazzo/tiles',
-        '@terrazzo/react-color-picker',
-        '@terrazzo/use-color',
-      ],
-    },
   },
   define: {
     'import.meta.env.VITE_PACKAGE_VERSION': JSON.stringify(commitHash),
