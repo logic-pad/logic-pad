@@ -114,6 +114,8 @@ export default async function handler(
     canvas.height - logoSize / 2 - margin
   );
 
+  let flowY = margin;
+
   // Puzzle title
   ctx.fillStyle = '#e4e4e7';
   ctx.font = '64px Palatino';
@@ -126,32 +128,27 @@ export default async function handler(
     2
   );
   titleLines.forEach((line, index) => {
-    ctx.fillText(line, margin, margin + index * lineHeight);
+    ctx.fillText(line, margin, flowY + index * lineHeight);
   });
+  flowY += titleLines.length * lineHeight + 36;
 
   // Author name
   ctx.globalAlpha = 0.75;
   ctx.fillStyle = '#e4e4e7';
-  ctx.font = '36px Palatino';
+  ctx.font = '42px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   const { actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(
     puzzle.creator.name
   );
   const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-  ctx.fillText(
-    puzzle.creator.name,
-    margin,
-    margin + titleLines.length * lineHeight + 24
-  );
+  ctx.fillText(puzzle.creator.name, margin, flowY);
+  flowY += authorHeight + 48;
 
   // Difficulty
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.translate(
-    margin,
-    margin + titleLines.length * lineHeight + 24 + authorHeight + 32
-  );
+  ctx.translate(margin, flowY);
   ctx.scale(0.2, 0.2);
   if (puzzle.designDifficulty === 0) {
     ctx.globalAlpha = 0.75;
@@ -183,13 +180,7 @@ export default async function handler(
   ctx.textBaseline = 'middle';
   let statsX = margin + 240 * 5 * 0.2 + margin;
   let statsWidth = ctx.measureText(puzzle.solveCount.toString()).width;
-  const statsY =
-    margin +
-    titleLines.length * lineHeight +
-    24 +
-    authorHeight +
-    32 +
-    (200 * 0.2) / 2;
+  const statsY = flowY + (200 * 0.2) / 2;
   ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
   statsX += statsWidth + 16;
   ctx.globalAlpha = 0.75;
