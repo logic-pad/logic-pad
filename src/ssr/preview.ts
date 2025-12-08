@@ -85,36 +85,42 @@ export default async function handler(
     `https://${process.env.VERCEL_URL}/pwa-512x512.png`
   );
   const logoSize = 128;
-  ctx.drawImage(logo, 64, canvas.height - logoSize - 64, logoSize, logoSize);
-
-  // Puzzle title
-  ctx.fillStyle = '#e4e4e7';
-  ctx.font = '64px Palatino';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  const titleLines = getLines(ctx, puzzle.title, canvas.width - 64 * 2, 2);
-  const lineHeight = 70;
-  titleLines.forEach((line, index) => {
-    ctx.fillText(line, 64, 64 + index * lineHeight);
-  });
-
-  // Logo
-  const buffer = canvas.toBuffer('image/png');
-  response.status(200).send(buffer);
+  const margin = 84;
+  ctx.drawImage(
+    logo,
+    margin,
+    canvas.height - logoSize - margin,
+    logoSize,
+    logoSize
+  );
   ctx.fillStyle = '#00d3bb';
   ctx.font = '32px Palatino';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(
     'Logic Pad',
-    64 + logoSize + 64,
-    canvas.height - logoSize / 2 - 64
+    margin + logoSize + margin,
+    canvas.height - logoSize / 2 - margin
   );
   const textWidth = ctx.measureText('Logic Pad').width;
   ctx.fillStyle = '#e4e4e7';
   ctx.fillText(
     'Puzzle',
-    64 + logoSize + 64 + textWidth + 16,
-    canvas.height - logoSize / 2 - 64
+    margin + logoSize + margin + textWidth + 16,
+    canvas.height - logoSize / 2 - margin
   );
+
+  // Puzzle title
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = '64px Palatino';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const titleLines = getLines(ctx, puzzle.title, canvas.width - margin * 2, 2);
+  const lineHeight = 70;
+  titleLines.forEach((line, index) => {
+    ctx.fillText(line, margin, margin + index * lineHeight);
+  });
+
+  const buffer = canvas.toBuffer('image/png');
+  response.status(200).send(buffer);
 }
