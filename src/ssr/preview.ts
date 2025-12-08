@@ -1,13 +1,26 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { api, axios } from '../client/online/api';
-import { createCanvas, loadImage, SKRSContext2D } from '@napi-rs/canvas';
+import {
+  createCanvas,
+  loadImage,
+  SKRSContext2D,
+  GlobalFonts,
+} from '@napi-rs/canvas';
+import fontPath from '../../public/palatino.ttf';
+
+GlobalFonts.registerFromPath(fontPath, 'Palatino');
 
 // TODO: A dirty hack to get around import.meta.env being undefined in vite-plugin-vercel v9
 axios.defaults.baseURL = process.env.VITE_API_ENDPOINT;
 
 const urlRegex = /^\/api\/preview\/([^/]+)\/([^/]+)/;
 
-function getLines(ctx: SKRSContext2D, text: string, maxWidth: number) {
+function getLines(
+  ctx: SKRSContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number = Infinity
+): string[] {
   const words = text.split(' ');
   const lines = [];
   let currentLine = words[0];
@@ -23,6 +36,12 @@ function getLines(ctx: SKRSContext2D, text: string, maxWidth: number) {
     }
   }
   lines.push(currentLine);
+
+  if (lines.length > maxLines) {
+    lines.splice(maxLines, lines.length - maxLines);
+    lines[maxLines - 1] =
+      lines[maxLines - 1].substring(0, lines[maxLines - 1].length - 3) + '...';
+  }
   return lines;
 }
 
@@ -69,19 +88,33 @@ export default async function handler(
   ctx.drawImage(logo, 64, canvas.height - logoSize - 64, logoSize, logoSize);
 
   // Puzzle title
-  ctx.fillStyle = 'white';
-  ctx.font = 'bold 64pt Sans-serif';
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
-  const titleLines = getLines(ctx, puzzle.title, canvas.width - 256 - 64);
-
-  const lineHeight = 80;
-  const titleYStart =
-    canvas.height / 2 - ((titleLines.length - 1) * lineHeight) / 2;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = '64px Palatino';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const titleLines = getLines(ctx, puzzle.title, canvas.width - 64 * 2, 2);
+  const lineHeight = 70;
   titleLines.forEach((line, index) => {
-    ctx.fillText(line, canvas.width - 64, titleYStart + index * lineHeight);
+    ctx.fillText(line, 64, 64 + index * lineHeight);
   });
 
+  // Logo
   const buffer = canvas.toBuffer('image/png');
   response.status(200).send(buffer);
+  ctx.fillStyle = '#00d3bb';
+  ctx.font = '32px Palatino';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(
+    'Logic Pad',
+    64 + logoSize + 64,
+    canvas.height - logoSize / 2 - 64
+  );
+  const textWidth = ctx.measureText('Logic Pad').width;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.fillText(
+    'Puzzle',
+    64 + logoSize + 64 + textWidth + 16,
+    canvas.height - logoSize / 2 - 64
+  );
 }

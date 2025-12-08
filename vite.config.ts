@@ -114,6 +114,7 @@ export default defineConfig({
         buildOptions: {
           loader: {
             '.node': 'copy',
+            '.ttf': 'file',
           },
         },
       },
