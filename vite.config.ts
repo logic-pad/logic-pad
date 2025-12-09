@@ -118,10 +118,13 @@ export default defineConfig({
       },
     ],
     rewrites: [
-      { source: '/ssr', destination: '/' },
-      { source: '/solve/:puzzleId', destination: '/ssr' },
-      { source: '/api/preview/:type/:resourceId', destination: '/ssr' },
-      { source: '/sitemap.xml', destination: '/ssr' },
+      { source: '/ssr/:path*', destination: '/' },
+      { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
+      {
+        source: '/api/preview/:type/:resourceId',
+        destination: '/ssr/api/preview/:type/:resourceId',
+      },
+      { source: '/sitemap.xml', destination: '/ssr/sitemap.xml' },
       { source: '/((?!ssr).*)', destination: '/' },
     ],
     headers: [
