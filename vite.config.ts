@@ -118,6 +118,7 @@ export default defineConfig({
       },
     ],
     rewrites: [
+      { source: '/ssr/(.*)', destination: '/' },
       { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
       {
         source: '/api/preview/:type/:resourceId',
