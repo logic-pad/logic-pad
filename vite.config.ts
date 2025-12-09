@@ -105,30 +105,25 @@ export default defineConfig({
   vercel: {
     additionalEndpoints: [
       {
-        source: './src/ssr/sitemap.ts',
-        destination: '/sitemap.xml',
-      },
-      {
-        source: './src/ssr/preview.ts',
-        destination: '/api/preview/[type]/[resourceId]',
+        source: './src/ssr/index.ts',
+        destination: '/ssr',
+        isr: { expiration: 60 * 60 * 12 },
         buildOptions: {
           loader: {
             '.node': 'copy',
             '.ttf': 'file',
-          },
-        },
-      },
-      {
-        source: './src/ssr/solve.ts',
-        destination: '/solve/[puzzleId]',
-        buildOptions: {
-          loader: {
             '.html': 'text',
           },
         },
       },
     ],
-    rewrites: [{ source: '/((?!api|solve/\\w+).*)', destination: '/' }],
+    rewrites: [
+      { source: '/ssr', destination: '/' },
+      { source: '/solve/:puzzleId', destination: '/ssr' },
+      { source: '/api/preview/:type/:resourceId', destination: '/ssr' },
+      { source: '/sitemap.xml', destination: '/ssr' },
+      { source: '/((?!ssr).*)', destination: '/' },
+    ],
     headers: [
       {
         source: '/(.*)',

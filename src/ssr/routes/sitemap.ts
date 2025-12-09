@@ -1,11 +1,8 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import Elysia from 'elysia';
+import { SitemapEntry } from '../../client/online/data';
 import { SitemapStream } from 'sitemap';
 import { createGzip } from 'zlib';
-import { SitemapEntry } from '../client/online/data';
-import { api, axios } from '../client/online/api';
-
-// TODO: A dirty hack to get around import.meta.env being undefined in vite-plugin-vercel v9
-axios.defaults.baseURL = process.env.VITE_API_ENDPOINT;
+import { api } from '../../client/online/api';
 
 const lastSitemapModification = new Date('2025-11-17T03:48:59Z');
 
@@ -16,16 +13,11 @@ function lastMod(updatedAt: string) {
     : lastSitemapModification.toISOString();
 }
 
-export const isr = { expiration: 60 * 60 * 12 };
-
-export default async function handler(
-  _request: VercelRequest,
-  response: VercelResponse
-) {
-  response.setHeader('Content-Type', 'text/xml');
-  response.setHeader('Content-Encoding', 'gzip');
-  response.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate');
-  response.setHeader('X-Robots-Tag', 'index, follow');
+export const sitemap = new Elysia().get('/sitemap.xml', async ({ set }) => {
+  set.headers['content-type'] = 'text/xml';
+  set.headers['content-encoding'] = 'gzip';
+  set.headers['cache-control'] = 's-maxage=10, stale-while-revalidate';
+  set.headers['x-robots-tag'] = 'index, follow';
 
   const smStream = new SitemapStream({
     hostname: process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL,
@@ -102,5 +94,5 @@ export default async function handler(
   // make sure to attach a write stream such as streamToPromise before ending
   smStream.end();
   // stream write the response
-  return pipeline.pipe(response);
-}
+  return pipeline;
+});
