@@ -106,7 +106,7 @@ export default defineConfig({
     additionalEndpoints: [
       {
         source: './src/ssr/index.ts',
-        destination: '/ssr',
+        destination: '/ssr/[...slug]',
         isr: { expiration: 60 * 60 },
         buildOptions: {
           loader: {
