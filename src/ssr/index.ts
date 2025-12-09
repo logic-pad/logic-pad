@@ -21,7 +21,7 @@ const handler = {
         return app.fetch(new Request(url.toString(), request));
       }
     }
-    console.log('SSR request for:', url.toString());
+    console.log('Regular request for:', url.toString());
     return app.fetch(request);
   },
 };
