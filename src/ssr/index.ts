@@ -9,21 +9,4 @@ axios.defaults.baseURL = process.env.VITE_API_ENDPOINT;
 
 const app = new Elysia().use(sitemap).use(ssr).use(image);
 
-const handler = {
-  async fetch(request: Request) {
-    const url = new URL(request.url);
-    if (url.pathname.startsWith('/ssr')) {
-      const path = url.searchParams.get('path');
-      if (path) {
-        url.pathname = '/' + path;
-        url.searchParams.delete('path');
-        console.log('SSR request for:', url.toString());
-        return app.fetch(new Request(url.toString(), request));
-      }
-    }
-    console.log('Regular request for:', url.toString());
-    return app.fetch(request);
-  },
-};
-
-export default handler;
+export default app;

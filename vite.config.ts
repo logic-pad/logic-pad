@@ -106,7 +106,7 @@ export default defineConfig({
     additionalEndpoints: [
       {
         source: './src/ssr/index.ts',
-        destination: '/ssr',
+        destination: '/ssr/[[...path]]',
         isr: { expiration: 60 * 60 },
         buildOptions: {
           loader: {
@@ -117,51 +117,24 @@ export default defineConfig({
         },
       },
     ],
-    config: {
-      routes: [
-        {
-          src: '^(?:/(.*))$',
-          headers: {
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp',
-          },
-          continue: true,
-        },
-        {
-          handle: 'filesystem',
-        },
-        {
-          src: '^/ssr(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?$',
-          dest: '/?path=$1',
-          check: true,
-        },
-        {
-          src: '^/solve(?:/([^/]+?))$',
-          dest: '/ssr/solve/$1',
-          check: false,
-        },
-        {
-          src: '^/api/preview(?:/([^/]+?))(?:/([^/]+?))$',
-          dest: '/ssr/api/preview/$1/$2',
-          check: false,
-        },
-        {
-          src: '^/sitemap\\.xml$',
-          dest: '/ssr/sitemap.xml',
-          check: false,
-        },
-        {
-          src: '^/ssr(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?$',
-          dest: '/ssr?path=$1',
-          check: true,
-        },
-        {
-          src: '^(?:/((?!ssr).*))$',
-          dest: '/',
-          check: true,
-        },
-      ],
-    },
+    rewrites: [
+      { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
+      {
+        source: '/api/preview/:type/:resourceId',
+        destination: '/ssr/api/preview/:type/:resourceId',
+      },
+      { source: '/sitemap.xml', destination: '/ssr/sitemap.xml' },
+      { source: '/((?!ssr).*)', destination: '/' },
+    ],
+    headers: [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+        ],
+      },
+    ],
   },
   preview: {
     headers: {
