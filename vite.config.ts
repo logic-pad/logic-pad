@@ -107,7 +107,7 @@ export default defineConfig({
       {
         source: './src/ssr/index.ts',
         destination: '/ssr',
-        isr: { expiration: 60 * 60 * 12 },
+        isr: { expiration: 60 * 60 },
         buildOptions: {
           loader: {
             '.node': 'copy',
