@@ -106,7 +106,7 @@ export default defineConfig({
     additionalEndpoints: [
       {
         source: './src/ssr/index.ts',
-        destination: '/ssr/[...slug]',
+        destination: '/ssr',
         isr: { expiration: 60 * 60 },
         buildOptions: {
           loader: {
@@ -125,6 +125,7 @@ export default defineConfig({
         destination: '/ssr/api/preview/:type/:resourceId',
       },
       { source: '/sitemap.xml', destination: '/ssr/sitemap.xml' },
+      { source: '/ssr/:path*', destination: '/ssr' },
       { source: '/((?!ssr).*)', destination: '/' },
     ],
     headers: [
