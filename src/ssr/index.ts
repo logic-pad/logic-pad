@@ -16,9 +16,12 @@ const handler = {
       const path = url.searchParams.get('path');
       if (path) {
         url.pathname = '/' + path;
+        url.searchParams.delete('path');
+        console.log('SSR request for:', url.toString());
         return app.fetch(new Request(url.toString(), request));
       }
     }
+    console.log('SSR request for:', url.toString());
     return app.fetch(request);
   },
 };
