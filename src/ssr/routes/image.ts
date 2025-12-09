@@ -161,8 +161,9 @@ export const image = new Elysia().get(
     statsX += statsWidth + 16;
     ctx.globalAlpha = 0.75;
     ctx.font = '36px Palatino';
-    statsWidth = ctx.measureText('Solves').width;
-    ctx.fillText('Solves', statsX, statsY);
+    const solves = puzzle.solveCount === 1 ? 'Solve' : 'Solves';
+    statsWidth = ctx.measureText(solves).width;
+    ctx.fillText(solves, statsX, statsY);
     statsX += statsWidth + 48;
 
     ctx.globalAlpha = 1;
@@ -172,8 +173,9 @@ export const image = new Elysia().get(
     statsX += statsWidth + 16;
     ctx.globalAlpha = 0.75;
     ctx.font = '36px Palatino';
-    statsWidth = ctx.measureText('Loves').width;
-    ctx.fillText('Loves', statsX, statsY);
+    const loves = puzzle.loveCount === 1 ? 'Love' : 'Loves';
+    statsWidth = ctx.measureText(loves).width;
+    ctx.fillText(loves, statsX, statsY);
 
     return canvas.toBuffer('image/png');
   },
