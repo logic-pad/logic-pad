@@ -8,6 +8,7 @@ import {
 } from '@napi-rs/canvas';
 import fontPath from '../../../public/palatino.ttf';
 import { api } from '../../client/online/api';
+import { PuzzleType } from '@logic-pad/core/index';
 
 GlobalFonts.registerFromPath(fontPath, 'Palatino');
 
@@ -42,6 +43,86 @@ function getLines(
       lines[maxLines - 1].substring(0, lines[maxLines - 1].length - 3) + '...';
   }
   return [lines, height];
+}
+
+const PUZZLE_ICONS = {
+  [PuzzleType.Logic]: {
+    size: 24,
+    path: new Path2D(
+      'M 3 15 C 3.044 14.52 3.279 13.893 3.586 13.586 C 3.893 13.279 4.52 13.044 5 13 L 9 13 C 9.481 13.044 10.108 13.279 10.415 13.586 C 10.722 13.893 10.956 14.52 11 15 L 11 19 C 10.956 19.48 10.722 20.107 10.415 20.414 C 10.108 20.721 9.481 20.956 9 21 L 5 21 C 4.52 20.956 3.893 20.721 3.586 20.414 C 3.279 20.107 3.044 19.48 3 19 Z M 5 19 L 9 19 L 9 15 L 5 15 Z M 13 15 C 13.044 14.52 13.279 13.893 13.586 13.586 C 13.893 13.279 14.52 13.044 15 13 L 19 13 C 19.481 13.044 20.108 13.279 20.415 13.586 C 20.722 13.893 20.956 14.52 21 15 L 21 19 C 20.956 19.48 20.722 20.107 20.415 20.414 C 20.108 20.721 19.481 20.956 19 21 L 15 21 C 14.52 20.956 13.893 20.721 13.586 20.414 C 13.279 20.107 13.044 19.48 13 19 Z M 15 19 L 19 19 L 19 15 L 15 15 Z M 13 5 C 13.044 4.52 13.279 3.893 13.586 3.586 C 13.893 3.279 14.52 3.044 15 3 L 19 3 C 19.481 3.044 20.108 3.279 20.415 3.586 C 20.722 3.893 20.956 4.52 21 5 L 21 9 C 20.956 9.48 20.722 10.107 20.415 10.414 C 20.108 10.721 19.481 10.956 19 11 L 15 11 C 14.52 10.956 13.893 10.721 13.586 10.414 C 13.279 10.107 13.044 9.48 13 9 Z M 15 9 L 19 9 L 19 5 L 15 5 Z M 3 5 C 3.044 4.52 3.279 3.893 3.586 3.586 C 3.893 3.279 4.52 3.044 5 3 L 9 3 C 9.481 3.044 10.108 3.279 10.415 3.586 C 10.722 3.893 10.956 4.52 11 5 L 11 9 C 10.956 9.48 10.722 10.107 10.415 10.414 C 10.108 10.721 9.481 10.956 9 11 L 5 11 C 4.52 10.956 3.893 10.721 3.586 10.414 C 3.279 10.107 3.044 9.48 3 9 Z M 5 9 L 9 9 L 9 5 L 5 5 Z'
+    ),
+  },
+  [PuzzleType.Underclued]: {
+    size: 24,
+    path: new Path2D(
+      'M 3 15 C 3.044 14.519 3.279 13.892 3.586 13.585 C 3.893 13.278 4.52 13.044 5 13 L 9 13 C 9.48 13.044 10.107 13.278 10.414 13.585 C 10.721 13.892 10.956 14.519 11 15 L 11 19 C 10.956 19.48 10.721 20.107 10.414 20.414 C 10.107 20.721 9.48 20.956 9 21 L 5 21 C 4.52 20.956 3.893 20.721 3.586 20.414 C 3.279 20.107 3.044 19.48 3 19 Z M 9 15 L 5 15 L 5 19 L 9 19 Z M 13 17 C 13 16.448 13.448 16 14 16 L 20 16 C 20.552 16 21 16.448 21 17 C 21 17.552 20.552 18 20 18 L 14 18 C 13.448 18 13 17.552 13 17 Z M 13 5 C 13.044 4.519 13.279 3.892 13.586 3.585 C 13.893 3.278 14.52 3.044 15 3 L 19 3 C 19.48 3.044 20.107 3.278 20.414 3.585 C 20.721 3.892 20.956 4.519 21 5 L 21 9 C 20.956 9.48 20.721 10.107 20.414 10.414 C 20.107 10.721 19.48 10.956 19 11 L 15 11 C 14.52 10.956 13.893 10.721 13.586 10.414 C 13.279 10.107 13.044 9.48 13 9 Z M 19 5 L 15 5 L 15 9 L 19 9 Z M 3 5 C 3.044 4.519 3.279 3.892 3.586 3.585 C 3.893 3.278 4.52 3.044 5 3 L 9 3 C 9.48 3.044 10.107 3.278 10.414 3.585 C 10.721 3.892 10.956 4.519 11 5 L 11 9 C 10.956 9.48 10.721 10.107 10.414 10.414 C 10.107 10.721 9.48 10.956 9 11 L 5 11 C 4.52 10.956 3.893 10.721 3.586 10.414 C 3.279 10.107 3.044 9.48 3 9 Z M 9 5 L 5 5 L 5 9 L 9 9 Z'
+    ),
+  },
+  [PuzzleType.Music]: {
+    size: 512,
+    path: new Path2D(
+      'M470.38 1.51L150.41 96A32 32 0 0 0 128 126.51v261.41A139 139 0 0 0 96 384c-53 0-96 28.66-96 64s43 64 96 64 96-28.66 96-64V214.32l256-75v184.61a138.4 138.4 0 0 0-32-3.93c-53 0-96 28.66-96 64s43 64 96 64 96-28.65 96-64V32a32 32 0 0 0-41.62-30.49z'
+    ),
+  },
+  [PuzzleType.Pattern]: {
+    size: 256,
+    path: new Path2D(
+      'M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H128V128H48V48h80v80h80v80Z'
+    ),
+  },
+};
+
+function drawPuzzleIcon(
+  puzzleType: PuzzleType,
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  size: number
+) {
+  const icon = PUZZLE_ICONS[puzzleType];
+  if (!icon) return;
+
+  ctx.save();
+  ctx.resetTransform();
+  ctx.translate(x, y);
+  const scale = size / icon.size;
+  ctx.scale(scale, scale);
+  ctx.fillStyle = '#343c47';
+  ctx.fillRect(0, 0, icon.size, icon.size);
+  ctx.fillStyle = '#00d3bb';
+  ctx.fill(icon.path);
+  ctx.restore();
+}
+
+function drawPuzzleType(
+  puzzleTypes: PuzzleType[],
+  ctx: SKRSContext2D,
+  x: number,
+  y: number,
+  size: number
+) {
+  if (puzzleTypes.length === 0) return;
+  else if (puzzleTypes.length === 1) {
+    drawPuzzleIcon(puzzleTypes[0], ctx, x, y, size);
+  } else if (puzzleTypes.length === 2) {
+    drawPuzzleIcon(puzzleTypes[0], ctx, x, y, (size / 3) * 2);
+    drawPuzzleIcon(
+      puzzleTypes[1],
+      ctx,
+      x + size / 3,
+      y + size / 3,
+      (size / 3) * 2
+    );
+  } else if (puzzleTypes.length === 3) {
+    drawPuzzleIcon(puzzleTypes[0], ctx, x + size / 4, y, size / 2);
+    drawPuzzleIcon(puzzleTypes[1], ctx, x, y + size / 2, size / 2);
+    drawPuzzleIcon(puzzleTypes[2], ctx, x + size / 2, y + size / 2, size / 2);
+  } else {
+    drawPuzzleIcon(puzzleTypes[0], ctx, x, y, size / 2);
+    drawPuzzleIcon(puzzleTypes[1], ctx, x + size / 2, y, size / 2);
+    drawPuzzleIcon(puzzleTypes[2], ctx, x, y + size / 2, size / 2);
+    drawPuzzleIcon(puzzleTypes[3], ctx, x + size / 2, y + size / 2, size / 2);
+  }
 }
 
 export const image = new Elysia().get(
@@ -99,13 +180,22 @@ export const image = new Elysia().get(
     const [titleLines, lineHeight] = getLines(
       ctx,
       puzzle.title,
-      canvas.width - margin * 2,
+      canvas.width - margin * 2 - logoSize,
       2
     );
     titleLines.forEach((line, index) => {
       ctx.fillText(line, margin, flowY + index * lineHeight);
     });
     flowY += titleLines.length * lineHeight + 36;
+
+    // Puzzle icon
+    drawPuzzleType(
+      puzzle.types,
+      ctx,
+      canvas.width - logoSize - margin,
+      margin,
+      logoSize
+    );
 
     // Author name
     ctx.globalAlpha = 0.75;

@@ -15,11 +15,4 @@ const app = new Elysia()
   .use(ssr)
   .use(image);
 
-const handler = {
-  async fetch(request: Request) {
-    console.log(request.url);
-    return app.fetch(request);
-  },
-};
-
-export default handler;
+export default app;
