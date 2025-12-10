@@ -5,7 +5,7 @@ import { api } from '../../client/online/api';
 
 export const ssr = new Elysia()
   .get('/solve/:puzzleId', async ({ params: { puzzleId }, set, headers }) => {
-    set.headers['content-type'] = 'text/html';
+    set.headers['content-type'] = 'text/html; charset=utf8';
     set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
 
     if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
@@ -35,7 +35,7 @@ export const ssr = new Elysia()
   .get(
     '/collection/:collectionId',
     async ({ params: { collectionId }, set, headers }) => {
-      set.headers['content-type'] = 'text/html';
+      set.headers['content-type'] = 'text/html; charset=utf8';
       set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
 
       if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
@@ -64,7 +64,7 @@ export const ssr = new Elysia()
     }
   )
   .get('/profile/:userId', async ({ params: { userId }, set, headers }) => {
-    set.headers['content-type'] = 'text/html';
+    set.headers['content-type'] = 'text/html; charset=utf8';
     set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
 
     if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
