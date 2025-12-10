@@ -118,9 +118,7 @@ export const api = {
   },
   signInWithOAuth: (provider: string, success: string, error: string) => {
     onlineSolveTracker.clearSolveRecords();
-    const url = new URL(
-      (import.meta.env?.VITE_API_ENDPOINT as string) + '/auth/oauth/' + provider
-    );
+    const url = new URL(axios.defaults.baseURL + '/auth/oauth/' + provider);
     url.searchParams.set('success', success);
     url.searchParams.set('error', error);
     window.location.href = url.toString();
@@ -171,13 +169,8 @@ export const api = {
       .then(res => res.data)
       .catch(() => null);
   },
-  getAvatar: async (userId: string) => {
-    return await axios
-      .get<Blob>(`/user/${userId}/avatar`, {
-        responseType: 'blob',
-      })
-      .then(res => URL.createObjectURL(res.data))
-      .catch(() => null);
+  getAvatar: (userId: string) => {
+    return `${axios.defaults.baseURL}/user/${userId}/avatar`;
   },
   getPuzzleFullForEdit: async (puzzleId: string) => {
     return await axios

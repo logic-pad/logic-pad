@@ -501,16 +501,13 @@ export const image = new Elysia()
       flowY += titleLines.length * lineHeight + 36;
 
       // User icon
-      const avatarObjectUrl = await api.getAvatar(user.id);
-      if (avatarObjectUrl) {
-        ctx.save();
-        ctx.translate(canvas.width - logoSize - margin, margin);
-        ctx.scale(logoSize / 200, logoSize / 200);
-        ctx.clip(CIRCLE_200);
-        const avatar = await loadImage(avatarObjectUrl);
-        ctx.drawImage(avatar, 0, 0, 200, 200);
-        ctx.restore();
-      }
+      ctx.save();
+      ctx.translate(canvas.width - logoSize - margin, margin);
+      ctx.scale(logoSize / 200, logoSize / 200);
+      ctx.clip(CIRCLE_200);
+      const avatar = await loadImage(api.getAvatar(user.id));
+      ctx.drawImage(avatar, 0, 0, 200, 200);
+      ctx.restore();
 
       // Title
       if (user.title) {
