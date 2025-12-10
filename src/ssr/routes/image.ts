@@ -118,7 +118,7 @@ function drawIcon(
   ctx.scale(scale, scale);
   ctx.fillStyle = '#343c47';
   ctx.fillRect(0, 0, icon.size, icon.size);
-  ctx.fillStyle = '#00d3bb';
+  ctx.fillStyle = '#e4e4e7';
   ctx.fill(icon.path);
   ctx.restore();
 }
