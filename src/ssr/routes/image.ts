@@ -21,13 +21,10 @@ function getLines(
   const words = text.split(' ');
   const lines = [];
   let currentLine = words[0];
-  let height = 0;
 
   for (let i = 1; i < words.length; i++) {
     const word = words[i];
-    const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } =
-      ctx.measureText(currentLine + ' ' + word);
-    height = actualBoundingBoxAscent + actualBoundingBoxDescent;
+    const { width } = ctx.measureText(currentLine + ' ' + word);
     if (width < maxWidth) {
       currentLine += ' ' + word;
     } else {
@@ -42,7 +39,12 @@ function getLines(
     lines[maxLines - 1] =
       lines[maxLines - 1].substring(0, lines[maxLines - 1].length - 3) + '...';
   }
-  return [lines, height];
+
+  const totalBox = ctx.measureText(text);
+  return [
+    lines,
+    totalBox.actualBoundingBoxAscent + totalBox.actualBoundingBoxDescent,
+  ];
 }
 
 interface IconInfo {
@@ -536,18 +538,18 @@ export const image = new Elysia()
       ctx.font = '36px Palatino';
       statsWidth = ctx.measureText('Solved').width;
       ctx.fillText('Solved', statsX, statsY);
-      statsX += statsWidth + 48;
+      statsX += statsWidth + 16;
       ctx.globalAlpha = 1;
       ctx.font = '42px Palatino';
       statsWidth = ctx.measureText(user.solveCount.toString()).width;
       ctx.fillText(user.solveCount.toString(), statsX, statsY);
-      statsX += statsWidth + 16;
+      statsX += statsWidth + 48;
 
       ctx.globalAlpha = 0.75;
       ctx.font = '36px Palatino';
       statsWidth = ctx.measureText('Created').width;
       ctx.fillText('Created', statsX, statsY);
-      statsX += statsWidth + 48;
+      statsX += statsWidth + 16;
       ctx.globalAlpha = 1;
       ctx.font = '42px Palatino';
       ctx.fillText(user.createCount.toString(), statsX, statsY);
