@@ -121,6 +121,10 @@ export default defineConfig({
       { source: '/ssr/(.*)', destination: '/' },
       { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
       {
+        source: '/collection/:collectionId',
+        destination: '/ssr/collection/:collectionId',
+      },
+      {
         source: '/api/preview/:type/:resourceId',
         destination: '/ssr/api/preview/:type/:resourceId',
       },

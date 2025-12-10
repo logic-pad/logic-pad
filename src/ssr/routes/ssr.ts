@@ -3,9 +3,8 @@ import indexHtml from '../../../dist/index.html';
 import { isbot } from 'isbot';
 import { api } from '../../client/online/api';
 
-export const ssr = new Elysia().get(
-  '/solve/:puzzleId',
-  async ({ params: { puzzleId }, set, headers }) => {
+export const ssr = new Elysia()
+  .get('/solve/:puzzleId', async ({ params: { puzzleId }, set, headers }) => {
     set.headers['content-type'] = 'text/html';
     set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
 
@@ -32,5 +31,35 @@ export const ssr = new Elysia().get(
         `https://${process.env.VERCEL_URL}/api/preview/puzzle/${puzzle.id}`
       );
     return customizedHtml;
-  }
-);
+  })
+  .get(
+    '/collection/:collectionId',
+    async ({ params: { collectionId }, set, headers }) => {
+      set.headers['content-type'] = 'text/html';
+      set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+
+      if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
+        return indexHtml;
+      }
+      if (typeof collectionId !== 'string' || collectionId.length === 0) {
+        return indexHtml;
+      }
+
+      const collection = await api.getCollectionBrief(collectionId);
+      if (!collection) {
+        return indexHtml;
+      }
+
+      const customizedHtml = (indexHtml as unknown as string)
+        .replace(/Logic Pad/g, `${collection.title} - Logic Pad`)
+        .replace(
+          /A modern, open-source web app for grid-based puzzles\./g,
+          `A ${collection.isSeries ? 'series' : 'collection'} by ${collection.creator.name} on Logic Pad.`
+        )
+        .replace(
+          /\/pwa-512x512.png/g,
+          `https://${process.env.VERCEL_URL}/api/preview/collection/${collection.id}`
+        );
+      return customizedHtml;
+    }
+  );
