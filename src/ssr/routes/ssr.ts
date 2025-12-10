@@ -62,4 +62,32 @@ export const ssr = new Elysia()
         );
       return customizedHtml;
     }
-  );
+  )
+  .get('/profile/:userId', async ({ params: { userId }, set, headers }) => {
+    set.headers['content-type'] = 'text/html';
+    set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+
+    if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
+      return indexHtml;
+    }
+    if (typeof userId !== 'string' || userId.length === 0) {
+      return indexHtml;
+    }
+
+    const user = await api.getUser(userId);
+    if (!user) {
+      return indexHtml;
+    }
+
+    const customizedHtml = (indexHtml as unknown as string)
+      .replace(/Logic Pad/g, `${user.name} - Logic Pad`)
+      .replace(
+        /A modern, open-source web app for grid-based puzzles\./g,
+        user.title ?? ''
+      )
+      .replace(
+        /\/pwa-512x512.png/g,
+        `https://${process.env.VERCEL_URL}/api/preview/user/${user.id}`
+      );
+    return customizedHtml;
+  });

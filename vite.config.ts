@@ -125,6 +125,10 @@ export default defineConfig({
         destination: '/ssr/collection/:collectionId',
       },
       {
+        source: '/profile/:userId',
+        destination: '/ssr/profile/:userId',
+      },
+      {
         source: '/api/preview/:type/:resourceId',
         destination: '/ssr/api/preview/:type/:resourceId',
       },

@@ -1,4 +1,4 @@
-import Elysia, { t } from 'elysia';
+import Elysia, { status, t } from 'elysia';
 import {
   createCanvas,
   loadImage,
@@ -49,6 +49,14 @@ interface IconInfo {
   size: number;
   path: Path2D;
 }
+
+const CIRCLE_200 = new Path2D(
+  'M100,0 A100,100 0 1,0 100,200 A100,100 0 1,0 100,0'
+);
+
+const STAR_200 = new Path2D(
+  'm96 153.044-58.779 26.243 7.02-63.513L.894 68.481l63.117-13.01L96 0l31.989 55.472 63.117 13.01-43.347 47.292 7.02 63.513z'
+);
 
 const PUZZLE_ICONS: Record<PuzzleType, IconInfo> = {
   [PuzzleType.Logic]: {
@@ -257,13 +265,9 @@ export const image = new Elysia()
         ctx.fillStyle = '#00d3bb';
         let path: Path2D;
         if (puzzle.designDifficulty > 5) {
-          path = new Path2D(
-            'm96 153.044-58.779 26.243 7.02-63.513L.894 68.481l63.117-13.01L96 0l31.989 55.472 63.117 13.01-43.347 47.292 7.02 63.513z'
-          );
+          path = STAR_200;
         } else {
-          path = new Path2D(
-            'M100,0 A100,100 0 1,0 100,200 A100,100 0 1,0 100,0'
-          );
+          path = CIRCLE_200;
         }
         for (let i = 0; i <= puzzle.designDifficulty % 5; i++) {
           ctx.fill(path, 'evenodd');
@@ -431,6 +435,128 @@ export const image = new Elysia()
     {
       params: t.Object({
         collectionId: t.String({ minLength: 1, maxLength: 36 }),
+      }),
+    }
+  )
+  .get(
+    '/api/preview/user/:userId',
+    async ({ params: { userId }, set }) => {
+      set.headers['content-type'] = 'image/png';
+      set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+
+      const user = await api.getUser(userId);
+
+      if (!user) {
+        return status('Not Found');
+      }
+
+      const canvas = createCanvas(1200, 630);
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#343c47';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Site logo
+      const logo = await loadImage(
+        `https://${process.env.VERCEL_URL}/pwa-512x512.png`
+      );
+      const logoSize = 128;
+      const margin = 84;
+      ctx.drawImage(
+        logo,
+        margin,
+        canvas.height - logoSize - margin,
+        logoSize,
+        logoSize
+      );
+      ctx.fillStyle = '#00d3bb';
+      ctx.font = '48px Palatino';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(
+        'Logic Pad',
+        margin + logoSize + 16,
+        canvas.height - logoSize / 2 - margin
+      );
+
+      let flowY = margin;
+
+      // User name
+      ctx.fillStyle = '#e4e4e7';
+      ctx.font = '64px Palatino';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      const [titleLines, lineHeight] = getLines(
+        ctx,
+        user.name,
+        canvas.width - margin * 2 - logoSize,
+        2
+      );
+      titleLines.forEach((line, index) => {
+        ctx.fillText(line, margin, flowY + index * lineHeight);
+      });
+      flowY += titleLines.length * lineHeight + 36;
+
+      // User icon
+      const avatarObjectUrl = await api.getAvatar(user.id);
+      if (avatarObjectUrl) {
+        ctx.save();
+        ctx.translate(canvas.width - logoSize - margin, margin);
+        ctx.scale(logoSize / 200, logoSize / 200);
+        ctx.clip(CIRCLE_200);
+        const avatar = await loadImage(avatarObjectUrl);
+        ctx.drawImage(avatar, 0, 0, 200, 200);
+        ctx.restore();
+      }
+
+      // Title
+      if (user.title) {
+        ctx.globalAlpha = 0.75;
+        ctx.fillStyle = '#e4e4e7';
+        ctx.font = '42px Palatino';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        const { actualBoundingBoxAscent, actualBoundingBoxDescent } =
+          ctx.measureText(user.title);
+        const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+        ctx.fillText(user.title, margin, flowY);
+        flowY += authorHeight + 48;
+      }
+
+      // Stats
+      ctx.fillStyle = '#e4e4e7';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      const statsHeight = 200 * 0.22;
+      let statsX = margin;
+      let statsWidth = 0;
+      const statsY = flowY + statsHeight / 2;
+      ctx.globalAlpha = 0.75;
+      ctx.font = '36px Palatino';
+      statsWidth = ctx.measureText('Solved').width;
+      ctx.fillText('Solved', statsX, statsY);
+      statsX += statsWidth + 48;
+      ctx.globalAlpha = 1;
+      ctx.font = '42px Palatino';
+      statsWidth = ctx.measureText(user.solveCount.toString()).width;
+      ctx.fillText(user.solveCount.toString(), statsX, statsY);
+      statsX += statsWidth + 16;
+
+      ctx.globalAlpha = 0.75;
+      ctx.font = '36px Palatino';
+      statsWidth = ctx.measureText('Created').width;
+      ctx.fillText('Created', statsX, statsY);
+      statsX += statsWidth + 48;
+      ctx.globalAlpha = 1;
+      ctx.font = '42px Palatino';
+      ctx.fillText(user.createCount.toString(), statsX, statsY);
+
+      return canvas.toBuffer('image/png');
+    },
+    {
+      params: t.Object({
+        userId: t.String({ minLength: 1, maxLength: 36 }),
       }),
     }
   );
