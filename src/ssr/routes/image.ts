@@ -1,5 +1,4 @@
 import Elysia, { status, t } from 'elysia';
-import node from '@elysiajs/node';
 import {
   createCanvas,
   loadImage,
@@ -167,13 +166,14 @@ function drawPuzzleType(
   }
 }
 
-export const image = new Elysia({ adapter: node() })
+export const image = new Elysia()
+  .mapResponse(({ set }) => {
+    set.headers['content-type'] = 'image/png';
+    set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+  })
   .get(
     '/api/preview/puzzle/:puzzleId',
-    async ({ params: { puzzleId }, set }) => {
-      set.headers['content-type'] = 'image/png';
-      set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
-
+    async ({ params: { puzzleId } }) => {
       const puzzle = await api.getPuzzleBriefForSolve(puzzleId);
 
       const canvas = createCanvas(1200, 630);
@@ -318,10 +318,7 @@ export const image = new Elysia({ adapter: node() })
   )
   .get(
     '/api/preview/collection/:collectionId',
-    async ({ params: { collectionId }, set }) => {
-      set.headers['content-type'] = 'image/png';
-      set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
-
+    async ({ params: { collectionId } }) => {
       const collection = await api.getCollectionBrief(collectionId);
 
       const canvas = createCanvas(1200, 630);
@@ -443,10 +440,7 @@ export const image = new Elysia({ adapter: node() })
   )
   .get(
     '/api/preview/user/:userId',
-    async ({ params: { userId }, set }) => {
-      set.headers['content-type'] = 'image/png';
-      set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
-
+    async ({ params: { userId } }) => {
       const user = await api.getUser(userId);
 
       if (!user) {

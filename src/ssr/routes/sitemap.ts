@@ -1,5 +1,4 @@
 import Elysia from 'elysia';
-import node from '@elysiajs/node';
 import { SitemapEntry } from '../../client/online/data';
 import { SitemapStream } from 'sitemap';
 import { createGzip } from 'zlib';
@@ -14,14 +13,14 @@ function lastMod(updatedAt: string) {
     : lastSitemapModification.toISOString();
 }
 
-export const sitemap = new Elysia({ adapter: node() }).get(
-  '/sitemap.xml',
-  async ({ set }) => {
+export const sitemap = new Elysia()
+  .mapResponse(({ set }) => {
     set.headers['content-type'] = 'text/xml';
     set.headers['content-encoding'] = 'gzip';
     set.headers['cache-control'] = 's-maxage=10, stale-while-revalidate';
     set.headers['x-robots-tag'] = 'index, follow';
-
+  })
+  .get('/sitemap.xml', async () => {
     const smStream = new SitemapStream({
       hostname: process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL,
     });
@@ -106,5 +105,4 @@ export const sitemap = new Elysia({ adapter: node() }).get(
     smStream.end();
     // stream write the response
     return pipeline;
-  }
-);
+  });
