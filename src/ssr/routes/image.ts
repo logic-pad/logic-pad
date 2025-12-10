@@ -167,9 +167,13 @@ function drawPuzzleType(
 }
 
 export const image = new Elysia()
-  .mapResponse(({ set }) => {
-    set.headers['content-type'] = 'image/png';
-    set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+  .mapResponse(({ responseValue }) => {
+    return new Response(responseValue as BodyInit, {
+      headers: {
+        'content-type': 'image/png',
+        'cache-control': 's-maxage=3600, stale-while-revalidate',
+      },
+    });
   })
   .get(
     '/api/preview/puzzle/:puzzleId',

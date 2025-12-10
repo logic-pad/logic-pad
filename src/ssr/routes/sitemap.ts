@@ -14,11 +14,15 @@ function lastMod(updatedAt: string) {
 }
 
 export const sitemap = new Elysia()
-  .mapResponse(({ set }) => {
-    set.headers['content-type'] = 'text/xml';
-    set.headers['content-encoding'] = 'gzip';
-    set.headers['cache-control'] = 's-maxage=10, stale-while-revalidate';
-    set.headers['x-robots-tag'] = 'index, follow';
+  .mapResponse(({ responseValue }) => {
+    return new Response(responseValue as BodyInit, {
+      headers: {
+        'content-type': 'text/xml',
+        'content-encoding': 'gzip',
+        'cache-control': 's-maxage=10, stale-while-revalidate',
+        'x-robots-tag': 'index, follow',
+      },
+    });
   })
   .get('/sitemap.xml', async () => {
     const smStream = new SitemapStream({

@@ -4,9 +4,13 @@ import { isbot } from 'isbot';
 import { api } from '../../client/online/api';
 
 export const ssr = new Elysia()
-  .mapResponse(({ set }) => {
-    set.headers['content-type'] = 'text/html; charset=utf8';
-    set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';
+  .mapResponse(({ responseValue }) => {
+    return new Response(responseValue as BodyInit, {
+      headers: {
+        'content-type': 'text/html; charset=utf8',
+        'cache-control': 's-maxage=3600, stale-while-revalidate',
+      },
+    });
   })
   .get('/solve/:puzzleId', async ({ params: { puzzleId }, headers }) => {
     if (!headers['user-agent'] || !isbot(headers['user-agent'])) {
