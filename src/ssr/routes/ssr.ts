@@ -1,9 +1,10 @@
 import Elysia from 'elysia';
+import node from '@elysiajs/node';
 import indexHtml from '../../../dist/index.html';
 import { isbot } from 'isbot';
 import { api } from '../../client/online/api';
 
-export const ssr = new Elysia()
+export const ssr = new Elysia({ adapter: node() })
   .get('/solve/:puzzleId', async ({ params: { puzzleId }, set, headers }) => {
     set.headers['content-type'] = 'text/html; charset=utf8';
     set.headers['cache-control'] = 's-maxage=3600, stale-while-revalidate';

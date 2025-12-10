@@ -1,4 +1,5 @@
 import Elysia, { status, t } from 'elysia';
+import node from '@elysiajs/node';
 import {
   createCanvas,
   loadImage,
@@ -166,7 +167,7 @@ function drawPuzzleType(
   }
 }
 
-export const image = new Elysia()
+export const image = new Elysia({ adapter: node() })
   .get(
     '/api/preview/puzzle/:puzzleId',
     async ({ params: { puzzleId }, set }) => {
