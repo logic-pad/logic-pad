@@ -1,3 +1,8 @@
+# 18/12/2025
+
+- Fixed puzzle image generation for hidden tiles
+- Fixed grid sounds playing incorrectly during puzzle image generation
+
 # 6/12/2025
 
 - Added sound effects to tile clicks and puzzle solves
