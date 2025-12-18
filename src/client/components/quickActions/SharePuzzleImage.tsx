@@ -92,7 +92,11 @@ const PuzzleImage = memo(function PuzzleImage({
             <GridContext grid={newGrid} initialMetadata={metadata}>
               <div className="flex flex-col gap-4">
                 {gridOnly || <Metadata simplified={true} responsive={false} />}
-                <MainGrid useToolboxClick={false} animated={false} />
+                <MainGrid
+                  useToolboxClick={false}
+                  allowAnimation={false}
+                  allowSounds={false}
+                />
               </div>
               {gridOnly || (
                 <div className="pr-2">

@@ -23,7 +23,8 @@ const GridSounds = React.lazy(() => import('./GridSounds.tsx'));
 export interface MainGridProps {
   useToolboxClick: boolean;
   children?: React.ReactNode;
-  animated?: boolean;
+  allowAnimation?: boolean;
+  allowSounds?: boolean;
 }
 
 export function computeTileSize(
@@ -62,9 +63,11 @@ export function computeTileSize(
 export default memo(function MainGrid({
   useToolboxClick,
   children,
-  animated,
+  allowAnimation,
+  allowSounds,
 }: MainGridProps) {
-  animated = animated ?? true;
+  allowAnimation = allowAnimation ?? true;
+  allowSounds = allowSounds ?? true;
   const gridContext = useGrid();
   const { grid, solution } = gridContext;
   const { scale, setScale, responsiveScale } = useDisplay();
@@ -144,13 +147,15 @@ export default memo(function MainGrid({
       ref={stateRingRef}
       width={grid.width}
       height={grid.height}
-      animated={animated}
+      allowAnimation={allowAnimation}
       {...bind()}
       className="tour-grid"
     >
-      <Suspense fallback={null}>
-        <GridSounds />
-      </Suspense>
+      {allowSounds && (
+        <Suspense fallback={null}>
+          <GridSounds />
+        </Suspense>
+      )}
       <Grid
         size={Math.round(tileConfig.tileSize * scale)}
         grid={grid}
