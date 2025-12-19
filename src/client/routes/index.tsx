@@ -119,13 +119,9 @@ export const Route = createFileRoute('/')({
                   <div className="absolute w-0 h-0 top-1/2 left-1/2 logo-glow fade-in-slow"></div>
                   <div
                     className="absolute inset-0 w-fit h-fit tooltip tooltip-bottom"
-                    data-tip="Stay safe from fire."
+                    data-tip="Merry Christmas!"
                   >
-                    <img
-                      src="/logo.svg"
-                      className="grayscale"
-                      alt="Logic Pad logo"
-                    />
+                    <img src="/logo.svg" alt="Logic Pad logo" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
