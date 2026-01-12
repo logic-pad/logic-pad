@@ -26,9 +26,7 @@ import('@sentry/react')
 const savedTheme = localStorage.getItem(themeKey) ?? 'dark';
 document.documentElement.dataset.theme = savedTheme;
 
-const redirectDomains = (
-  import.meta.env.VITE_LEGACY_URL as string | undefined
-)?.split(',');
+const redirectDomains = import.meta.env.VITE_LEGACY_URL?.split(',');
 
 function Redirector() {
   if (redirectDomains?.includes(window.location.host)) {
