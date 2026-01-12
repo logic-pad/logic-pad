@@ -276,7 +276,7 @@ export const image = new Elysia()
         } else {
           path = CIRCLE_200;
         }
-        for (let i = 0; i <= puzzle.designDifficulty % 5; i++) {
+        for (let i = 1; i <= puzzle.designDifficulty % 5; i++) {
           ctx.fill(path, 'evenodd');
           ctx.translate(240, 0);
         }
