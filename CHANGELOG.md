@@ -1,6 +1,7 @@
 # 14/1/2026
 
 - Fixed "I'm feeling lucky" button not working
+- Fixed the "Followed collections" section not loading
 
 # 18/12/2025
 
