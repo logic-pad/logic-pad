@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { r } from 'readable-regexp';
 import { cn } from '../../client/uiHelper.ts';
 import Loading from './Loading';
 import type { Options } from 'react-markdown';
@@ -19,7 +20,15 @@ export interface MarkdownProps extends Readonly<Options> {
   onClickCapture?: React.MouseEventHandler;
 }
 
-const profileUrlRegex = /^\/profile\/([^/\s]+)\/?$/;
+const profileUrlRegex = r
+  .match(
+    r.lineStart,
+    r.exactly`/profile/`,
+    r.capture.oneOrMore.notCharIn('/', r.whitespace),
+    r.maybe`/`,
+    r.lineEnd
+  )
+  .toRegExp();
 
 const UserMention = memo(function UserMention({
   href,

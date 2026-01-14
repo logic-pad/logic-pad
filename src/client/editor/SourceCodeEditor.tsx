@@ -12,6 +12,7 @@ import handleTileClick from '../grid/handleTileClick';
 import { useGrid } from '../contexts/GridContext.tsx';
 import { array } from '@logic-pad/core/data/dataHelper';
 import toast from 'react-hot-toast';
+import { r } from 'readable-regexp';
 
 const defaultCode = `/** @type Puzzle */
 ({
@@ -40,6 +41,15 @@ const options: editor.IStandaloneEditorConstructionOptions = {
 export interface SourceCodeEditorProps {
   loading?: React.ReactNode;
 }
+
+const stackTraceRegex = r
+  .match(
+    r.exactly`<anonymous>:`,
+    r.capture.oneOrMore.digit,
+    r.exactly`:`,
+    r.capture.oneOrMore.digit
+  )
+  .toRegExp();
 
 export default memo(function SourceCodeEditor({
   loading,
@@ -132,7 +142,7 @@ export default memo(function SourceCodeEditor({
         } else if (error instanceof Error) {
           toast.error(error.message);
           if (error.stack) {
-            const match = /<anonymous>:(\d+):(\d+)/.exec(error.stack);
+            const match = stackTraceRegex.exec(error.stack);
             if (match) {
               const [_, line, column] = match;
               editorRef.current.focus();

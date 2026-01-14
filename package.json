@@ -58,6 +58,7 @@
     "react-markdown": "^10.1.0",
     "react-mentions": "^4.4.10",
     "react-responsive": "^10.0.1",
+    "readable-regexp": "^1.5.2",
     "remark-inline-spoiler": "^1.0.1",
     "retry-axios": "^4.0.1",
     "semver": "^7.7.2",

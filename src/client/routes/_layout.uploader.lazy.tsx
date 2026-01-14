@@ -4,6 +4,7 @@ import { useRouteProtection } from '../router/useRouteProtection';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import { FaExternalLinkAlt, FaTrash, FaUpload } from 'react-icons/fa';
 import PQueue from 'p-queue';
+import { r } from 'readable-regexp';
 import Loading from '../components/Loading';
 import Difficulty from '../metadata/Difficulty';
 import PuzzleEditorModal, {
@@ -97,7 +98,18 @@ function getErrorMessage(checklistItem: string) {
   }
 }
 
-const linkRegex = /https?:\/\/[\w\-.]+\/\w+\?(?:[\w=&])*d=([\w_%-]+)/gm;
+const linkRegex = r
+  .match(
+    r.exactly`http`.maybe`s`.exactly`://`,
+    r.oneOrMore.charIn('-.', r.word),
+    r.exactly`/`,
+    r.oneOrMore.word,
+    r.exactly`?`,
+    r.zeroOrMore.charIn('=&', r.word),
+    r.exactly`d=`,
+    r.capture.oneOrMore.charIn('_%-', r.word)
+  )
+  .toRegExp('gm');
 
 class UploadManager {
   private uploads: readonly UploadEntry[] = [];
