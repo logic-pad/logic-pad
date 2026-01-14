@@ -1,3 +1,7 @@
+# 14/1/2026
+
+- Fixed "I'm feeling lucky" button not working
+
 # 18/12/2025
 
 - Fixed puzzle image generation for hidden tiles
