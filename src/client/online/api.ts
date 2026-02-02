@@ -7,7 +7,6 @@ import {
   PuzzleLove,
   ListResponse,
   UserBrief,
-  Identity,
   CollectionBrief,
   CollectionFollow,
   ResourceStatus,
@@ -43,6 +42,7 @@ import {
   PublicPuzzleSearchParams,
 } from './PuzzleSearchQuery';
 import { CollectionSearchParams } from './CollectionSearchQuery';
+import { authClient } from './auth';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -116,31 +116,19 @@ export const api = {
         return null;
       });
   },
-  signInWithOAuth: (provider: string, success: string, error: string) => {
+  signInWithOAuth: async (provider: string, success: string, error: string) => {
     onlineSolveTracker.clearSolveRecords();
-    const url = new URL(axios.defaults.baseURL + '/auth/oauth/' + provider);
-    url.searchParams.set('success', success);
-    url.searchParams.set('error', error);
-    window.location.href = url.toString();
-  },
-  callbackOAuth: async (userId: string, secret: string) => {
-    await axios({
-      method: 'POST',
-      url: '/auth/oauth/callback',
-      params: {
-        userId,
-        secret,
-      },
+    const data = await authClient.signIn.social({
+      provider,
+      callbackURL: success,
+      errorCallbackURL: error,
     });
-  },
-  listIdentities: async () => {
-    return await axios
-      .get<ListResponse<Identity>>('/auth/identity/list')
-      .then(res => res.data)
-      .catch(() => null);
-  },
-  deleteIdentity: async (identityId: string) => {
-    await axios.delete(`/auth/identity/${identityId}`).catch(rethrowError);
+    if (!data.data) {
+      throw new Error(
+        'Failed to initiate OAuth sign-in: ' + data.error.message
+      );
+    }
+    window.location.href = data.data.url!;
   },
   getMe: async () => {
     return await axios
@@ -154,7 +142,7 @@ export const api = {
   logout: async () => {
     await queryClient.invalidateQueries();
     onlineSolveTracker.clearSolveRecords();
-    await axios.delete('/auth/logout').catch(rethrowError);
+    await authClient.signOut();
     window.location.reload();
   },
   getUser: async (userId: string) => {

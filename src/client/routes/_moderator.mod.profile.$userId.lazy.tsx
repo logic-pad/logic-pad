@@ -78,12 +78,12 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
               >
                 {userBrief.name}
                 <SupporterBadge tooltip supporter={userBrief.supporter} />
-                {userAccount?.labels.map(label => (
+                {userAccount?.roles.map(role => (
                   <span
-                    key={label}
+                    key={role}
                     className="badge badge-info badge-sm inline-block py-1 px-2 ms-2 h-fit w-fit whitespace-nowrap align-middle capitalize"
                   >
-                    {label}
+                    {role}
                   </span>
                 ))}
                 <div
@@ -138,10 +138,6 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
                     created {toRelativeDate(new Date(userAccount.createdAt))}
                   </div>
                   <div className="opacity-80">
-                    registered{' '}
-                    {toRelativeDate(new Date(userAccount.registeredAt))}
-                  </div>
-                  <div className="opacity-80">
                     updated {toRelativeDate(new Date(userAccount.updatedAt))}
                   </div>
                   {userAccount.accessedAt && (
@@ -181,7 +177,7 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
             <UserRestrictions userId={userId} promptHandle={promptRef} />
             <UserStatus
               userId={userId}
-              status={userAccount?.status}
+              status={!userAccount?.bannedUntil}
               promptHandle={promptRef}
             />
           </div>
@@ -191,7 +187,7 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
             <UserCollections userId={userId} promptHandle={promptRef} />
             <UserComments userId={userId} promptHandle={promptRef} />
             <UserModerations userId={userId} type="received" />
-            {userAccount?.labels.includes('moderator') && (
+            {userAccount?.roles.includes('moderator') && (
               <UserModerations userId={userId} type="given" />
             )}
           </div>

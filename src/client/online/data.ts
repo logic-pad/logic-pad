@@ -7,18 +7,13 @@ export enum ResourceStatus {
   Public = 'public',
 }
 
-export enum FeedbackType {
-  General = 'general',
-  Issue = 'issue',
-  Report = 'report',
-}
-
 export enum NotificationType {
   CollectionActivity = 'collectionActivity',
   CommentActivity = 'commentActivity',
   Account = 'account',
   System = 'system',
 }
+
 export interface ResourceResponse {
   id: string;
   createdAt: string;
@@ -32,6 +27,7 @@ export enum AutoCollection {
 }
 
 export interface UserBrief extends ResourceResponse {
+  accessedAt: string;
   solveCount: number;
   createCount: number;
   description: string;
@@ -42,7 +38,7 @@ export interface UserBrief extends ResourceResponse {
 
 export interface MeBrief extends UserBrief {
   supporterUntil: string | null;
-  labels: string[];
+  roles: string[];
 }
 
 export interface PuzzleBrief extends ResourceResponse {
@@ -87,11 +83,6 @@ export interface Completion extends ResourceResponse {
   user: string;
 }
 
-export interface Identity extends ResourceResponse {
-  provider: string;
-  email: string;
-}
-
 export interface Notification extends ResourceResponse {
   user: string;
   target: string | null;
@@ -120,7 +111,6 @@ export interface PuzzleSection {
 }
 
 export interface UserDetail {
-  accessedAt: string | null;
   followCount: number;
   solvedPuzzles: PuzzleSection | null;
   createdPuzzles: PuzzleSection | null;
@@ -138,7 +128,7 @@ export interface FrontPage {
   newestCollections: CollectionBrief[];
 }
 
-export interface ListResponse<T extends ResourceResponse> {
+export interface ListResponse<T> {
   total: number;
   results: T[];
 }
@@ -154,7 +144,7 @@ export interface PaymentHistory extends ResourceResponse {
   user: string;
   order: string;
   currency: string;
-  amount: number;
+  amount: string;
   items: string[];
 }
 
@@ -167,10 +157,10 @@ export interface UserAccount {
   id: string;
   createdAt: string;
   updatedAt: string;
-  registeredAt: string;
-  accessedAt: string | null;
-  labels: string[];
-  status: boolean;
+  accessedAt: string;
+  roles: string[];
+  bannedUntil: string | null;
+  banReason: string | null;
 }
 
 export interface UserRestrictions {

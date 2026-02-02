@@ -290,7 +290,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                               {new Intl.NumberFormat('en-US', {
                                 style: 'currency',
                                 currency: payment.currency,
-                              }).format(payment.amount / 100)}
+                              }).format(Number(payment.amount) / 100)}
                             </td>
                           </tr>
                         ))

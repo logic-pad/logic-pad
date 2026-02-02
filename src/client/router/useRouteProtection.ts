@@ -29,7 +29,7 @@ export const useRouteProtection = (level: 'online' | 'login' | 'moderator') => {
       }
     } else if (
       level === 'moderator' &&
-      (!isOnline || !me?.labels.includes('moderator'))
+      (!isOnline || !me?.roles.includes('moderator'))
     ) {
       toast.error('You have to be a moderator to access this page');
       void navigate({ to: '/', replace: true });

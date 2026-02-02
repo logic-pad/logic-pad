@@ -6,7 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { api, queryClient } from '../online/api';
 import Loading from '../components/Loading';
 import toast from 'react-hot-toast';
-import { Identity, UserBrief } from '../online/data';
+import { UserBrief } from '../online/data';
 import { useRouteProtection } from '../router/useRouteProtection';
 import { FaDiscord, FaGoogle, FaQuestion, FaTrash } from 'react-icons/fa';
 import { toRelativeDate } from '../uiHelper';

@@ -19,12 +19,17 @@ function AuthButton({
   return (
     <button
       className="btn btn-outline font-thin text-lg w-full"
-      onClick={() => {
+      onClick={async () => {
         onBeforeRedirect?.();
-        api.signInWithOAuth(
+        const successUrl = new URL(window.location.origin);
+        successUrl.searchParams.set('test', 'erf4tg5h64g5rfgtr');
+        const errorUrl = new URL(window.location.origin);
+        errorUrl.pathname = 'auth';
+        errorUrl.searchParams.set('error', 'oauth_failed');
+        await api.signInWithOAuth(
           provider,
-          window.location.origin + '/oauth/callback',
-          window.location.origin
+          successUrl.toString(),
+          errorUrl.toString()
         );
       }}
     >

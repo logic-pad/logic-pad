@@ -37,6 +37,7 @@
     "@use-gesture/react": "^10.3.1",
     "animejs": "^4.1.2",
     "axios": "^1.11.0",
+    "better-auth": "^1.4.18",
     "canvas-size": "^2.0.0",
     "clsx": "^2.1.1",
     "compression-streams-polyfill": "^0.1.7",

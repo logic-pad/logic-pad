@@ -80,12 +80,10 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
                 <div className="opacity-80">
                   Joined {toRelativeDate(new Date(userBrief.createdAt))}
                 </div>
-                {userDetail?.accessedAt && (
-                  <div className="opacity-80">
-                    Last active{' '}
-                    {toRelativeDate(new Date(userDetail.accessedAt), 'day')}
-                  </div>
-                )}
+                <div className="opacity-80">
+                  Last active{' '}
+                  {toRelativeDate(new Date(userBrief.accessedAt), 'day')}
+                </div>
               </div>
             </div>
             {userBrief.id === me?.id && (
@@ -199,7 +197,7 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
             ))}
           </HorizontalScroller>
         )}
-        {me?.labels.includes('moderator') && (
+        {me?.roles.includes('moderator') && (
           <div
             className="tooltip tooltip-error tooltip-left fixed bottom-4 right-4"
             data-tip="Mod view"
