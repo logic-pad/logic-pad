@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { useOnline } from '../contexts/OnlineContext';
-import { useNavigate } from '@tanstack/react-router';
-import deferredRedirect from './deferredRedirect';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
+import storedRedirect from './storedRedirect';
 import toast from 'react-hot-toast';
-import { router } from './router';
 
 export const useRouteProtection = (level: 'online' | 'login' | 'moderator') => {
   const { isOnline, me, isPending } = useOnline();
   const navigate = useNavigate();
+  const location = useRouterState({ select: s => s.location });
   useEffect(() => {
     if (isPending) return;
     if (level === 'online' && !isOnline) {
@@ -19,8 +19,11 @@ export const useRouteProtection = (level: 'online' | 'login' | 'moderator') => {
     ) {
       if (isOnline) {
         toast.error('You have to log in to access this page');
-        void deferredRedirect.setAndNavigate(router.state.location, {
+        void navigate({
           to: '/auth',
+          search: {
+            redirect: storedRedirect.set(location),
+          },
           replace: true,
         });
       } else {

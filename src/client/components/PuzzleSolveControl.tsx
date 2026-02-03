@@ -2,7 +2,7 @@ import { useOnline } from '../contexts/OnlineContext.tsx';
 import { PiSignInBold } from 'react-icons/pi';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import deferredRedirect from '../router/deferredRedirect.ts';
+import storedRedirect from '../router/storedRedirect.ts';
 import { useGridState } from '../contexts/GridStateContext.tsx';
 import { State } from '@logic-pad/core/data/primitives';
 import onlineSolveTracker from '../router/onlineSolveTracker.ts';
@@ -18,11 +18,13 @@ import CommentSidebar from '../online/CommentSidebar.tsx';
 import { FaComment } from 'react-icons/fa';
 import { router } from '../router/router';
 import { count } from '../uiHelper.ts';
+import { useNavigate } from '@tanstack/react-router';
 
 const SolveTrackerAnonymous = memo(function SolveTracker() {
   const { isOnline, me } = useOnline();
   const { id } = useOnlinePuzzle();
   const { state } = useGridState();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isOnline || !!me || !id) return;
@@ -48,8 +50,11 @@ const SolveTrackerAnonymous = memo(function SolveTracker() {
           <button
             className="btn btn-sm btn-ghost"
             onClick={async () => {
-              await deferredRedirect.setAndNavigate(router.state.location, {
+              await navigate({
                 to: '/auth',
+                search: {
+                  redirect: storedRedirect.set(router.state.location),
+                },
               });
             }}
           >

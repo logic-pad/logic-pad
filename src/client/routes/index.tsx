@@ -1,18 +1,18 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Suspense, lazy, memo, useEffect, useState } from 'react';
+import { Suspense, lazy, memo, useState } from 'react';
 import QuickAccessBar from '../components/QuickAccessBar';
 import Changelog from '../components/Changelog';
 import Loading from '../components/Loading';
 import PWAPrompt from '../components/PWAPrompt';
 import toast from 'react-hot-toast';
-import deferredRedirect from '../router/deferredRedirect';
 import FrontPageLists from '../online/FrontPageLists';
 import PersonalFrontPageLists from '../online/PersonalFrontPageLists';
 import { useOnline } from '../contexts/OnlineContext';
 import Footer from '../components/Footer';
-import { router } from '../router/router';
 import { api } from '../online/api';
 import NavigationSkip from '../components/NavigationSkip';
+import storedRedirect from '../router/storedRedirect';
+import { router } from '../router/router';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
@@ -75,31 +75,8 @@ const RandomPuzzle = memo(function RandomPuzzle() {
 
 export const Route = createFileRoute('/')({
   component: memo(function Home() {
-    const navigate = useNavigate();
     const { isOnline, me } = useOnline();
-    useEffect(() => {
-      let toastId: string | undefined;
-      void (async () => {
-        // this is likely due to OAuth errors
-        if ('error' in router.state.location.search) {
-          // display a toast and clear the search params
-          toastId = toast.error('An error occurred. Please try again.');
-          if (!(await deferredRedirect.execute())) {
-            void navigate({
-              to: '/',
-              search: {},
-              ignoreBlocker: true,
-            });
-          }
-        }
-      })();
-      return () => {
-        if (toastId) {
-          toast.dismiss(toastId);
-        }
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const navigate = useNavigate();
     return (
       <>
         <main className="flex flex-col gap-4 items-stretch min-h-svh shrink-0">
@@ -181,7 +158,29 @@ export const Route = createFileRoute('/')({
           </div>
           <section className="mt-8 px-8 pb-8 shrink-0 xl:px-32 flex flex-col gap-8 max-w-[calc(320px*4+3rem)] box-content self-center *:shrink-0">
             {isOnline && <FrontPageLists />}
-            {isOnline && me && <PersonalFrontPageLists />}
+            {isOnline &&
+              (me ? (
+                <PersonalFrontPageLists />
+              ) : (
+                <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200/20 rounded-lg">
+                  <span className="text-center text-lg">
+                    Sign in to track your progress and upload your own puzzles
+                  </span>
+                  <button
+                    className="btn btn-accent btn-lg"
+                    onClick={() =>
+                      navigate({
+                        to: '/auth',
+                        search: {
+                          redirect: storedRedirect.set(router.state.location),
+                        },
+                      })
+                    }
+                  >
+                    Sign In / Sign Up
+                  </button>
+                </div>
+              ))}
           </section>
         </main>
         <Footer />

@@ -12,7 +12,9 @@ import { FaDiscord, FaGoogle, FaQuestion, FaTrash } from 'react-icons/fa';
 import { toRelativeDate } from '../uiHelper';
 import AuthProviders from '../online/AuthProviders';
 import { IoSettingsSharp } from 'react-icons/io5';
-import deferredRedirect from '../router/deferredRedirect';
+import storedRedirect from '../router/storedRedirect';
+import { router } from '../router/router';
+import { Account } from '../online/auth';
 
 interface SettingsSectionProps {
   header: ReactNode;
@@ -125,22 +127,24 @@ const ProfileSettings = memo(function ProfileSettings() {
   );
 });
 
-const IdentityEntry = memo(function IdentityEntry({
-  identity,
+const AccountEntry = memo(function AccountEntry({
+  account: account,
 }: {
-  identity: Identity;
+  account: Account;
 }) {
-  const deleteIdentity = useMutation({
-    mutationFn: api.deleteIdentity,
+  const unlinkAccount = useMutation({
+    mutationFn: async () => {
+      await api.unlinkAccount(account.providerId, account.accountId);
+    },
     onError(error) {
       toast.error(error.message);
     },
     onSettled: async () => {
-      await queryClient.refetchQueries({ queryKey: ['user', 'identities'] });
+      await queryClient.refetchQueries({ queryKey: ['user', 'accounts'] });
     },
   });
   const Icon = useMemo(() => {
-    switch (identity.provider) {
+    switch (account.providerId) {
       case 'google':
         return FaGoogle;
       case 'discord':
@@ -148,27 +152,27 @@ const IdentityEntry = memo(function IdentityEntry({
       default:
         return FaQuestion;
     }
-  }, [identity.provider]);
+  }, [account.providerId]);
 
   return (
     <div className="relative">
       <div className="flex gap-2 items-center">
         <span className="badge h-8 p-0 border-0 pe-2">
           <Icon className="h-8 w-8 p-2 rounded-full" />
-          <span className="capitalize">{identity.provider}</span>
+          <span className="capitalize">{account.providerId}</span>
         </span>
-        <span>{identity.email}</span>
+        <span>{account.email}</span>
       </div>
       <div className="opacity-70 mt-1">
-        Created {toRelativeDate(new Date(identity.createdAt))}
+        Created {toRelativeDate(new Date(account.createdAt))}
       </div>
       <div className="divider my-2" />
-      {deleteIdentity.isPending ? (
+      {unlinkAccount.isPending ? (
         <Loading className="w-8 h-8 absolute top-0 right-0" />
       ) : (
         <button
           className="absolute top-0 right-0 btn btn-ghost"
-          onClick={() => deleteIdentity.mutate(identity.id)}
+          onClick={() => unlinkAccount.mutate()}
         >
           <FaTrash />
         </button>
@@ -196,7 +200,10 @@ const AddProviderButton = memo(function AddProviderButton() {
             Add a provider to your account
           </h3>
           <AuthProviders
-            onBeforeRedirect={() => deferredRedirect.set({ to: '/settings' })}
+            onClick={async provider => {
+              const redirectUrl = storedRedirect.set(router.state.location);
+              await api.linkAccount(provider, redirectUrl);
+            }}
           />
         </div>
         <form method="dialog" className="modal-backdrop">
@@ -207,31 +214,28 @@ const AddProviderButton = memo(function AddProviderButton() {
   );
 });
 
-const IdentitiesSettings = memo(function IdentitiesSettings() {
-  const identitiesQuery = useQuery({
-    queryKey: ['user', 'identities'],
-    queryFn: api.listIdentities,
+const AccountsSettings = memo(function AccountsSettings() {
+  const accountsQuery = useQuery({
+    queryKey: ['user', 'accounts'],
+    queryFn: api.listAccounts,
   });
   return (
     <SettingsSection
       header={
         <>
           <span className="text-2xl font-semibold">Providers</span>
-          <div>Identity providers that you use to log in</div>
+          <div>Account providers that you use to log in</div>
         </>
       }
     >
-      {identitiesQuery.isPending ? (
+      {accountsQuery.isPending ? (
         <Loading />
       ) : (
         <>
+          <div>You have linked {accountsQuery.data?.length} accounts</div>
           <div>
-            This account is associated with {identitiesQuery.data?.total}{' '}
-            providers
-          </div>
-          <div>
-            {identitiesQuery.data?.results.map(identity => (
-              <IdentityEntry key={identity.id} identity={identity} />
+            {accountsQuery.data?.map(account => (
+              <AccountEntry key={account.id} account={account} />
             ))}
           </div>
         </>
@@ -252,7 +256,7 @@ export const Route = createLazyFileRoute('/_layout/settings')({
         <div className="divider" />
         <ProfileSettings />
         <div className="divider my-4" />
-        <IdentitiesSettings />
+        <AccountsSettings />
       </ResponsiveLayout>
     );
   }),

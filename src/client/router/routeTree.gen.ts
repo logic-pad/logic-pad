@@ -11,6 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './../routes/__root'
+import { Route as RedirectRouteImport } from './../routes/redirect'
 import { Route as AuthRouteImport } from './../routes/auth'
 import { Route as IndexRouteImport } from './../routes/index'
 import { Route as LayoutUploaderRouteImport } from './../routes/_layout.uploader'
@@ -45,6 +46,11 @@ const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./../routes/_layout.lazy').then((d) => d.Route))
+const RedirectRoute = RedirectRouteImport.update({
+  id: '/redirect',
+  path: '/redirect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -232,6 +238,7 @@ const ModeratorModProfileUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
   '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/my-stuff': typeof LayoutMyStuffRouteWithChildren
@@ -261,6 +268,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
   '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
   '/_layout/color': typeof LayoutColorRoute
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
@@ -321,6 +330,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/redirect'
     | '/color'
     | '/my-follows'
     | '/my-stuff'
@@ -350,6 +360,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/redirect'
     | '/color'
     | '/my-follows'
     | '/privacy-policy'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/redirect'
     | '/_layout'
     | '/_layout/color'
     | '/_layout/my-follows'
@@ -408,6 +420,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  RedirectRoute: typeof RedirectRoute
   LayoutLazyRoute: typeof LayoutLazyRouteWithChildren
   ModeratorModProfileUserIdRoute: typeof ModeratorModProfileUserIdRoute
 }
@@ -419,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof LayoutLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redirect': {
+      id: '/redirect'
+      path: '/redirect'
+      fullPath: '/redirect'
+      preLoaderRoute: typeof RedirectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -694,6 +714,7 @@ const LayoutLazyRouteWithChildren = LayoutLazyRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  RedirectRoute: RedirectRoute,
   LayoutLazyRoute: LayoutLazyRouteWithChildren,
   ModeratorModProfileUserIdRoute: ModeratorModProfileUserIdRoute,
 }

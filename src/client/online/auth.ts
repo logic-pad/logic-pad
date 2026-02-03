@@ -10,34 +10,53 @@ export const authClient = createAuthClient({
       user: {
         role: {
           type: 'string',
-          nullable: false,
+          required: true,
           input: false,
-          default: 'user',
+          defaultValue: 'user',
         },
         banned: {
           type: 'boolean',
-          nullable: false,
+          required: true,
           input: false,
-          default: false,
+          defaultValue: false,
         },
         banReason: {
           type: 'string',
-          nullable: true,
+          required: false,
           input: false,
         },
         banExpires: {
           type: 'date',
-          nullable: true,
+          required: false,
           input: false,
         },
       },
       session: {
         impersonatedBy: {
           type: 'string',
-          nullable: true,
+          required: false,
+          input: false,
+        },
+      },
+      account: {
+        email: {
+          type: 'string',
+          required: false,
           input: false,
         },
       },
     }),
   ],
 });
+
+// Type inference doesn't work for accounts yet, so we define it here
+export type Account = {
+  scopes: string[];
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  providerId: string;
+  accountId: string;
+  email: string | null;
+};

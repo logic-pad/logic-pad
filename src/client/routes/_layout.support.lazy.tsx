@@ -15,7 +15,7 @@ import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import Loading from '../components/Loading';
 import { FaCheckCircle } from 'react-icons/fa';
 import { router } from '../router/router';
-import deferredRedirect from '../router/deferredRedirect';
+import storedRedirect from '../router/storedRedirect';
 
 export const Route = createLazyFileRoute('/_layout/support')({
   component: memo(function RouteComponent() {
@@ -245,8 +245,11 @@ export const Route = createLazyFileRoute('/_layout/support')({
             <button
               className="btn btn-lg btn-primary shrink-0 w-fit"
               onClick={async () => {
-                await deferredRedirect.setAndNavigate(router.state.location, {
+                await navigate({
                   to: '/auth',
+                  search: {
+                    redirect: storedRedirect.set(router.state.location),
+                  },
                 });
               }}
             >

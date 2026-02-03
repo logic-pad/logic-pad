@@ -42,7 +42,7 @@ import {
   PublicPuzzleSearchParams,
 } from './PuzzleSearchQuery';
 import { CollectionSearchParams } from './CollectionSearchQuery';
-import { authClient } from './auth';
+import { Account, authClient } from './auth';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -118,17 +118,54 @@ export const api = {
   },
   signInWithOAuth: async (provider: string, success: string, error: string) => {
     onlineSolveTracker.clearSolveRecords();
-    const data = await authClient.signIn.social({
+    const result = await authClient.signIn.social({
       provider,
       callbackURL: success,
       errorCallbackURL: error,
     });
-    if (!data.data) {
-      throw new Error(
-        'Failed to initiate OAuth sign-in: ' + data.error.message
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to sign in',
+        result.error.status
       );
     }
-    window.location.href = data.data.url!;
+    window.location.href = result.data.url!;
+  },
+  linkAccount: async (provider: string, callbackURL: string) => {
+    const result = await authClient.linkSocial({
+      provider,
+      callbackURL,
+    });
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to link account',
+        result.error.status
+      );
+    }
+    window.location.href = result.data.url!;
+  },
+  listAccounts: async () => {
+    const result = await authClient.listAccounts();
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to list accounts',
+        result.error.status
+      );
+    }
+    return result.data as Account[];
+  },
+  unlinkAccount: async (providerId: string, accountId: string) => {
+    const result = await authClient.unlinkAccount({
+      providerId,
+      accountId,
+    });
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to unlink account',
+        result.error.status
+      );
+    }
+    return result.data;
   },
   getMe: async () => {
     return await axios
