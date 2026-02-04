@@ -167,6 +167,12 @@ export const api = {
     }
     return result.data;
   },
+  logout: async () => {
+    await queryClient.invalidateQueries();
+    onlineSolveTracker.clearSolveRecords();
+    await authClient.signOut();
+    window.location.reload();
+  },
   getMe: async () => {
     return await axios
       .get<MeBrief>('/user/me')
@@ -175,12 +181,6 @@ export const api = {
   },
   updateMe: async (data: Partial<Pick<UserBrief, 'name' | 'description'>>) => {
     return await axios.put<UserBrief>('/user/me', data).catch(() => null);
-  },
-  logout: async () => {
-    await queryClient.invalidateQueries();
-    onlineSolveTracker.clearSolveRecords();
-    await authClient.signOut();
-    window.location.reload();
   },
   getUser: async (userId: string) => {
     return await axios
@@ -661,14 +661,21 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  modUpdateAccountStatus: async (
+  modBanUser: async (
     userId: string,
-    status: boolean,
+    expiresInSeconds: number,
     message: string
   ) => {
     await axios
-      .post(`/moderation/user/${userId}/status`, {
-        status,
+      .post(`/moderation/user/${userId}/ban`, {
+        expiresInSeconds,
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUnbanUser: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/unban`, {
         message,
       })
       .catch(rethrowError);

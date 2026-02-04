@@ -123,33 +123,20 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
                 </div>
               </div>
               <div className="flex flex-wrap gap-4 mt-2">
-                <span>Profile</span>
                 <span className="opacity-80">
                   created {toRelativeDate(new Date(userBrief.createdAt))}
                 </span>
                 <span className="opacity-80">
                   updated {toRelativeDate(new Date(userBrief.updatedAt))}
                 </span>
+                {userAccount?.accessedAt ? (
+                  <div className="opacity-80">
+                    accessed {toRelativeDate(new Date(userAccount.accessedAt))}
+                  </div>
+                ) : (
+                  <div className="skeleton h-5 w-36"></div>
+                )}
               </div>
-              {userAccount ? (
-                <div className="flex flex-wrap gap-4">
-                  <span>Account</span>
-                  <div className="opacity-80">
-                    created {toRelativeDate(new Date(userAccount.createdAt))}
-                  </div>
-                  <div className="opacity-80">
-                    updated {toRelativeDate(new Date(userAccount.updatedAt))}
-                  </div>
-                  {userAccount.accessedAt && (
-                    <div className="opacity-80">
-                      accessed{' '}
-                      {toRelativeDate(new Date(userAccount.accessedAt))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="skeleton h-5 w-96"></div>
-              )}
               <div className="flex-1 flex gap-2 min-w-[320px] mt-2">
                 <span>{userBrief.description}</span>
                 <div
@@ -175,11 +162,7 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
               </div>
             </div>
             <UserRestrictions userId={userId} promptHandle={promptRef} />
-            <UserStatus
-              userId={userId}
-              status={!userAccount?.bannedUntil}
-              promptHandle={promptRef}
-            />
+            <UserStatus account={userAccount} promptHandle={promptRef} />
           </div>
           <div className="divider shrink-0" />
           <div className="flex-1 flex gap-8 justify-start items-stretch overflow-x-auto">

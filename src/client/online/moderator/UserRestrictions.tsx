@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import { cn } from '../../uiHelper';
 import { modPrompt, PromptHandle } from './ModMessagePrompt';
 
+const timezoneString = 'Z' + (new Date().toISOString().split('Z')[1] ?? '');
+
 const RestrictionEntry = memo(function RestrictionEntry({
   label,
   value,
@@ -25,7 +27,11 @@ const RestrictionEntry = memo(function RestrictionEntry({
               type="datetime-local"
               className="input input-xs w-fit max-w-xs"
               value={new Date(value).toISOString().split('Z')[0]}
-              onChange={e => onChange(new Date(e.target.value).toISOString())}
+              onChange={e =>
+                onChange(
+                  new Date(e.target.value + timezoneString).toISOString()
+                )
+              }
             />
             <button
               className="btn btn-xs btn-neutral"
