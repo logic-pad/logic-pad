@@ -37,7 +37,7 @@ export default memo(function AuthProviders({ onClick }: AuthProvidersProps) {
         icon={FaDiscord}
         onClick={() => onClick?.('discord')}
       />
-      <p>More providers coming soon</p>
+      <p>More options coming soon</p>
     </div>
   );
 });

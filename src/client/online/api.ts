@@ -135,6 +135,7 @@ export const api = {
     const result = await authClient.linkSocial({
       provider,
       callbackURL,
+      errorCallbackURL: callbackURL,
     });
     if (!result.data) {
       throw new ApiError(
@@ -179,8 +180,21 @@ export const api = {
       .then(res => res.data)
       .catch(() => null);
   },
-  updateMe: async (data: Partial<Pick<UserBrief, 'name' | 'description'>>) => {
-    return await axios.put<UserBrief>('/user/me', data).catch(() => null);
+  updateMe: async (
+    data: Partial<Pick<MeBrief, 'name' | 'description' | 'email'>>
+  ) => {
+    const result = await axios
+      .put<UserBrief>('/user/me', data)
+      .catch(() => null);
+    if (data.email) {
+      // Invalidate session cache to update email in the session
+      await authClient.getSession({
+        query: {
+          disableCookieCache: true,
+        },
+      });
+    }
+    return result;
   },
   getUser: async (userId: string) => {
     return await axios

@@ -39,6 +39,7 @@ export interface UserBrief extends ResourceResponse {
 export interface MeBrief extends UserBrief {
   supporterUntil: string | null;
   roles: string[];
+  email: string;
 }
 
 export interface PuzzleBrief extends ResourceResponse {
