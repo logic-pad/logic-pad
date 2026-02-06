@@ -205,7 +205,6 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
             <FaChevronDown aria-label="Ascending" />
           )}
         </button>
-        <div className="flex-1" />
         <div>
           {collectionBrief.autoPopulate
             ? 'Automatic collection'
