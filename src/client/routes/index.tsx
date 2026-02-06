@@ -75,7 +75,7 @@ const RandomPuzzle = memo(function RandomPuzzle() {
 
 export const Route = createFileRoute('/')({
   component: memo(function Home() {
-    const { isOnline, me } = useOnline();
+    const { isOnline, me, isPending } = useOnline();
     const navigate = useNavigate();
     return (
       <>
@@ -162,24 +162,26 @@ export const Route = createFileRoute('/')({
               (me ? (
                 <PersonalFrontPageLists />
               ) : (
-                <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200/20 rounded-lg">
-                  <span className="text-center text-lg">
-                    Sign in to track your progress and upload your own puzzles
-                  </span>
-                  <button
-                    className="btn btn-accent btn-lg"
-                    onClick={() =>
-                      navigate({
-                        to: '/auth',
-                        search: {
-                          redirect: storedRedirect.set(router.state.location),
-                        },
-                      })
-                    }
-                  >
-                    Sign In / Sign Up
-                  </button>
-                </div>
+                !isPending && (
+                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200/20 rounded-lg">
+                    <span className="text-center text-lg">
+                      Sign in to track your progress and upload your own puzzles
+                    </span>
+                    <button
+                      className="btn btn-accent btn-lg"
+                      onClick={() =>
+                        navigate({
+                          to: '/auth',
+                          search: {
+                            redirect: storedRedirect.set(router.state.location),
+                          },
+                        })
+                      }
+                    >
+                      Sign In / Sign Up
+                    </button>
+                  </div>
+                )
               ))}
           </section>
         </main>
