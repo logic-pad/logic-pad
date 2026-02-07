@@ -153,7 +153,7 @@ export default memo(function MainGrid({
     >
       {allowSounds && (
         <Suspense fallback={null}>
-          <GridSounds />
+          <GridSounds allowAnimation={allowAnimation} />
         </Suspense>
       )}
       <Grid

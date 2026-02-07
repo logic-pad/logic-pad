@@ -12,7 +12,11 @@ const sfx = {
   remove: new Tone.Player('/samples/sfx_remove.mp3').toDestination(),
 };
 
-export default memo(function GridSounds() {
+export interface GridSoundsProps {
+  allowAnimation?: boolean;
+}
+
+export default memo(function GridSounds({ allowAnimation }: GridSoundsProps) {
   const { grid } = useGrid();
   const { state } = useGridState();
   const previousGrid = useRef<GridData | null>(null);
@@ -60,12 +64,12 @@ export default memo(function GridSounds() {
     previousGrid.current = grid;
   }, [grid, sfxVolume]);
   useEffect(() => {
-    if (sfxVolume > 0 && State.isSatisfied(state.final)) {
+    if (sfxVolume > 0 && State.isSatisfied(state.final) && allowAnimation) {
       if (sfx.complete.loaded) {
         sfx.complete.stop();
         sfx.complete.start();
       }
     }
-  }, [state.final, sfxVolume]);
+  }, [state.final, sfxVolume, allowAnimation]);
   return null;
 });
