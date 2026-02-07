@@ -73,6 +73,8 @@ const RandomPuzzle = memo(function RandomPuzzle() {
   );
 });
 
+const ServerNote = lazy(() => import('../components/ServerNote'));
+
 export const Route = createFileRoute('/')({
   component: memo(function Home() {
     const { isOnline, me, isPending } = useOnline();
@@ -151,6 +153,7 @@ export const Route = createFileRoute('/')({
                       </div>
                     </div>
                   )}
+                  <ServerNote />
                   <Changelog />
                 </div>
               </div>

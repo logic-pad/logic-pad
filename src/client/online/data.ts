@@ -2,6 +2,14 @@
 
 import { PuzzleType } from '@logic-pad/core/data/primitives';
 
+export type HighlightColor =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'error';
+
 export enum ResourceStatus {
   Private = 'private',
   Public = 'public',
@@ -124,9 +132,29 @@ export interface PuzzleFull extends PuzzleBrief {
   series: CollectionBrief | null;
 }
 
+export interface FrontPageSection<T extends PuzzleBrief | CollectionBrief> {
+  type: 'puzzles' | 'collections';
+  title: string;
+  description: string | null;
+  highlight: HighlightColor | null;
+  link: string | null;
+  items: T[];
+}
+
+export interface PuzzlesSection extends FrontPageSection<PuzzleBrief> {
+  type: 'puzzles';
+}
+
+export interface CollectionsSection extends FrontPageSection<CollectionBrief> {
+  type: 'collections';
+}
+
 export interface FrontPage {
-  newestPuzzles: PuzzleBrief[];
-  newestCollections: CollectionBrief[];
+  note: {
+    content: string;
+    highlight: HighlightColor;
+  } | null;
+  sections: (PuzzlesSection | CollectionsSection)[];
 }
 
 export interface ListResponse<T> {

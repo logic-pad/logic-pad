@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import toast from 'react-hot-toast';
 import { extendTailwindMerge } from 'tailwind-merge';
+import { HighlightColor } from './online/data';
 
 const twMerge = extendTailwindMerge({
   extend: {
@@ -9,6 +10,25 @@ const twMerge = extendTailwindMerge({
     },
   },
 });
+
+export function getHighlightColor(highlight?: HighlightColor) {
+  switch (highlight) {
+    case 'primary':
+      return 'bg-primary/5 border-primary outline-primary shadow-primary';
+    case 'secondary':
+      return 'bg-secondary/5 border-secondary outline-secondary shadow-secondary';
+    case 'accent':
+      return 'bg-accent/5 border-accent outline-accent shadow-accent';
+    case 'info':
+      return 'bg-info/5 border-info outline-info shadow-info';
+    case 'success':
+      return 'bg-success/5 border-success outline-success shadow-success';
+    case 'error':
+      return 'bg-error/5 border-error outline-error shadow-error';
+    default:
+      return '';
+  }
+}
 
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en');
 
