@@ -1,3 +1,15 @@
+# PREVIEW BRANCH
+
+- Dynamic front page layout
+- Less restrictive server limits
+  - Max collection size 250 -> infinite
+  - Followed collections 250 -> infinite
+- "I'm feeling lucky" no longer picks puzzles that you have solved before
+- Authentication
+  - Authentication is how handled first-party by Logic Pad instead of relying on Appwrite
+  - You can now change your primary email
+- Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+
 # 14/1/2026
 
 - Fixed "I'm feeling lucky" button not working
