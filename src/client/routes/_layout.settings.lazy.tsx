@@ -15,6 +15,7 @@ import { IoSettingsSharp } from 'react-icons/io5';
 import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
 import { Account } from '../online/auth';
+import { FaXTwitter } from 'react-icons/fa6';
 
 interface SettingsSectionProps {
   header: ReactNode;
@@ -149,6 +150,8 @@ const AccountEntry = memo(function AccountEntry({
         return FaGoogle;
       case 'discord':
         return FaDiscord;
+      case 'twitter':
+        return FaXTwitter;
       default:
         return FaQuestion;
     }

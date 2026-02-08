@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { IconType } from 'react-icons';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 interface AuthButtonProps {
   label: string;
@@ -37,7 +38,11 @@ export default memo(function AuthProviders({ onClick }: AuthProvidersProps) {
         icon={FaDiscord}
         onClick={() => onClick?.('discord')}
       />
-      <p>More options coming soon</p>
+      <AuthButton
+        label="Continue with X"
+        icon={FaXTwitter}
+        onClick={() => onClick?.('twitter')}
+      />
     </div>
   );
 });
