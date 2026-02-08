@@ -1,4 +1,5 @@
 import type { NavigateOptions } from '@tanstack/react-router';
+import { router } from './router';
 
 class StoredRedirect {
   set(location: NavigateOptions): string {
@@ -17,7 +18,6 @@ class StoredRedirect {
     if (!serialized) return false;
     const location = JSON.parse(serialized) as NavigateOptions;
     try {
-      const { router } = await import('./router');
       await router.navigate(location);
       return true;
     } catch {

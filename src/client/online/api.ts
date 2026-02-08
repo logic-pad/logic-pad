@@ -43,7 +43,6 @@ import {
 } from './PuzzleSearchQuery';
 import { CollectionSearchParams } from './CollectionSearchQuery';
 import { Account, authClient } from './auth';
-import storedRedirect from '../router/storedRedirect';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -171,7 +170,6 @@ export const api = {
   },
   logout: async () => {
     await queryClient.invalidateQueries();
-    storedRedirect.clear();
     onlineSolveTracker.clearSolveRecords();
     await authClient.signOut();
     window.location.reload();

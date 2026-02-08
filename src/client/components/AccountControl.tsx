@@ -138,6 +138,7 @@ export default memo(function AccountControl() {
           <a
             role="menuitem"
             onClick={async () => {
+              storedRedirect.clear();
               await api.logout();
               await refresh();
               detailsRef.current!.open = false;
