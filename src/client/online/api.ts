@@ -1,7 +1,7 @@
 import * as rax from 'retry-axios';
 import axiosStatic, { AxiosError } from 'axios';
 import {
-  Completion,
+  SolveSession,
   PuzzleBrief,
   PuzzleFull,
   PuzzleLove,
@@ -289,38 +289,38 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionBegin: async (puzzleId: string) => {
+  solveSessionBegin: async (puzzleId: string) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/begin`)
+      .post<SolveSession>(`/session/${puzzleId}/begin`)
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionSolvingBeacon: (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolvingBeacon: (puzzleId: string, msTimeElapsed: number) => {
     const headers = {
       type: 'application/json',
     };
     const blob = new Blob([JSON.stringify({ msTimeElapsed })], headers);
     return navigator.sendBeacon(
       (import.meta.env?.VITE_API_ENDPOINT as string) +
-        `/completion/${puzzleId}/solving`,
+        `/session/${puzzleId}/solving`,
       blob
     );
   },
-  completionSolving: async (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolving: async (puzzleId: string, msTimeElapsed: number) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/solving`, { msTimeElapsed })
+      .post<SolveSession>(`/session/${puzzleId}/solving`, { msTimeElapsed })
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionComplete: async (puzzleId: string) => {
+  solveSessionComplete: async (puzzleId: string) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/complete`, undefined, {})
+      .post<SolveSession>(`/session/${puzzleId}/complete`, undefined, {})
       .then(res => res.data)
       .catch(rethrowError);
   },
   ratePuzzle: async (puzzleId: string, rating: number) => {
     return await axios
-      .put<{ id: string }>(`/completion/${puzzleId}/rate`, { rating })
+      .put<{ id: string }>(`/session/${puzzleId}/rate`, { rating })
       .then(res => res.data)
       .catch(rethrowError);
   },

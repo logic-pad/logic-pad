@@ -187,9 +187,9 @@ const PuzzleCompleted = memo(function PuzzleCompleted({
 const SolveTrackerSignedIn = memo(function SolveTracker() {
   const { isOnline, me } = useOnline();
   const { id } = useOnlinePuzzle();
-  const completionBegin = useQuery({
-    queryKey: ['completion', 'begin', id],
-    queryFn: () => api.completionBegin(id!),
+  const solveSessionBegin = useQuery({
+    queryKey: ['solveSession', 'begin', id],
+    queryFn: () => api.solveSessionBegin(id!),
     enabled: isOnline && !!me && !!id,
   });
 
@@ -240,7 +240,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
 
   if (!isOnline || !me || !id) return null;
 
-  if (completionBegin.isPending) {
+  if (solveSessionBegin.isPending) {
     return (
       <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between">
         <Loading />
@@ -248,7 +248,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
     );
   }
 
-  if (!completionBegin.data!.solvedAt && !State.isSatisfied(state.final)) {
+  if (!solveSessionBegin.data!.solvedAt && !State.isSatisfied(state.final)) {
     return (
       <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between">
         Unsolved puzzle
@@ -274,7 +274,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
 
   return (
     <PuzzleCompleted
-      initialRating={completionBegin.data!.ratedDifficulty ?? 0}
+      initialRating={solveSessionBegin.data!.ratedDifficulty ?? 0}
       openComments={openComments}
       setOpenComments={setOpenComments}
     />

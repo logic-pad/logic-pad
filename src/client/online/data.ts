@@ -84,7 +84,7 @@ export interface Comment extends ResourceResponse {
   content: string;
 }
 
-export interface Completion extends ResourceResponse {
+export interface SolveSession extends ResourceResponse {
   ratedDifficulty: number | null;
   solvedAt: string | null;
   msTimeUsed: number;

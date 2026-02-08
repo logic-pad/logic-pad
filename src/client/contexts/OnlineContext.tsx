@@ -10,7 +10,7 @@ import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
 
 const defaultOnline = true;
-const apiVersionRange = '19.x';
+const apiVersionRange = '20.x';
 
 export interface OnlineContext {
   /**

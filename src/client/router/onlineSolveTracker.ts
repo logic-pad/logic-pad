@@ -14,14 +14,14 @@ class OnlineSolveTracker {
     sessionStorage.setItem('alreadySolved', JSON.stringify(alreadySolved));
 
     if (msTimeElapsed !== undefined)
-      await api.completionSolving(puzzleId, msTimeElapsed);
-    await api.completionComplete(puzzleId);
+      await api.solveSessionSolving(puzzleId, msTimeElapsed);
+    await api.solveSessionComplete(puzzleId);
     return true;
   }
 
   sendSolving(puzzleId: string, msTimeElapsed: number) {
     if (!this.isSolved(puzzleId))
-      api.completionSolvingBeacon(puzzleId, msTimeElapsed);
+      api.solveSessionSolvingBeacon(puzzleId, msTimeElapsed);
   }
 
   isSolved(puzzleId: string) {
