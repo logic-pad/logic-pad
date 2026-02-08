@@ -27,8 +27,8 @@ export default memo(function HorizontalScroller({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 px-8 py-4 -mx-8 -my-4',
-        highlight && 'mb-8 outline-2 rounded-lg shadow-glow-xl',
+        'flex flex-col gap-2 px-8 py-4 -mx-8 -my-4 mb-6',
+        highlight && 'outline-2 rounded-lg shadow-glow-xl',
         getHighlightColor(highlight)
       )}
     >

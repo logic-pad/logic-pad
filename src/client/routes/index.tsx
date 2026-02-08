@@ -53,7 +53,7 @@ const RandomPuzzle = memo(function RandomPuzzle() {
 
   return (
     <button
-      className="btn btn-ghost h-fit py-1 md:py-2 bg-base-100/10"
+      className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
       onClick={async () => {
         setLoading(true);
         try {
@@ -96,10 +96,7 @@ export const Route = createFileRoute('/')({
               <div className="flex flex-wrap shrink-0 grow-0 justify-center gap-8">
                 <div className="relative w-32 h-32 inline-block">
                   <div className="absolute w-0 h-0 top-1/2 left-1/2 logo-glow fade-in-slow"></div>
-                  <div
-                    className="absolute inset-0 w-fit h-fit tooltip tooltip-bottom"
-                    data-tip="Merry Christmas!"
-                  >
+                  <div className="absolute inset-0 w-fit h-fit tooltip tooltip-bottom">
                     <img src="/logo.svg" alt="Logic Pad logo" />
                   </div>
                 </div>
@@ -119,21 +116,21 @@ export const Route = createFileRoute('/')({
                       <Link
                         type="button"
                         to="/create"
-                        className="btn btn-md h-fit py-1 md:btn-lg md:py-4 md:px-6 btn-accent"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent"
                       >
                         Create new puzzle
                       </Link>
                       <Link
                         type="button"
                         to="/search"
-                        className="btn btn-md h-fit py-1 md:btn-lg md:py-4 md:px-6 btn-accent btn-outline"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent btn-outline"
                       >
                         Explore puzzles
                       </Link>
                       <Link
                         type="button"
                         to="/uploader"
-                        className="btn btn-ghost h-fit py-1 md:py-2 bg-base-100/10"
+                        className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
                       >
                         Bulk-import puzzles
                       </Link>
@@ -144,7 +141,7 @@ export const Route = createFileRoute('/')({
                       <Link
                         type="button"
                         to="/create"
-                        className="btn btn-md h-fit py-1 md:btn-lg md:py-4 md:px-6 btn-accent"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent"
                       >
                         Create new puzzle
                       </Link>

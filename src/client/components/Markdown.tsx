@@ -174,7 +174,7 @@ const MarkdownAsync = lazy(async () => {
 
 export default memo(function Markdown(props: MarkdownProps) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<Loading className="h-5 w-20" />}>
       <MarkdownAsync {...props} />
     </Suspense>
   );

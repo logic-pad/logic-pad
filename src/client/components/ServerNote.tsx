@@ -15,11 +15,11 @@ export default memo(function Changelog() {
     <div
       className={cn(
         'w-full mt-8 px-6 py-4 shrink-0 flex flex-col items-stretch',
-        'border-y rounded-lg',
+        'border-y rounded-field',
         getHighlightColor(data.note.highlight)
       )}
     >
-      <Markdown className="prose-sm prose-h1:text-lg text-neutral-content">
+      <Markdown className="prose-sm prose-h1:text-lg text-neutral-content text-wrap whitespace-normal">
         {data.note.content}
       </Markdown>
     </div>
