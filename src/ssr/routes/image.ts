@@ -130,6 +130,9 @@ function drawPuzzleType(
   y: number,
   size: number
 ) {
+  if (puzzleTypes.includes(PuzzleType.Underclued)) {
+    puzzleTypes = puzzleTypes.filter(type => type !== PuzzleType.Logic);
+  }
   if (puzzleTypes.length === 0) return;
   else if (puzzleTypes.length === 1) {
     drawIcon(PUZZLE_ICONS[puzzleTypes[0]], ctx, x, y, size);
