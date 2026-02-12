@@ -16,6 +16,7 @@ export const Route = createLazyFileRoute('/_layout/create/$puzzleId')({
       puzzleEditQueryOptions(Route.useParams().puzzleId)
     );
     const result = useOnlineLinkLoader('create-online', data, {
+      disableCache: true,
       solutionHandling: SolutionHandling.LoadVisible,
     });
 

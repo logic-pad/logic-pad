@@ -15,6 +15,10 @@ interface OnlineLinkLoaderResult {
 
 interface OnlineLinkLoaderParams {
   /**
+   * Disables caching of the decoded puzzle
+   */
+  disableCache?: boolean;
+  /**
    * Specifies how the solution should be loaded.
    */
   solutionHandling?: SolutionHandling;
@@ -28,6 +32,7 @@ export default function useOnlineLinkLoader(
   id: string,
   puzzle: PuzzleFull,
   {
+    disableCache = false,
     solutionHandling: solutionBehavior = SolutionHandling.LoadHidden,
     modifyPuzzle = puzzle => puzzle,
   }: OnlineLinkLoaderParams = {}
@@ -85,6 +90,8 @@ export default function useOnlineLinkLoader(
         initialPuzzle,
       };
     },
+    gcTime: disableCache ? 0 : undefined,
+    staleTime: disableCache ? 0 : undefined,
   });
   return result.data;
 }
