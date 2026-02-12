@@ -1,15 +1,20 @@
 # PREVIEW BRANCH
 
 - Dynamic front page layout
+- The puzzle editor now auto-saves your progress every minute, or every 5 seconds for supporters
 - Less restrictive server limits
   - Max collection size 250 -> infinite
   - Followed collections 250 -> infinite
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
 - Authentication
   - Added support for signing in with X
-  - Authentication is how handled first-party by Logic Pad instead of relying on Appwrite
+  - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
   - You can now change your primary email
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+- Fixed errors when switching between puzzle and collection search with filters enabled
+- Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
+- Puzzle completion SFX no longer plays in the editor
+- Fixed small issues with link preview rendering
 
 # 14/1/2026
 
