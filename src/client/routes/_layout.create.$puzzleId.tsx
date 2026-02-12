@@ -7,8 +7,8 @@ export const puzzleEditQueryOptions = (puzzleId: string | null) =>
   queryOptions({
     queryKey: ['puzzle', 'edit', puzzleId],
     queryFn: () => api.getPuzzleFullForEdit(puzzleId!),
-    gcTime: 0,
-    staleTime: 0,
+    gcTime: 1000,
+    staleTime: 1000,
     enabled: !!puzzleId,
   });
 

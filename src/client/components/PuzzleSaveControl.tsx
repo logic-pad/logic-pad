@@ -2,7 +2,7 @@ import { useOnline } from '../contexts/OnlineContext';
 import { PiSignInBold } from 'react-icons/pi';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
 import { FaCloudUploadAlt, FaLink, FaSave } from 'react-icons/fa';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGrid } from '../contexts/GridContext.tsx';
 import { cn, safeClipboard } from '../uiHelper.ts';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
@@ -12,6 +12,10 @@ import { api, queryClient } from '../online/api.ts';
 import toast from 'react-hot-toast';
 import Loading from './Loading.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
+import debounce from 'lodash/debounce';
+import { PuzzleMetadata } from '@logic-pad/core/data/puzzle';
+import GridData from '@logic-pad/core/data/grid';
+import DynamicRelativeTime from './DynamicRelativeTime.tsx';
 
 const CopyLink = memo(function CopyLink() {
   const { grid, solution, metadata } = useGrid();
@@ -87,58 +91,85 @@ const CopyLink = memo(function CopyLink() {
   );
 });
 
-const SavePuzzle = memo(function SavePuzzle() {
+const SavePuzzle = memo(function SavePuzzle({
+  debounceDelay,
+}: {
+  debounceDelay: number;
+}) {
   const { id, setLastSaved } = useOnlinePuzzle();
   const { metadata, grid } = useGrid();
-  const [lastSavedTime, setLastSavedTime] = useState<Date>(new Date());
-  const savePuzzle = useMutation({
+  const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
+  const { isPending, mutate } = useMutation({
     mutationFn: (data: Parameters<typeof api.savePuzzle>) => {
       return api.savePuzzle(...data);
     },
     onError(error) {
       toast.error(error.message);
     },
-    async onSuccess() {
+    onSuccess() {
       setLastSavedTime(new Date());
       setLastSaved({
         ...metadata,
         grid,
         solution: null,
       });
-      await queryClient.invalidateQueries({
+      queryClient.removeQueries({
         queryKey: ['puzzle', 'edit', id],
       });
     },
   });
-  const save = async () => {
-    const data = await Compressor.compress(Serializer.stringifyGrid(grid));
-    savePuzzle.mutate([
-      id!,
-      metadata.title,
-      metadata.description,
-      metadata.difficulty,
-      data,
-    ]);
-  };
-  useHotkeys('ctrl+s', save, {
+  const save = useCallback(
+    async (grid: GridData, metadata: PuzzleMetadata) => {
+      const data = await Compressor.compress(Serializer.stringifyGrid(grid));
+      mutate([
+        id!,
+        metadata.title,
+        metadata.description,
+        metadata.difficulty,
+        data,
+      ]);
+    },
+    [id, mutate]
+  );
+  const debouncedSave = useMemo(
+    () => debounce(save, debounceDelay, { leading: false, trailing: true }),
+    [save, debounceDelay]
+  );
+  useHotkeys('ctrl+s', () => save(grid, metadata), {
     preventDefault: true,
     enabled: !!id,
     useKey: true,
   });
+  useEffect(() => {
+    if (lastSavedTime === null) {
+      setLastSavedTime(new Date());
+      return;
+    }
+    void debouncedSave(grid, metadata);
+  }, [grid, metadata, debouncedSave, lastSavedTime]);
 
   return (
-    <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
-      {`Last saved ${lastSavedTime.toLocaleTimeString()}`}
+    <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between tour-upload">
+      {lastSavedTime ? (
+        <>
+          Last saved <DynamicRelativeTime time={lastSavedTime} />
+        </>
+      ) : (
+        <>Saved</>
+      )}
       <div className="flex items-center gap-2">
         <CopyLink />
         <div
           className="tooltip tooltip-left tooltip-info"
           data-tip="Save (Ctrl+S)"
         >
-          {savePuzzle.isPending ? (
+          {isPending ? (
             <Loading className="h-8 w-12 px-3" />
           ) : (
-            <button className="btn btn-sm btn-ghost" onClick={save}>
+            <button
+              className="btn btn-sm btn-ghost"
+              onClick={() => save(grid, metadata)}
+            >
               <FaSave size={22} />
             </button>
           )}
@@ -201,5 +232,5 @@ export default memo(function PuzzleSaveControl({
     );
   }
 
-  return <SavePuzzle />;
+  return <SavePuzzle debounceDelay={me.supporter > 0 ? 5000 : 60000} />;
 });

@@ -34,20 +34,20 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat('en');
 
 export function toRelativeDate(
   date: Date,
-  accuracy: 'second' | 'day' = 'second'
+  accuracy: 'second' | 'day' | 'exact' = 'second'
 ) {
   const msOffset = date.getTime() - Date.now();
   const absOffset = Math.abs(msOffset);
   if (absOffset < 10 * 1000 && accuracy === 'second') {
     return msOffset < 0 ? 'a few seconds ago' : 'in a few seconds';
-  } else if (absOffset < 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(Math.round(msOffset / 1000), 'second');
-  } else if (absOffset < 60 * 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 60 * 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(
       Math.round(msOffset / 1000 / 60),
       'minute'
     );
-  } else if (absOffset < 24 * 60 * 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 24 * 60 * 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(
       Math.round(msOffset / 1000 / 60 / 60),
       'hour'
