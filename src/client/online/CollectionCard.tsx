@@ -57,7 +57,7 @@ export default memo(function CollectionCard({
                 ? 'Untitled Collection'
                 : collection.title}
             </h2>
-            <div className="badge badge-neutral bg-neutral/40 badge-md mt-1">
+            <div className="badge badge-neutral bg-neutral/40 badge-md mt-1 gap-0">
               {collection.creator.name}
               <SupporterBadge supporter={collection.creator.supporter} />
             </div>

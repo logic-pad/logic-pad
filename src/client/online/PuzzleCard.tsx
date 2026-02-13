@@ -201,7 +201,7 @@ export default memo(function PuzzleCard({
             )}{' '}
             {puzzle.title.length === 0 ? 'Untitled Puzzle' : puzzle.title}
           </h2>
-          <div className="badge badge-neutral bg-neutral/20 text-base-content badge-md mt-1">
+          <div className="badge badge-neutral bg-neutral/20 text-base-content badge-md mt-1 gap-0">
             {puzzle.creator.name}
             <SupporterBadge supporter={puzzle.creator.supporter} />
           </div>
