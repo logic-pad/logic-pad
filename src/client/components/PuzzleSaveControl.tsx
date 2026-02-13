@@ -132,7 +132,12 @@ const SavePuzzle = memo(function SavePuzzle({
     [id, mutate]
   );
   const debouncedSave = useMemo(
-    () => debounce(save, debounceDelay, { leading: false, trailing: true }),
+    () =>
+      debounce(save, 10000, {
+        leading: false,
+        trailing: true,
+        maxWait: debounceDelay,
+      }),
     [save, debounceDelay]
   );
   useHotkeys('ctrl+s', () => save(grid, metadata), {
@@ -146,7 +151,8 @@ const SavePuzzle = memo(function SavePuzzle({
       return;
     }
     void debouncedSave(grid, metadata);
-  }, [grid, metadata, debouncedSave, lastSavedTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grid, metadata, debouncedSave]);
 
   return (
     <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between tour-upload">
@@ -232,5 +238,5 @@ export default memo(function PuzzleSaveControl({
     );
   }
 
-  return <SavePuzzle debounceDelay={me.supporter > 0 ? 5000 : 60000} />;
+  return <SavePuzzle debounceDelay={me.supporter > 0 ? 10000 : 60000} />;
 });
