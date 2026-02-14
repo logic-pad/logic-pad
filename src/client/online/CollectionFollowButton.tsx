@@ -65,7 +65,7 @@ export default memo(function CollectionFollowButton({
   });
 
   if (!isOnline || !me || collectionFollow.error) return null;
-  if (collectionFollow.isPending) return <Skeleton className="h-12 w-28" />;
+  if (collectionFollow.isPending) return <Skeleton className="h-10 w-28" />;
   return (
     <button
       className="tooltip tooltip-info tooltip-top btn btn-md btn-primary flex items-center w-fit focus:z-50"

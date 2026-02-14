@@ -43,7 +43,6 @@ import toast from 'react-hot-toast';
 import { useOnline } from '../contexts/OnlineContext';
 import EditableField from '../components/EditableField';
 import AddPuzzlesModal from '../online/AddPuzzlesModal';
-import { BiSolidSelectMultiple } from 'react-icons/bi';
 import {
   DndContext,
   closestCenter,
@@ -60,7 +59,7 @@ import {
 import Avatar from '../online/Avatar';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import Skeleton from '../components/Skeleton';
-import { TbLayoutGrid } from 'react-icons/tb';
+import { TbLayoutGrid, TbReorder } from 'react-icons/tb';
 
 const updateCollectionOptions = (collectionId: string) =>
   mutationOptions({
@@ -215,7 +214,7 @@ const CollectionControls = memo(function CollectionControls({
   collectionBrief: CollectionBrief;
 }) {
   const { me } = useOnline();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: '/collection/$collectionId' });
   const { isPending: isPendingUpdate, mutateAsync: updateCollection } =
     useMutation(updateCollectionOptions(collectionBrief.id));
   const { isPending: isPendingDelete, mutateAsync: deleteCollection } =
@@ -378,59 +377,64 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
   useEffect(() => {
     setPuzzleList(puzzles.pages.flatMap(p => p.results));
   }, [puzzles]);
-  const reorderCollection = useMutation({
-    mutationKey: ['collection', collectionBrief.id, 'reorder'],
-    mutationFn: (variables: Parameters<typeof api.reorderCollection>) => {
-      return api.reorderCollection(...variables);
-    },
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: ['collection', collectionBrief.id, 'puzzles'],
-      });
-    },
-    onError(error) {
-      toast.error(error.message);
-      setPuzzleList(puzzles.pages.flatMap(p => p.results));
-    },
-    async onSettled() {
-      if (
-        queryClient.isMutating({
-          mutationKey: ['collection', collectionBrief.id, 'reorder'],
-        }) === 1
-      )
-        await queryClient.invalidateQueries({
+  const { isPending: isPendingReorder, mutate: reorderCollection } =
+    useMutation({
+      mutationKey: ['collection', collectionBrief.id, 'reorder'],
+      mutationFn: (variables: Parameters<typeof api.reorderCollection>) => {
+        return api.reorderCollection(...variables);
+      },
+      onMutate: async () => {
+        await queryClient.cancelQueries({
           queryKey: ['collection', collectionBrief.id, 'puzzles'],
         });
-    },
-  });
-  const addToCollection = useMutation({
-    mutationFn: (variables: Parameters<typeof api.addToCollection>) => {
-      return api.addToCollection(...variables);
-    },
-    onError(error) {
-      toast.error(error.message);
-    },
-    async onSuccess() {
-      await queryClient.invalidateQueries({
-        queryKey: ['collection', collectionBrief.id],
-      });
-    },
-  });
-  const removeFromCollection = useMutation({
-    mutationFn: (variables: Parameters<typeof api.removeFromCollection>) => {
-      return api.removeFromCollection(...variables);
-    },
-    onError(error) {
-      toast.error(error.message);
-    },
-    async onSuccess() {
-      await queryClient.invalidateQueries({
-        queryKey: ['collection', collectionBrief.id],
-      });
-    },
-  });
+      },
+      onError(error) {
+        toast.error(error.message);
+        setPuzzleList(puzzles.pages.flatMap(p => p.results));
+      },
+      async onSettled() {
+        if (
+          queryClient.isMutating({
+            mutationKey: ['collection', collectionBrief.id, 'reorder'],
+          }) === 1
+        )
+          await queryClient.invalidateQueries({
+            queryKey: ['collection', collectionBrief.id, 'puzzles'],
+          });
+      },
+    });
+  const { isPending: isPendingAdd, mutateAsync: addToCollection } = useMutation(
+    {
+      mutationFn: (variables: Parameters<typeof api.addToCollection>) => {
+        return api.addToCollection(...variables);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+      async onSuccess() {
+        await queryClient.invalidateQueries({
+          queryKey: ['collection', collectionBrief.id],
+        });
+      },
+    }
+  );
+  const { isPending: isPendingRemove, mutateAsync: removeFromCollection } =
+    useMutation({
+      mutationFn: (variables: Parameters<typeof api.removeFromCollection>) => {
+        return api.removeFromCollection(...variables);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+      async onSuccess() {
+        await queryClient.invalidateQueries({
+          queryKey: ['collection', collectionBrief.id],
+        });
+      },
+    });
   const addPuzzlesModalRef = useRef<{ open: () => void }>(null);
-  const [selectedPuzzles, setSelectedPuzzles] = useState<string[] | null>(null);
+  const [editMode, setEditMode] = useState<'reorder' | 'delete' | null>(null);
+  const [selectedPuzzles, setSelectedPuzzles] = useState<string[]>([]);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -441,42 +445,43 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-  const draggableWrapper = editable
-    ? (children: ReactNode) => (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={({ active, over }) => {
-            if (over && active.id !== over.id) {
-              const newList = [...puzzleList];
-              const movingIndex = newList.findIndex(p => p.id === active.id);
-              const replacingIndex = newList.findIndex(p => p.id === over.id);
-              if (movingIndex === replacingIndex) {
-                return;
+  const draggableWrapper =
+    editable && editMode === 'reorder'
+      ? (children: ReactNode) => (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={({ active, over }) => {
+              if (over && active.id !== over.id) {
+                const newList = [...puzzleList];
+                const movingIndex = newList.findIndex(p => p.id === active.id);
+                const replacingIndex = newList.findIndex(p => p.id === over.id);
+                if (movingIndex === replacingIndex) {
+                  return;
+                }
+                const [moving] = newList.splice(movingIndex, 1);
+                newList.splice(replacingIndex, 0, moving);
+                setPuzzleList(newList);
+                reorderCollection([
+                  collectionBrief.id,
+                  active.id as string,
+                  over.id as string,
+                ]);
               }
-              const [moving] = newList.splice(movingIndex, 1);
-              newList.splice(replacingIndex, 0, moving);
-              setPuzzleList(newList);
-              reorderCollection.mutate([
-                collectionBrief.id,
-                active.id as string,
-                over.id as string,
-              ]);
-            }
-          }}
-        >
-          <SortableContext items={puzzleList} strategy={rectSortingStrategy}>
-            {children}
-          </SortableContext>
-        </DndContext>
-      )
-    : (children: ReactNode) => children;
+            }}
+          >
+            <SortableContext items={puzzleList} strategy={rectSortingStrategy}>
+              {children}
+            </SortableContext>
+          </DndContext>
+        )
+      : (children: ReactNode) => children;
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <div className="flex gap-4 items-center w-full justify-end shrink-0">
+      <div className="flex gap-4 items-center flex-wrap w-full justify-end shrink-0">
         <button
-          className="btn"
+          className="btn btn-sm"
           onClick={() =>
             navigate({
               search: {
@@ -500,95 +505,127 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
             ? 'Automatic collection'
             : `${collectionBrief.puzzleCount} puzzles`}
         </div>
-        {editable && (
-          <>
-            <div className="flex-1" />
-            <div>
-              {reorderCollection.isPending
-                ? 'Reordering...'
-                : 'Drag and drop to reorder'}
-            </div>
-            {addToCollection.isPending ? (
-              <Loading className="h-12 w-24" />
-            ) : (
+        <div className="flex-1" />
+        {editable &&
+          (editMode === 'reorder' ? (
+            <>
+              <div>
+                {isPendingReorder
+                  ? 'Reordering...'
+                  : 'Drag and drop to reorder'}
+              </div>
+              {isPendingReorder ? (
+                <Loading className="h-10 w-24" />
+              ) : (
+                <button
+                  className="btn btn-sm"
+                  onClick={() => setEditMode(null)}
+                >
+                  Done
+                </button>
+              )}
+            </>
+          ) : editMode === 'delete' ? (
+            <>
+              <div>Select puzzles to be removed</div>
+              {isPendingRemove ? (
+                <Loading className="h-10 w-24" />
+              ) : (
+                <>
+                  <button
+                    className={cn(
+                      'btn btn-sm',
+                      selectedPuzzles.length > 0 ? 'btn-error' : 'btn-disabled'
+                    )}
+                    onClick={async () => {
+                      if (selectedPuzzles.length > 0) {
+                        await removeFromCollection([
+                          collectionBrief.id,
+                          selectedPuzzles,
+                        ]);
+                      }
+                      setSelectedPuzzles([]);
+                      setEditMode(null);
+                    }}
+                  >
+                    <FaTrash size={16} />
+                    Remove selected
+                  </button>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => {
+                      setSelectedPuzzles([]);
+                      setEditMode(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {isPendingAdd ? (
+                <Loading className="h-10 w-24" />
+              ) : (
+                <button
+                  className="btn btn-sm"
+                  onClick={() => addPuzzlesModalRef.current?.open()}
+                >
+                  <FaPlus size={16} />
+                  Add puzzles
+                </button>
+              )}
+              <AddPuzzlesModal
+                ref={addPuzzlesModalRef}
+                searchType={
+                  collectionBrief.status === ResourceStatus.Public
+                    ? 'public'
+                    : 'all'
+                }
+                modifyParams={
+                  collectionBrief.isSeries
+                    ? p => ({
+                        ...p,
+                        q: `${p.q ?? ``} creator=${me?.id} series=null`,
+                      })
+                    : undefined
+                }
+                onSubmit={async puzzles => {
+                  await addToCollection([collectionBrief.id, puzzles]);
+                }}
+              />
               <button
-                className="btn"
-                onClick={() => addPuzzlesModalRef.current?.open()}
+                className="btn btn-sm"
+                onClick={() => {
+                  setEditMode('reorder');
+                }}
               >
-                <FaPlus size={16} />
-                Add puzzles
+                <TbReorder size={16} />
+                Reorder puzzles
               </button>
-            )}
-            <AddPuzzlesModal
-              ref={addPuzzlesModalRef}
-              searchType={
-                collectionBrief.status === ResourceStatus.Public
-                  ? 'public'
-                  : 'all'
-              }
-              modifyParams={
-                collectionBrief.isSeries
-                  ? p => ({
-                      ...p,
-                      q: `${p.q ?? ``} creator=${me?.id} series=null`,
-                    })
-                  : undefined
-              }
-              onSubmit={async puzzles => {
-                await addToCollection.mutateAsync([
-                  collectionBrief.id,
-                  puzzles,
-                ]);
-              }}
-            />
-            <div className="divider divider-horizontal mx-0" />
-            {removeFromCollection.isPending ? (
-              <Loading className="h-12 w-24" />
-            ) : selectedPuzzles === null ? (
-              <button className="btn" onClick={() => setSelectedPuzzles([])}>
-                <BiSolidSelectMultiple size={16} />
-                Select puzzles
+              <button
+                className="btn btn-sm"
+                onClick={() => {
+                  setSelectedPuzzles([]);
+                  setEditMode('delete');
+                }}
+              >
+                <FaTrash size={16} />
+                Delete puzzles
               </button>
-            ) : (
-              <>
-                <button
-                  className="btn"
-                  onClick={() => setSelectedPuzzles(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={cn(
-                    'btn',
-                    selectedPuzzles?.length > 0 ? 'btn-error' : 'btn-disabled'
-                  )}
-                  onClick={async () => {
-                    if (selectedPuzzles.length > 0) {
-                      await removeFromCollection.mutateAsync([
-                        collectionBrief.id,
-                        selectedPuzzles,
-                      ]);
-                    }
-                    setSelectedPuzzles(null);
-                  }}
-                >
-                  <FaTrash size={16} />
-                  Remove selected
-                </button>
-              </>
-            )}
-          </>
-        )}
+            </>
+          ))}
       </div>
       <div className="flex flex-wrap gap-4 justify-center">
         {draggableWrapper(
           puzzleList.map(puzzle => (
             <PuzzleCard
               key={puzzle.id}
-              dragDroppable={editable}
+              dragDroppable={editable && editMode === 'reorder'}
               puzzle={puzzle}
               to={
-                selectedPuzzles === null
+                editMode === null
                   ? puzzle.status === ResourceStatus.Private &&
                     puzzle.creator.id === me?.id
                     ? `/create/$puzzleId`
@@ -598,7 +635,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
               params={{ puzzleId: puzzle.id }}
               search={{ collection: collectionBrief.id }}
               onClick={
-                selectedPuzzles !== null
+                editMode === 'delete'
                   ? () => {
                       setSelectedPuzzles(selection => {
                         if (selection?.includes(puzzle.id)) {
@@ -616,7 +653,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
                   : undefined
               }
             >
-              {selectedPuzzles !== null && (
+              {editMode === 'delete' && (
                 <div
                   className={cn(
                     'absolute bottom-0 right-0 w-10 h-10 flex justify-center items-center rounded-tl-xl rounded-br-xl',
