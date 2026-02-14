@@ -2,6 +2,7 @@
 
 - Dynamic front page layout
 - The puzzle editor now auto-saves your progress every minute, or every 5 seconds for supporters
+- Added unlisted puzzles and collections for supporters
 - Less restrictive server limits
   - Max collection size 250 -> infinite
   - Followed collections 250 -> infinite
@@ -11,6 +12,7 @@
   - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
   - You can now change your primary email
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+- Reworked collection page UI
 - Fixed errors when switching between puzzle and collection search with filters enabled
 - Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
 - Puzzle completion SFX no longer plays in the editor
