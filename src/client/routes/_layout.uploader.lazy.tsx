@@ -24,6 +24,7 @@ import GridData from '@logic-pad/core/data/grid';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import validateGrid from '@logic-pad/core/data/validate';
+import { ResourceStatus } from '../online/data';
 
 const defaultSolver = [...allSolvers.values()][0];
 
@@ -335,7 +336,10 @@ class UploadManager {
                 puzzleData
               );
               try {
-                return await api.publishPuzzle(result.id);
+                return await api.publishPuzzle(
+                  result.id,
+                  ResourceStatus.Public
+                );
               } catch (_) {
                 await api.deletePuzzle(result.id);
               }
