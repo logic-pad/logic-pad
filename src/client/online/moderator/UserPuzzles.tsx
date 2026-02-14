@@ -146,23 +146,24 @@ const UserPuzzle = memo(function UserPuzzle({
           size="sm"
         />
       </div>
-      {puzzle.status === ResourceStatus.Public ? (
-        <div className="flex gap-4 text-sm opacity-80">
-          <span className="flex items-center">
-            <FaCheckSquare className="me-2" /> {puzzle.solveCount}
-          </span>
-          <span className="flex items-center">
-            <FaHeart className="me-2" /> {puzzle.loveCount}
-          </span>
-        </div>
-      ) : (
-        <div className="flex gap-4 text-sm opacity-80">
-          <span className="flex items-center">
+      <div className="flex gap-4 text-sm opacity-80">
+        {puzzle.status !== ResourceStatus.Private && (
+          <>
+            <span className="flex items-center">
+              <FaCheckSquare className="me-2" /> {puzzle.solveCount}
+            </span>
+            <span className="flex items-center">
+              <FaHeart className="me-2" /> {puzzle.loveCount}
+            </span>
+          </>
+        )}
+        {puzzle.status !== ResourceStatus.Public && (
+          <span className="flex items-center capitalize">
             <FaEyeSlash className="me-2" />
-            Private
+            {puzzle.status}
           </span>
-        </div>
-      )}
+        )}
+      </div>
       <div className="text-xs wrap-break-word">{puzzle.description}</div>
       <div className="divider my-0" />
     </div>

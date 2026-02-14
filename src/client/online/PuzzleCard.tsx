@@ -209,29 +209,32 @@ export default memo(function PuzzleCard({
             {puzzle.width} &times; {puzzle.height}
             <Difficulty value={puzzle.designDifficulty} size="xs" />
           </div>
-          {puzzle.status === ResourceStatus.Public ? (
-            <div className="flex gap-4 text-sm opacity-80">
-              <span className="flex items-center">
-                <FaCheckSquare className="me-2" /> {puzzle.solveCount}
-                <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
-                  {puzzle.solveCount === 1 ? 'solve' : 'solves'}
+          <div className="flex gap-4 text-sm opacity-80">
+            {puzzle.status !== ResourceStatus.Private && (
+              <>
+                <span className="flex items-center">
+                  <FaCheckSquare className="me-2" /> {puzzle.solveCount}
+                  <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
+                    {puzzle.solveCount === 1 ? 'solve' : 'solves'}
+                  </span>
                 </span>
-              </span>
-              <span className="flex items-center">
-                <FaHeart className="me-2" /> {puzzle.loveCount}
-                <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
-                  {puzzle.loveCount === 1 ? 'love' : 'loves'}
+                <span className="flex items-center">
+                  <FaHeart className="me-2" /> {puzzle.loveCount}
+                  <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
+                    {puzzle.loveCount === 1 ? 'love' : 'loves'}
+                  </span>
                 </span>
-              </span>
-            </div>
-          ) : (
-            <div className="flex gap-4 text-sm opacity-80">
-              <span className="flex items-center">
+              </>
+            )}
+            {puzzle.status !== ResourceStatus.Public && (
+              <span className="flex items-center capitalize">
                 <FaEyeSlash className="me-2" />
-                Private
+                <span className="[.wrapper:hover_&]:hidden">
+                  {puzzle.status}
+                </span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         {children}
       </RootComponent>

@@ -144,14 +144,15 @@ const UserCollection = memo(function UserCollection({
             <TbLayoutGrid className="me-2" /> {collection.puzzleCount}
           </span>
         )}
-        {collection.status === ResourceStatus.Public ? (
+        {collection.status !== ResourceStatus.Private && (
           <span className="flex items-center">
             <FaUser className="me-2" /> {collection.followCount}
           </span>
-        ) : (
-          <span className="flex items-center">
+        )}
+        {collection.status !== ResourceStatus.Public && (
+          <span className="flex items-center capitalize">
             <FaEyeSlash className="me-2" />
-            Private
+            {collection.status}
           </span>
         )}
       </div>

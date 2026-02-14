@@ -8,7 +8,6 @@ import Loading from '../components/Loading';
 import { useRouteProtection } from '../router/useRouteProtection';
 import PuzzleSearchQuery from '../online/PuzzleSearchQuery';
 import toast from 'react-hot-toast';
-import { BiSolidSelectMultiple } from 'react-icons/bi';
 import { cn } from '../uiHelper';
 import { ResourceStatus } from '../online/data';
 import { FaXmark } from 'react-icons/fa6';
@@ -66,20 +65,21 @@ export const Route = createLazyFileRoute('/_layout/my-stuff/puzzles')({
         />
         <div className="flex gap-4 items-center w-full justify-end shrink-0">
           {deletePuzzles.isPending ? (
-            <Loading className="h-12 w-24" />
+            <Loading className="h-8 w-24" />
           ) : selectedPuzzles === null ? (
-            <button className="btn" onClick={() => setSelectedPuzzles([])}>
-              <BiSolidSelectMultiple size={16} />
-              Select puzzles
+            <button
+              className="btn btn-sm"
+              onClick={() => setSelectedPuzzles([])}
+            >
+              <FaTrash size={16} />
+              Delete private puzzles
             </button>
           ) : (
             <>
-              <button className="btn" onClick={() => setSelectedPuzzles(null)}>
-                Cancel
-              </button>
+              <div>Select puzzles to be removed</div>
               <button
                 className={cn(
-                  'btn',
+                  'btn btn-sm',
                   selectedPuzzles?.length > 0 ? 'btn-error' : 'btn-disabled'
                 )}
                 onClick={async () => {
@@ -91,6 +91,12 @@ export const Route = createLazyFileRoute('/_layout/my-stuff/puzzles')({
               >
                 <FaTrash size={16} />
                 Delete puzzles
+              </button>
+              <button
+                className="btn btn-sm"
+                onClick={() => setSelectedPuzzles(null)}
+              >
+                Cancel
               </button>
             </>
           )}

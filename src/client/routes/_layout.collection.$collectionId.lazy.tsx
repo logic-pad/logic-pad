@@ -109,7 +109,7 @@ const CollectionFollow = memo(function FollowButton({
 }: {
   collectionBrief: CollectionBrief;
 }) {
-  if (collectionBrief.status === ResourceStatus.Public)
+  if (collectionBrief.status !== ResourceStatus.Private)
     return <CollectionFollowButton collectionId={collectionBrief.id} />;
   else return <div className="btn btn-disabled">Private collection</div>;
 });
@@ -129,7 +129,7 @@ const CollectionMeta = memo(function CollectionMeta({
             {pluralize(collectionBrief.puzzleCount)`puzzle``puzzles`}
           </span>
         )}
-        {collectionBrief.status === ResourceStatus.Public && (
+        {collectionBrief.status !== ResourceStatus.Private && (
           <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
             <FaUser className="inline-block me-2" size={14} />
             {pluralize(collectionBrief.followCount)`follow``follows`}
@@ -515,7 +515,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
                   : 'Drag and drop to reorder'}
               </div>
               {isPendingReorder ? (
-                <Loading className="h-10 w-24" />
+                <Loading className="h-8 w-24" />
               ) : (
                 <button
                   className="btn btn-sm"
@@ -529,7 +529,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
             <>
               <div>Select puzzles to be removed</div>
               {isPendingRemove ? (
-                <Loading className="h-10 w-24" />
+                <Loading className="h-8 w-24" />
               ) : (
                 <>
                   <button
@@ -566,7 +566,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
           ) : (
             <>
               {isPendingAdd ? (
-                <Loading className="h-10 w-24" />
+                <Loading className="h-8 w-24" />
               ) : (
                 <button
                   className="btn btn-sm"
@@ -717,13 +717,14 @@ export const Route = createLazyFileRoute('/_layout/collection/$collectionId')({
           fallback={
             <div className="flex flex-col gap-4 items-center">
               <div className="flex gap-4 items-center w-full justify-end shrink-0">
-                <Skeleton className="w-36 h-10" />
+                <Skeleton className="w-36 h-8" />
                 <div className="flex-1" />
                 {collectionBrief.creator.id === me?.id &&
                   collectionBrief.autoPopulate === null && (
                     <>
-                      <Skeleton className="w-28 h-10" />
-                      <Skeleton className="w-28 h-10" />
+                      <Skeleton className="w-28 h-8" />
+                      <Skeleton className="w-28 h-8" />
+                      <Skeleton className="w-28 h-8" />
                     </>
                   )}
               </div>

@@ -106,14 +106,14 @@ const SavePuzzle = memo(function SavePuzzle({
     onError(error) {
       toast.error(error.message);
     },
-    onSuccess() {
+    async onSuccess() {
       setLastSavedTime(new Date());
       setLastSaved({
         ...metadata,
         grid,
         solution: null,
       });
-      queryClient.removeQueries({
+      await queryClient.invalidateQueries({
         queryKey: ['puzzle', 'edit', id],
       });
     },

@@ -70,17 +70,20 @@ export default memo(function CollectionCard({
                   </span>
                 </span>
               )}
-              {collection.status === ResourceStatus.Public ? (
+              {collection.status !== ResourceStatus.Private && (
                 <span className="flex items-center">
                   <FaUser className="me-2" /> {collection.followCount}
                   <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
                     {collection.followCount === 1 ? 'follow' : 'follows'}
                   </span>
                 </span>
-              ) : (
-                <span className="flex items-center">
+              )}
+              {collection.status !== ResourceStatus.Public && (
+                <span className="flex items-center capitalize">
                   <FaEyeSlash className="me-2" />
-                  Private
+                  <span className="[.wrapper:hover_&]:hidden">
+                    {collection.status}
+                  </span>
                 </span>
               )}
             </div>
