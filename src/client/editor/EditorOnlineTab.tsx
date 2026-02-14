@@ -155,9 +155,12 @@ const PublishPuzzle = memo(function PublishPuzzle() {
   const { id } = useOnlinePuzzle();
   const { metadata, grid } = useGrid();
   const publishPuzzle = useMutation({
-    mutationFn: async (data: Parameters<typeof api.savePuzzle>) => {
+    mutationFn: async ([status, ...data]: [
+      ResourceStatus,
+      ...Parameters<typeof api.savePuzzle>,
+    ]) => {
       await api.savePuzzle(...data);
-      return await api.publishPuzzle(data[0]);
+      return await api.publishPuzzle(data[0], status);
     },
     onError(error) {
       if (!(error instanceof ApiError) || error.status !== 451)

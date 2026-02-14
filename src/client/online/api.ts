@@ -271,9 +271,9 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  publishPuzzle: async (puzzleId: string) => {
+  publishPuzzle: async (puzzleId: string, status: ResourceStatus) => {
     return await axios
-      .post<{ id: string }>(`/puzzle/${puzzleId}/publish`)
+      .post<{ id: string }>(`/puzzle/${puzzleId}/publish`, { status })
       .then(res => res.data)
       .catch(rethrowError);
   },

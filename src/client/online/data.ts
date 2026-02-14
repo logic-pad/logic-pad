@@ -1,6 +1,6 @@
-/* Sync with backend */
+// Sync between frontend and backend
 
-import { PuzzleType } from '@logic-pad/core/data/primitives';
+import type { PuzzleType } from '@logic-pad/core/data/primitives.js';
 
 export type HighlightColor =
   | 'primary'
@@ -12,6 +12,7 @@ export type HighlightColor =
 
 export enum ResourceStatus {
   Private = 'private',
+  Unlisted = 'unlisted',
   Public = 'public',
 }
 

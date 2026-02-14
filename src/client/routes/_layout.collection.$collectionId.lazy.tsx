@@ -62,15 +62,305 @@ import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import Skeleton from '../components/Skeleton';
 import { TbLayoutGrid } from 'react-icons/tb';
 
-interface CollectionPuzzlesProps {
+const updateCollectionOptions = (collectionId: string) =>
+  mutationOptions({
+    mutationKey: ['collection', collectionId, 'update'],
+    mutationFn: (variables: Parameters<typeof api.updateCollection>) => {
+      return api.updateCollection(...variables);
+    },
+    onMutate: async (variables: Parameters<typeof api.updateCollection>) => {
+      await queryClient.cancelQueries({
+        queryKey: ['collection', collectionId, 'info'],
+      });
+      const previousCollection = queryClient.getQueryData<CollectionBrief>([
+        'collection',
+        collectionId,
+        'info',
+      ])!;
+      queryClient.setQueryData(['collection', collectionId, 'info'], {
+        ...previousCollection,
+        title: variables[1] ?? previousCollection.title,
+        description: variables[2] ?? previousCollection.description,
+        status: variables[3] ?? previousCollection.status,
+      });
+      return { previousCollection };
+    },
+    onError(error, _variables, context) {
+      toast.error(error.message);
+      if (context)
+        queryClient.setQueryData(
+          ['collection', collectionId, 'info'],
+          context.previousCollection
+        );
+    },
+    onSettled(_data, _error) {
+      if (
+        queryClient.isMutating({
+          mutationKey: ['collection', collectionId, 'update'],
+        }) === 1
+      )
+        void queryClient.invalidateQueries({
+          queryKey: ['collection', collectionId, 'info'],
+        });
+    },
+  });
+
+const CollectionFollow = memo(function FollowButton({
+  collectionBrief,
+}: {
   collectionBrief: CollectionBrief;
-  editable: boolean;
-}
+}) {
+  if (collectionBrief.status === ResourceStatus.Public)
+    return <CollectionFollowButton collectionId={collectionBrief.id} />;
+  else return <div className="btn btn-disabled">Private collection</div>;
+});
+
+const CollectionMeta = memo(function CollectionMeta({
+  collectionBrief,
+}: {
+  collectionBrief: CollectionBrief;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <UserCard user={collectionBrief.creator} />
+      <div className="flex gap-4 items-center flex-wrap">
+        {collectionBrief.puzzleCount !== null && (
+          <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
+            <TbLayoutGrid className="inline-block me-2" size={14} />
+            {pluralize(collectionBrief.puzzleCount)`puzzle``puzzles`}
+          </span>
+        )}
+        {collectionBrief.status === ResourceStatus.Public && (
+          <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
+            <FaUser className="inline-block me-2" size={14} />
+            {pluralize(collectionBrief.followCount)`follow``follows`}
+          </span>
+        )}
+        <span className="opacity-80">
+          Created {toRelativeDate(new Date(collectionBrief.createdAt))}
+        </span>
+        <span className="opacity-80">
+          Updated {toRelativeDate(new Date(collectionBrief.modifiedAt))}
+        </span>
+      </div>
+    </div>
+  );
+});
+
+const CollectionTitle = memo(function CollectionTitle({
+  collectionBrief,
+}: {
+  collectionBrief: CollectionBrief;
+}) {
+  const { isPending, mutate: updateCollection } = useMutation(
+    updateCollectionOptions(collectionBrief.id)
+  );
+  const { me } = useOnline();
+
+  return (
+    <div
+      className={cn(
+        'flex items-center text-3xl mt-8 gap-4',
+        collectionBrief.isSeries && 'text-accent font-semibold'
+      )}
+    >
+      {collectionBrief.autoPopulate === AutoCollection.CreatedPuzzles ? (
+        <Avatar
+          userId={collectionBrief.creator.id}
+          username={collectionBrief.creator.name}
+          className="w-[32px] h-[32px] inline-block aspect-square me-4 shrink-0"
+        />
+      ) : collectionBrief.isSeries ? (
+        <FaListOl size={32} className="inline-block me-4 shrink-0" />
+      ) : (
+        <FaListUl size={32} className="inline-block me-4 shrink-0" />
+      )}
+      <EditableField
+        initialValue={collectionBrief.title}
+        editable={collectionBrief.creator.id === me?.id}
+        pending={isPending}
+        onEdit={newValue => {
+          updateCollection([collectionBrief.id, newValue]);
+        }}
+      />
+    </div>
+  );
+});
+
+const CollectionDescription = memo(function CollectionDescription({
+  collectionBrief,
+}: {
+  collectionBrief: CollectionBrief;
+}) {
+  const { isPending, mutate: updateCollection } = useMutation(
+    updateCollectionOptions(collectionBrief.id)
+  );
+  const { me } = useOnline();
+  return (
+    <EditableField
+      className="flex-1"
+      initialValue={collectionBrief.description}
+      editable={collectionBrief.creator.id === me?.id}
+      pending={isPending}
+      onEdit={newValue => {
+        updateCollection([collectionBrief.id, undefined, newValue]);
+      }}
+    />
+  );
+});
+
+const CollectionControls = memo(function CollectionControls({
+  collectionBrief,
+}: {
+  collectionBrief: CollectionBrief;
+}) {
+  const { me } = useOnline();
+  const navigate = useNavigate();
+  const { isPending: isPendingUpdate, mutateAsync: updateCollection } =
+    useMutation(updateCollectionOptions(collectionBrief.id));
+  const { isPending: isPendingDelete, mutateAsync: deleteCollection } =
+    useMutation({
+      mutationFn: (collectionId: string) => {
+        return api.deleteCollection(collectionId);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+      async onSuccess() {
+        await queryClient.invalidateQueries({
+          queryKey: ['collection', 'search-own', {}],
+        });
+        await navigate({ to: '/my-stuff/collections' });
+      },
+    });
+  if (!me || collectionBrief.creator.id !== me.id) return null;
+  return (
+    <div
+      className={cn(
+        'menu menu-horizontal w-full bg-base-100 rounded-box gap-4',
+        (isPendingUpdate || isPendingDelete) &&
+          'pointer-events-none opacity-70 transition-opacity'
+      )}
+    >
+      <line>
+        <span className="mx-2">Access:</span>
+        <select
+          defaultValue={collectionBrief.status}
+          className="select select-sm capitalize w-30 inline"
+          onChange={async e => {
+            await updateCollection([
+              collectionBrief.id,
+              undefined,
+              undefined,
+              e.target.value as ResourceStatus,
+            ]);
+          }}
+        >
+          {Object.values(ResourceStatus).map(status => (
+            <option key={status} value={status} className="capitalize">
+              {status}
+            </option>
+          ))}
+        </select>
+      </line>
+      {collectionBrief.autoPopulate === null && (
+        <li>
+          <a
+            type="button"
+            className={cn(
+              collectionBrief.isSeries ? 'text-base-content' : 'text-accent'
+            )}
+            onClick={async () => {
+              await updateCollection([
+                collectionBrief.id,
+                undefined,
+                undefined,
+                undefined,
+                !collectionBrief.isSeries,
+              ]);
+              await queryClient.invalidateQueries({
+                queryKey: ['collection', collectionBrief.id, 'puzzles'],
+              });
+            }}
+          >
+            <FaExchangeAlt size={16} />{' '}
+            {collectionBrief.isSeries
+              ? 'Convert to collection'
+              : 'Convert to puzzle series'}
+          </a>
+        </li>
+      )}
+      {collectionBrief.autoPopulate === null && (
+        <li>
+          <a
+            type="button"
+            className="text-error"
+            onClick={() =>
+              (
+                document.getElementById(
+                  'deleteCollectionModal'
+                ) as HTMLDialogElement
+              ).showModal()
+            }
+          >
+            <FaTrash size={16} /> Delete this collection
+          </a>
+        </li>
+      )}
+      <dialog id="deleteCollectionModal" className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-xl">
+            Are you sure you want to delete this collection?
+          </h3>
+          {isPendingDelete ? (
+            <div className="modal-action">
+              <Loading />
+            </div>
+          ) : (
+            <div className="modal-action">
+              <button
+                className="btn"
+                onClick={() =>
+                  (
+                    document.getElementById(
+                      'deleteCollectionModal'
+                    ) as HTMLDialogElement
+                  ).close()
+                }
+              >
+                No
+              </button>
+              <button
+                className="btn btn-error"
+                onClick={async () => {
+                  await deleteCollection(collectionBrief.id);
+                }}
+              >
+                Yes
+              </button>
+            </div>
+          )}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      {(isPendingUpdate || isPendingDelete) && (
+        <li className="flex-1 flex items-end">
+          <Loading className="w-12 h-8" />
+        </li>
+      )}
+    </div>
+  );
+});
 
 const CollectionPuzzles = memo(function CollectionPuzzles({
   collectionBrief,
   editable,
-}: CollectionPuzzlesProps) {
+}: {
+  collectionBrief: CollectionBrief;
+  editable: boolean;
+}) {
   const { sort } = useSearch({ from: '/_layout/collection/$collectionId' });
   const navigate = useNavigate({ from: '/collection/$collectionId' });
   const { me } = useOnline();
@@ -240,7 +530,7 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
                 collectionBrief.isSeries
                   ? p => ({
                       ...p,
-                      q: `${p.q ?? ''} creator=${me?.id} series=null`,
+                      q: `${p.q ?? ``} creator=${me?.id} series=null`,
                     })
                   : undefined
               }
@@ -355,258 +645,36 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
   );
 });
 
-const updateCollectionOptions = (collectionId: string) =>
-  mutationOptions({
-    mutationKey: ['collection', collectionId, 'update'],
-    mutationFn: (variables: Parameters<typeof api.updateCollection>) => {
-      return api.updateCollection(...variables);
-    },
-    onMutate: async (variables: Parameters<typeof api.updateCollection>) => {
-      await queryClient.cancelQueries({
-        queryKey: ['collection', collectionId, 'info'],
-      });
-      const previousCollection = queryClient.getQueryData<CollectionBrief>([
-        'collection',
-        collectionId,
-        'info',
-      ])!;
-      queryClient.setQueryData(['collection', collectionId, 'info'], {
-        ...previousCollection,
-        title: variables[1] ?? previousCollection.title,
-        description: variables[2] ?? previousCollection.description,
-        status: variables[3] ?? previousCollection.status,
-      });
-      return { previousCollection };
-    },
-    onError(error, _variables, context) {
-      toast.error(error.message);
-      if (context)
-        queryClient.setQueryData(
-          ['collection', collectionId, 'info'],
-          context.previousCollection
-        );
-    },
-    onSettled(_data, _error) {
-      if (
-        queryClient.isMutating({
-          mutationKey: ['collection', collectionId, 'update'],
-        }) === 1
-      )
-        void queryClient.invalidateQueries({
-          queryKey: ['collection', collectionId, 'info'],
-        });
-    },
-  });
-
 export const Route = createLazyFileRoute('/_layout/collection/$collectionId')({
   component: memo(function Collection() {
     useRouteProtection('online');
-    const navigate = Route.useNavigate();
     const params = Route.useParams();
     const { me } = useOnline();
     const { data: collectionBrief } = useSuspenseQuery(
       collectionQueryOptions(params.collectionId)
     );
-    const updateCollection = useMutation(
-      updateCollectionOptions(params.collectionId)
-    );
-    const deleteCollection = useMutation({
-      mutationFn: (collectionId: string) => {
-        return api.deleteCollection(collectionId);
-      },
-      onError(error) {
-        toast.error(error.message);
-      },
-      async onSuccess() {
-        await queryClient.invalidateQueries({
-          queryKey: ['collection', 'search-own', {}],
-        });
-        await navigate({ to: '/my-stuff/collections' });
-      },
-    });
 
     return (
       <ResponsiveLayout>
-        <section className="flex items-center text-3xl mt-8 flex-wrap gap-4 justify-between">
-          <div
-            className={cn(
-              'flex items-center',
-              collectionBrief.isSeries && 'text-accent font-semibold'
-            )}
-          >
-            {collectionBrief.autoPopulate === AutoCollection.CreatedPuzzles ? (
-              <Avatar
-                userId={collectionBrief.creator.id}
-                username={collectionBrief.creator.name}
-                className="w-[32px] h-[32px] inline-block aspect-square me-4 shrink-0"
-              />
-            ) : collectionBrief.isSeries ? (
-              <FaListOl size={32} className="inline-block me-4 shrink-0" />
-            ) : (
-              <FaListUl size={32} className="inline-block me-4 shrink-0" />
-            )}
-            <EditableField
-              initialValue={collectionBrief.title}
-              editable={collectionBrief.creator.id === me?.id}
-              pending={updateCollection.isPending}
-              onEdit={async newValue => {
-                await updateCollection.mutateAsync([
-                  params.collectionId,
-                  newValue,
-                ]);
-              }}
-            />
-          </div>
-          {collectionBrief.creator.id === me?.id && (
-            <div className="flex justify-end items-center bg-base-100 rounded-lg overflow-hidden shrink-0">
-              {collectionBrief.autoPopulate === null && (
-                <button
-                  className={cn(
-                    'tooltip tooltip-right btn rounded-none',
-                    collectionBrief.isSeries
-                      ? 'btn-ghost bg-base-300 text-base-content tooltip-info'
-                      : 'btn-accent tooltip-accent'
-                  )}
-                  data-tip={
-                    collectionBrief.isSeries
-                      ? 'Convert to collection'
-                      : 'Convert to puzzle series'
-                  }
-                  onClick={async () => {
-                    await updateCollection.mutateAsync([
-                      params.collectionId,
-                      undefined,
-                      undefined,
-                      undefined,
-                      !collectionBrief.isSeries,
-                    ]);
-                    await queryClient.invalidateQueries({
-                      queryKey: ['collection', params.collectionId, 'puzzles'],
-                    });
-                  }}
-                >
-                  <FaExchangeAlt size={16} />
-                </button>
-              )}
-              <fieldset className="fieldset mx-4">
-                <label className="label cursor-pointer flex gap-2">
-                  <span className="label-text">Public collection</span>
-                  <input
-                    type="checkbox"
-                    className="toggle"
-                    checked={collectionBrief.status === ResourceStatus.Public}
-                    onChange={async e => {
-                      await updateCollection.mutateAsync([
-                        params.collectionId,
-                        undefined,
-                        undefined,
-                        e.target.checked
-                          ? ResourceStatus.Public
-                          : ResourceStatus.Private,
-                      ]);
-                    }}
-                  />
-                </label>
-              </fieldset>
-              {collectionBrief.autoPopulate === null && (
-                <button
-                  className="tooltip tooltip-error tooltip-left btn btn-error rounded-none"
-                  data-tip="Delete this collection"
-                  onClick={() =>
-                    (
-                      document.getElementById(
-                        'deleteCollectionModal'
-                      ) as HTMLDialogElement
-                    ).showModal()
-                  }
-                >
-                  <FaTrash size={16} />
-                </button>
-              )}
-              <dialog id="deleteCollectionModal" className="modal">
-                <div className="modal-box">
-                  <h3 className="font-bold text-xl">
-                    Are you sure you want to delete this collection?
-                  </h3>
-                  {deleteCollection.isPending ? (
-                    <div className="modal-action">
-                      <Loading />
-                    </div>
-                  ) : (
-                    <div className="modal-action">
-                      <button
-                        className="btn"
-                        onClick={() =>
-                          (
-                            document.getElementById(
-                              'deleteCollectionModal'
-                            ) as HTMLDialogElement
-                          ).close()
-                        }
-                      >
-                        No
-                      </button>
-                      <button
-                        className="btn btn-error"
-                        onClick={async () => {
-                          await deleteCollection.mutateAsync(
-                            params.collectionId
-                          );
-                        }}
-                      >
-                        Yes
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                  <button>close</button>
-                </form>
-              </dialog>
+        <CollectionTitle collectionBrief={collectionBrief} />
+        {collectionBrief.description.length > 0 ||
+        collectionBrief.creator.id === me?.id ? (
+          <>
+            <CollectionMeta collectionBrief={collectionBrief} />
+            <div className="flex gap-4 flex-wrap items-center justify-between">
+              <CollectionDescription collectionBrief={collectionBrief} />
+              <CollectionFollow collectionBrief={collectionBrief} />
             </div>
-          )}
-        </section>
-        <UserCard user={collectionBrief.creator} />
-        <div className="flex gap-4 items-center flex-wrap">
-          {collectionBrief.puzzleCount !== null && (
-            <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
-              <TbLayoutGrid className="inline-block me-2" size={14} />
-              {pluralize(collectionBrief.puzzleCount)`puzzle``puzzles`}
-            </span>
-          )}
-          {collectionBrief.status === ResourceStatus.Public && (
-            <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
-              <FaUser className="inline-block me-2" size={14} />
-              {pluralize(collectionBrief.followCount)`follow``follows`}
-            </span>
-          )}
-          <span className="opacity-80">
-            Created {toRelativeDate(new Date(collectionBrief.createdAt))}
-          </span>
-          <span className="opacity-80">
-            Updated {toRelativeDate(new Date(collectionBrief.modifiedAt))}
-          </span>
-        </div>
-        <div className="flex gap-4 items-center">
-          <EditableField
-            className="flex-1"
-            initialValue={collectionBrief.description}
-            editable={collectionBrief.creator.id === me?.id}
-            pending={updateCollection.isPending}
-            onEdit={async newValue => {
-              await updateCollection.mutateAsync([
-                params.collectionId,
-                undefined,
-                newValue,
-              ]);
-            }}
-          />
-          {collectionBrief.status === ResourceStatus.Public ? (
-            <CollectionFollowButton collectionId={collectionBrief.id} />
-          ) : (
-            <div className="btn btn-disabled">Private collection</div>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            <div className="flex gap-4 flex-wrap items-end justify-between">
+              <CollectionMeta collectionBrief={collectionBrief} />
+              <CollectionFollow collectionBrief={collectionBrief} />
+            </div>
+          </>
+        )}
+        <CollectionControls collectionBrief={collectionBrief} />
         <div className="divider" />
         <Suspense
           fallback={
