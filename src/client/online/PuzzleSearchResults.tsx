@@ -31,6 +31,15 @@ export const searchOwnPuzzlesInfiniteQueryOptions = (
       api.searchMyPuzzles(search, cursorBefore, cursorAfter)
   );
 
+export const searchPublishedPuzzlesInfiniteQueryOptions = (
+  search: PublicPuzzleSearchParams
+) =>
+  bidirectionalInfiniteQuery(
+    ['puzzle', 'search-published', search],
+    (cursorBefore, cursorAfter) =>
+      api.searchPublishedPuzzles(search, cursorBefore, cursorAfter)
+  );
+
 export const searchAllPuzzlesInfiniteQueryOptions = (
   search: PrivatePuzzleSearchParams
 ) =>
@@ -60,13 +69,17 @@ export default function PuzzleSearchResults<Search extends SearchType>({
       ? (searchPuzzlesInfiniteQueryOptions(
           params as PublicPuzzleSearchParams
         ) as ReturnType<typeof searchOwnPuzzlesInfiniteQueryOptions>) // note: inaccurate page params type
-      : searchType === 'own'
-        ? searchOwnPuzzlesInfiniteQueryOptions(
-            params as PrivatePuzzleSearchParams
-          )
-        : searchAllPuzzlesInfiniteQueryOptions(
-            params as PrivatePuzzleSearchParams
-          )
+      : searchType === 'published'
+        ? (searchPublishedPuzzlesInfiniteQueryOptions(
+            params as PublicPuzzleSearchParams
+          ) as ReturnType<typeof searchOwnPuzzlesInfiniteQueryOptions>) // note: inaccurate page params type
+        : searchType === 'own'
+          ? searchOwnPuzzlesInfiniteQueryOptions(
+              params as PrivatePuzzleSearchParams
+            )
+          : searchAllPuzzlesInfiniteQueryOptions(
+              params as PrivatePuzzleSearchParams
+            )
   );
 
   return (

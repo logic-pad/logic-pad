@@ -579,8 +579,8 @@ const CollectionPuzzles = memo(function CollectionPuzzles({
               <AddPuzzlesModal
                 ref={addPuzzlesModalRef}
                 searchType={
-                  collectionBrief.status === ResourceStatus.Public
-                    ? 'public'
+                  collectionBrief.status !== ResourceStatus.Private
+                    ? 'published'
                     : 'all'
                 }
                 modifyParams={

@@ -360,7 +360,7 @@ export default memo(function EditorOnlineTab() {
   const { data, isPending } = useQuery(puzzleEditQueryOptions(id));
   const [commentsOpen, setCommentsOpen] = useState(false);
 
-  if (isPending) {
+  if (!!id && isPending) {
     return <Loading />;
   }
 

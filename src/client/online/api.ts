@@ -348,6 +348,18 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
+  searchPublishedPuzzles: async (
+    query: PublicPuzzleSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<PuzzleBrief>>(`/puzzle/search/published`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
   searchAllPuzzles: async (
     query: PrivatePuzzleSearchParams,
     cursorBefore?: string,
@@ -473,6 +485,18 @@ export const api = {
   ) => {
     return await axios
       .get<ListResponse<CollectionBrief>>(`/collection/search/own`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  searchPublishedCollections: async (
+    query: CollectionSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<CollectionBrief>>(`/collection/search/published`, {
         params: { ...query, cursorBefore, cursorAfter },
       })
       .then(res => res.data)

@@ -25,6 +25,15 @@ export const searchOwnCollectionsInfiniteQueryOptions = (
       api.searchMyCollections(search, cursorBefore, cursorAfter)
   );
 
+export const searchPublishedCollectionsInfiniteQueryOptions = (
+  search: CollectionSearchParams
+) =>
+  bidirectionalInfiniteQuery(
+    ['collection', 'search-published', search],
+    (cursorBefore, cursorAfter) =>
+      api.searchPublishedCollections(search, cursorBefore, cursorAfter)
+  );
+
 export const searchAllCollectionsInfiniteQueryOptions = (
   search: CollectionSearchParams
 ) =>
@@ -48,7 +57,9 @@ export default memo(function CollectionSearchResults({
       ? searchCollectionsInfiniteQueryOptions(params)
       : searchType === 'own'
         ? searchOwnCollectionsInfiniteQueryOptions(params)
-        : searchAllCollectionsInfiniteQueryOptions(params)
+        : searchType === 'published'
+          ? searchPublishedCollectionsInfiniteQueryOptions(params)
+          : searchAllCollectionsInfiniteQueryOptions(params)
   );
 
   return (

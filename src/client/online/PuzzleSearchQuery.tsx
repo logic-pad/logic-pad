@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useOnline } from '../contexts/OnlineContext';
 import { cn } from '../uiHelper';
 
-export type SearchType = 'public' | 'own' | 'all';
+export type SearchType = 'public' | 'own' | 'published' | 'all';
 
 export const puzzleSearchSchema = z.object({
   q: z.string().optional().catch(undefined),
@@ -59,10 +59,11 @@ export type PublicPuzzleSearchParams = z.infer<typeof puzzleSearchSchema>;
 export type PrivatePuzzleSearchParams = z.infer<
   typeof privatePuzzleSearchSchema
 >;
-export type PuzzleSearchParams<Search extends SearchType> =
-  Search extends 'public'
-    ? PublicPuzzleSearchParams
-    : PrivatePuzzleSearchParams;
+export type PuzzleSearchParams<Search extends SearchType> = Search extends
+  | 'public'
+  | 'published'
+  ? PublicPuzzleSearchParams
+  : PrivatePuzzleSearchParams;
 
 type FilterOption = {
   id: string;
@@ -365,7 +366,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
         <div className="flex gap-4 mt-2 flex-wrap">
           {orderings
             .filter(ordering =>
-              searchType === 'public'
+              searchType === 'public' || searchType === 'published'
                 ? ordering.id !== 'created'
                 : ordering.id !== 'published'
             )
