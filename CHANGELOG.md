@@ -1,11 +1,14 @@
 # PREVIEW BRANCH
 
 - Dynamic front page layout
-- The puzzle editor now auto-saves your progress every minute, or every 5 seconds for supporters
-- Added unlisted puzzles and collections for supporters
+- The puzzle editor now auto-saves your progress
 - Less restrictive server limits
-  - Max collection size 250 -> infinite
-  - Followed collections 250 -> infinite
+  - Max collection size 250 -> unlimited
+  - Followed collections 250 -> unlimited
+- Supporter benefits
+  - Unlisted puzzles and collections
+  - Unlimited private puzzles
+  - More frequent auto-saves
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
 - Authentication
   - Added support for signing in with X
