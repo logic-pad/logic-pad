@@ -1,18 +1,16 @@
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { memo, RefObject, useMemo } from 'react';
+import { memo, RefObject } from 'react';
 import Loading from '../../components/Loading';
 import InfiniteScrollTrigger from '../../components/InfiniteScrollTrigger';
 import { CollectionBrief, ResourceStatus } from '../data';
 import { FaEyeSlash, FaListOl, FaUser } from 'react-icons/fa';
 import { count, toRelativeDate } from '../../uiHelper';
-import { CollectionSearchParams } from '../CollectionSearchQuery';
-import { searchCollectionsInfiniteQueryOptions } from '../CollectionSearchResults';
 import { TbLayoutGrid } from 'react-icons/tb';
 import Skeleton from '../../components/Skeleton';
 import { Link } from '@tanstack/react-router';
 import { modPrompt, PromptHandle } from './ModMessagePrompt';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { api, queryClient } from '../api';
+import { api, bidirectionalInfiniteQuery, queryClient } from '../api';
 import toast from 'react-hot-toast';
 
 const UserCollection = memo(function UserCollection({
@@ -162,6 +160,18 @@ const UserCollection = memo(function UserCollection({
   );
 });
 
+export const modUserCollectionsInfiniteQueryOptions = (userId: string) =>
+  bidirectionalInfiniteQuery(
+    ['profile', userId, 'mod-collections'],
+    (cursorBefore, cursorAfter) =>
+      api.modListCollections(
+        userId,
+        { sort: 'updated-desc' },
+        cursorBefore,
+        cursorAfter
+      )
+  );
+
 export interface UserCollectionsProps {
   userId: string;
   promptHandle: RefObject<PromptHandle | null>;
@@ -171,15 +181,8 @@ export default memo(function UserCollections({
   userId,
   promptHandle,
 }: UserCollectionsProps) {
-  const searchParams = useMemo<CollectionSearchParams>(
-    () => ({
-      q: `creator=${userId}`,
-      sort: 'updated-desc',
-    }),
-    [userId]
-  );
   const { data, isPending, isFetching, hasNextPage, fetchNextPage } =
-    useInfiniteQuery(searchCollectionsInfiniteQueryOptions(searchParams));
+    useInfiniteQuery(modUserCollectionsInfiniteQueryOptions(userId));
 
   return (
     <div className="flex flex-col gap-4 w-[400px] max-w-full shrink-0">

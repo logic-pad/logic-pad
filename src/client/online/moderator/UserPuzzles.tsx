@@ -1,7 +1,5 @@
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { memo, RefObject, useMemo } from 'react';
-import { searchPuzzlesInfiniteQueryOptions } from '../PuzzleSearchResults';
-import { PublicPuzzleSearchParams } from '../PuzzleSearchQuery';
+import { memo, RefObject } from 'react';
 import Loading from '../../components/Loading';
 import InfiniteScrollTrigger from '../../components/InfiniteScrollTrigger';
 import { PuzzleBrief, ResourceStatus } from '../data';
@@ -13,7 +11,7 @@ import { medianFromHistogram } from '../../metadata/RatedDifficulty';
 import { Link } from '@tanstack/react-router';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { modPrompt, PromptHandle } from './ModMessagePrompt';
-import { api, queryClient } from '../api';
+import { api, bidirectionalInfiniteQuery, queryClient } from '../api';
 import toast from 'react-hot-toast';
 
 const UserPuzzle = memo(function UserPuzzle({
@@ -170,6 +168,18 @@ const UserPuzzle = memo(function UserPuzzle({
   );
 });
 
+export const modUserPuzzlesInfiniteQueryOptions = (userId: string) =>
+  bidirectionalInfiniteQuery(
+    ['profile', userId, 'mod-puzzles'],
+    (cursorBefore, cursorAfter) =>
+      api.modListPuzzles(
+        userId,
+        { sort: 'published-desc' },
+        cursorBefore,
+        cursorAfter
+      )
+  );
+
 export interface UserPuzzlesProps {
   userId: string;
   promptHandle: RefObject<PromptHandle | null>;
@@ -179,15 +189,8 @@ export default memo(function UserPuzzles({
   userId,
   promptHandle,
 }: UserPuzzlesProps) {
-  const searchParams = useMemo<PublicPuzzleSearchParams>(
-    () => ({
-      q: `creator=${userId}`,
-      sort: 'published-desc',
-    }),
-    [userId]
-  );
   const { data, isPending, isFetching, hasNextPage, fetchNextPage } =
-    useInfiniteQuery(searchPuzzlesInfiniteQueryOptions(searchParams));
+    useInfiniteQuery(modUserPuzzlesInfiniteQueryOptions(userId));
   return (
     <div className="flex flex-col gap-4 w-[400px] max-w-full shrink-0">
       <h2 className="font-semibold text-xl shrink-0">

@@ -657,6 +657,35 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
+  modListPuzzles: async (
+    userId: string,
+    query: PublicPuzzleSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<PuzzleBrief>>(`/moderation/user/${userId}/puzzles`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  modListCollections: async (
+    userId: string,
+    query: CollectionSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<CollectionBrief>>(
+        `/moderation/user/${userId}/collections`,
+        {
+          params: { ...query, cursorBefore, cursorAfter },
+        }
+      )
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
   modListComments: async (
     userId: string,
     cursorBefore?: string,
