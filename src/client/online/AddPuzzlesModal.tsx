@@ -41,7 +41,7 @@ export default function AddPuzzlesModal<Search extends SearchType>({
   return (
     <dialog id="addPuzzlesModal" className={cn('modal', open && 'modal-open')}>
       {open && (
-        <div className="modal-box flex flex-col max-h-[90vh] w-full max-w-[calc(320px*3+1rem*2+1rem*2)] md:max-w-[calc(320px*3+1rem*2+3rem*2)] gap-4 *:shrink-0">
+        <div className="modal-box flex flex-col h-[90vh] w-full max-w-[calc(320px*3+1rem*2+1rem*2)] md:max-w-[calc(320px*3+1rem*2+3rem*2)] gap-4 *:shrink-0">
           <div className="flex justify-between gap-4 flex-wrap items-center">
             <h3 className="font-semibold text-2xl">
               Add puzzles to collection
