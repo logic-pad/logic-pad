@@ -307,7 +307,7 @@ const UnlistedToggle = memo(function UnlistedToggle({
       });
     },
   });
-  if (!me || me.supporter <= 0) {
+  if (!me || (me.supporter <= 0 && !isUnlisted)) {
     return (
       <p className="text-sm">
         <Link className="link" target="_blank" to="/support">
