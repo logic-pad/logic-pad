@@ -111,7 +111,10 @@ export const api = {
       .then(res => res.data)
       .catch((err: AxiosError) => {
         if (err.status === 503) {
-          toast.error('The server is in maintenance. Please try again later.');
+          toast.error(
+            (err.response?.data as ApiErrorResponse).summary ??
+              'The server is in maintenance. Please try again later.'
+          );
         }
         return null;
       });
