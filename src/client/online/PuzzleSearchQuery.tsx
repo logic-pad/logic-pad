@@ -397,7 +397,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
                   <button
                     key={option.id}
                     className={cn(
-                      `btn btn-xs`,
+                      `btn btn-xs text-[0.75rem]`,
                       option.isActive(displayParams) ? '' : 'btn-ghost',
                       !me && 'btn-disabled',
                       promptForSupporter && 'btn-disabled'
