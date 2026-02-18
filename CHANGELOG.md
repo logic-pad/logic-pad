@@ -1,6 +1,5 @@
 # PREVIEW BRANCH
 
-- Dynamic front page layout
 - The puzzle editor now auto-saves your progress
 - Less restrictive server limits
   - Max collection size 250 -> unlimited
@@ -8,6 +7,7 @@
 - Supporter benefits
   - Unlisted puzzles and collections
   - Unlimited private puzzles
+  - Search puzzles by solve status
   - More frequent auto-saves
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
 - Authentication

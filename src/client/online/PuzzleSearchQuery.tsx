@@ -16,6 +16,7 @@ export const puzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
+  solve: z.enum(['unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'published-asc',
@@ -40,6 +41,7 @@ export const privatePuzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
+  solve: z.enum(['unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'created-asc',
@@ -78,6 +80,7 @@ type FilterOption = {
 
 type Filter = {
   name: string;
+  supporter?: boolean;
   options: FilterOption[];
 };
 
@@ -237,6 +240,38 @@ const filters: Filter[] = [
       },
     ],
   },
+  {
+    name: 'Solve',
+    supporter: true,
+    options: [
+      {
+        id: 'any',
+        text: 'Any',
+        applyFilter: search => {
+          return { ...search, solve: undefined };
+        },
+        isActive: search => !search.solve,
+      },
+      {
+        id: 'unseen',
+        text: 'Unseen',
+        applyFilter: search => {
+          const newValue = search.solve === 'unseen' ? undefined : 'unseen';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'unseen',
+      },
+      {
+        id: 'unsolved',
+        text: 'Unsolved',
+        applyFilter: search => {
+          const newValue = search.solve === 'unsolved' ? undefined : 'unsolved';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'unsolved',
+      },
+    ],
+  },
 ];
 
 const orderings = [
@@ -336,32 +371,43 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
         </label>
       </div>
       <div className="grid grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] items-start gap-y-1">
-        {filters.map(filter => (
-          <Fragment key={filter.name}>
-            <div>{filter.name}</div>
-            <div className="flex gap-2 flex-wrap">
-              {filter.options.map(option => (
-                <button
-                  key={option.id}
-                  className={cn(
-                    `btn btn-sm`,
-                    option.isActive(displayParams) ? '' : 'btn-ghost',
-                    !me && 'btn-disabled'
-                  )}
-                  onClick={() =>
-                    updateParams(
-                      option.applyFilter(
-                        displayParams
-                      ) as PuzzleSearchParams<Search>
-                    )
-                  }
-                >
-                  {option.text}
-                </button>
-              ))}
-            </div>
-          </Fragment>
-        ))}
+        {filters.map(filter => {
+          const promptForSupporter =
+            filter.supporter && (!me || me.supporter === 0);
+          return (
+            <Fragment key={filter.name}>
+              <div>{filter.name}</div>
+              <div
+                className={cn(
+                  'flex gap-2 flex-wrap',
+                  promptForSupporter && 'tooltip tooltip-left tooltip-info'
+                )}
+                data-tip={promptForSupporter ? 'Requires supporter status' : ''}
+              >
+                {filter.options.map(option => (
+                  <button
+                    key={option.id}
+                    className={cn(
+                      `btn btn-sm`,
+                      option.isActive(displayParams) ? '' : 'btn-ghost',
+                      !me && 'btn-disabled',
+                      promptForSupporter && 'btn-disabled'
+                    )}
+                    onClick={() =>
+                      updateParams(
+                        option.applyFilter(
+                          displayParams
+                        ) as PuzzleSearchParams<Search>
+                      )
+                    }
+                  >
+                    {option.text}
+                  </button>
+                ))}
+              </div>
+            </Fragment>
+          );
+        })}
         <div className="mt-2">Sort by</div>
         <div className="flex gap-4 mt-2 flex-wrap">
           {orderings
