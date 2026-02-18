@@ -16,7 +16,7 @@ export const puzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
-  solve: z.enum(['unseen', 'unsolved']).optional().catch(undefined),
+  solve: z.enum(['seen', 'unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'published-asc',
@@ -41,7 +41,7 @@ export const privatePuzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
-  solve: z.enum(['unseen', 'unsolved']).optional().catch(undefined),
+  solve: z.enum(['seen', 'unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'created-asc',
@@ -251,6 +251,15 @@ const filters: Filter[] = [
           return { ...search, solve: undefined };
         },
         isActive: search => !search.solve,
+      },
+      {
+        id: 'seen',
+        text: 'Seen',
+        applyFilter: search => {
+          const newValue = search.solve === 'seen' ? undefined : 'seen';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'seen',
       },
       {
         id: 'unseen',
