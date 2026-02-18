@@ -190,8 +190,8 @@ const filters: Filter[] = [
         id: '1-4',
         text: (
           <>
-            1 <span className="w-4 h-4 bg-accent mask mask-circle" /> - 4{' '}
-            <span className="w-4 h-4 bg-accent mask mask-circle" />
+            1 <span className="w-3 h-3 bg-accent mask mask-circle" /> - 4{' '}
+            <span className="w-3 h-3 bg-accent mask mask-circle" />
           </>
         ),
         applyFilter: search => {
@@ -207,8 +207,8 @@ const filters: Filter[] = [
         id: '5-7',
         text: (
           <>
-            5 <span className="w-4 h-4 bg-accent mask mask-circle" /> - 7{' '}
-            <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />
+            5 <span className="w-3 h-3 bg-accent mask mask-circle" /> - 7{' '}
+            <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />
           </>
         ),
         applyFilter: search => {
@@ -224,9 +224,9 @@ const filters: Filter[] = [
         id: '8-10',
         text: (
           <>
-            8 <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />{' '}
+            8 <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />{' '}
             - 10{' '}
-            <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />
+            <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />
           </>
         ),
         applyFilter: search => {
@@ -385,7 +385,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
             filter.supporter && (!me || me.supporter === 0);
           return (
             <Fragment key={filter.name}>
-              <div>{filter.name}</div>
+              <div className="text-sm">{filter.name}</div>
               <div
                 className={cn(
                   'flex gap-2 flex-wrap',
@@ -397,7 +397,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
                   <button
                     key={option.id}
                     className={cn(
-                      `btn btn-sm`,
+                      `btn btn-xs`,
                       option.isActive(displayParams) ? '' : 'btn-ghost',
                       !me && 'btn-disabled',
                       promptForSupporter && 'btn-disabled'
