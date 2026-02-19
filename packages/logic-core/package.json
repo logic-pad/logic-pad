@@ -6,6 +6,9 @@
     "dist",
     "assets"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://github.com/logic-pad/logic-pad",
   "repository": {
     "type": "git",
