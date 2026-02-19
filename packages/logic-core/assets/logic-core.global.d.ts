@@ -2163,6 +2163,8 @@ declare global {
    * It uses the default serializer when stringifying puzzles, and select the correct deserializer when parsing puzzles.
    */
   export declare const Serializer: {
+    stringifyTiles(tiles: readonly (readonly TileData[])[]): string;
+    parseTiles(input: string): TileData[][];
     stringifyRule(rule: Rule): string;
     parseRule(input: string): Rule;
     stringifySymbol(symbol: Symbol$1): string;
