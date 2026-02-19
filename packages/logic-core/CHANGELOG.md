@@ -1,3 +1,7 @@
+# 0.26.2
+
+- Expose `stringifyTiles` and `parseTiles` methods in the public API of the serializer
+
 # 0.26.1
 
 - Added unsupported symbol to work with the auto solver

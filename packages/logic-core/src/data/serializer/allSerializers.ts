@@ -2,6 +2,7 @@ import GridData from '../grid.js';
 import { Puzzle, PuzzleData } from '../puzzle.js';
 import Rule from '../rules/rule.js';
 import Symbol from '../symbols/symbol.js';
+import TileData from '../tile.js';
 import SerializerV0 from './serializer_v0.js';
 import SerializerBase from './serializerBase.js';
 
@@ -35,6 +36,13 @@ function selectSerializer(input: string): {
  * It uses the default serializer when stringifying puzzles, and select the correct deserializer when parsing puzzles.
  */
 const Serializer = {
+  stringifyTiles(tiles: readonly (readonly TileData[])[]): string {
+    return `${defaultSerializer.version}_${defaultSerializer.stringifyTiles(tiles)}`;
+  },
+  parseTiles(input: string): TileData[][] {
+    const { serializer, data } = selectSerializer(input);
+    return serializer.parseTiles(data);
+  },
   stringifyRule(rule: Rule): string {
     return `${defaultSerializer.version}_${defaultSerializer.stringifyRule(rule)}`;
   },
