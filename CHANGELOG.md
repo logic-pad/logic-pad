@@ -1,19 +1,21 @@
 # PREVIEW BRANCH
 
-- The puzzle editor now auto-saves your progress
 - Less restrictive server limits
   - Max collection size 250 -> unlimited
   - Followed collections 250 -> unlimited
+  - Compressed puzzle size limit 5KB -> 7.5KB
+- Authentication
+  - Added support for signing in with X
+  - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
+  - You can now change your primary email
 - Supporter benefits
   - Unlisted puzzles and collections
   - Unlimited private puzzles
   - Search puzzles by solve status
   - More frequent auto-saves
+- Reduced supporter prices
+- The puzzle editor now auto-saves your progress
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
-- Authentication
-  - Added support for signing in with X
-  - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
-  - You can now change your primary email
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
 - Reworked collection page UI
 - Fixed errors when switching between puzzle and collection search with filters enabled
