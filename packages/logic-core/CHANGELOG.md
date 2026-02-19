@@ -1,3 +1,7 @@
+# 0.26.3
+
+- Fixed publishing error
+
 # 0.26.2
 
 - Expose `stringifyTiles` and `parseTiles` methods in the public API of the serializer
