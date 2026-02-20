@@ -298,20 +298,34 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  solveSessionSolvingBeacon: (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolvingBeacon: (
+    puzzleId: string,
+    msTimeElapsed: number,
+    solutionData?: string
+  ) => {
     const headers = {
       type: 'application/json',
     };
-    const blob = new Blob([JSON.stringify({ msTimeElapsed })], headers);
+    const blob = new Blob(
+      [JSON.stringify({ msTimeElapsed, solutionData })],
+      headers
+    );
     return navigator.sendBeacon(
       (import.meta.env?.VITE_API_ENDPOINT as string) +
         `/session/${puzzleId}/solving`,
       blob
     );
   },
-  solveSessionSolving: async (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolving: async (
+    puzzleId: string,
+    msTimeElapsed: number,
+    solutionData?: string
+  ) => {
     return await retryAxios
-      .post<SolveSession>(`/session/${puzzleId}/solving`, { msTimeElapsed })
+      .post<{ id: string }>(`/session/${puzzleId}/solving`, {
+        msTimeElapsed,
+        solutionData,
+      })
       .then(res => res.data)
       .catch(rethrowError);
   },

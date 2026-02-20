@@ -91,6 +91,7 @@ export interface SolveSession extends ResourceResponse {
   msTimeUsed: number;
   puzzle: string;
   user: string;
+  solutionData: string | null;
 }
 
 export interface Notification extends ResourceResponse {
