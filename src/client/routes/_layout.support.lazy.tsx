@@ -1,5 +1,5 @@
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import Footer from '../components/Footer';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -41,6 +41,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    const paymentRef = useRef<HTMLDivElement>(null);
 
     return (
       <ResponsiveLayout
@@ -69,7 +70,12 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 max={1000 * 60 * 60 * 24 * 365}
               ></progress>
             </div>
-            <SupporterMedal supporter={me?.supporter ?? 0} />
+            <SupporterMedal
+              supporter={me?.supporter ?? 0}
+              onClick={() => {
+                paymentRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
           </div>
         ) : (
           <div className="flex self-stretch items-center flex-wrap justify-center mt-12 gap-8 *:shrink-0">
@@ -93,7 +99,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
         )}
 
         {/* Quote Section */}
-        <div className="p-8 bg-base-100 text-base-content rounded-lg shadow-sm">
+        <div className="p-8 bg-base-100/20 text-neutral-content rounded-lg shadow-sm">
           <blockquote className="text-xl italic text-center leading-relaxed">
             Logic Pad is a project born out of love for the game{' '}
             <a
@@ -123,13 +129,93 @@ export const Route = createLazyFileRoute('/_layout/support')({
               <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
                 <span className="text-accent-content text-sm">✓</span>
               </div>
+              <span>
+                Save your solve progress in the cloud and access it from any
+                device
+              </span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-accent-content text-sm">✓</span>
+              </div>
+              <span>Filter by solve status when searching for puzzles</span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-accent-content text-sm">✓</span>
+              </div>
+              <div className="flex flex-col">
+                <span>Publish unlisted puzzles and collections</span>
+                <span className="text-sm opacity-80">
+                  and keep them even if your supporter status expires
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-accent-content text-sm">✓</span>
+              </div>
+              <div className="flex flex-col">
+                <span>Store unlimited private puzzles</span>
+                <span className="text-sm opacity-80">
+                  Normally you can only store 50
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                <span className="text-accent-content text-sm">✓</span>
+              </div>
               <span>Animated supporter badge next to your username</span>
             </div>
           </div>
-          <p className="text-sm text-base-content/70 mt-4 text-center">
-            More features are being developed! Your support helps make them
-            possible.
-          </p>
+        </div>
+
+        {/* Where does the money go */}
+        <div className="p-6">
+          <h2 className="text-3xl font-semibold text-accent mb-6 text-center">
+            Where Your Support Goes
+          </h2>
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+                1
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Server costs</h3>
+                <p className="text-base-content/80">
+                  Your support helps cover server costs so that Logic Pad can be
+                  completely ad-free for everyone.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+                2
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">
+                  Scaling infrastructure
+                </h3>
+                <p className="text-base-content/80">
+                  Your support helps fund improvements to the site and new
+                  features that require more server resources.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+                3
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Reward for creators</h3>
+                <p className="text-base-content/80">
+                  In the future, most of the supporter revenue will go towards
+                  rewarding puzzle creators for their high-quality puzzles.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* How It Works Section */}
@@ -139,7 +225,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
           </h2>
           <div className="space-y-8">
             <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
                 1
               </div>
               <div>
@@ -151,7 +237,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
                 2
               </div>
               <div>
@@ -165,7 +251,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
                 3
               </div>
               <div>
@@ -178,12 +264,24 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 </p>
               </div>
             </div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 shrink-0 bg-accent text-accent-content rounded-full flex items-center justify-center font-bold">
+                4
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Content Retention</h3>
+                <p className="text-base-content/80">
+                  Contents created with supporter benefits are kept even if your
+                  supporter status expires, so your creations are always safe.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Pricing Section / Call to action */}
         {me ? (
-          <div>
+          <div ref={paymentRef}>
             <h2 className="text-3xl font-semibold text-accent mb-4 text-center">
               Choose Your Support Level
             </h2>
@@ -267,7 +365,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
             {paymentHistory.data?.pages[0].results.length ? (
               <div className="overflow-x-auto max-w-full w-fit">
                 <div className="flex flex-col gap-2 items-center w-fit">
-                  <table className="table table-zebra">
+                  <table className="table">
                     <thead>
                       <tr>
                         <th>Date</th>
@@ -283,7 +381,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                             <td>
                               {new Date(payment.createdAt).toLocaleDateString()}
                             </td>
-                            <td className="font-mono max-w-32 overflow-x-hidden">
+                            <td className="font-mono max-w-56 overflow-x-hidden">
                               {payment.order}
                             </td>
                             <td className="min-w-32">
