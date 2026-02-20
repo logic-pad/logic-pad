@@ -12,7 +12,7 @@
   - Unlisted puzzles and collections
   - Unlimited private puzzles
   - Search puzzles by solve status
-  - More frequent auto-saves
+  - Save puzzle solve progress to the server
 - Reduced supporter prices
 - The puzzle editor now auto-saves your progress
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
