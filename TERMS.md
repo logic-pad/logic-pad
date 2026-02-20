@@ -1,6 +1,6 @@
 # Logic Pad Terms of Service
 
-**Last Updated:** November 16, 2025
+**Last Updated:** February 20, 2026
 
 These Terms of Service ("Terms") govern your access to and use of the Logic Pad website and web application (the "Service"), which is operated by Logic Pad ("we," "us," or "our"). By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, you must not use the Service.
 
@@ -48,6 +48,8 @@ All puzzles uploaded to the Logic Pad server must either be:
 1. Completely **original content** created solely by the uploading user; or
 2. Uploaded with **proper credits** after obtaining **explicit written approval** from the original puzzle owner.
 
+Unlisted puzzles are subject to the same content requirements as published puzzles. **Authorized personnel (moderators) may review unlisted puzzles to verify compliance with these requirements, regardless of whether the puzzle owner has explicitly shared the puzzle.**
+
 ### **3.3 Prohibited Content and Copyright**
 
 The uploading of **copyrighted materials or puzzles from other games without explicit written approval is strictly prohibited**. Logic Pad reserves the right to take action against such violations, including but not limited to:
@@ -63,9 +65,10 @@ Logic Pad endeavors to respond to copyright inquiries from copyright owners and 
 ### **4.1 Content Visibility and Permanence**
 
 * **Uploaded Puzzles** are initially only visible to the creator.
-* **Published Puzzles** become publicly accessible to everyone, including users who have not logged in.
+* **Public Puzzles** become publicly accessible to everyone, including users who have not logged in.
+* **Unlisted Puzzles** are not publicly discoverable but are accessible to anyone with the URL. **Unlisted puzzles are subject to the same removal restrictions as public puzzles and cannot be deleted by the user.**
 * Uploaded puzzles may be **deleted** by the user.
-* **Published puzzles cannot be deleted by the user.** A moderator may delete published puzzles only if they are found to be in violation of these Terms or the Logic Pad rules.
+* **Public or unlisted puzzles cannot be deleted by the user.** A moderator may delete published puzzles only if they are found to be in violation of these Terms or the Logic Pad rules.
 
 ### **4.2 Editing and Reversion**
 
@@ -96,10 +99,6 @@ Users may request a copy of their data on the Logic Pad server. However, Logic P
 ### **6.2 Service Provision**
 
 The Service is provided on an "AS IS" and "AS AVAILABLE" basis. We disclaim all warranties, express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
-
-### **6.3 Server Location**
-
-The Service is available globally, with servers hosted in **Frankfurt**.
 
 ## **7. Indemnification and Changes**
 

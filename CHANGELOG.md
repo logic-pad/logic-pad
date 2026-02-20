@@ -17,6 +17,7 @@
 - The puzzle editor now auto-saves your progress
 - "I'm feeling lucky" no longer picks puzzles that you have solved before
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+- Updated Privacy Policy and Terms of Service
 - Reworked collection page UI
 - Fixed errors when switching between puzzle and collection search with filters enabled
 - Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
