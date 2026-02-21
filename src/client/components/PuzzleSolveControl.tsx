@@ -26,7 +26,7 @@ import { PuzzleFull, SolveSession } from '../online/data.ts';
 import CommentSidebar from '../online/CommentSidebar.tsx';
 import { FaComment, FaDownload, FaSave } from 'react-icons/fa';
 import { router } from '../router/router';
-import { count } from '../uiHelper.ts';
+import { cn, count } from '../uiHelper.ts';
 import { useNavigate } from '@tanstack/react-router';
 import { useGrid } from '../contexts/GridContext.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -351,7 +351,7 @@ const PuzzleSolving = memo(function PuzzleSolving({
       <span className="flex-auto">
         {solved ? (
           <>Auto-save off</>
-        ) : lastSavedTime ? (
+        ) : lastSavedTime && me!.supporter > 0 ? (
           <>
             Last saved <DynamicRelativeTime time={lastSavedTime} />
           </>
@@ -362,12 +362,22 @@ const PuzzleSolving = memo(function PuzzleSolving({
       <div className="flex-1" />
       <div
         className="tooltip tooltip-left tooltip-info shrink-0"
-        data-tip="Save (Ctrl+S)"
+        data-tip={
+          me!.supporter > 0 ? 'Save (Ctrl+S)' : 'Require supporter status'
+        }
       >
-        {isPending ? (
+        {isPending && me!.supporter > 0 ? (
           <Loading className="h-8 w-12 px-3" />
         ) : (
-          <button className="btn btn-sm btn-ghost" onClick={() => save(grid)}>
+          <button
+            className={cn(
+              'btn btn-sm btn-ghost',
+              me!.supporter === 0 && 'btn-disabled'
+            )}
+            onClick={async () => {
+              if (me!.supporter > 0) await save(grid);
+            }}
+          >
             <FaSave size={22} />
           </button>
         )}
