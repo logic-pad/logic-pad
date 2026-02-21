@@ -1,5 +1,6 @@
-# PREVIEW BRANCH
+# 21/2/2026
 
+- Complete server rewrite for better performance and capacity
 - Less restrictive server limits
   - Max collection size 250 -> unlimited
   - Followed collections 250 -> unlimited
