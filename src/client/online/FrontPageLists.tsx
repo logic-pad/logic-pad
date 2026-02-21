@@ -15,17 +15,6 @@ export default memo(function FrontPageLists() {
     return (
       <>
         <HorizontalScroller
-          title="Featured Collections"
-          description="Loading..."
-          scrollable={false}
-          className="flex-wrap box-content max-h-[calc(96px*2+1rem)] w-full"
-          to="/search/collections"
-        >
-          {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} className="w-[320px] h-[96px]" />
-          ))}
-        </HorizontalScroller>
-        <HorizontalScroller
           title="Newest Puzzles"
           scrollable={false}
           className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
