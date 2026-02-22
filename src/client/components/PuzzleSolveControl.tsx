@@ -411,13 +411,21 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
     queryFn: () => api.solveSessionBegin(id!),
     enabled: isOnline && !!me && !!id,
   });
+  const solutionSet = useRef(false);
   const setSolution = useEffectEvent((solutionData: string) => {
     void loadSolution(grid, solutionData).then(solution => {
       if (solution) setGrid(solution);
     });
   });
   useEffect(() => {
-    if (me!.supporter > 0 && data && !data.solvedAt && data.solutionData) {
+    if (
+      me!.supporter > 0 &&
+      data &&
+      !data.solvedAt &&
+      data.solutionData &&
+      !solutionSet.current
+    ) {
+      solutionSet.current = true;
       setSolution(data.solutionData);
     }
   }, [data, me]);
