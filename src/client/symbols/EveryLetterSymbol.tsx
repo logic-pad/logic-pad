@@ -21,11 +21,12 @@ export default memo(function EveryLetterSymbol({
       <span
         className={cn(
           'absolute m-auto text-[0.75em] x-text-outline',
+          symbol.letter.length === 0 && 'opacity-50',
           textClass
         )}
         aria-hidden="true"
       >
-        {symbol.letter}
+        {symbol.letter.padStart(1, '?')}
       </span>
       <span className="sr-only">
         {`Hollow Letter ${symbol.letter} at (${symbol.x}, ${symbol.y})`}

@@ -20,6 +20,7 @@
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
 - Updated Privacy Policy and Terms of Service
 - Reworked collection page UI
+- Empty text symbols now display a placeholder question mark
 - Fixed errors when switching between puzzle and collection search with filters enabled
 - Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
 - Puzzle completion SFX no longer plays in the editor
