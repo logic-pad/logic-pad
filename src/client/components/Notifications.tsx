@@ -237,7 +237,7 @@ const NotificationEntry = memo(function NotificationEntry({
 });
 
 export default memo(function Notifications() {
-  const { isOnline, me } = useOnline();
+  const { isOnline, me, isPending } = useOnline();
   const [expand, setExpand] = useState(false);
   const notificationsCount = useQuery({
     queryKey: ['notification', 'count'],
@@ -267,6 +267,10 @@ export default memo(function Notifications() {
       false
     )
   );
+
+  if (isPending) {
+    return <Loading className="w-10 h-10" />;
+  }
 
   if (!isOnline || !me) return null;
 
