@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import Difficulty from '../metadata/Difficulty';
+import Difficulty, { medianFromHistogram } from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
 import './ratedDifficulty.css';
 
@@ -7,23 +7,6 @@ export interface RatedDifficultyProps {
   collapsible?: boolean;
   ratedDifficulty: number[];
   className?: string;
-}
-
-export function medianFromHistogram(ratedDifficulty: number[]) {
-  const total = ratedDifficulty.reduce((acc, val) => acc + val, 0);
-  const half = total / 2;
-
-  if (total === 0) return 0;
-
-  let current = 0;
-  for (let i = 0; i < ratedDifficulty.length; i++) {
-    current += ratedDifficulty[i];
-    if (current >= half) {
-      return i + 1;
-    }
-  }
-
-  return 0;
 }
 
 export default memo(function RatedDifficulty({

@@ -207,7 +207,11 @@ export default memo(function PuzzleCard({
           </div>
           <div className="flex gap-2 mt-2 text-sm">
             {puzzle.width} &times; {puzzle.height}
-            <Difficulty value={puzzle.designDifficulty} size="xs" />
+            <Difficulty
+              value={puzzle.designDifficulty}
+              ratedDifficulty={puzzle.ratedDifficulty}
+              size="xs"
+            />
           </div>
           <div className="flex gap-4 text-sm opacity-80">
             {puzzle.status !== ResourceStatus.Private && (
