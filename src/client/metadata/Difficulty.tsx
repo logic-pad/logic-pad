@@ -9,10 +9,10 @@ export function medianFromHistogram(ratedDifficulty: number[]) {
 
   if (total === 0) return 0;
 
-  let current = 0;
-  for (let i = 0; i < ratedDifficulty.length; i++) {
-    current += ratedDifficulty[i];
-    if (current > half) {
+  let current = total;
+  for (let i = ratedDifficulty.length - 1; i >= 0; i--) {
+    current -= ratedDifficulty[i];
+    if (current <= half) {
       return i + 1;
     }
   }
