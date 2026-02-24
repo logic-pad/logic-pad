@@ -10,18 +10,6 @@ import { queryClient } from './online/api.ts';
 import { useSettings } from './contexts/SettingsContext.tsx';
 import { router } from './router/router.tsx';
 
-import('@sentry/react')
-  .then(Sentry => {
-    Sentry.init({
-      dsn: import.meta.env.VITE_SENTRY_DSN as string,
-      tunnel: (import.meta.env.VITE_API_ENDPOINT as string) + '/sentry',
-      release: import.meta.env.VITE_PACKAGE_VERSION as string,
-      integrations: [Sentry.browserTracingIntegration()],
-      tracesSampleRate: 1,
-    });
-  })
-  .catch(console.log);
-
 // load the selected theme early to avoid flicker
 const savedTheme = localStorage.getItem(themeKey) ?? 'dark';
 document.documentElement.dataset.theme = savedTheme;

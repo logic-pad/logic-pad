@@ -80,6 +80,12 @@ export default defineConfig({
             release: {
               name: commitHash,
             },
+            bundleSizeOptimizations: {
+              excludeDebugStatements: true,
+              excludeReplayIframe: true,
+              excludeReplayShadowDom: true,
+              excludeReplayWorker: true,
+            },
           }),
         ]
       : []),
