@@ -425,8 +425,10 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
       data.solutionData &&
       !solutionSet.current
     ) {
-      solutionSet.current = true;
       setSolution(data.solutionData);
+    }
+    if (data) {
+      solutionSet.current = true;
     }
   }, [data, me]);
 
