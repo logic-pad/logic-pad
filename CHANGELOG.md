@@ -24,6 +24,7 @@
 - Puzzle cards now show an indication of how the rated difficulty compares to design difficulty
 - The rated difficulty is now rounded up instead of down
 - Automatic collections are no longer shown in a profile's "created collections" section
+- Symbols in wrap-around visualizations are now properly colored by their state
 - Fixed errors when switching between puzzle and collection search with filters enabled
 - Fixed network errors when a puzzle is rated right after solving
 - Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
