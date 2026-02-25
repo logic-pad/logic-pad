@@ -856,7 +856,8 @@ summary::marker {
     to right,
     transparent,
     transparent 50%,
-    rgba(0, 0, 0, 0.5)
+    rgba(0, 0, 0, 0.3) 75%,
+    rgba(0, 0, 0, 1)
   );
 }
 @utility mask-fade-r {
@@ -864,7 +865,8 @@ summary::marker {
     to left,
     transparent,
     transparent 50%,
-    rgba(0, 0, 0, 0.5)
+    rgba(0, 0, 0, 0.3) 75%,
+    rgba(0, 0, 0, 1)
   );
 }
 @utility mask-fade-t {
@@ -872,7 +874,8 @@ summary::marker {
     to bottom,
     transparent,
     transparent 50%,
-    rgba(0, 0, 0, 0.5)
+    rgba(0, 0, 0, 0.3) 75%,
+    rgba(0, 0, 0, 1)
   );
 }
 @utility mask-fade-b {
@@ -880,7 +883,8 @@ summary::marker {
     to top,
     transparent,
     transparent 50%,
-    rgba(0, 0, 0, 0.5)
+    rgba(0, 0, 0, 0.3) 75%,
+    rgba(0, 0, 0, 1)
   );
 }
 
