@@ -855,8 +855,9 @@ summary::marker {
   mask-image: linear-gradient(
     to right,
     transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 75%,
+    transparent 33%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 1) 66%,
     rgba(0, 0, 0, 1)
   );
 }
@@ -864,8 +865,9 @@ summary::marker {
   mask-image: linear-gradient(
     to left,
     transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 75%,
+    transparent 33%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 1) 66%,
     rgba(0, 0, 0, 1)
   );
 }
@@ -873,8 +875,9 @@ summary::marker {
   mask-image: linear-gradient(
     to bottom,
     transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 75%,
+    transparent 33%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 1) 66%,
     rgba(0, 0, 0, 1)
   );
 }
@@ -882,8 +885,9 @@ summary::marker {
   mask-image: linear-gradient(
     to top,
     transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 75%,
+    transparent 33%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 1) 66%,
     rgba(0, 0, 0, 1)
   );
 }
