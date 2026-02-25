@@ -1,8 +1,9 @@
 import { createAuthClient } from 'better-auth/react';
 import { inferAdditionalFields } from 'better-auth/client/plugins';
+import { API_ENDPOINT } from './env';
 
 export const authClient = createAuthClient({
-  baseURL: `${import.meta.env?.VITE_API_ENDPOINT as string}/auth`,
+  baseURL: `${API_ENDPOINT}/auth`,
   basePath: '/auth',
 
   plugins: [

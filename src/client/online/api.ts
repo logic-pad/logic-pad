@@ -43,6 +43,7 @@ import {
 } from './PuzzleSearchQuery';
 import { CollectionSearchParams } from './CollectionSearchQuery';
 import { Account, authClient } from './auth';
+import { API_ENDPOINT } from './env';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -82,12 +83,12 @@ export const queryClient = new QueryClient({
 });
 
 export const axios = axiosStatic.create({
-  baseURL: import.meta.env?.VITE_API_ENDPOINT as string,
+  baseURL: API_ENDPOINT,
   withCredentials: true,
 });
 
 export const retryAxios = axiosStatic.create({
-  baseURL: import.meta.env?.VITE_API_ENDPOINT as string,
+  baseURL: API_ENDPOINT,
   withCredentials: true,
 });
 retryAxios.defaults.raxConfig = {
@@ -311,8 +312,7 @@ export const api = {
       headers
     );
     return navigator.sendBeacon(
-      (import.meta.env?.VITE_API_ENDPOINT as string) +
-        `/session/${puzzleId}/solving`,
+      API_ENDPOINT + `/session/${puzzleId}/solving`,
       blob
     );
   },
@@ -620,10 +620,7 @@ export const api = {
       .catch(rethrowError);
   },
   checkoutSupporter: (price: string, success: string, error: string) => {
-    const url = new URL(
-      (import.meta.env?.VITE_API_ENDPOINT as string) +
-        '/payment/supporter/checkout'
-    );
+    const url = new URL(API_ENDPOINT + '/payment/supporter/checkout');
     url.searchParams.set('priceId', price);
     url.searchParams.set('success', success);
     url.searchParams.set('error', error);
