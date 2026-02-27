@@ -382,22 +382,26 @@ const PuzzleSolving = memo(function PuzzleSolving({
           </button>
         )}
       </div>
-      <CommentSidebar
-        open={openComments}
-        onClose={() => setOpenComments(false)}
-        key="commentSidebar"
-      />
-      <button
-        className="btn btn-sm btn-ghost shrink-0"
-        onClick={() => setOpenComments(!openComments)}
-      >
-        <FaComment />
-        {(commentCount.data?.total ?? 0) > 0 && (
-          <span className="badge badge-sm border border-accent">
-            {count(commentCount.data?.total)}
-          </span>
-        )}
-      </button>
+      {!solved && (
+        <>
+          <CommentSidebar
+            open={openComments}
+            onClose={() => setOpenComments(false)}
+            key="commentSidebar"
+          />
+          <button
+            className="btn btn-sm btn-ghost shrink-0"
+            onClick={() => setOpenComments(!openComments)}
+          >
+            <FaComment />
+            {(commentCount.data?.total ?? 0) > 0 && (
+              <span className="badge badge-sm border border-accent">
+                {count(commentCount.data?.total)}
+              </span>
+            )}
+          </button>
+        </>
+      )}
     </div>
   );
 });
