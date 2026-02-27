@@ -892,44 +892,64 @@ summary::marker {
   );
 }
 @utility mask-fade-tl {
-  mask-image: linear-gradient(
-    to bottom right,
-    transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 58%,
-    rgba(0, 0, 0, 1) 66%,
-    rgba(0, 0, 0, 1)
-  );
+  mask-image:
+    radial-gradient(
+      circle at bottom 33% right 33%,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.3) 16.5%,
+      transparent 33%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.7) 33%,
+      transparent 50%
+    );
 }
 @utility mask-fade-tr {
-  mask-image: linear-gradient(
-    to bottom left,
-    transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 58%,
-    rgba(0, 0, 0, 1) 66%,
-    rgba(0, 0, 0, 1)
-  );
+  mask-image:
+    radial-gradient(
+      circle at bottom 33% left 33%,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.3) 16.5%,
+      transparent 33%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.7) 33%,
+      transparent 50%
+    );
 }
 @utility mask-fade-bl {
-  mask-image: linear-gradient(
-    to top right,
-    transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 58%,
-    rgba(0, 0, 0, 1) 66%,
-    rgba(0, 0, 0, 1)
-  );
+  mask-image:
+    radial-gradient(
+      circle at top 33% right 33%,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.3) 16.5%,
+      transparent 33%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.7) 33%,
+      transparent 50%
+    );
 }
 @utility mask-fade-br {
-  mask-image: linear-gradient(
-    to top left,
-    transparent,
-    transparent 50%,
-    rgba(0, 0, 0, 0.3) 58%,
-    rgba(0, 0, 0, 1) 66%,
-    rgba(0, 0, 0, 1)
-  );
+  mask-image:
+    radial-gradient(
+      circle at top 33% left 33%,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.3) 16.5%,
+      transparent 33%
+    ),
+    radial-gradient(
+      circle at top left,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.7) 33%,
+      transparent 50%
+    );
 }
 
 .x-text-outline {
