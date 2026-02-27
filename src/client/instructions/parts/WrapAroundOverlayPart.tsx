@@ -11,7 +11,12 @@ import { useDisplay } from '../../contexts/DisplayContext.tsx';
 import { array } from '@logic-pad/core/data/dataHelper';
 import GridZones from '@logic-pad/core/data/gridZones';
 import GridData from '@logic-pad/core/data/grid';
-import { State, Wrapping } from '@logic-pad/core/data/primitives';
+import {
+  OrientationMap,
+  ORIENTATIONS,
+  State,
+  Wrapping,
+} from '@logic-pad/core/data/primitives';
 import GridConnections from '@logic-pad/core/data/gridConnections';
 import { cn } from '../../uiHelper.ts';
 import SymbolOverlay from '../../grid/SymbolOverlay.tsx';
@@ -23,7 +28,32 @@ interface WrapAroundOverlayPartProps {
   instruction: WrapAroundRule;
 }
 
-function getLeftEdge(grid: GridData) {
+interface ExtensionGrid {
+  grid: GridData;
+  symbolStateMap: Map<string, number[]>;
+}
+
+// todo: same symbol overlap in reverse wrap/reflect
+
+function isWrap(wrapping: Wrapping) {
+  return wrapping === Wrapping.Wrap || wrapping === Wrapping.WrapReverse;
+}
+
+function isReverse(wrapping: Wrapping) {
+  return (
+    wrapping === Wrapping.WrapReverse || wrapping === Wrapping.ReflectReverse
+  );
+}
+
+function isReflectReverse(wrapping: Wrapping) {
+  return wrapping === Wrapping.ReflectReverse;
+}
+
+function isNone(wrapping: Wrapping) {
+  return wrapping === Wrapping.None;
+}
+
+function getRightEdge(grid: GridData) {
   const symbolStateMap = new Map<string, number[]>();
   const newGrid = grid.copyWith({
     width: 1,
@@ -45,7 +75,7 @@ function getLeftEdge(grid: GridData) {
           k,
           v
             .filter((s, idx) => {
-              if (Math.abs(s.x - grid.width + 1) <= 0.5) {
+              if (grid.width - 1 - s.x < 0.5) {
                 stateMap.push(idx);
                 return true;
               }
@@ -75,7 +105,7 @@ function getLeftEdge(grid: GridData) {
   };
 }
 
-function getRightEdge(grid: GridData) {
+function getLeftEdge(grid: GridData) {
   const symbolStateMap = new Map<string, number[]>();
   const newGrid = grid.copyWith({
     width: 1,
@@ -89,7 +119,7 @@ function getRightEdge(grid: GridData) {
         const newSymbols = [
           k,
           v.filter((s, idx) => {
-            if (Math.abs(s.x) <= 0.5) {
+            if (s.x < 0.5) {
               stateMap.push(idx);
               return true;
             }
@@ -111,14 +141,14 @@ function getRightEdge(grid: GridData) {
   };
 }
 
-function getTopEdge(grid: GridData) {
+function getBottomEdge(grid: GridData) {
   const symbolStateMap = new Map<string, number[]>();
   const newGrid = grid.copyWith({
     height: 1,
     tiles: array(grid.width, 1, (x, _) => grid.getTile(x, grid.height - 1)),
     connections: new GridConnections(
       grid.connections.edges
-        .filter(e => e.y1 === grid.height - 1 || e.y1 === grid.height - 1)
+        .filter(e => e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
         .map(e => ({
           x1: e.x1,
           y1: e.y1 - grid.height + 1,
@@ -133,7 +163,7 @@ function getTopEdge(grid: GridData) {
           k,
           v
             .filter((s, idx) => {
-              if (Math.abs(s.y - grid.height + 1) < 0.5) {
+              if (grid.height - 1 - s.y < 0.5) {
                 stateMap.push(idx);
                 return true;
               }
@@ -148,7 +178,7 @@ function getTopEdge(grid: GridData) {
     rules: [],
     zones: new GridZones(
       grid.zones.edges
-        .filter(e => e.y1 === grid.height - 1 || e.y1 === grid.height - 1)
+        .filter(e => e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
         .map(e => ({
           x1: e.x1,
           y1: e.y1 - grid.height + 1,
@@ -163,13 +193,13 @@ function getTopEdge(grid: GridData) {
   };
 }
 
-function getBottomEdge(grid: GridData) {
+function getTopEdge(grid: GridData) {
   const symbolStateMap = new Map<string, number[]>();
   const newGrid = grid.copyWith({
     height: 1,
     tiles: array(grid.width, 1, (x, _) => grid.getTile(x, 0)),
     connections: new GridConnections(
-      grid.connections.edges.filter(e => e.y1 === 0 || e.y1 === 0)
+      grid.connections.edges.filter(e => e.y1 === 0 || e.y2 === 0)
     ),
     symbols: new Map(
       [...grid.symbols.entries()].map(([k, v]) => {
@@ -177,7 +207,7 @@ function getBottomEdge(grid: GridData) {
         const newSymbols = [
           k,
           v.filter((s, idx) => {
-            if (Math.abs(s.y) < 0.5) {
+            if (s.y < 0.5) {
               stateMap.push(idx);
               return true;
             }
@@ -190,7 +220,7 @@ function getBottomEdge(grid: GridData) {
     ),
     rules: [],
     zones: new GridZones(
-      grid.zones.edges.filter(e => e.y1 === 0 || e.y1 === 0)
+      grid.zones.edges.filter(e => e.y1 === 0 || e.y2 === 0)
     ),
   });
   return {
@@ -199,6 +229,375 @@ function getBottomEdge(grid: GridData) {
   };
 }
 
+function getTopLeftCorner(grid: GridData) {
+  const symbolStateMap = new Map<string, number[]>();
+  const newGrid = grid.copyWith({
+    width: 1,
+    height: 1,
+    tiles: array(1, 1, () => grid.getTile(0, 0)),
+    connections: new GridConnections(
+      grid.connections.edges.filter(
+        e => (e.x1 === 0 || e.x2 === 0) && (e.y1 === 0 || e.y2 === 0)
+      )
+    ),
+    symbols: new Map(
+      [...grid.symbols.entries()].map(([k, v]) => {
+        const stateMap: number[] = [];
+        const newSymbols = [
+          k,
+          v.filter((s, idx) => {
+            if (s.x < 0.5 && s.y < 0.5) {
+              stateMap.push(idx);
+              return true;
+            }
+            return false;
+          }),
+        ] as const;
+        symbolStateMap.set(k, stateMap);
+        return newSymbols;
+      })
+    ),
+    rules: [],
+    zones: new GridZones(
+      grid.zones.edges.filter(
+        e => (e.x1 === 0 || e.x2 === 0) && (e.y1 === 0 || e.y2 === 0)
+      )
+    ),
+  });
+  return {
+    grid: newGrid,
+    symbolStateMap,
+  };
+}
+
+function getTopRightCorner(grid: GridData) {
+  const symbolStateMap = new Map<string, number[]>();
+  const newGrid = grid.copyWith({
+    width: 1,
+    height: 1,
+    tiles: array(1, 1, () => grid.getTile(grid.width - 1, 0)),
+    connections: new GridConnections(
+      grid.connections.edges
+        .filter(
+          e =>
+            (e.x1 === grid.width - 1 || e.x2 === grid.width - 1) &&
+            (e.y1 === 0 || e.y2 === 0)
+        )
+        .map(e => ({
+          x1: e.x1 - grid.width + 1,
+          y1: e.y1,
+          x2: e.x2 - grid.width + 1,
+          y2: e.y2,
+        }))
+    ),
+    symbols: new Map(
+      [...grid.symbols.entries()].map(([k, v]) => {
+        const stateMap: number[] = [];
+        const newSymbols = [
+          k,
+          v
+            .filter((s, idx) => {
+              if (grid.width - 1 - s.x < 0.5 && s.y < 0.5) {
+                stateMap.push(idx);
+                return true;
+              }
+              return false;
+            })
+            .map(s => s.withX(s.x - grid.width + 1)),
+        ] as const;
+        symbolStateMap.set(k, stateMap);
+        return newSymbols;
+      })
+    ),
+    rules: [],
+    zones: new GridZones(
+      grid.zones.edges
+        .filter(
+          e =>
+            (e.x1 === grid.width - 1 || e.x2 === grid.width - 1) &&
+            (e.y1 === 0 || e.y2 === 0)
+        )
+        .map(e => ({
+          x1: e.x1 - grid.width + 1,
+          y1: e.y1,
+          x2: e.x2 - grid.width + 1,
+          y2: e.y2,
+        }))
+    ),
+  });
+  return {
+    grid: newGrid,
+    symbolStateMap,
+  };
+}
+
+function getBottomLeftCorner(grid: GridData) {
+  const symbolStateMap = new Map<string, number[]>();
+  const newGrid = grid.copyWith({
+    width: 1,
+    height: 1,
+    tiles: array(1, 1, () => grid.getTile(0, grid.height - 1)),
+    connections: new GridConnections(
+      grid.connections.edges
+        .filter(
+          e =>
+            (e.x1 === 0 || e.x2 === 0) &&
+            (e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
+        )
+        .map(e => ({
+          x1: e.x1,
+          y1: e.y1 - grid.height + 1,
+          x2: e.x2,
+          y2: e.y2 - grid.height + 1,
+        }))
+    ),
+    symbols: new Map(
+      [...grid.symbols.entries()].map(([k, v]) => {
+        const stateMap: number[] = [];
+        const newSymbols = [
+          k,
+          v
+            .filter((s, idx) => {
+              if (s.x < 0.5 && grid.height - 1 - s.y < 0.5) {
+                stateMap.push(idx);
+                return true;
+              }
+              return false;
+            })
+            .map(s => s.withY(s.y - grid.height + 1)),
+        ] as const;
+        symbolStateMap.set(k, stateMap);
+        return newSymbols;
+      })
+    ),
+    rules: [],
+    zones: new GridZones(
+      grid.zones.edges
+        .filter(
+          e =>
+            (e.x1 === 0 || e.x2 === 0) &&
+            (e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
+        )
+        .map(e => ({
+          x1: e.x1,
+          y1: e.y1 - grid.height + 1,
+          x2: e.x2,
+          y2: e.y2 - grid.height + 1,
+        }))
+    ),
+  });
+  return {
+    grid: newGrid,
+    symbolStateMap,
+  };
+}
+
+function getBottomRightCorner(grid: GridData) {
+  const symbolStateMap = new Map<string, number[]>();
+  const newGrid = grid.copyWith({
+    width: 1,
+    height: 1,
+    tiles: array(1, 1, () => grid.getTile(grid.width - 1, grid.height - 1)),
+    connections: new GridConnections(
+      grid.connections.edges
+        .filter(
+          e =>
+            (e.x1 === grid.width - 1 || e.x2 === grid.width - 1) &&
+            (e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
+        )
+        .map(e => ({
+          x1: e.x1 - grid.width + 1,
+          y1: e.y1 - grid.height + 1,
+          x2: e.x2 - grid.width + 1,
+          y2: e.y2 - grid.height + 1,
+        }))
+    ),
+    symbols: new Map(
+      [...grid.symbols.entries()].map(([k, v]) => {
+        const stateMap: number[] = [];
+        const newSymbols = [
+          k,
+          v
+            .filter((s, idx) => {
+              if (grid.width - 1 - s.x < 0.5 && grid.height - 1 - s.y < 0.5) {
+                stateMap.push(idx);
+                return true;
+              }
+              return false;
+            })
+            .map(s =>
+              s.copyWith({ x: s.x - grid.width + 1, y: s.y - grid.height + 1 })
+            ),
+        ] as const;
+        symbolStateMap.set(k, stateMap);
+        return newSymbols;
+      })
+    ),
+    rules: [],
+    zones: new GridZones(
+      grid.zones.edges
+        .filter(
+          e =>
+            (e.x1 === grid.width - 1 || e.x2 === grid.width - 1) &&
+            (e.y1 === grid.height - 1 || e.y2 === grid.height - 1)
+        )
+        .map(e => ({
+          x1: e.x1 - grid.width + 1,
+          y1: e.y1 - grid.height + 1,
+          x2: e.x2 - grid.width + 1,
+          y2: e.y2 - grid.height + 1,
+        }))
+    ),
+  });
+  return {
+    grid: newGrid,
+    symbolStateMap,
+  };
+}
+
+function getCorner(grid: GridData, bottom: boolean, right: boolean) {
+  if (bottom && right) return getBottomRightCorner(grid);
+  if (bottom && !right) return getBottomLeftCorner(grid);
+  if (!bottom && right) return getTopRightCorner(grid);
+  return getTopLeftCorner(grid);
+}
+
+function getWrappedCorner(
+  instruction: WrapAroundRule,
+  grid: GridData,
+  bottom: boolean,
+  right: boolean
+) {
+  switch (instruction.horizontal) {
+    case Wrapping.WrapReverse:
+      bottom = !bottom;
+      break;
+    case Wrapping.ReflectReverse:
+      right = !right;
+      bottom = !bottom;
+      break;
+  }
+  switch (instruction.vertical) {
+    case Wrapping.WrapReverse:
+      right = !right;
+      break;
+    case Wrapping.ReflectReverse:
+      right = !right;
+      bottom = !bottom;
+      break;
+  }
+  return getCorner(grid, bottom, right);
+}
+
+function getExtensionGrids(
+  grid: GridData,
+  instruction: WrapAroundRule
+): OrientationMap<ExtensionGrid | undefined> {
+  return {
+    left: isNone(instruction.horizontal)
+      ? undefined
+      : isWrap(instruction.horizontal)
+        ? getRightEdge(grid)
+        : getLeftEdge(grid),
+    right: isNone(instruction.horizontal)
+      ? undefined
+      : isWrap(instruction.horizontal)
+        ? getLeftEdge(grid)
+        : getRightEdge(grid),
+    up: isNone(instruction.vertical)
+      ? undefined
+      : isWrap(instruction.vertical)
+        ? getBottomEdge(grid)
+        : getTopEdge(grid),
+    down: isNone(instruction.vertical)
+      ? undefined
+      : isWrap(instruction.vertical)
+        ? getTopEdge(grid)
+        : getBottomEdge(grid),
+    'up-left':
+      isNone(instruction.horizontal) || isNone(instruction.vertical)
+        ? undefined
+        : getWrappedCorner(instruction, grid, true, true),
+    'up-right':
+      isNone(instruction.horizontal) || isNone(instruction.vertical)
+        ? undefined
+        : getWrappedCorner(instruction, grid, true, false),
+    'down-left':
+      isNone(instruction.horizontal) || isNone(instruction.vertical)
+        ? undefined
+        : getWrappedCorner(instruction, grid, false, true),
+    'down-right':
+      isNone(instruction.horizontal) || isNone(instruction.vertical)
+        ? undefined
+        : getWrappedCorner(instruction, grid, false, false),
+  };
+}
+
+function getExtensionStates(
+  state: ReadonlyMap<string, State[]>,
+  extensionGrids: OrientationMap<ExtensionGrid | undefined>
+): OrientationMap<Map<string, State[]> | undefined> {
+  const result: OrientationMap<Map<string, State[]> | undefined> = {
+    left: undefined,
+    right: undefined,
+    up: undefined,
+    down: undefined,
+    'down-left': undefined,
+    'down-right': undefined,
+    'up-left': undefined,
+    'up-right': undefined,
+  };
+  for (const orientation of ORIENTATIONS) {
+    const extensionGrid = extensionGrids[orientation];
+    if (!extensionGrid) continue;
+    const symbolStateMap = extensionGrid.symbolStateMap;
+    const newState = new Map<string, State[]>();
+    for (const [k, v] of state.entries()) {
+      const stateMap = symbolStateMap.get(k);
+      if (!stateMap) continue;
+      newState.set(
+        k,
+        stateMap.map(i => v[i])
+      );
+    }
+    result[orientation] = newState;
+  }
+  return result;
+}
+
+const GridExtension = memo(function GridExtension({
+  grid,
+  symbolState,
+  tileSize,
+  wrapperClassName,
+  gridClassName,
+}: {
+  grid: GridData;
+  symbolState: Map<string, State[]> | undefined;
+  tileSize: number;
+  wrapperClassName?: string;
+  gridClassName?: string;
+}) {
+  return (
+    <div className={wrapperClassName}>
+      <Grid
+        grid={grid}
+        size={tileSize}
+        editable={false}
+        className={gridClassName}
+      >
+        <SymbolOverlay
+          grid={grid}
+          state={symbolState}
+          solution={null}
+          editable={false}
+        />
+        <GridZoneOverlay grid={grid} />
+      </Grid>
+    </div>
+  );
+});
+
 export default memo(function WrapAroundOverlayPart({
   instruction,
 }: WrapAroundOverlayPartProps) {
@@ -206,90 +605,14 @@ export default memo(function WrapAroundOverlayPart({
   const { state } = useGridState();
   const { scale, responsiveScale } = useDisplay();
   const [visualizeWrapArounds] = useSettings('visualizeWrapArounds');
-  const leftGrid = useMemo(() => {
-    if (instruction.horizontal === Wrapping.None)
-      return { grid, symbolStateMap: undefined };
-    return instruction.horizontal === Wrapping.Wrap ||
-      instruction.horizontal === Wrapping.WrapReverse
-      ? getLeftEdge(grid)
-      : getRightEdge(grid);
-  }, [grid, instruction]);
-  const leftState = useMemo(() => {
-    if (leftGrid.symbolStateMap === undefined) return undefined;
-    const newState = new Map<string, State[]>();
-    for (const [k, v] of state.symbols.entries()) {
-      const stateMap = leftGrid.symbolStateMap.get(k);
-      if (!stateMap) continue;
-      newState.set(
-        k,
-        stateMap.map(i => v[i])
-      );
-    }
-    return newState;
-  }, [state, leftGrid.symbolStateMap]);
-  const rightGrid = useMemo(() => {
-    if (instruction.horizontal === Wrapping.None)
-      return { grid, symbolStateMap: undefined };
-    return instruction.horizontal === Wrapping.Wrap ||
-      instruction.horizontal === Wrapping.WrapReverse
-      ? getRightEdge(grid)
-      : getLeftEdge(grid);
-  }, [grid, instruction]);
-  const rightState = useMemo(() => {
-    if (rightGrid.symbolStateMap === undefined) return undefined;
-    const newState = new Map<string, State[]>();
-    for (const [k, v] of state.symbols.entries()) {
-      const stateMap = rightGrid.symbolStateMap.get(k);
-      if (!stateMap) continue;
-      newState.set(
-        k,
-        stateMap.map(i => v[i])
-      );
-    }
-    return newState;
-  }, [state, rightGrid.symbolStateMap]);
-  const topGrid = useMemo(() => {
-    if (instruction.vertical === Wrapping.None)
-      return { grid, symbolStateMap: undefined };
-    return instruction.vertical === Wrapping.Wrap ||
-      instruction.vertical === Wrapping.WrapReverse
-      ? getTopEdge(grid)
-      : getBottomEdge(grid);
-  }, [grid, instruction]);
-  const topState = useMemo(() => {
-    if (topGrid.symbolStateMap === undefined) return undefined;
-    const newState = new Map<string, State[]>();
-    for (const [k, v] of state.symbols.entries()) {
-      const stateMap = topGrid.symbolStateMap.get(k);
-      if (!stateMap) continue;
-      newState.set(
-        k,
-        stateMap.map(i => v[i])
-      );
-    }
-    return newState;
-  }, [state, topGrid.symbolStateMap]);
-  const bottomGrid = useMemo(() => {
-    if (instruction.vertical === Wrapping.None)
-      return { grid, symbolStateMap: undefined };
-    return instruction.vertical === Wrapping.Wrap ||
-      instruction.vertical === Wrapping.WrapReverse
-      ? getBottomEdge(grid)
-      : getTopEdge(grid);
-  }, [grid, instruction]);
-  const bottomState = useMemo(() => {
-    if (bottomGrid.symbolStateMap === undefined) return undefined;
-    const newState = new Map<string, State[]>();
-    for (const [k, v] of state.symbols.entries()) {
-      const stateMap = bottomGrid.symbolStateMap.get(k);
-      if (!stateMap) continue;
-      newState.set(
-        k,
-        stateMap.map(i => v[i])
-      );
-    }
-    return newState;
-  }, [state, bottomGrid.symbolStateMap]);
+  const extensions = useMemo(
+    () => getExtensionGrids(grid, instruction),
+    [grid, instruction]
+  );
+  const states = useMemo(
+    () => getExtensionStates(state.symbols, extensions),
+    [state.symbols, extensions]
+  );
 
   const [tileConfig, setTileConfig] = useState<{
     width: number;
@@ -319,121 +642,149 @@ export default memo(function WrapAroundOverlayPart({
 
   return (
     <GridOverlay>
-      {instruction.horizontal !== Wrapping.None && (
-        <>
-          <div
-            className={cn(
-              'absolute right-[calc(100%-0.5em)] -top-[0.5em] w-[1.5em] h-[calc(100%+1em)] mask-fade-l',
-              (instruction.horizontal === Wrapping.WrapReverse ||
-                instruction.horizontal === Wrapping.ReflectReverse) &&
-                '-scale-y-100'
-            )}
-          >
-            <Grid
-              grid={leftGrid.grid}
-              size={Math.round(tileConfig.tileSize * scale)}
-              editable={false}
-              className={cn(
-                'absolute right-[0.5em] top-[0.5em]',
-                instruction.horizontal === Wrapping.ReflectReverse &&
-                  '-scale-x-100'
-              )}
-            >
-              <SymbolOverlay
-                grid={leftGrid.grid}
-                state={leftState}
-                solution={null}
-                editable={false}
-              />
-              <GridZoneOverlay grid={leftGrid.grid} />
-            </Grid>
-          </div>
-          <div
-            className={cn(
-              'absolute left-[calc(100%-0.5em)] -top-[0.5em] w-[1.5em] h-[calc(100%+1em)] mask-fade-r',
-              (instruction.horizontal === Wrapping.WrapReverse ||
-                instruction.horizontal === Wrapping.ReflectReverse) &&
-                '-scale-y-100'
-            )}
-          >
-            <Grid
-              grid={rightGrid.grid}
-              size={Math.round(tileConfig.tileSize * scale)}
-              editable={false}
-              className={cn(
-                'absolute left-[0.5em] top-[0.5em]',
-                instruction.horizontal === Wrapping.ReflectReverse &&
-                  '-scale-x-100'
-              )}
-            >
-              <SymbolOverlay
-                grid={rightGrid.grid}
-                state={rightState}
-                solution={null}
-                editable={false}
-              />
-              <GridZoneOverlay grid={rightGrid.grid} />
-            </Grid>
-          </div>
-        </>
+      {extensions.left && (
+        <GridExtension
+          grid={extensions.left.grid}
+          symbolState={states.left}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute right-[calc(100%-0.5em)] -top-[0.5em] w-[1.5em] h-[calc(100%+1em)] mask-fade-l',
+            isReverse(instruction.horizontal) && '-scale-y-100'
+          )}
+          gridClassName={cn(
+            'absolute right-[0.5em] top-[0.5em]',
+            isReflectReverse(instruction.horizontal) && '-scale-x-100'
+          )}
+        />
       )}
-      {instruction.vertical !== Wrapping.None && (
-        <>
-          <div
-            className={cn(
-              'absolute bottom-[calc(100%-0.5em)] -left-[0.5em] w-[calc(100%+1em)] h-[1.5em] mask-fade-t',
-              (instruction.vertical === Wrapping.WrapReverse ||
-                instruction.vertical === Wrapping.ReflectReverse) &&
-                '-scale-x-100'
-            )}
-          >
-            <Grid
-              grid={topGrid.grid}
-              size={Math.round(tileConfig.tileSize * scale)}
-              editable={false}
-              className={cn(
-                'absolute left-[0.5em] bottom-[0.5em]',
-                instruction.vertical === Wrapping.ReflectReverse &&
-                  '-scale-y-100'
-              )}
-            >
-              <SymbolOverlay
-                grid={topGrid.grid}
-                state={topState}
-                solution={null}
-                editable={false}
-              />
-              <GridZoneOverlay grid={topGrid.grid} />
-            </Grid>
-          </div>
-          <div
-            className={cn(
-              'absolute top-[calc(100%-0.5em)] -left-[0.5em] w-[calc(100%+1em)] h-[1.5em] mask-fade-b',
-              (instruction.vertical === Wrapping.WrapReverse ||
-                instruction.vertical === Wrapping.ReflectReverse) &&
-                '-scale-x-100'
-            )}
-          >
-            <Grid
-              grid={bottomGrid.grid}
-              size={Math.round(tileConfig.tileSize * scale)}
-              editable={false}
-              className={cn(
-                'absolute left-[0.5em] top-[0.5em]',
-                instruction.vertical === Wrapping.ReflectReverse &&
-                  '-scale-y-100'
-              )}
-            >
-              <SymbolOverlay
-                grid={bottomGrid.grid}
-                state={bottomState}
-                solution={null}
-                editable={false}
-              />
-              <GridZoneOverlay grid={bottomGrid.grid} />
-            </Grid>
-          </div>
-        </>
+      {extensions.right && (
+        <GridExtension
+          grid={extensions.right.grid}
+          symbolState={states.right}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute left-[calc(100%-0.5em)] -top-[0.5em] w-[1.5em] h-[calc(100%+1em)] mask-fade-r',
+            isReverse(instruction.horizontal) && '-scale-y-100'
+          )}
+          gridClassName={cn(
+            'absolute left-[0.5em] top-[0.5em]',
+            isReflectReverse(instruction.horizontal) && '-scale-x-100'
+          )}
+        />
+      )}
+      {extensions.up && (
+        <GridExtension
+          grid={extensions.up.grid}
+          symbolState={states.up}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute bottom-[calc(100%-0.5em)] -left-[0.5em] w-[calc(100%+1em)] h-[1.5em] mask-fade-t',
+            isReverse(instruction.vertical) && '-scale-x-100'
+          )}
+          gridClassName={cn(
+            'absolute left-[0.5em] bottom-[0.5em]',
+            isReflectReverse(instruction.vertical) && '-scale-y-100'
+          )}
+        />
+      )}
+      {extensions.down && (
+        <GridExtension
+          grid={extensions.down.grid}
+          symbolState={states.down}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute top-[calc(100%-0.5em)] -left-[0.5em] w-[calc(100%+1em)] h-[1.5em] mask-fade-b',
+            isReverse(instruction.vertical) && '-scale-x-100'
+          )}
+          gridClassName={cn(
+            'absolute left-[0.5em] top-[0.5em]',
+            isReflectReverse(instruction.vertical) && '-scale-y-100'
+          )}
+        />
+      )}
+      {extensions['up-left'] && (
+        <GridExtension
+          grid={extensions['up-left'].grid}
+          symbolState={states['up-left']}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute -left-[1em] -top-[1em] w-[1.5em] h-[1.5em] mask-fade-tl'
+          )}
+          gridClassName={cn(
+            'absolute left-0 top-0',
+            ((instruction.horizontal === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-y-100',
+            ((instruction.vertical === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-x-100'
+          )}
+        />
+      )}
+      {extensions['up-right'] && (
+        <GridExtension
+          grid={extensions['up-right'].grid}
+          symbolState={states['up-right']}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute -right-[1em] -top-[1em] w-[1.5em] h-[1.5em] mask-fade-tr'
+          )}
+          gridClassName={cn(
+            'absolute right-0 top-0',
+            ((instruction.horizontal === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-y-100',
+            ((instruction.vertical === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-x-100'
+          )}
+        />
+      )}
+      {extensions['down-left'] && (
+        <GridExtension
+          grid={extensions['down-left'].grid}
+          symbolState={states['down-left']}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute -left-[1em] -bottom-[1em] w-[1.5em] h-[1.5em] mask-fade-bl'
+          )}
+          gridClassName={cn(
+            'absolute left-0 bottom-0',
+            ((instruction.horizontal === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-y-100',
+            ((instruction.vertical === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-x-100'
+          )}
+        />
+      )}
+      {extensions['down-right'] && (
+        <GridExtension
+          grid={extensions['down-right'].grid}
+          symbolState={states['down-right']}
+          tileSize={Math.round(tileConfig.tileSize * scale)}
+          wrapperClassName={cn(
+            'absolute -right-[1em] -bottom-[1em] w-[1.5em] h-[1.5em] mask-fade-br'
+          )}
+          gridClassName={cn(
+            'absolute right-0 bottom-0',
+            ((instruction.horizontal === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-y-100',
+            ((instruction.vertical === Wrapping.WrapReverse) !==
+              (instruction.horizontal === Wrapping.ReflectReverse)) !==
+              (instruction.vertical === Wrapping.ReflectReverse) &&
+              '-scale-x-100'
+          )}
+        />
       )}
     </GridOverlay>
   );

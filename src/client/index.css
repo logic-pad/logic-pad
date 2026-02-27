@@ -891,6 +891,46 @@ summary::marker {
     rgba(0, 0, 0, 1)
   );
 }
+@utility mask-fade-tl {
+  mask-image: linear-gradient(
+    to bottom right,
+    transparent,
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 58%,
+    rgba(0, 0, 0, 1) 66%,
+    rgba(0, 0, 0, 1)
+  );
+}
+@utility mask-fade-tr {
+  mask-image: linear-gradient(
+    to bottom left,
+    transparent,
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 58%,
+    rgba(0, 0, 0, 1) 66%,
+    rgba(0, 0, 0, 1)
+  );
+}
+@utility mask-fade-bl {
+  mask-image: linear-gradient(
+    to top right,
+    transparent,
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 58%,
+    rgba(0, 0, 0, 1) 66%,
+    rgba(0, 0, 0, 1)
+  );
+}
+@utility mask-fade-br {
+  mask-image: linear-gradient(
+    to top left,
+    transparent,
+    transparent 50%,
+    rgba(0, 0, 0, 0.3) 58%,
+    rgba(0, 0, 0, 1) 66%,
+    rgba(0, 0, 0, 1)
+  );
+}
 
 .x-text-outline {
   -webkit-text-stroke: thin currentColor;
