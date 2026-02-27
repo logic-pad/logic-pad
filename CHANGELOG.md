@@ -20,6 +20,7 @@
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
 - Updated Privacy Policy and Terms of Service
 - Reworked collection page UI
+- New set of SVG user avatars with better support for different names
 - Empty text symbols now display a placeholder question mark
 - Puzzle cards now show an indication of how the rated difficulty compares to design difficulty
 - The rated difficulty is now rounded up instead of down
