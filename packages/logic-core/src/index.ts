@@ -87,7 +87,6 @@ import CspuzSolver from './data/solver/cspuz/cspuzSolver.js';
 import { gridToJson } from './data/solver/cspuz/jsonify.js';
 import EventIteratingSolver from './data/solver/eventIteratingSolver.js';
 import Solver from './data/solver/solver.js';
-import UniversalDevSolver from './data/solver/universal/dev/universalDevSolver.js';
 import UniversalSolver from './data/solver/universal/universalSolver.js';
 import AreaNumberSymbol from './data/symbols/areaNumberSymbol.js';
 import CustomIconSymbol from './data/symbols/customIconSymbol.js';
@@ -250,7 +249,6 @@ export {
   gridToJson,
   EventIteratingSolver,
   Solver,
-  UniversalDevSolver,
   UniversalSolver,
   AreaNumberSymbol,
   CustomIconSymbol,
