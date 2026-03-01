@@ -1,13 +1,24 @@
 import { parseArgs } from 'util';
 import { allSolvers } from '../src/data/solver/allSolvers.js';
-import { BenchmarkEntry, parseLink, PuzzleEntry } from './helper.js';
+import {
+  BenchmarkEntry,
+  parseLink,
+  PuzzleEntry,
+  shuffleArray,
+} from './helper.js';
 import PQueue from 'p-queue';
-
-const allPuzzlesPath = 'benchmark/data/all_puzzles_logic_pad.json';
 
 const { values, positionals } = parseArgs({
   args: Bun.argv,
   options: {
+    name: {
+      type: 'string',
+      short: 'n',
+    },
+    file: {
+      type: 'string',
+      short: 'f',
+    },
     maxTime: {
       type: 'string',
       default: '10',
@@ -15,13 +26,13 @@ const { values, positionals } = parseArgs({
     },
     maxCount: {
       type: 'string',
-      default: '99999',
+      default: '200',
       short: 'c',
     },
     concurrency: {
       type: 'string',
       default: '4',
-      short: 'n',
+      short: 'd',
     },
     help: {
       type: 'boolean',
@@ -34,14 +45,17 @@ const { values, positionals } = parseArgs({
 
 positionals.splice(0, 2); // Remove "bun" and script name
 
-if (values.help || positionals.length !== 1) {
+if (values.help || positionals.length !== 1 || !values.file) {
   console.log(`
 Usage: bun bench:prepare <solver> [options]
 
 Options:
+  -f, --file <string>         Path to the puzzle data file (required)
+
+  -n, --name <string>         Name of the generated benchmark files (default: solver name)
   -t, --maxTime <number>      Maximum seconds allowed for each solve (default: 10)
   -c, --maxCount <number>     Maximum number of puzzles included (default: 100)
-  -n, --concurrency <number>  Number of solves to run concurrently (default: 4)
+  -d, --concurrency <number>  Number of solves to run concurrently (default: 4)
   -h, --help                  Show this help message
 
 Solver:
@@ -54,6 +68,8 @@ ${[...allSolvers.keys()].map(s => `    - ${s}`).join('\n')}
 const maxTime = parseFloat(values.maxTime) * 1000;
 const maxCount = parseInt(values.maxCount);
 const solverName = positionals[0];
+const outputName = values.name ?? solverName;
+const allPuzzlesPath = `benchmark/data/${values.file}`;
 
 const solver = allSolvers.get(solverName);
 if (!solver) {
@@ -62,20 +78,30 @@ if (!solver) {
 }
 
 const allPuzzles = (await Bun.file(allPuzzlesPath).json()) as PuzzleEntry[];
-allPuzzles.sort(() => Math.random() - 0.5);
+shuffleArray(allPuzzles);
 
 const results: { puzzle: PuzzleEntry; result: BenchmarkEntry }[] = [];
 const pqueue = new PQueue({ concurrency: 4 });
+pqueue.on('completed', () => {
+  if (
+    results.filter(r => r.result.solveCorrect && r.result.supported).length >=
+    maxCount
+  ) {
+    pqueue.clear();
+  }
+});
 
 function printEntry(
   benchmarkEntry: BenchmarkEntry,
   entryId: number,
-  solverId: string,
   pid: number
 ) {
+  const selectedPuzzles = results.filter(
+    r => r.result.solveCorrect && r.result.supported
+  );
   if (benchmarkEntry.supported) {
     console.log(
-      `${solverId}\t| ${entryId} / ${allPuzzles.length}\t| ${pid}\t| ${
+      `${entryId} / ${allPuzzles.length}    \t| ${selectedPuzzles.length} / ${maxCount}    \t| ${pid}\t| ${
         Number.isNaN(benchmarkEntry.solveTime)
           ? 'timeout'
           : `${benchmarkEntry.solveTime.toFixed(0)}ms`
@@ -83,7 +109,7 @@ function printEntry(
     );
   } else {
     console.log(
-      `${solverId}\t| ${entryId} / ${allPuzzles.length}\t| ${pid}\t| unsupported`
+      `${entryId} / ${allPuzzles.length}    \t| ${selectedPuzzles.length} / ${maxCount}    \t| ${pid}\t| unsupported`
     );
   }
 }
@@ -91,13 +117,6 @@ function printEntry(
 console.log('Available\t| Selected\t| PID\t| Result');
 
 for (const entry of allPuzzles) {
-  if (
-    results.filter(r => r.result.solveCorrect && r.result.supported).length >=
-    maxCount
-  ) {
-    break;
-  }
-
   const puzzle = await parseLink(entry.puzzleLink);
   void pqueue.add(async () => {
     if (!solver.isGridSupported(puzzle.grid)) {
@@ -110,12 +129,7 @@ for (const entry of allPuzzles) {
           solveCorrect: false,
         },
       });
-      printEntry(
-        results[results.length - 1].result,
-        results.length,
-        solverName,
-        entry.pid
-      );
+      printEntry(results[results.length - 1].result, results.length, entry.pid);
       return;
     }
     const startTime = performance.now();
@@ -151,12 +165,7 @@ for (const entry of allPuzzles) {
     }
     clearTimeout(handle);
     results.push({ puzzle: entry, result: benchmarkEntry });
-    printEntry(
-      results[results.length - 1].result,
-      results.length,
-      solverName,
-      entry.pid
-    );
+    printEntry(results[results.length - 1].result, results.length, entry.pid);
   });
 }
 
@@ -168,7 +177,7 @@ const selectedPuzzles = results.filter(
 const benchmarkEntries = selectedPuzzles.map(r => r.result);
 
 await Bun.write(
-  `benchmark/data/bench_${solverName}_puzzles.json`,
+  `benchmark/data/${outputName}_bench_puzzles.json`,
   JSON.stringify(
     selectedPuzzles.map(r => r.puzzle),
     null,
@@ -176,7 +185,7 @@ await Bun.write(
   )
 );
 await Bun.write(
-  `benchmark/data/bench_${solverName}_results.json`,
+  `benchmark/data/${outputName}_bench_results.json`,
   JSON.stringify(benchmarkEntries, null, 2)
 );
 
@@ -184,7 +193,6 @@ console.log(`
 Benchmark preparation completed. Selected ${selectedPuzzles.length} puzzles.
 
 - Solver: ${solverName}   Max Time: ${maxTime}ms   Max Count: ${maxCount}
-- Average time: ${benchmarkEntries.filter(e => !Number.isNaN(e.solveTime)).reduce((a, b) => a + b.solveTime, 0) / benchmarkEntries.filter(e => !Number.isNaN(e.solveTime)).length}ms
-- Number of timeouts: ${benchmarkEntries.filter(e => Number.isNaN(e.solveTime)).length}
+- Average time: ${selectedPuzzles.reduce((a, b) => a + b.result.solveTime, 0) / selectedPuzzles.length}ms
 - Solve correctness: ${benchmarkEntries.filter(e => e.solveCorrect).length} / ${benchmarkEntries.length}
 `);

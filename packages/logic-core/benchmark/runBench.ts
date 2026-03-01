@@ -1,11 +1,20 @@
 import { parseArgs } from 'util';
 import { allSolvers } from '../src/data/solver/allSolvers.js';
-import { BenchmarkEntry, parseLink, PuzzleEntry } from './helper.js';
+import {
+  BenchmarkEntry,
+  parseLink,
+  PuzzleEntry,
+  shuffleArray,
+} from './helper.js';
 import PQueue from 'p-queue';
 
 const { values, positionals } = parseArgs({
   args: Bun.argv,
   options: {
+    name: {
+      type: 'string',
+      short: 'n',
+    },
     maxTime: {
       type: 'string',
       default: '10',
@@ -13,13 +22,13 @@ const { values, positionals } = parseArgs({
     },
     maxCount: {
       type: 'string',
-      default: '99999',
+      default: '200',
       short: 'c',
     },
     concurrency: {
       type: 'string',
       default: '4',
-      short: 'n',
+      short: 'd',
     },
     help: {
       type: 'boolean',
@@ -37,10 +46,11 @@ if (values.help || positionals.length === 0) {
 Usage: bun bench:run <solver> [options]
 
 Options:
-  -t, --maxTime <number>       Maximum seconds allowed for each solve (default: 10)
-  -c, --maxCount <number>      Maximum number of puzzles included (default: 100)
-  -n, --concurrency <number>   Number of solves to run concurrently (default: 4)
-  -h, --help                   Show this help message
+  -n, --name <string>         Name of the generated benchmark files (default: first solver name)
+  -t, --maxTime <number>      Maximum seconds allowed for each solve (default: 10)
+  -c, --maxCount <number>     Maximum number of puzzles included (default: 100)
+  -n, --concurrency <number>  Number of solves to run concurrently (default: 4)
+  -h, --help                  Show this help message
 
 Solvers available for benchmarking:
 ${[...allSolvers.keys()].map(s => `    - ${s}`).join('\n')}
@@ -59,10 +69,12 @@ for (const name of positionals) {
   }
 }
 
+const outputName = values.name ?? positionals[0];
+
 const allPuzzles = (await Bun.file(
-  `benchmark/data/bench_${positionals[0]}_puzzles.json`
+  `benchmark/data/${outputName}_bench_puzzles.json`
 ).json()) as PuzzleEntry[];
-allPuzzles.sort(() => Math.random() - 0.5);
+shuffleArray(allPuzzles);
 allPuzzles.splice(maxCount);
 
 const benchmarkEntries: { [key: string]: BenchmarkEntry[] } =
@@ -170,9 +182,11 @@ const results = positionals.map(name => ({
   solve25: 0,
   solve50: 0,
   solve75: 0,
+  solve90: 0,
   solveSD: 0,
   unsupportedCount: 0,
   incorrectCount: 0,
+  timeoutCount: 0,
 }));
 
 for (let i = 0; i < benchmarkEntries[positionals[0]].length; i++) {
@@ -190,8 +204,10 @@ for (let i = 0; i < benchmarkEntries[positionals[0]].length; i++) {
         fastestSolveTime = entry.solveTime;
         fastestSolverIndex = j;
       }
-    } else {
+    } else if (!Number.isNaN(entry.solveTime)) {
       results[j].incorrectCount++;
+    } else {
+      results[j].timeoutCount++;
     }
   }
 
@@ -220,6 +236,11 @@ for (let j = 0; j < positionals.length; j++) {
     times.length === 0
       ? Number.NaN
       : times[Math.floor((times.length - 1) * 0.75)];
+  // 90th percentile
+  results[j].solve90 =
+    times.length === 0
+      ? Number.NaN
+      : times[Math.floor((times.length - 1) * 0.9)];
   // Standard deviation
   const mean = times.reduce((sum, time) => sum + time, 0) / (times.length || 1);
   const variance =
@@ -243,10 +264,14 @@ ${result.solver}:
     P75: ${
       Number.isNaN(result.solve75) ? 'N/A' : `${result.solve75.toFixed(2)}ms`
     }
+    P90: ${
+      Number.isNaN(result.solve90) ? 'N/A' : `${result.solve90.toFixed(2)}ms`
+    }
     SD:  ${
       Number.isNaN(result.solveSD) ? 'N/A' : `${result.solveSD.toFixed(2)}ms`
     }
   Unsupported Puzzles: ${result.unsupportedCount}
   Incorrect Solutions: ${result.incorrectCount}
+  Timeouts:            ${result.timeoutCount}
 `);
 }

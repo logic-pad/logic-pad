@@ -56,3 +56,19 @@ export async function parseLink(link: string): Promise<Puzzle> {
   }
   return Serializer.parsePuzzle(await bunCompressor.decompress(data));
 }
+
+export function shuffleArray<T>(array: T[]): T[] {
+  let currentIndex = array.length;
+
+  while (currentIndex !== 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
