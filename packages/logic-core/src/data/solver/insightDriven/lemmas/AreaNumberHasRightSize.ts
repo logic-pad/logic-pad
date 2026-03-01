@@ -21,7 +21,7 @@ export class AreaNumberHasRightSize extends Lemma {
     const unsatisfiedAreaNumberSymbol: AreaNumberSymbol[] =
       getUnsatisfiedAreaNumberSymbols(grid);
     const areaNumberSymbol: AreaNumberSymbol = unsatisfiedAreaNumberSymbol.find(
-      symbol => symbol.countTiles(grid).completed === symbol.number
+      symbol => symbol.countTiles(grid)?.completed === symbol.number
     )!;
     if (!areaNumberSymbol) return [false, grid]; // No symbol found
     // Surround the empty tiles around the area number region using the opposite color
@@ -51,9 +51,13 @@ export class AreaNumberHasRightSize extends Lemma {
               (t.y === y && Math.abs(t.x - x) === 1)
           )
         ) {
-          grid = grid.fastCopyWith({
-            tiles: grid.setTile(x, y, tile.withColor(oppositeColor)),
-          });
+          grid = grid.copyWith(
+            {
+              tiles: grid.setTile(x, y, tile.withColor(oppositeColor)),
+            },
+            false,
+            false
+          );
         }
       }
     );

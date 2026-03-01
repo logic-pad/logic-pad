@@ -29,26 +29,38 @@ export class AreaNumberImpossibleSymbolColor extends Lemma {
     const checks = [false, false];
     let tmpGrid1, tmpGrid2: GridData;
     for (const symbol of unsatisfiedGrayAreaNumberSymbol) {
-      tmpGrid1 = grid.fastCopyWith({
-        tiles: grid.setTile(
-          Math.floor(symbol.x),
-          Math.floor(symbol.y),
-          grid
-            .getTile(Math.floor(symbol.x), Math.floor(symbol.y))
-            .withColor(Color.Dark)
-        ),
-      });
-      checks[0] = symbol.countTiles(tmpGrid1).possible >= symbol.number;
-      tmpGrid2 = grid.fastCopyWith({
-        tiles: grid.setTile(
-          Math.floor(symbol.x),
-          Math.floor(symbol.y),
-          grid
-            .getTile(Math.floor(symbol.x), Math.floor(symbol.y))
-            .withColor(Color.Light)
-        ),
-      });
-      checks[1] = symbol.countTiles(tmpGrid2).possible >= symbol.number;
+      tmpGrid1 = grid.copyWith(
+        {
+          tiles: grid.setTile(
+            Math.floor(symbol.x),
+            Math.floor(symbol.y),
+            grid
+              .getTile(Math.floor(symbol.x), Math.floor(symbol.y))
+              .withColor(Color.Dark)
+          ),
+        },
+        false,
+        false
+      );
+      const count1 = symbol.countTiles(tmpGrid1);
+      if (!count1) continue;
+      checks[0] = count1.possible >= symbol.number;
+      tmpGrid2 = grid.copyWith(
+        {
+          tiles: grid.setTile(
+            Math.floor(symbol.x),
+            Math.floor(symbol.y),
+            grid
+              .getTile(Math.floor(symbol.x), Math.floor(symbol.y))
+              .withColor(Color.Light)
+          ),
+        },
+        false,
+        false
+      );
+      const count2 = symbol.countTiles(tmpGrid2);
+      if (!count2) continue;
+      checks[1] = count2.possible >= symbol.number;
       // If only one of the two colors is possible, take it
       if (checks[0] !== checks[1]) {
         areaNumberSymbol = symbol;
