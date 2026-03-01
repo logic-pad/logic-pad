@@ -9,6 +9,7 @@ import OfflineModeToggle from './settings/OfflineModeToggle';
 import SansSerifToggle from './settings/SansSerifToggle';
 import ResetEditorTour from './settings/ResetEditorTour';
 import KeyboardLayoutDropdown from './settings/KeyboardLayoutDropdown';
+import SfxVolumeSlider from './settings/SfxVolumeSlider';
 
 export default memo(function Settings() {
   return (
@@ -55,6 +56,10 @@ export default memo(function Settings() {
                 Online
               </h3>
               <OfflineModeToggle />
+              <h3 className="text-xl opacity-80 font-semibold self-start mt-2">
+                Sound
+              </h3>
+              <SfxVolumeSlider />
             </div>
             <div className="modal-action self-stretch justify-between">
               <ResetSite />

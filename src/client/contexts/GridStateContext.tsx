@@ -1,7 +1,14 @@
-import React, { createContext, memo, use, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  memo,
+  use,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { GridState, State } from '@logic-pad/core/data/primitives';
 import { GridValidator } from '@logic-pad/core/data/validateAsync';
-import { GridData } from '@logic-pad/core/index';
+import GridData from '@logic-pad/core/data/grid';
 
 interface GridStateContext {
   state: GridState;
@@ -56,9 +63,12 @@ export default memo(function GridStateContext({
     };
   }, [setState]);
 
-  const validateGrid = (grid: GridData, solution: GridData | null) => {
-    gridValidator.validateGrid(grid, solution);
-  };
+  const validateGrid = useCallback(
+    (grid: GridData, solution: GridData | null) => {
+      gridValidator.validateGrid(grid, solution);
+    },
+    [gridValidator]
+  );
 
   return (
     <Context

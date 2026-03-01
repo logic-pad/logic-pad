@@ -12,6 +12,20 @@
       name="description"
       content="A modern, open-source web app for grid-based puzzles."
     />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Logic Pad" />
+    <meta
+      property="twitter:description"
+      content="A modern, open-source web app for grid-based puzzles."
+    />
+    <meta property="twitter:image" content="/pwa-512x512.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Logic Pad" />
+    <meta
+      property="og:description"
+      content="A modern, open-source web app for grid-based puzzles."
+    />
+    <meta property="og:image" content="/pwa-512x512.png" />
     <meta
       name="keywords"
       content="logic, puzzle, islands of insight, grid, custom, editor, solve, create, rule, symbol, tile, cell"
@@ -23,15 +37,12 @@
     <meta name="theme-color" content="#414558" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preload" as="image" href="/logo.svg" fetchpriority="high" />
-
-    <title>Logic Pad</title>
   </head>
   <body oncontextmenu="return false;">
     <div id="app"></div>
     <script>
       window.global ||= window;
     </script>
-    <script src="/assets/z3-built.js" fetchpriority="low" defer></script>
     <script
       type="module"
       src="/src/client/main.tsx"

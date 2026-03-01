@@ -5,7 +5,6 @@ import Markdown from '../components/Markdown';
 import { cn, toRelativeDate } from '../uiHelper.ts';
 import UserCard from './UserCard.tsx';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
-import DocumentTitle from '../components/DocumentTitle.tsx';
 
 export interface MetadataProps {
   simplified?: boolean;
@@ -23,7 +22,6 @@ export default memo(function Metadata({
 
   return (
     <section className="flex flex-col gap-4 text-neutral-content">
-      <DocumentTitle>{metadata.title} - Logic Pad</DocumentTitle>
       <div
         className="tooltip tooltip-info tooltip-right w-fit"
         data-tip={

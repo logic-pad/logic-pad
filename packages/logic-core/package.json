@@ -1,11 +1,14 @@
 {
   "name": "@logic-pad/core",
-  "version": "0.25.2",
+  "version": "0.26.3",
   "type": "module",
   "files": [
     "dist",
     "assets"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://github.com/logic-pad/logic-pad",
   "repository": {
     "type": "git",
@@ -56,10 +59,8 @@
   "dependencies": {
     "compression-streams-polyfill": "^0.1.7",
     "event-iterator": "^2.0.0",
-    "grilops": "^0.1.2",
     "lodash": "^4.17.21",
     "logic-pad-solver-core": "^0.1.2",
-    "z3-solver": "^4.13.0",
     "zod": "^4.0.17"
   },
   "devDependencies": {

@@ -15,6 +15,7 @@ export const SiteSettingsSchema = z.object({
     .enum(['qwerty', 'azerty', 'dvorak', 'colemak'])
     .default('qwerty')
     .catch('qwerty'),
+  sfxVolume: z.number().min(0).max(2).default(1).catch(1),
 });
 
 export type SiteSettings = z.infer<typeof SiteSettingsSchema>;

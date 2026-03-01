@@ -38,6 +38,14 @@ export default memo(function EditableField({
           editable && editing && 'border-base-100 min-w-24'
         )}
       ></div>
+      <div
+        className={cn(
+          'border-2 p-1 rounded-sm border-transparent border-dashed italic opacity-50',
+          (!editable || editing || initialValue.length > 0) && 'hidden'
+        )}
+      >
+        (Empty)
+      </div>
       {pending && <Loading className="w-4 h-4 m-2" />}
       {!pending && editable && (
         <button

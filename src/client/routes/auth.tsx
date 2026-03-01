@@ -1,26 +1,51 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import {
+  Link,
+  createFileRoute,
+  useNavigate,
+  useRouterState,
+} from '@tanstack/react-router';
 import { useOnline } from '../contexts/OnlineContext';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import deferredRedirect from '../router/deferredRedirect';
 import AuthProviders from '../online/AuthProviders';
 import PWAPrompt from '../components/PWAPrompt';
+import { zodValidator } from '@tanstack/zod-adapter';
+import { z } from 'zod';
+import { api } from '../online/api';
 
 export const Route = createFileRoute('/auth')({
+  validateSearch: zodValidator(
+    z.object({
+      redirect: z.string().min(1).optional().catch(undefined),
+      error: z.unknown().optional().catch(undefined),
+    })
+  ),
+  remountDeps: ({ search }) =>
+    `redirect=${search.search?.redirect},error=${String(search.search?.error)}`,
   component: function Auth() {
     const { isOnline, me } = useOnline();
     const navigate = useNavigate();
+    const { error } = Route.useSearch();
+    const location = useRouterState({ select: s => s.location });
     useEffect(() => {
       void (async () => {
         if (!isOnline) {
           toast.error('Failed to sign in because you are offline');
-          await navigate({ to: '/' });
+          const redirect = new URL(
+            location.search?.redirect ?? window.location.origin
+          );
+          await navigate({
+            to: redirect.pathname + redirect.search + redirect.hash,
+          });
         }
         if (me) {
           toast.success('Signed in automatically');
-          if (!(await deferredRedirect.execute())) {
-            await navigate({ to: '/' });
-          }
+          const redirect = new URL(
+            location.search?.redirect ?? window.location.origin
+          );
+          await navigate({
+            to: redirect.pathname + redirect.search + redirect.hash,
+          });
         }
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,7 +74,24 @@ export const Route = createFileRoute('/auth')({
               </h2>
               <p className="text-lg">Sign in or sign up here</p>
             </div>
-            <AuthProviders />
+            {!!error && (
+              <div className="alert alert-error alert-outline">
+                <p>Something went wrong. Please try again.</p>
+              </div>
+            )}
+            <AuthProviders
+              onClick={async provider => {
+                const redirect = location.search?.redirect;
+                const errorUrl = new URL('/auth', window.location.origin);
+                errorUrl.searchParams.set('error', 'true');
+                if (redirect) errorUrl.searchParams.set('redirect', redirect);
+                await api.signInWithOAuth(
+                  provider,
+                  redirect ?? new URL('/', window.location.origin).toString(),
+                  errorUrl.toString()
+                );
+              }}
+            />
           </div>
         </div>
       </div>

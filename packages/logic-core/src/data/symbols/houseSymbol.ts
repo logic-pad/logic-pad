@@ -73,7 +73,11 @@ export default class HouseSymbol extends NumberSymbol {
     return HouseSymbol.EXAMPLE_GRID;
   }
 
-  public countTiles(grid: GridData): { completed: number; possible: number } {
+  public countTiles(
+    grid: GridData
+  ): { completed: number; possible: number } | null {
+    if (!this.validateSubtilePlacement(grid)) return null;
+
     const thisX = Math.floor(this.x);
     const thisY = Math.floor(this.y);
     const visited = array(grid.width, grid.height, () => false);

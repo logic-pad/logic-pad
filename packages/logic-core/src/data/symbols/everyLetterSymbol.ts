@@ -73,6 +73,8 @@ export default class EveryLetterSymbol extends Symbol {
   }
 
   public validateSymbol(grid: GridData): State {
+    if (!this.validateSubtilePlacement(grid)) return State.Error;
+
     const uniqueLetters = new Set(
       grid.symbols.get(this.id)?.map(s => (s as EveryLetterSymbol).letter)
     );

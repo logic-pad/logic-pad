@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import { cn } from '../../uiHelper';
 import { modPrompt, PromptHandle } from './ModMessagePrompt';
 
+const timezoneString = 'Z' + (new Date().toISOString().split('Z')[1] ?? '');
+
 const RestrictionEntry = memo(function RestrictionEntry({
   label,
   value,
@@ -25,7 +27,11 @@ const RestrictionEntry = memo(function RestrictionEntry({
               type="datetime-local"
               className="input input-xs w-fit max-w-xs"
               value={new Date(value).toISOString().split('Z')[0]}
-              onChange={e => onChange(new Date(e.target.value).toISOString())}
+              onChange={e =>
+                onChange(
+                  new Date(e.target.value + timezoneString).toISOString()
+                )
+              }
             />
             <button
               className="btn btn-xs btn-neutral"
@@ -115,7 +121,7 @@ export default memo(function UserRestrictions({
           onClick={() =>
             modPrompt(
               promptHandle,
-              "Modifying user's restrictions. Please explain why this action is being taken. This message will be logged with the action."
+              "Modifying user's restrictions. Please explain why this action is being taken. This message will be sent to the user and logged with the action."
             )
               .then(message =>
                 saveRestrictions.mutate([userId, newRestrictions, message])

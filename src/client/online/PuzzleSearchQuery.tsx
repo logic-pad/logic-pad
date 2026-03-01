@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useOnline } from '../contexts/OnlineContext';
 import { cn } from '../uiHelper';
 
-export type SearchType = 'public' | 'own' | 'all';
+export type SearchType = 'public' | 'own' | 'published' | 'all';
 
 export const puzzleSearchSchema = z.object({
   q: z.string().optional().catch(undefined),
@@ -16,6 +16,7 @@ export const puzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
+  solve: z.enum(['seen', 'unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'published-asc',
@@ -40,6 +41,7 @@ export const privatePuzzleSearchSchema = z.object({
   size: z.enum(['s', 'm', 'l']).optional().catch(undefined),
   minDiff: z.number().min(1).max(10).optional().catch(undefined),
   maxDiff: z.number().min(1).max(10).optional().catch(undefined),
+  solve: z.enum(['seen', 'unseen', 'unsolved']).optional().catch(undefined),
   sort: z
     .enum([
       'created-asc',
@@ -59,10 +61,11 @@ export type PublicPuzzleSearchParams = z.infer<typeof puzzleSearchSchema>;
 export type PrivatePuzzleSearchParams = z.infer<
   typeof privatePuzzleSearchSchema
 >;
-export type PuzzleSearchParams<Search extends SearchType> =
-  Search extends 'public'
-    ? PublicPuzzleSearchParams
-    : PrivatePuzzleSearchParams;
+export type PuzzleSearchParams<Search extends SearchType> = Search extends
+  | 'public'
+  | 'published'
+  ? PublicPuzzleSearchParams
+  : PrivatePuzzleSearchParams;
 
 type FilterOption = {
   id: string;
@@ -77,6 +80,7 @@ type FilterOption = {
 
 type Filter = {
   name: string;
+  supporter?: boolean;
   options: FilterOption[];
 };
 
@@ -186,8 +190,8 @@ const filters: Filter[] = [
         id: '1-4',
         text: (
           <>
-            1 <span className="w-4 h-4 bg-accent mask mask-circle" /> - 4{' '}
-            <span className="w-4 h-4 bg-accent mask mask-circle" />
+            1 <span className="w-3 h-3 bg-accent mask mask-circle" /> - 4{' '}
+            <span className="w-3 h-3 bg-accent mask mask-circle" />
           </>
         ),
         applyFilter: search => {
@@ -203,8 +207,8 @@ const filters: Filter[] = [
         id: '5-7',
         text: (
           <>
-            5 <span className="w-4 h-4 bg-accent mask mask-circle" /> - 7{' '}
-            <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />
+            5 <span className="w-3 h-3 bg-accent mask mask-circle" /> - 7{' '}
+            <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />
           </>
         ),
         applyFilter: search => {
@@ -220,9 +224,9 @@ const filters: Filter[] = [
         id: '8-10',
         text: (
           <>
-            8 <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />{' '}
+            8 <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />{' '}
             - 10{' '}
-            <span className="w-4 h-4 bg-accent mask mask-star-2 scale-105" />
+            <span className="w-3 h-3 bg-accent mask mask-star-2 scale-105" />
           </>
         ),
         applyFilter: search => {
@@ -233,6 +237,47 @@ const filters: Filter[] = [
           }
         },
         isActive: search => search.minDiff === 8 && search.maxDiff === 10,
+      },
+    ],
+  },
+  {
+    name: 'Solve',
+    supporter: true,
+    options: [
+      {
+        id: 'any',
+        text: 'Any',
+        applyFilter: search => {
+          return { ...search, solve: undefined };
+        },
+        isActive: search => !search.solve,
+      },
+      {
+        id: 'seen',
+        text: 'Seen',
+        applyFilter: search => {
+          const newValue = search.solve === 'seen' ? undefined : 'seen';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'seen',
+      },
+      {
+        id: 'unseen',
+        text: 'Unseen',
+        applyFilter: search => {
+          const newValue = search.solve === 'unseen' ? undefined : 'unseen';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'unseen',
+      },
+      {
+        id: 'unsolved',
+        text: 'Unsolved',
+        applyFilter: search => {
+          const newValue = search.solve === 'unsolved' ? undefined : 'unsolved';
+          return { ...search, solve: newValue };
+        },
+        isActive: search => search.solve === 'unsolved',
       },
     ],
   },
@@ -335,37 +380,48 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
         </label>
       </div>
       <div className="grid grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] items-start gap-y-1">
-        {filters.map(filter => (
-          <Fragment key={filter.name}>
-            <div>{filter.name}</div>
-            <div className="flex gap-2 flex-wrap">
-              {filter.options.map(option => (
-                <button
-                  key={option.id}
-                  className={cn(
-                    `btn btn-sm`,
-                    option.isActive(displayParams) ? '' : 'btn-ghost',
-                    !me && 'btn-disabled'
-                  )}
-                  onClick={() =>
-                    updateParams(
-                      option.applyFilter(
-                        displayParams
-                      ) as PuzzleSearchParams<Search>
-                    )
-                  }
-                >
-                  {option.text}
-                </button>
-              ))}
-            </div>
-          </Fragment>
-        ))}
+        {filters.map(filter => {
+          const promptForSupporter =
+            filter.supporter && (!me || me.supporter === 0);
+          return (
+            <Fragment key={filter.name}>
+              <div className="text-sm">{filter.name}</div>
+              <div
+                className={cn(
+                  'flex gap-2 flex-wrap',
+                  promptForSupporter && 'tooltip tooltip-left tooltip-info'
+                )}
+                data-tip={promptForSupporter ? 'Requires supporter status' : ''}
+              >
+                {filter.options.map(option => (
+                  <button
+                    key={option.id}
+                    className={cn(
+                      `btn btn-xs text-[0.75rem]`,
+                      option.isActive(displayParams) ? '' : 'btn-ghost',
+                      !me && 'btn-disabled',
+                      promptForSupporter && 'btn-disabled'
+                    )}
+                    onClick={() =>
+                      updateParams(
+                        option.applyFilter(
+                          displayParams
+                        ) as PuzzleSearchParams<Search>
+                      )
+                    }
+                  >
+                    {option.text}
+                  </button>
+                ))}
+              </div>
+            </Fragment>
+          );
+        })}
         <div className="mt-2">Sort by</div>
         <div className="flex gap-4 mt-2 flex-wrap">
           {orderings
             .filter(ordering =>
-              searchType === 'public'
+              searchType === 'public' || searchType === 'published'
                 ? ordering.id !== 'created'
                 : ordering.id !== 'published'
             )

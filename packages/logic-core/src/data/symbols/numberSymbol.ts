@@ -18,10 +18,12 @@ export default abstract class NumberSymbol extends Symbol {
   public abstract countTiles(grid: GridData): {
     completed: number;
     possible: number;
-  };
+  } | null;
 
   public validateSymbol(grid: GridData): State {
-    const { completed, possible } = this.countTiles(grid);
+    const countResult = this.countTiles(grid);
+    if (countResult === null) return State.Error;
+    const { completed, possible } = countResult;
     if (completed > this.number || possible < this.number) return State.Error;
     if (completed === this.number && possible === this.number)
       return State.Satisfied;

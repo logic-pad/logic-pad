@@ -7,7 +7,9 @@ import BanPatternRule, {
 import CellCountRule, {
   instance as cellCountInstance,
 } from '../../rules/cellCountRule.js';
-import ConnectAllRule from '../../rules/connectAllRule.js';
+import ConnectAllRule, {
+  instance as connectAllInstance,
+} from '../../rules/connectAllRule.js';
 import RegionAreaRule, {
   instance as regionAreaInstance,
 } from '../../rules/regionAreaRule.js';
@@ -50,8 +52,8 @@ import Symbol from '../../symbols/symbol.js';
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import TileData from '../../tile.js';
-import { instance as connectAllInstance } from '../z3/modules/connectAllModule.js';
 import BTModule, { BTGridData, BTTile, IntArray2D, Rating } from './data.js';
 import BanPatternBTModule from './rules/banPattern.js';
 import CellCountBTModule from './rules/cellCount.js';
@@ -109,6 +111,8 @@ function translateToBTGridData(grid: GridData): BTGridData {
         module = new FocusBTModule(symbol as FocusSymbol);
       } else if (id === letterInstance.id) {
         continue;
+      } else if (id === unsupportedInstance.id) {
+        continue;
       }
 
       if (!module && symbol.necessaryForCompletion)
@@ -141,7 +145,11 @@ function translateToBTGridData(grid: GridData): BTGridData {
       module = new BanPatternBTModule(rule as BanPatternRule);
     } else if (rule.id === symbolsPerRegionInstance.id) {
       const allSymbols: Symbol[] = [];
-      grid.symbols.forEach(symbols => allSymbols.push(...symbols));
+      grid.symbols.forEach(symbols =>
+        allSymbols.push(
+          ...symbols.filter(symbol => symbol.necessaryForCompletion)
+        )
+      );
 
       module = new SymbolsPerRegionBTModule(
         rule as SymbolsPerRegionRule,

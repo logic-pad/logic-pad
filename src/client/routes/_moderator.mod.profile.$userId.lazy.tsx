@@ -1,6 +1,6 @@
 import { createLazyFileRoute, Link } from '@tanstack/react-router';
 import { useRouteProtection } from '../router/useRouteProtection';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { userBriefQueryOptions } from './_layout.profile.$userId';
 import { memo, useRef } from 'react';
 import { toRelativeDate } from '../uiHelper';
@@ -10,6 +10,7 @@ import { FaCheckSquare, FaEdit } from 'react-icons/fa';
 import { userAccountQueryOptions } from './_moderator.mod.profile.$userId';
 import UserRestrictions from '../online/moderator/UserRestrictions';
 import ModMessagePrompt, {
+  modPrompt,
   PromptHandle,
 } from '../online/moderator/ModMessagePrompt';
 import UserPuzzles from '../online/moderator/UserPuzzles';
@@ -17,6 +18,8 @@ import UserCollections from '../online/moderator/UserCollections';
 import UserComments from '../online/moderator/UserComments';
 import UserModerations from '../online/moderator/UserModerations';
 import UserStatus from '../online/moderator/UserStatus';
+import { api, queryClient } from '../online/api';
+import toast from 'react-hot-toast';
 
 export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
   component: memo(function RouteComponent() {
@@ -25,6 +28,32 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
     const { data: userBrief } = useSuspenseQuery(userBriefQueryOptions(userId));
     const { data: userAccount } = useQuery(userAccountQueryOptions(userId));
     const promptRef = useRef<PromptHandle>(null);
+    const removeDescription = useMutation({
+      mutationFn: (data: Parameters<typeof api.modRemoveUserDescription>) => {
+        return api.modRemoveUserDescription(...data);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+      onSuccess() {
+        void queryClient.invalidateQueries({
+          queryKey: ['profile', userId],
+        });
+      },
+    });
+    const removeName = useMutation({
+      mutationFn: (data: Parameters<typeof api.modRemoveUserName>) => {
+        return api.modRemoveUserName(...data);
+      },
+      onError(error) {
+        toast.error(error.message);
+      },
+      onSuccess() {
+        void queryClient.invalidateQueries({
+          queryKey: ['profile', userId],
+        });
+      },
+    });
 
     if (!userBrief) return null;
 
@@ -49,14 +78,34 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
               >
                 {userBrief.name}
                 <SupporterBadge tooltip supporter={userBrief.supporter} />
-                {userAccount?.labels.map(label => (
+                {userAccount?.roles.map(role => (
                   <span
-                    key={label}
+                    key={role}
                     className="badge badge-info badge-sm inline-block py-1 px-2 ms-2 h-fit w-fit whitespace-nowrap align-middle capitalize"
                   >
-                    {label}
+                    {role}
                   </span>
                 ))}
+                <div
+                  className="tooltip tooltip-error tooltip-bottom ms-2"
+                  data-tip="Remove user name"
+                >
+                  <button
+                    className="btn btn-xs btn-error"
+                    onClick={e => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      modPrompt(
+                        promptRef,
+                        'Replacing user name with "[anonymous]". Please explain why this action is being taken. This message will be sent to the user and logged with the action.'
+                      )
+                        .then(message => removeName.mutate([userId, message]))
+                        .catch(() => {});
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
               </Link>
               {userBrief.title && (
                 <span className="text-accent font-semibold">
@@ -74,52 +123,54 @@ export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
                 </div>
               </div>
               <div className="flex flex-wrap gap-4 mt-2">
-                <span>Profile</span>
                 <span className="opacity-80">
                   created {toRelativeDate(new Date(userBrief.createdAt))}
                 </span>
                 <span className="opacity-80">
                   updated {toRelativeDate(new Date(userBrief.updatedAt))}
                 </span>
+                {userAccount?.accessedAt ? (
+                  <div className="opacity-80">
+                    accessed {toRelativeDate(new Date(userAccount.accessedAt))}
+                  </div>
+                ) : (
+                  <div className="skeleton h-5 w-36"></div>
+                )}
               </div>
-              {userAccount ? (
-                <div className="flex flex-wrap gap-4 mt-2">
-                  <span>Account</span>
-                  <div className="opacity-80">
-                    created {toRelativeDate(new Date(userAccount.createdAt))}
-                  </div>
-                  <div className="opacity-80">
-                    registered{' '}
-                    {toRelativeDate(new Date(userAccount.registeredAt))}
-                  </div>
-                  <div className="opacity-80">
-                    updated {toRelativeDate(new Date(userAccount.updatedAt))}
-                  </div>
-                  {userAccount.accessedAt && (
-                    <div className="opacity-80">
-                      accessed{' '}
-                      {toRelativeDate(new Date(userAccount.accessedAt))}
-                    </div>
-                  )}
+              <div className="flex-1 flex gap-2 min-w-[320px] mt-2">
+                <span>{userBrief.description}</span>
+                <div
+                  className="tooltip tooltip-error tooltip-top"
+                  data-tip="Remove user description"
+                >
+                  <button
+                    className="btn btn-xs btn-error"
+                    onClick={() =>
+                      modPrompt(
+                        promptRef,
+                        'Replacing user description with "[removed]". Please explain why this action is being taken. This message will be sent to the user and logged with the action.'
+                      )
+                        .then(message =>
+                          removeDescription.mutate([userId, message])
+                        )
+                        .catch(() => {})
+                    }
+                  >
+                    Remove
+                  </button>
                 </div>
-              ) : (
-                <div className="skeleton h-5 w-96 mt-2"></div>
-              )}
+              </div>
             </div>
             <UserRestrictions userId={userId} promptHandle={promptRef} />
-            <UserStatus
-              userId={userId}
-              status={userAccount?.status}
-              promptHandle={promptRef}
-            />
+            <UserStatus account={userAccount} promptHandle={promptRef} />
           </div>
           <div className="divider shrink-0" />
           <div className="flex-1 flex gap-8 justify-start items-stretch overflow-x-auto">
-            <UserPuzzles userId={userId} />
-            <UserCollections userId={userId} />
-            <UserComments userId={userId} />
+            <UserPuzzles userId={userId} promptHandle={promptRef} />
+            <UserCollections userId={userId} promptHandle={promptRef} />
+            <UserComments userId={userId} promptHandle={promptRef} />
             <UserModerations userId={userId} type="received" />
-            {userAccount?.labels.includes('moderator') && (
+            {userAccount?.roles.includes('moderator') && (
               <UserModerations userId={userId} type="given" />
             )}
           </div>

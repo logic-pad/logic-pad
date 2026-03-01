@@ -11,9 +11,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './../routes/__root'
+import { Route as RedirectRouteImport } from './../routes/redirect'
 import { Route as AuthRouteImport } from './../routes/auth'
 import { Route as IndexRouteImport } from './../routes/index'
-import { Route as OauthCallbackRouteImport } from './../routes/oauth.callback'
+import { Route as LayoutUploaderRouteImport } from './../routes/_layout.uploader'
 import { Route as LayoutTermsRouteImport } from './../routes/_layout.terms'
 import { Route as LayoutSupportRouteImport } from './../routes/_layout.support'
 import { Route as LayoutSettingsRouteImport } from './../routes/_layout.settings'
@@ -22,6 +23,7 @@ import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
 import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
 import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
 import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
+import { Route as LayoutColorRouteImport } from './../routes/_layout.color'
 import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
 import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
 import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
@@ -39,12 +41,16 @@ import { Route as LayoutCollectionCollectionIdRouteImport } from './../routes/_l
 import { Route as ModeratorModProfileUserIdRouteImport } from './../routes/_moderator.mod.profile.$userId'
 
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
-const LayoutUploaderLazyRouteImport = createFileRoute('/_layout/uploader')()
 
 const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./../routes/_layout.lazy').then((d) => d.Route))
+const RedirectRoute = RedirectRouteImport.update({
+  id: '/redirect',
+  path: '/redirect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -55,18 +61,13 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutUploaderLazyRoute = LayoutUploaderLazyRouteImport.update({
+const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
   id: '/uploader',
   path: '/uploader',
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
   import('./../routes/_layout.uploader.lazy').then((d) => d.Route),
 )
-const OauthCallbackRoute = OauthCallbackRouteImport.update({
-  id: '/oauth/callback',
-  path: '/oauth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LayoutTermsRoute = LayoutTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -112,6 +113,13 @@ const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
   import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
+)
+const LayoutColorRoute = LayoutColorRouteImport.update({
+  id: '/color',
+  path: '/color',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.color.lazy').then((d) => d.Route),
 )
 const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
   id: '/solve/',
@@ -230,6 +238,8 @@ const ModeratorModProfileUserIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
+  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -238,8 +248,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
   '/support': typeof LayoutSupportRoute
   '/terms': typeof LayoutTermsRoute
-  '/oauth/callback': typeof OauthCallbackRoute
-  '/uploader': typeof LayoutUploaderLazyRoute
+  '/uploader': typeof LayoutUploaderRoute
   '/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -259,14 +268,15 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
+  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
   '/rules': typeof LayoutRulesRoute
   '/settings': typeof LayoutSettingsRoute
   '/support': typeof LayoutSupportRoute
   '/terms': typeof LayoutTermsRoute
-  '/oauth/callback': typeof OauthCallbackRoute
-  '/uploader': typeof LayoutUploaderLazyRoute
+  '/uploader': typeof LayoutUploaderRoute
   '/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -287,7 +297,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/redirect': typeof RedirectRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
+  '/_layout/color': typeof LayoutColorRoute
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
   '/_layout/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/_layout/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -296,8 +308,7 @@ export interface FileRoutesById {
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/support': typeof LayoutSupportRoute
   '/_layout/terms': typeof LayoutTermsRoute
-  '/oauth/callback': typeof OauthCallbackRoute
-  '/_layout/uploader': typeof LayoutUploaderLazyRoute
+  '/_layout/uploader': typeof LayoutUploaderRoute
   '/_layout/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/_layout/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/_layout/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -319,6 +330,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/redirect'
+    | '/color'
     | '/my-follows'
     | '/my-stuff'
     | '/privacy-policy'
@@ -327,7 +340,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/terms'
-    | '/oauth/callback'
     | '/uploader'
     | '/collection/$collectionId'
     | '/create/$puzzleId'
@@ -348,13 +360,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/redirect'
+    | '/color'
     | '/my-follows'
     | '/privacy-policy'
     | '/rules'
     | '/settings'
     | '/support'
     | '/terms'
-    | '/oauth/callback'
     | '/uploader'
     | '/collection/$collectionId'
     | '/create/$puzzleId'
@@ -375,7 +388,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/redirect'
     | '/_layout'
+    | '/_layout/color'
     | '/_layout/my-follows'
     | '/_layout/my-stuff'
     | '/_layout/privacy-policy'
@@ -384,7 +399,6 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/support'
     | '/_layout/terms'
-    | '/oauth/callback'
     | '/_layout/uploader'
     | '/_layout/collection/$collectionId'
     | '/_layout/create/$puzzleId'
@@ -406,8 +420,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  RedirectRoute: typeof RedirectRoute
   LayoutLazyRoute: typeof LayoutLazyRouteWithChildren
-  OauthCallbackRoute: typeof OauthCallbackRoute
   ModeratorModProfileUserIdRoute: typeof ModeratorModProfileUserIdRoute
 }
 
@@ -418,6 +432,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof LayoutLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redirect': {
+      id: '/redirect'
+      path: '/redirect'
+      fullPath: '/redirect'
+      preLoaderRoute: typeof RedirectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -438,15 +459,8 @@ declare module '@tanstack/react-router' {
       id: '/_layout/uploader'
       path: '/uploader'
       fullPath: '/uploader'
-      preLoaderRoute: typeof LayoutUploaderLazyRouteImport
+      preLoaderRoute: typeof LayoutUploaderRouteImport
       parentRoute: typeof LayoutLazyRoute
-    }
-    '/oauth/callback': {
-      id: '/oauth/callback'
-      path: '/oauth/callback'
-      fullPath: '/oauth/callback'
-      preLoaderRoute: typeof OauthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_layout/terms': {
       id: '/_layout/terms'
@@ -502,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/my-follows'
       fullPath: '/my-follows'
       preLoaderRoute: typeof LayoutMyFollowsRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/color': {
+      id: '/_layout/color'
+      path: '/color'
+      fullPath: '/color'
+      preLoaderRoute: typeof LayoutColorRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/solve/': {
@@ -645,6 +666,7 @@ const LayoutSearchRouteWithChildren = LayoutSearchRoute._addFileChildren(
 )
 
 interface LayoutLazyRouteChildren {
+  LayoutColorRoute: typeof LayoutColorRoute
   LayoutMyFollowsRoute: typeof LayoutMyFollowsRoute
   LayoutMyStuffRoute: typeof LayoutMyStuffRouteWithChildren
   LayoutPrivacyPolicyRoute: typeof LayoutPrivacyPolicyRoute
@@ -653,7 +675,7 @@ interface LayoutLazyRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutSupportRoute: typeof LayoutSupportRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
-  LayoutUploaderLazyRoute: typeof LayoutUploaderLazyRoute
+  LayoutUploaderRoute: typeof LayoutUploaderRoute
   LayoutCollectionCollectionIdRoute: typeof LayoutCollectionCollectionIdRoute
   LayoutCreatePuzzleIdRoute: typeof LayoutCreatePuzzleIdRoute
   LayoutPerfectionPuzzleIdRoute: typeof LayoutPerfectionPuzzleIdRoute
@@ -665,6 +687,7 @@ interface LayoutLazyRouteChildren {
 }
 
 const LayoutLazyRouteChildren: LayoutLazyRouteChildren = {
+  LayoutColorRoute: LayoutColorRoute,
   LayoutMyFollowsRoute: LayoutMyFollowsRoute,
   LayoutMyStuffRoute: LayoutMyStuffRouteWithChildren,
   LayoutPrivacyPolicyRoute: LayoutPrivacyPolicyRoute,
@@ -673,7 +696,7 @@ const LayoutLazyRouteChildren: LayoutLazyRouteChildren = {
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutSupportRoute: LayoutSupportRoute,
   LayoutTermsRoute: LayoutTermsRoute,
-  LayoutUploaderLazyRoute: LayoutUploaderLazyRoute,
+  LayoutUploaderRoute: LayoutUploaderRoute,
   LayoutCollectionCollectionIdRoute: LayoutCollectionCollectionIdRoute,
   LayoutCreatePuzzleIdRoute: LayoutCreatePuzzleIdRoute,
   LayoutPerfectionPuzzleIdRoute: LayoutPerfectionPuzzleIdRoute,
@@ -691,8 +714,8 @@ const LayoutLazyRouteWithChildren = LayoutLazyRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  RedirectRoute: RedirectRoute,
   LayoutLazyRoute: LayoutLazyRouteWithChildren,
-  OauthCallbackRoute: OauthCallbackRoute,
   ModeratorModProfileUserIdRoute: ModeratorModProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport

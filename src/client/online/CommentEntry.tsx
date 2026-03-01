@@ -177,28 +177,30 @@ export default memo(function CommentEntry({
           <FaReply />
         </button>
       </div>
-      <div className="absolute right-2 top-0 bg-base-100 shadow-md rounded-md flex gap-1 [.comment-entry:hover_&]:opacity-100 opacity-0 transition-opacity">
-        <button
-          className="btn btn-ghost btn-sm shrink-0 px-2"
-          onClick={() => {
-            if (editing) {
-              inputRef.current?.sendComment();
-            } else {
-              setEditing(!editing);
-            }
-          }}
-        >
-          {editing ? <FaCheck /> : <FaEdit />}
-        </button>
-        <button
-          className="btn btn-ghost btn-sm shrink-0 px-2 text-error"
-          onClick={() => {
-            deleteComment.mutate([comment.id]);
-          }}
-        >
-          <FaTrash />
-        </button>
-      </div>
+      {editable && (
+        <div className="absolute right-2 top-0 bg-base-100 shadow-md rounded-md flex gap-1 [.comment-entry:hover_&]:opacity-100 opacity-0 transition-opacity">
+          <button
+            className="btn btn-ghost btn-sm shrink-0 px-2"
+            onClick={() => {
+              if (editing) {
+                inputRef.current?.sendComment();
+              } else {
+                setEditing(!editing);
+              }
+            }}
+          >
+            {editing ? <FaCheck /> : <FaEdit />}
+          </button>
+          <button
+            className="btn btn-ghost btn-sm shrink-0 px-2 text-error"
+            onClick={() => {
+              deleteComment.mutate([comment.id]);
+            }}
+          >
+            <FaTrash />
+          </button>
+        </div>
+      )}
       {editable ? (
         <div className="self-stretch flex gap-1">
           {editing ? (

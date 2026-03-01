@@ -1,0 +1,29 @@
+@reference "../index.css";
+
+.tz-color-picker {
+  @apply flex flex-col gap-2;
+}
+
+.tz-select-options {
+  @apply bg-base-100 z-50;
+}
+
+.tz-color-picker-sliders {
+  @apply gap-6;
+}
+
+.tz-slider-track-wrapper {
+  @apply mb-1;
+}
+
+.tz-slider-handle {
+  @apply z-1;
+}
+
+.tz-subtle-input {
+  @apply border-b;
+}
+
+.tz-color-picker-code {
+  @apply font-mono border-b mt-4;
+}

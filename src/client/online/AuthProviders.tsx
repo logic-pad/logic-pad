@@ -1,32 +1,19 @@
 import { memo } from 'react';
 import { IconType } from 'react-icons';
-import { api } from './api';
 import { FaDiscord, FaGoogle } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 interface AuthButtonProps {
-  provider: string;
   label: string;
   icon: IconType;
-  onBeforeRedirect?: () => void;
+  onClick: () => void;
 }
 
-function AuthButton({
-  provider,
-  label,
-  icon: Icon,
-  onBeforeRedirect,
-}: AuthButtonProps) {
+function AuthButton({ label, icon: Icon, onClick }: AuthButtonProps) {
   return (
     <button
       className="btn btn-outline font-thin text-lg w-full"
-      onClick={() => {
-        onBeforeRedirect?.();
-        api.signInWithOAuth(
-          provider,
-          window.location.origin + '/oauth/callback',
-          window.location.origin
-        );
-      }}
+      onClick={onClick}
     >
       {<Icon size={24} />}
       {label}
@@ -35,25 +22,27 @@ function AuthButton({
 }
 
 export interface AuthProvidersProps {
-  onBeforeRedirect?: () => void;
+  onClick: (provider: string) => void;
 }
 
-export default memo(function AuthProviders(props: AuthProvidersProps) {
+export default memo(function AuthProviders({ onClick }: AuthProvidersProps) {
   return (
     <div className="justify-end card-actions flex-col gap-4 w-full">
       <AuthButton
-        provider="google"
         label="Continue with Google"
         icon={FaGoogle}
-        {...props}
+        onClick={() => onClick?.('google')}
       />
       <AuthButton
-        provider="discord"
         label="Continue with Discord"
         icon={FaDiscord}
-        {...props}
+        onClick={() => onClick?.('discord')}
       />
-      <p>More providers coming soon</p>
+      <AuthButton
+        label="Continue with X"
+        icon={FaXTwitter}
+        onClick={() => onClick?.('twitter')}
+      />
     </div>
   );
 });

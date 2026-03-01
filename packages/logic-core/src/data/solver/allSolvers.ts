@@ -1,7 +1,6 @@
 import Solver from './solver.js';
 import UniversalSolver from './universal/universalSolver.js';
 import BacktrackSolver from './backtrack/backtrackSolver.js';
-import Z3Solver from './z3/z3Solver.js';
 import CspuzSolver from './cspuz/cspuzSolver.js';
 import AutoSolver from './auto/autoSolver.js';
 import UniversalDevSolver from './universal/dev/universalDevSolver.js';
@@ -17,6 +16,5 @@ register(new CspuzSolver());
 register(new BacktrackSolver());
 register(new UniversalDevSolver());
 register(new UniversalSolver());
-register(new Z3Solver());
 
 export { allSolvers };

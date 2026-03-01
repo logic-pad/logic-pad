@@ -67,7 +67,7 @@ const PuzzleImage = memo(function PuzzleImage({
   gridOnly,
   ref,
 }: PuzzleImageProps) {
-  const { grid, metadata } = useGrid();
+  const { grid, solution, metadata } = useGrid();
   const { state } = useGridState();
   const { scale } = useDisplay();
 
@@ -89,10 +89,18 @@ const PuzzleImage = memo(function PuzzleImage({
       >
         <DisplayContext scale={resetScale ? 1 : scale} responsiveScale={false}>
           <GridStateContext state={resetGrid ? defaultState : state}>
-            <GridContext grid={newGrid} initialMetadata={metadata}>
+            <GridContext
+              grid={newGrid}
+              initialSolution={solution}
+              initialMetadata={metadata}
+            >
               <div className="flex flex-col gap-4">
                 {gridOnly || <Metadata simplified={true} responsive={false} />}
-                <MainGrid useToolboxClick={false} animated={false} />
+                <MainGrid
+                  useToolboxClick={false}
+                  allowAnimation={false}
+                  allowSounds={false}
+                />
               </div>
               {gridOnly || (
                 <div className="pr-2">

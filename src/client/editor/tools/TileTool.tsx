@@ -23,8 +23,7 @@ export default memo(function TileTool() {
                 colorMap={(x, y, color) => {
                   if (color === Color.Dark) return grid.getTile(x, y).fixed;
                   else if (color === Color.Light)
-                    return grid.getTile(x, y).exists;
-
+                    return !grid.getTile(x, y).exists;
                   return false;
                 }}
                 onTileClick={(x, y, from, to) => {
@@ -40,7 +39,7 @@ export default memo(function TileTool() {
                     setGrid(
                       grid.copyWith({
                         tiles: grid.setTile(x, y, t =>
-                          t.withExists(to === Color.Light)
+                          t.withExists(to !== Color.Light)
                         ),
                       })
                     );

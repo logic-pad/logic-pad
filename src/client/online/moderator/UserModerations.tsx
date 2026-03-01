@@ -20,15 +20,17 @@ const UserModeration = memo(function UserModeration({
         user={
           'moderator' in moderation ? moderation.moderator : moderation.user
         }
-        className="!badge-xs !badge-neutral"
+        className="badge-xs! badge-neutral!"
       />
       <div className="text-xs opacity-80 flex flex-wrap gap-2">
         <span>Created {toRelativeDate(new Date(moderation.createdAt))}</span>
         <span>Updated {toRelativeDate(new Date(moderation.updatedAt))}</span>
       </div>
-      <pre className="text-xs">{moderation.description}</pre>
+      <pre className="text-xs whitespace-normal wrap-break-words">
+        {moderation.description}
+      </pre>
       {moderation.message !== null && (
-        <div className="text-sm bg-base-300 rounded-sm w-full py-1 px-2">
+        <div className="text-sm bg-base-300 rounded-sm w-full py-1 px-2 whitespace-normal wrap-break-words">
           {moderation.message}
         </div>
       )}

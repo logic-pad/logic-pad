@@ -1,13 +1,12 @@
 import * as rax from 'retry-axios';
 import axiosStatic, { AxiosError } from 'axios';
 import {
-  Completion,
+  SolveSession,
   PuzzleBrief,
   PuzzleFull,
   PuzzleLove,
   ListResponse,
   UserBrief,
-  Identity,
   CollectionBrief,
   CollectionFollow,
   ResourceStatus,
@@ -43,6 +42,8 @@ import {
   PublicPuzzleSearchParams,
 } from './PuzzleSearchQuery';
 import { CollectionSearchParams } from './CollectionSearchQuery';
+import { Account, authClient } from './auth';
+import { API_ENDPOINT } from './env';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -82,12 +83,12 @@ export const queryClient = new QueryClient({
 });
 
 export const axios = axiosStatic.create({
-  baseURL: import.meta.env?.VITE_API_ENDPOINT as string,
+  baseURL: API_ENDPOINT,
   withCredentials: true,
 });
 
 export const retryAxios = axiosStatic.create({
-  baseURL: import.meta.env?.VITE_API_ENDPOINT as string,
+  baseURL: API_ENDPOINT,
   withCredentials: true,
 });
 retryAxios.defaults.raxConfig = {
@@ -111,38 +112,71 @@ export const api = {
       .then(res => res.data)
       .catch((err: AxiosError) => {
         if (err.status === 503) {
-          toast.error('The server is in maintenance. Please try again later.');
+          toast.error(
+            (err.response?.data as ApiErrorResponse).summary ??
+              'The server is in maintenance. Please try again later.'
+          );
         }
         return null;
       });
   },
-  signInWithOAuth: (provider: string, success: string, error: string) => {
+  signInWithOAuth: async (provider: string, success: string, error: string) => {
     onlineSolveTracker.clearSolveRecords();
-    const url = new URL(
-      (import.meta.env?.VITE_API_ENDPOINT as string) + '/auth/oauth/' + provider
-    );
-    url.searchParams.set('success', success);
-    url.searchParams.set('error', error);
-    window.location.href = url.toString();
-  },
-  callbackOAuth: async (userId: string, secret: string) => {
-    await axios({
-      method: 'POST',
-      url: '/auth/oauth/callback',
-      params: {
-        userId,
-        secret,
-      },
+    const result = await authClient.signIn.social({
+      provider,
+      callbackURL: success,
+      errorCallbackURL: error,
     });
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to sign in',
+        result.error.status
+      );
+    }
+    window.location.href = result.data.url!;
   },
-  listIdentities: async () => {
-    return await axios
-      .get<ListResponse<Identity>>('/auth/identity/list')
-      .then(res => res.data)
-      .catch(() => null);
+  linkAccount: async (provider: string, callbackURL: string) => {
+    const result = await authClient.linkSocial({
+      provider,
+      callbackURL,
+      errorCallbackURL: callbackURL,
+    });
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to link account',
+        result.error.status
+      );
+    }
+    window.location.href = result.data.url!;
   },
-  deleteIdentity: async (identityId: string) => {
-    await axios.delete(`/auth/identity/${identityId}`).catch(rethrowError);
+  listAccounts: async () => {
+    const result = await authClient.listAccounts();
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to list accounts',
+        result.error.status
+      );
+    }
+    return result.data as Account[];
+  },
+  unlinkAccount: async (providerId: string, accountId: string) => {
+    const result = await authClient.unlinkAccount({
+      providerId,
+      accountId,
+    });
+    if (!result.data) {
+      throw new ApiError(
+        result.error.message ?? 'Failed to unlink account',
+        result.error.status
+      );
+    }
+    return result.data;
+  },
+  logout: async () => {
+    await queryClient.invalidateQueries();
+    onlineSolveTracker.clearSolveRecords();
+    await authClient.signOut();
+    window.location.reload();
   },
   getMe: async () => {
     return await axios
@@ -150,14 +184,21 @@ export const api = {
       .then(res => res.data)
       .catch(() => null);
   },
-  updateMe: async (data: Partial<Pick<UserBrief, 'name' | 'description'>>) => {
-    return await axios.put<UserBrief>('/user/me', data).catch(() => null);
-  },
-  logout: async () => {
-    await queryClient.invalidateQueries();
-    onlineSolveTracker.clearSolveRecords();
-    await axios.delete('/auth/logout').catch(rethrowError);
-    window.location.reload();
+  updateMe: async (
+    data: Partial<Pick<MeBrief, 'name' | 'description' | 'email'>>
+  ) => {
+    const result = await axios
+      .put<UserBrief>('/user/me', data)
+      .catch(() => null);
+    if (data.email) {
+      // Invalidate session cache to update email in the session
+      await authClient.getSession({
+        query: {
+          disableCookieCache: true,
+        },
+      });
+    }
+    return result;
   },
   getUser: async (userId: string) => {
     return await axios
@@ -171,13 +212,8 @@ export const api = {
       .then(res => res.data)
       .catch(() => null);
   },
-  getAvatar: async (userId: string) => {
-    return await axios
-      .get<Blob>(`/user/${userId}/avatar`, {
-        responseType: 'blob',
-      })
-      .then(res => URL.createObjectURL(res.data))
-      .catch(() => null);
+  getAvatar: (userId: string) => {
+    return `${axios.defaults.baseURL}/user/${userId}/avatar`;
   },
   getPuzzleFullForEdit: async (puzzleId: string) => {
     return await axios
@@ -239,9 +275,9 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  publishPuzzle: async (puzzleId: string) => {
+  publishPuzzle: async (puzzleId: string, status: ResourceStatus) => {
     return await axios
-      .post<{ id: string }>(`/puzzle/${puzzleId}/publish`)
+      .post<{ id: string }>(`/puzzle/${puzzleId}/publish`, { status })
       .then(res => res.data)
       .catch(rethrowError);
   },
@@ -257,38 +293,51 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionBegin: async (puzzleId: string) => {
+  solveSessionBegin: async (puzzleId: string) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/begin`)
+      .post<SolveSession>(`/session/${puzzleId}/begin`)
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionSolvingBeacon: (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolvingBeacon: (
+    puzzleId: string,
+    msTimeElapsed: number,
+    solutionData?: string
+  ) => {
     const headers = {
       type: 'application/json',
     };
-    const blob = new Blob([JSON.stringify({ msTimeElapsed })], headers);
+    const blob = new Blob(
+      [JSON.stringify({ msTimeElapsed, solutionData })],
+      headers
+    );
     return navigator.sendBeacon(
-      (import.meta.env?.VITE_API_ENDPOINT as string) +
-        `/completion/${puzzleId}/solving`,
+      API_ENDPOINT + `/session/${puzzleId}/solving`,
       blob
     );
   },
-  completionSolving: async (puzzleId: string, msTimeElapsed: number) => {
+  solveSessionSolving: async (
+    puzzleId: string,
+    msTimeElapsed: number,
+    solutionData?: string
+  ) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/solving`, { msTimeElapsed })
+      .post<{ id: string }>(`/session/${puzzleId}/solving`, {
+        msTimeElapsed,
+        solutionData,
+      })
       .then(res => res.data)
       .catch(rethrowError);
   },
-  completionComplete: async (puzzleId: string) => {
+  solveSessionComplete: async (puzzleId: string) => {
     return await retryAxios
-      .post<Completion>(`/completion/${puzzleId}/complete`, undefined, {})
+      .post<SolveSession>(`/session/${puzzleId}/complete`, undefined, {})
       .then(res => res.data)
       .catch(rethrowError);
   },
   ratePuzzle: async (puzzleId: string, rating: number) => {
     return await axios
-      .put<{ id: string }>(`/completion/${puzzleId}/rate`, { rating })
+      .put<{ id: string }>(`/session/${puzzleId}/rate`, { rating })
       .then(res => res.data)
       .catch(rethrowError);
   },
@@ -311,6 +360,18 @@ export const api = {
   ) => {
     return await axios
       .get<ListResponse<PuzzleBrief>>(`/puzzle/search/own`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  searchPublishedPuzzles: async (
+    query: PublicPuzzleSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<PuzzleBrief>>(`/puzzle/search/published`, {
         params: { ...query, cursorBefore, cursorAfter },
       })
       .then(res => res.data)
@@ -446,6 +507,18 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
+  searchPublishedCollections: async (
+    query: CollectionSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<CollectionBrief>>(`/collection/search/published`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
   searchAllCollections: async (
     query: CollectionSearchParams,
     cursorBefore?: string,
@@ -547,10 +620,7 @@ export const api = {
       .catch(rethrowError);
   },
   checkoutSupporter: (price: string, success: string, error: string) => {
-    const url = new URL(
-      (import.meta.env?.VITE_API_ENDPOINT as string) +
-        '/payment/supporter/checkout'
-    );
+    const url = new URL(API_ENDPOINT + '/payment/supporter/checkout');
     url.searchParams.set('priceId', price);
     url.searchParams.set('success', success);
     url.searchParams.set('error', error);
@@ -594,10 +664,39 @@ export const api = {
     message: string
   ) => {
     return await axios
-      .put<UserRestrictions>(`/moderation/user/${userId}/restrictions`, {
+      .post<UserRestrictions>(`/moderation/user/${userId}/restrictions`, {
         restrictions,
         message,
       })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  modListPuzzles: async (
+    userId: string,
+    query: PublicPuzzleSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<PuzzleBrief>>(`/moderation/user/${userId}/puzzles`, {
+        params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  modListCollections: async (
+    userId: string,
+    query: CollectionSearchParams,
+    cursorBefore?: string,
+    cursorAfter?: string
+  ) => {
+    return await axios
+      .get<ListResponse<CollectionBrief>>(
+        `/moderation/user/${userId}/collections`,
+        {
+          params: { ...query, cursorBefore, cursorAfter },
+        }
+      )
       .then(res => res.data)
       .catch(rethrowError);
   },
@@ -643,14 +742,85 @@ export const api = {
       .then(res => res.data)
       .catch(rethrowError);
   },
-  modUpdateAccountStatus: async (
+  modBanUser: async (
     userId: string,
-    status: boolean,
+    expiresInSeconds: number,
     message: string
   ) => {
     await axios
-      .put(`/moderation/user/${userId}/status`, {
-        status,
+      .post(`/moderation/user/${userId}/ban`, {
+        expiresInSeconds,
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUnbanUser: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/unban`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveUserDescription: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveUserName: async (userId: string, message: string) => {
+    await axios
+      .post(`/moderation/user/${userId}/name/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdatePuzzle: async (
+    action: 'unpublish' | 'delete',
+    puzzleId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/puzzle/${puzzleId}/${action}`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemovePuzzleDescription: async (puzzleId: string, message: string) => {
+    await axios
+      .post(`/moderation/puzzle/${puzzleId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdateCollection: async (
+    action: 'unpublish' | 'delete',
+    collectionId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/collection/${collectionId}/${action}`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modRemoveCollectionDescription: async (
+    collectionId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/collection/${collectionId}/description/remove`, {
+        message,
+      })
+      .catch(rethrowError);
+  },
+  modUpdateComment: async (
+    action: 'remove' | 'delete',
+    commentId: string,
+    message: string
+  ) => {
+    await axios
+      .post(`/moderation/comment/${commentId}/${action}`, {
         message,
       })
       .catch(rethrowError);

@@ -24,4 +24,11 @@ export const Route = createFileRoute('/_layout/perfection/$puzzleId')({
       });
     }
   },
+  head: ({ loaderData }) => ({
+    meta: [
+      {
+        title: `${loaderData?.title ?? 'Untitled'} - Logic Pad`,
+      },
+    ],
+  }),
 });

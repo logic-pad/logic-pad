@@ -16,7 +16,7 @@ import { handlesSetGrid, invokeSetGrid } from './data/events/onSetGrid.js';
 import { handlesSymbolDisplay } from './data/events/onSymbolDisplay.js';
 import { handlesSymbolMerge } from './data/events/onSymbolMerge.js';
 import { handlesSymbolValidation } from './data/events/onSymbolValidation.js';
-import GridData, { NEIGHBOR_OFFSETS } from './data/grid.js';
+import GridData, { NEIGHBOR_OFFSETS, NEIGHBOR_OFFSETS_8 } from './data/grid.js';
 import GridConnections from './data/gridConnections.js';
 import GridZones from './data/gridZones.js';
 import Instruction from './data/instruction.js';
@@ -64,7 +64,7 @@ import { getShapeVariants, normalizeShape, positionsToShape, sanitizePatternGrid
 import { allSolvers } from './data/solver/allSolvers.js';
 import AutoSolver from './data/solver/auto/autoSolver.js';
 import BacktrackSolver from './data/solver/backtrack/backtrackSolver.js';
-import BTModule, { BTGridData, BTTile, IntArray2D, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
+import BTModule, { BTGridData, BTTile, IntArray2D, checkSubtilePlacement, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
 import BanPatternBTModule from './data/solver/backtrack/rules/banPattern.js';
 import CellCountBTModule from './data/solver/backtrack/rules/cellCount.js';
 import ConnectAllBTModule from './data/solver/backtrack/rules/connectAll.js';
@@ -89,19 +89,6 @@ import EventIteratingSolver from './data/solver/eventIteratingSolver.js';
 import Solver from './data/solver/solver.js';
 import UniversalDevSolver from './data/solver/universal/dev/universalDevSolver.js';
 import UniversalSolver from './data/solver/universal/universalSolver.js';
-import AreaNumberModule from './data/solver/z3/modules/areaNumberModule.js';
-import CellCountModule from './data/solver/z3/modules/cellCountModule.js';
-import ConnectAllModule from './data/solver/z3/modules/connectAllModule.js';
-import DartModule from './data/solver/z3/modules/dartModule.js';
-import { allZ3Modules } from './data/solver/z3/modules/index.js';
-import LetterModule from './data/solver/z3/modules/letterModule.js';
-import MyopiaModule from './data/solver/z3/modules/myopiaModule.js';
-import RegionAreaModule from './data/solver/z3/modules/regionAreaModule.js';
-import ViewpointModule from './data/solver/z3/modules/viewpointModule.js';
-import Z3Module from './data/solver/z3/modules/z3Module.js';
-import { convertDirection } from './data/solver/z3/utils.js';
-import Z3Solver from './data/solver/z3/z3Solver.js';
-import Z3SolverContext from './data/solver/z3/z3SolverContext.js';
 import AreaNumberSymbol from './data/symbols/areaNumberSymbol.js';
 import CustomIconSymbol from './data/symbols/customIconSymbol.js';
 import CustomSymbol from './data/symbols/customSymbol.js';
@@ -120,6 +107,7 @@ import MinesweeperSymbol from './data/symbols/minesweeperSymbol.js';
 import MyopiaSymbol from './data/symbols/myopiaSymbol.js';
 import NumberSymbol from './data/symbols/numberSymbol.js';
 import Symbol from './data/symbols/symbol.js';
+import UnsupportedSymbol from './data/symbols/unsupportedSymbol.js';
 import ViewpointSymbol from './data/symbols/viewpointSymbol.js';
 import TileData from './data/tile.js';
 import TileConnections from './data/tileConnections.js';
@@ -154,6 +142,7 @@ export {
   handlesSymbolValidation,
   GridData,
   NEIGHBOR_OFFSETS,
+  NEIGHBOR_OFFSETS_8,
   GridConnections,
   GridZones,
   Instruction,
@@ -235,6 +224,7 @@ export {
   BTGridData,
   BTTile,
   IntArray2D,
+  checkSubtilePlacement,
   colorToBTTile,
   createOneTileResult,
   getOppositeColor,
@@ -262,19 +252,6 @@ export {
   Solver,
   UniversalDevSolver,
   UniversalSolver,
-  AreaNumberModule,
-  CellCountModule,
-  ConnectAllModule,
-  DartModule,
-  allZ3Modules,
-  LetterModule,
-  MyopiaModule,
-  RegionAreaModule,
-  ViewpointModule,
-  Z3Module,
-  convertDirection,
-  Z3Solver,
-  Z3SolverContext,
   AreaNumberSymbol,
   CustomIconSymbol,
   CustomSymbol,
@@ -293,6 +270,7 @@ export {
   MyopiaSymbol,
   NumberSymbol,
   Symbol,
+  UnsupportedSymbol,
   ViewpointSymbol,
   TileData,
   TileConnections,

@@ -5,7 +5,6 @@ import { tanstackRouter } from '@tanstack/router-vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import { replaceCodePlugin } from 'vite-plugin-replace';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { execSync } from 'child_process';
 import vercel from 'vite-plugin-vercel';
 
@@ -14,18 +13,6 @@ const commitHash = execSync('git rev-parse HEAD').toString().trim();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/z3-solver/build/z3-built.js',
-          dest: 'assets',
-        },
-        {
-          src: 'node_modules/z3-solver/build/z3-built.wasm',
-          dest: 'assets',
-        },
-      ],
-    }),
     replaceCodePlugin({
       replacements: [
         {
@@ -47,14 +34,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       outDir: '.vercel/output/static',
-      includeAssets: [
-        'favicon.ico',
-        '*.svg',
-        '*.png',
-        'assets/z3-built.js',
-        'assets/z3-built.wasm',
-        'assets/z3-built.worker.js',
-      ],
+      includeAssets: ['favicon.ico', '*.svg', '*.png'],
       workbox: {
         globIgnores: ['**/node_modules/**/*', '**/_moderator*'],
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
@@ -100,6 +80,12 @@ export default defineConfig({
             release: {
               name: commitHash,
             },
+            bundleSizeOptimizations: {
+              excludeDebugStatements: true,
+              excludeReplayIframe: true,
+              excludeReplayShadowDom: true,
+              excludeReplayWorker: true,
+            },
           }),
         ]
       : []),
@@ -125,11 +111,36 @@ export default defineConfig({
   vercel: {
     additionalEndpoints: [
       {
-        source: './src/ssr/sitemap.ts',
-        destination: '/sitemap.xml',
+        source: './src/ssr/index.ts',
+        destination: '/ssr/[[...path]]',
+        isr: { expiration: 60 * 60 },
+        buildOptions: {
+          loader: {
+            '.node': 'copy',
+            '.ttf': 'file',
+            '.html': 'text',
+          },
+        },
       },
     ],
-    rewrites: [{ source: '/(.*)', destination: '/' }],
+    rewrites: [
+      { source: '/ssr/(.*)', destination: '/' },
+      { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
+      {
+        source: '/collection/:collectionId',
+        destination: '/ssr/collection/:collectionId',
+      },
+      {
+        source: '/profile/:userId',
+        destination: '/ssr/profile/:userId',
+      },
+      {
+        source: '/api/preview/:type/:resourceId',
+        destination: '/ssr/api/preview/:type/:resourceId',
+      },
+      { source: '/sitemap.xml', destination: '/ssr/sitemap.xml' },
+      { source: '/((?!ssr).*)', destination: '/' },
+    ],
     headers: [
       {
         source: '/(.*)',
@@ -157,7 +168,17 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['@logic-pad/core', 'logic-pad-solver-core'],
-    include: ['event-iterator', 'z3-solver'],
+    include: ['event-iterator'],
+  },
+  build: {
+    sourcemap: true,
+    rolldownOptions: {
+      external: [
+        '@terrazzo/tiles',
+        '@terrazzo/react-color-picker',
+        '@terrazzo/use-color',
+      ],
+    },
   },
   resolve: {
     alias: [
@@ -176,9 +197,6 @@ export default defineConfig({
         ),
       },
     ],
-  },
-  build: {
-    sourcemap: true,
   },
   define: {
     'import.meta.env.VITE_PACKAGE_VERSION': JSON.stringify(commitHash),

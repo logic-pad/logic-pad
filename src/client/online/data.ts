@@ -1,16 +1,19 @@
-/* Sync with backend */
+// Sync between frontend and backend
 
-import { PuzzleType } from '@logic-pad/core/data/primitives';
+import type { PuzzleType } from '@logic-pad/core/data/primitives.js';
+
+export type HighlightColor =
+  | 'primary'
+  | 'secondary'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'error';
 
 export enum ResourceStatus {
   Private = 'private',
+  Unlisted = 'unlisted',
   Public = 'public',
-}
-
-export enum FeedbackType {
-  General = 'general',
-  Issue = 'issue',
-  Report = 'report',
 }
 
 export enum NotificationType {
@@ -19,6 +22,7 @@ export enum NotificationType {
   Account = 'account',
   System = 'system',
 }
+
 export interface ResourceResponse {
   id: string;
   createdAt: string;
@@ -32,6 +36,7 @@ export enum AutoCollection {
 }
 
 export interface UserBrief extends ResourceResponse {
+  accessedAt: string;
   solveCount: number;
   createCount: number;
   description: string;
@@ -42,7 +47,8 @@ export interface UserBrief extends ResourceResponse {
 
 export interface MeBrief extends UserBrief {
   supporterUntil: string | null;
-  labels: string[];
+  roles: string[];
+  email: string;
 }
 
 export interface PuzzleBrief extends ResourceResponse {
@@ -79,17 +85,13 @@ export interface Comment extends ResourceResponse {
   content: string;
 }
 
-export interface Completion extends ResourceResponse {
+export interface SolveSession extends ResourceResponse {
   ratedDifficulty: number | null;
   solvedAt: string | null;
   msTimeUsed: number;
   puzzle: string;
   user: string;
-}
-
-export interface Identity extends ResourceResponse {
-  provider: string;
-  email: string;
+  solutionData: string | null;
 }
 
 export interface Notification extends ResourceResponse {
@@ -120,7 +122,6 @@ export interface PuzzleSection {
 }
 
 export interface UserDetail {
-  accessedAt: string | null;
   followCount: number;
   solvedPuzzles: PuzzleSection | null;
   createdPuzzles: PuzzleSection | null;
@@ -133,12 +134,32 @@ export interface PuzzleFull extends PuzzleBrief {
   series: CollectionBrief | null;
 }
 
-export interface FrontPage {
-  newestPuzzles: PuzzleBrief[];
-  newestCollections: CollectionBrief[];
+export interface FrontPageSection<T extends PuzzleBrief | CollectionBrief> {
+  type: 'puzzles' | 'collections';
+  title: string;
+  description: string | null;
+  highlight: HighlightColor | null;
+  link: string | null;
+  items: T[];
 }
 
-export interface ListResponse<T extends ResourceResponse> {
+export interface PuzzlesSection extends FrontPageSection<PuzzleBrief> {
+  type: 'puzzles';
+}
+
+export interface CollectionsSection extends FrontPageSection<CollectionBrief> {
+  type: 'collections';
+}
+
+export interface FrontPage {
+  note: {
+    content: string;
+    highlight: HighlightColor;
+  } | null;
+  sections: (PuzzlesSection | CollectionsSection)[];
+}
+
+export interface ListResponse<T> {
   total: number;
   results: T[];
 }
@@ -154,7 +175,7 @@ export interface PaymentHistory extends ResourceResponse {
   user: string;
   order: string;
   currency: string;
-  amount: number;
+  amount: string;
   items: string[];
 }
 
@@ -167,10 +188,10 @@ export interface UserAccount {
   id: string;
   createdAt: string;
   updatedAt: string;
-  registeredAt: string;
-  accessedAt: string | null;
-  labels: string[];
-  status: boolean;
+  accessedAt: string;
+  roles: string[];
+  bannedUntil: string | null;
+  banReason: string | null;
 }
 
 export interface UserRestrictions {

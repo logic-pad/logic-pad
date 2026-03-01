@@ -2,6 +2,8 @@ import { CachedAccess } from '../dataHelper.js';
 import GridData from '../grid.js';
 import { allRules } from '../rules/index.js';
 import { allSymbols } from '../symbols/index.js';
+import { Instruction } from '../../index.js';
+import { instance as undercluedInstance } from '../rules/undercluedRule.js';
 
 /**
  * Base class that all solvers must extend.
@@ -78,14 +80,17 @@ export default abstract class Solver {
    *
    * @param instructionId The unique identifier of the instruction.
    */
-  public isInstructionSupported(instructionId: string): boolean {
-    const symbol = allSymbols.get(instructionId);
+  public isInstructionSupported(
+    _grid: GridData,
+    instruction: Instruction
+  ): boolean {
+    const symbol = allSymbols.get(instruction.id);
     if (symbol) {
       return !symbol.validateWithSolution;
     }
-    const rule = allRules.get(instructionId);
+    const rule = allRules.get(instruction.id);
     if (rule) {
-      return !rule.validateWithSolution;
+      return !rule.validateWithSolution || rule.id === undercluedInstance.id;
     }
     return false;
   }
@@ -104,16 +109,17 @@ export default abstract class Solver {
     if (
       grid.rules.some(
         rule =>
-          rule.necessaryForCompletion && !this.isInstructionSupported(rule.id)
+          rule.necessaryForCompletion &&
+          !this.isInstructionSupported(grid, rule)
       )
     ) {
       return false;
     }
     if (
-      [...grid.symbols.keys()].some(
-        id =>
-          grid.symbols.get(id)?.some(s => s.necessaryForCompletion) &&
-          !this.isInstructionSupported(id)
+      [...grid.symbols.values()].some(symbols =>
+        symbols.some(
+          s => s.necessaryForCompletion && !this.isInstructionSupported(grid, s)
+        )
       )
     ) {
       return false;

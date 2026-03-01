@@ -1,12 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
-import {
-  CollectionSearchParams,
-  collectionSearchSchema,
-} from '../online/CollectionSearchQuery';
+import { collectionSearchSchema } from '../online/CollectionSearchQuery';
 import { queryClient } from '../online/api';
 import toast from 'react-hot-toast';
-import { router } from '../router/router';
 import { searchOwnCollectionsInfiniteQueryOptions } from '../online/CollectionSearchResults';
 
 export const Route = createFileRoute('/_layout/my-stuff/collections')({
@@ -15,9 +11,7 @@ export const Route = createFileRoute('/_layout/my-stuff/collections')({
     try {
       await Promise.all([
         queryClient.ensureInfiniteQueryData(
-          searchOwnCollectionsInfiniteQueryOptions(
-            router.state.location.search as CollectionSearchParams
-          )
+          searchOwnCollectionsInfiniteQueryOptions({})
         ),
       ]);
     } catch (error) {
@@ -27,4 +21,11 @@ export const Route = createFileRoute('/_layout/my-stuff/collections')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `My Collections - Logic Pad`,
+      },
+    ],
+  }),
 });

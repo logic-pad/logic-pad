@@ -6,21 +6,27 @@ import { instance as symbolsPerRegionInstance } from '../../rules/symbolsPerRegi
 import { instance as undercluedInstance } from '../../rules/undercluedRule.js';
 import { instance as uniqueShapeInstance } from '../../rules/uniqueShapeRule.js';
 import { instance as offByXInstance } from '../../rules/offByXRule.js';
-import { instance as areaNumberInstance } from '../../symbols/areaNumberSymbol.js';
+import AreaNumberSymbol, {
+  instance as areaNumberInstance,
+} from '../../symbols/areaNumberSymbol.js';
 import { instance as dartInstance } from '../../symbols/dartSymbol.js';
 import GalaxySymbol, {
   instance as galaxyInstance,
 } from '../../symbols/galaxySymbol.js';
-import { instance as letterInstance } from '../../symbols/letterSymbol.js';
+import LetterSymbol, {
+  instance as letterInstance,
+} from '../../symbols/letterSymbol.js';
 import LotusSymbol, {
   instance as lotusInstance,
 } from '../../symbols/lotusSymbol.js';
 import { instance as minesweeperInstance } from '../../symbols/minesweeperSymbol.js';
 import { instance as viewpointInstance } from '../../symbols/viewpointSymbol.js';
 import { instance as connectAllInstance } from '../../rules/connectAllRule.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import EventIteratingSolver from '../eventIteratingSolver.js';
 import GridData from '../../grid.js';
 import { Color } from '../../primitives.js';
+import Instruction from '../../instruction.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 ('vite-apply-code-mod');
@@ -43,6 +49,7 @@ export default class CspuzSolver extends EventIteratingSolver {
     offByXInstance.id,
     undercluedInstance.id,
     symbolsPerRegionInstance.id,
+    unsupportedInstance.id,
   ];
 
   public readonly id = 'cspuz';
@@ -63,39 +70,76 @@ export default class CspuzSolver extends EventIteratingSolver {
       return false;
     }
 
-    // special handling for galaxies and lotuses since dual-color symbols are not supported yet
-    for (const [_, symbols] of grid.symbols) {
-      for (const symbol of symbols) {
-        if (symbol instanceof GalaxySymbol || symbol instanceof LotusSymbol) {
-          if (symbol.x % 1 !== 0 && symbol.y % 1 !== 0) {
-            return false;
-          } else if (symbol.x % 1 !== 0 || symbol.y % 1 !== 0) {
-            const tile1 = grid.getTile(
-              Math.floor(symbol.x),
-              Math.floor(symbol.y)
-            );
-            const tile2 = grid.getTile(
-              Math.ceil(symbol.x),
-              Math.ceil(symbol.y)
-            );
-            if (!tile1.fixed || !tile2.fixed || tile1.color !== tile2.color) {
-              return false;
-            }
-          }
-        }
-      }
-    }
-
     // special handling for fixed gray tiles
     if (grid.getTileCount(true, true, Color.Gray) > 0) {
+      return false;
+    }
+
+    // the solver doesn't count symbols correctly if some symbols are unsupported
+    if (
+      grid.findSymbol(symbol => symbol.id === unsupportedInstance.id) &&
+      grid.findRule(rule => rule.id === symbolsPerRegionInstance.id)
+    ) {
       return false;
     }
 
     return true;
   }
 
-  public isInstructionSupported(instructionId: string): boolean {
-    return CspuzSolver.supportedInstrs.includes(instructionId);
+  public isInstructionSupported(
+    grid: GridData,
+    instruction: Instruction
+  ): boolean {
+    if (
+      instruction instanceof LotusSymbol ||
+      instruction instanceof GalaxySymbol
+    ) {
+      if (instruction.x % 1 !== 0 && instruction.y % 1 !== 0) {
+        return false;
+      }
+    }
+    if (
+      instruction instanceof LotusSymbol ||
+      instruction instanceof GalaxySymbol ||
+      instruction instanceof AreaNumberSymbol ||
+      instruction instanceof LetterSymbol
+    ) {
+      if (instruction.x % 1 !== 0 || instruction.y % 1 !== 0) {
+        const minX = Math.floor(instruction.x);
+        const minY = Math.floor(instruction.y);
+        const maxX = Math.ceil(instruction.x);
+        const maxY = Math.ceil(instruction.y);
+        const connectedTiles = grid.connections.getConnectedTiles({
+          x: minX,
+          y: minY,
+        });
+        if (
+          connectedTiles.some(tile => tile.x === minX && tile.y === maxY) &&
+          connectedTiles.some(tile => tile.x === maxX && tile.y === minY) &&
+          connectedTiles.some(tile => tile.x === maxX && tile.y === maxY)
+        ) {
+          return true;
+        }
+        let color = Color.Gray;
+        for (let i = 0; i < 4; i++) {
+          const x = i % 2 === 0 ? minX : maxX;
+          const y = i < 2 ? minY : maxY;
+          const tile = grid.getTile(x, y);
+          if (!tile.fixed || !tile.exists) {
+            return false;
+          }
+          if (tile.color !== Color.Gray) {
+            if (color === Color.Gray) {
+              color = tile.color;
+            } else if (color !== tile.color) {
+              return false;
+            }
+          }
+        }
+        return true;
+      }
+    }
+    return CspuzSolver.supportedInstrs.includes(instruction.id);
   }
 
   public async isEnvironmentSupported(): Promise<boolean> {

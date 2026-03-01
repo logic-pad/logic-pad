@@ -1,3 +1,84 @@
+# 21/2/2026
+
+- Complete server rewrite for better performance and capacity
+- Less restrictive server limits
+  - Max collection size 250 -> unlimited
+  - Followed collections 250 -> unlimited
+  - Compressed puzzle size limit 5KB -> 7.5KB
+- Authentication
+  - Added support for signing in with X
+  - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
+  - You can now change your primary email
+- Supporter benefits
+  - Unlisted puzzles and collections
+  - Unlimited private puzzles
+  - Search puzzles by solve status
+  - Save puzzle solve progress to the server
+- Reduced supporter prices
+- The puzzle editor now auto-saves your progress
+- "I'm feeling lucky" no longer picks puzzles that you have solved before
+- Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+- Updated Privacy Policy and Terms of Service
+- Reworked collection page UI
+- New set of SVG user avatars with better support for different names
+- Empty text symbols now display a placeholder question mark
+- Puzzle cards now show an indication of how the rated difficulty compares to design difficulty
+- The rated difficulty is now rounded up instead of down
+- Automatic collections are no longer shown in a profile's "created collections" section
+- Enhanced wrap-around visualization to show corners and look more more seamless
+- Fixed errors when switching between puzzle and collection search with filters enabled
+- Fixed network errors when a puzzle is rated right after solving
+- Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
+- Puzzle completion SFX no longer plays in the editor
+- Fixed small issues with link preview rendering
+
+# 14/1/2026
+
+- Fixed "I'm feeling lucky" button not working
+- Fixed the "Followed collections" section not loading
+
+# 18/12/2025
+
+- Fixed puzzle image generation for hidden tiles
+- Fixed grid sounds playing incorrectly during puzzle image generation
+
+# 6/12/2025
+
+- Added sound effects to tile clicks and puzzle solves
+  - You can adjust the volume in site settings
+- Fixed incorrect site title in some pages
+
+# 4/12/2025
+
+- Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
+  - This is now supported by the backtrack and universal solvers
+- Removed the z3 solver
+- Improved card style for better readability and touchscreen support
+- The tile tool can now be dragged across tiles
+- The cspuz solver can now be used in more edge cases involving lotuses/galaxies
+- The solver support indicator now accurately reflects whether the selected symbol is supported in its current placement
+- Optimized symbols per region rule in the auto solver
+- Fixed the backtrack solver counting non-logic symbols (e.g. the hidden symbol) in symbols per region rule
+- Fixed text highlight being triggered by double-clicking on the grid in Firefox
+
+# 1/12/2025
+
+- Reworked all color themes again to improve contrast
+- Fixed notification layout when there are many notifications
+
+# 30/11/2025
+
+- Grid validation now runs automatically when a puzzle is loaded
+- Fixed repeated server errors in the collection sidebar for loved collections
+- Fixed missing grid validation when editing a published puzzle
+
+# 24/11/2025
+
+- The No Loops rule now only highlights the looped tiles
+- Fixed No Loops rule crashing on wrap-around grids
+- You can now use cmd+enter or ctrl+enter to add a new line in comments
+- You can now preview theme colors in the theme switcher
+
 # 22/11/2025
 
 - Added No Loops rule

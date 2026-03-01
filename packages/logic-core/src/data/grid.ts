@@ -26,6 +26,17 @@ export const NEIGHBOR_OFFSETS: Position[] = [
   { x: 0, y: 1 },
 ];
 
+export const NEIGHBOR_OFFSETS_8: Position[] = [
+  { x: -1, y: 0 },
+  { x: 1, y: 0 },
+  { x: 0, y: -1 },
+  { x: 0, y: 1 },
+  { x: -1, y: -1 },
+  { x: 1, y: -1 },
+  { x: -1, y: 1 },
+  { x: 1, y: 1 },
+];
+
 export default class GridData {
   public readonly tiles: readonly (readonly TileData[])[];
   public readonly connections: GridConnections;

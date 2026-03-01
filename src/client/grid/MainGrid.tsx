@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, Suspense, useEffect, useRef, useState } from 'react';
 import StateRing from './StateRing.tsx';
 import { useGrid } from '../contexts/GridContext.tsx';
 import Grid from './Grid';
@@ -18,10 +18,13 @@ import { usePinch } from '@use-gesture/react';
 import GridZoneOverlay from './GridZoneOverlay.tsx';
 import { useSettings } from '../contexts/SettingsContext.tsx';
 
+const GridSounds = React.lazy(() => import('./GridSounds.tsx'));
+
 export interface MainGridProps {
   useToolboxClick: boolean;
   children?: React.ReactNode;
-  animated?: boolean;
+  allowAnimation?: boolean;
+  allowSounds?: boolean;
 }
 
 export function computeTileSize(
@@ -60,9 +63,11 @@ export function computeTileSize(
 export default memo(function MainGrid({
   useToolboxClick,
   children,
-  animated,
+  allowAnimation,
+  allowSounds,
 }: MainGridProps) {
-  animated = animated ?? true;
+  allowAnimation = allowAnimation ?? true;
+  allowSounds = allowSounds ?? true;
   const gridContext = useGrid();
   const { grid, solution } = gridContext;
   const { scale, setScale, responsiveScale } = useDisplay();
@@ -142,10 +147,15 @@ export default memo(function MainGrid({
       ref={stateRingRef}
       width={grid.width}
       height={grid.height}
-      animated={animated}
+      allowAnimation={allowAnimation}
       {...bind()}
       className="tour-grid"
     >
+      {allowSounds && (
+        <Suspense fallback={null}>
+          <GridSounds allowAnimation={allowAnimation} />
+        </Suspense>
+      )}
       <Grid
         size={Math.round(tileConfig.tileSize * scale)}
         grid={grid}
