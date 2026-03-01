@@ -12,7 +12,7 @@ export const Route = createLazyFileRoute('/_layout/search/collections')({
 
     return (
       <>
-        <div role="tablist" className="tabs tabs-lg tabs-bordered">
+        <div role="tablist" className="tabs tabs-lg tabs-border">
           <Link
             to="/search/puzzles"
             role="tab"
@@ -33,7 +33,7 @@ export const Route = createLazyFileRoute('/_layout/search/collections')({
           onChange={async params => await navigate({ search: params })}
         />
         <div className="divider m-0" />
-        <CollectionSearchResults params={search} />
+        <CollectionSearchResults params={search} searchType="public" />
       </>
     );
   }),

@@ -155,7 +155,6 @@ export function resize<T>(
  * @param values The values to compare.
  * @returns Whether all the values are equal.
  */
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function allEqual<T>(...values: T[]) {
   return values.every(value => value === values[0]);
 }

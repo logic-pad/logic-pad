@@ -11,6 +11,7 @@ import { Color } from '@logic-pad/core/data/primitives';
 import { array } from '@logic-pad/core/data/dataHelper';
 import GridData from '@logic-pad/core/data/grid';
 import type { CachedPlayback } from './instruments.ts';
+import { useSuspenseQueries } from '@tanstack/react-query';
 
 const ToneImport = import('tone');
 const instrumentsImport = import('./instruments.ts');
@@ -22,32 +23,33 @@ const MusicControls = lazy(async function () {
     Tone,
     {
       cleanUp,
-      drum,
-      piano,
-      pianoImmediate,
-      pianoImmediatePedal,
+      instruments,
+      getInstrumentsUsed,
       playGrid,
       playImmediate,
       playbackState,
     },
   ] = await Promise.all([ToneImport, instrumentsImport]);
-  await Promise.all([
-    piano.load(),
-    pianoImmediate.load(),
-    pianoImmediatePedal.load(),
-  ]);
-  await new Promise<void>(resolve => {
-    const interval = setInterval(() => {
-      if (Object.values(drum).every(player => player.loaded)) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 100);
-  });
   return {
     default: memo(function MusicControls({
       instruction,
     }: MusicControlsPartProps) {
+      useSuspenseQueries({
+        queries: Array.from(getInstrumentsUsed(instruction)).map(
+          instrument => ({
+            queryKey: ['instrument', instrument],
+            queryFn: async () => {
+              const instr = instruments[instrument];
+              if (!instr) throw new Error(`Unknown instrument: ${instrument}`);
+              await instr.load();
+              return instr;
+            },
+            retry: false,
+            staleTime: Infinity,
+            cacheTime: Infinity,
+          })
+        ),
+      });
       const { grid, solution } = useGrid();
       const previousGrid = useRef<GridData | null>(null);
       const [playState, setPlayState] = useState<'listen' | 'play' | 'none'>(
@@ -58,6 +60,8 @@ const MusicControls = lazy(async function () {
         if (
           previousGrid.current &&
           !previousGrid.current.colorEquals(grid) &&
+          previousGrid.current.width === grid.width &&
+          previousGrid.current.height === grid.height &&
           playState === 'none'
         ) {
           playImmediate(grid, previousGrid.current, instruction);

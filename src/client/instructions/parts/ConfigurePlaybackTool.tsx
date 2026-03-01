@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import ToolboxItem from '../../editor/ToolboxItem';
 import { PartPlacement, PartSpec } from './types';
 import { instance as musicGridInstance } from '@logic-pad/core/data/rules/musicGridRule';
@@ -12,13 +12,15 @@ import {
   getConfigurableLocation,
   useConfig,
 } from '../../contexts/ConfigContext.tsx';
-import { mousePosition } from '../../../client/uiHelper.ts';
 import { IoMdFlag } from 'react-icons/io';
 
 const PlaybackOverlay = memo(function PlaybackOverlay() {
   const { setLocation, setRef } = useConfig();
   const { grid, setGrid } = useGrid();
   const musicGrid = grid.musicGrid.value;
+  const controlLineOverlayRef =
+    useRef<Map<number, HTMLDivElement | null>>(null);
+
   if (!musicGrid) return null;
   return (
     <>
@@ -43,9 +45,7 @@ const PlaybackOverlay = memo(function PlaybackOverlay() {
               )
             );
             setRef({
-              current: document
-                .elementsFromPoint(mousePosition.clientX, mousePosition.clientY)
-                .find(e => e.classList.contains('logic-tile')) as HTMLElement,
+              current: (controlLineOverlayRef.current?.get(x) ?? undefined)!,
             });
           } else {
             setGrid(
@@ -69,11 +69,19 @@ const PlaybackOverlay = memo(function PlaybackOverlay() {
           )
           .map(line => (
             <div
+              ref={el => {
+                controlLineOverlayRef.current ??= new Map();
+                const map = controlLineOverlayRef.current;
+                map.set(line.column, el);
+                return () => {
+                  map.delete(line.column);
+                };
+              }}
               key={line.column}
               className="absolute top-0 h-[calc(100%+0.7em)] w-[1em] border-l-[0.1em] border-secondary"
               style={{ left: `${line.column}em` }}
             >
-              <div className="absolute inset-0 bottom-[0.7em] bg-gradient-to-r from-secondary via-20% via-secondary/20 to-secondary/0"></div>
+              <div className="absolute inset-0 bottom-[0.7em] bg-linear-to-r from-secondary via-20% via-secondary/20 to-secondary/0"></div>
               {line.checkpoint && (
                 <div className="badge badge-secondary absolute bottom-[3.2em] text-[0.15em] h-[1.3em] rounded-l-none whitespace-nowrap pl-0">
                   <IoMdFlag size="1.3em" />

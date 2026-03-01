@@ -1,10 +1,22 @@
 import { Suspense, lazy, memo } from 'react';
+import { r } from 'readable-regexp';
+import { GrNew } from 'react-icons/gr';
 import Markdown from './Markdown';
 import Loading from './Loading';
-import { GrNew } from 'react-icons/gr';
 
 export let changelogText: string | null;
 export const changelogSections: { title: string; content: string }[] = [];
+
+const sectionMatchRegex = r
+  .match(
+    r.oneOf(r.lineStart, r.lineFeed),
+    r.exactly`# `,
+    r.capture.zeroOrMoreLazily.char,
+    r.lineFeed,
+    r.capture.zeroOrMoreLazily.char,
+    r.ahead.oneOf(r.lineFeed.exactly`#`, r.lineEnd)
+  )
+  .toRegExp('gs');
 
 async function loadChangelog() {
   if (changelogSections.length > 0) return Promise.resolve();
@@ -13,8 +25,7 @@ async function loadChangelog() {
       /\r\n|\r|\n/g,
       '\n'
     );
-    const sectionMatch = /(?:^|\n)# (.*?)\n(.*?)(?=\n#|$)/gs;
-    for (const match of changelogText.matchAll(sectionMatch)) {
+    for (const match of changelogText.matchAll(sectionMatchRegex)) {
       changelogSections.push({
         title: match[1].trim(),
         content: match[2].trim(),
@@ -49,12 +60,14 @@ const ChangelogButton = lazy(async () => {
               <div className="flex-1"></div>
               <span className="opacity-80">View changelog &gt;&gt;</span>
             </div>
-            <div className="max-h-[5.5rem] text-ellipsis overflow-hidden">
-              <Markdown>{changelogSections[0].content}</Markdown>
+            <div className="max-h-22 max-w-162 text-ellipsis overflow-hidden">
+              <Markdown className="prose-sm prose-h1:text-lg text-neutral-content">
+                {changelogSections[0].content}
+              </Markdown>
             </div>
           </button>
           <dialog id="changelogModal" className="modal">
-            <div className="modal-box text-base-content">
+            <div className="modal-box max-h-[80vh] text-base-content">
               <form method="dialog">
                 <button
                   aria-label="Close dialog"
@@ -64,7 +77,9 @@ const ChangelogButton = lazy(async () => {
                 </button>
               </form>
               <h3 className="font-bold text-2xl">Changelog</h3>
-              <Markdown>{changelogText!}</Markdown>
+              <Markdown className="prose-sm prose-h1:text-lg">
+                {changelogText!}
+              </Markdown>
             </div>
             <form method="dialog" className="modal-backdrop">
               <button aria-label="Close dialog">close</button>

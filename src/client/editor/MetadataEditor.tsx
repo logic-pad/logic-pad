@@ -24,11 +24,11 @@ export default memo(function MetadataEditor() {
   }, [isOnline, id, me, metadata, setMetadata, setLastSaved, lastSaved]);
 
   return (
-    <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col grow h-full gap-2 shadow tour-metadata-editor">
-      <label className="form-control">
-        <div className="label">
+    <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col grow h-full gap-2 shadow-sm tour-metadata-editor">
+      <fieldset className="fieldset">
+        <div className="label justify-between">
           <span className="label-text">Title</span>
-          <span className="label-text text-sm opacity-70 self-end">
+          <span className="text-base-content text-sm opacity-70 self-end">
             {metadata.title.length}/100
           </span>
         </div>
@@ -36,14 +36,11 @@ export default memo(function MetadataEditor() {
           type="text"
           placeholder="Required"
           maxLength={100}
-          className={cn(
-            'input input-bordered w-full',
-            metadata.title === '' && 'input-error'
-          )}
+          className={cn('input w-full', metadata.title === '' && 'input-error')}
           value={metadata.title}
           onChange={e => setMetadata({ ...metadata, title: e.target.value })}
         />
-      </label>
+      </fieldset>
       {isOnline && !!id && puzzle?.series && (
         <div className="text-sm opacity-80 ms-2">
           Part of the{' '}
@@ -58,14 +55,14 @@ export default memo(function MetadataEditor() {
         </div>
       )}
       {isOnline && (!!id || !!me) ? (
-        <label className="form-control">
+        <fieldset className="fieldset">
           <div className="label">
             <span className="label-text">Author</span>
           </div>
           <UserCard user={puzzle?.creator ?? me} />
-        </label>
+        </fieldset>
       ) : (
-        <label className="form-control">
+        <fieldset className="fieldset">
           <div className="label">
             <span className="label-text">Author</span>
           </div>
@@ -73,16 +70,16 @@ export default memo(function MetadataEditor() {
             type="text"
             placeholder="Required"
             className={cn(
-              'input input-bordered w-full',
+              'input w-full',
               metadata.author === '' && 'input-error'
             )}
             maxLength={100}
             value={metadata.author}
             onChange={e => setMetadata({ ...metadata, author: e.target.value })}
           />
-        </label>
+        </fieldset>
       )}
-      <label className="form-control">
+      <fieldset className="fieldset">
         <div className="label">
           <span className="label-text">Design difficulty</span>
         </div>
@@ -90,16 +87,16 @@ export default memo(function MetadataEditor() {
           value={metadata.difficulty}
           onChange={e => setMetadata({ ...metadata, difficulty: e })}
         />
-      </label>
-      <label className="form-control flex-1">
-        <div className="label">
+      </fieldset>
+      <fieldset className="fieldset flex-1 flex flex-col">
+        <div className="label justify-between">
           <span className="label-text">Description</span>
-          <span className="label-text text-sm opacity-70 self-end">
+          <span className="text-base-content text-sm opacity-70 self-end">
             {metadata.description.length}/500
           </span>
         </div>
         <textarea
-          className="textarea textarea-bordered h-full resize-none"
+          className="textarea h-full resize-none"
           placeholder="Optional text"
           maxLength={500}
           value={metadata.description}
@@ -107,7 +104,7 @@ export default memo(function MetadataEditor() {
             setMetadata({ ...metadata, description: e.target.value })
           }
         ></textarea>
-      </label>
+      </fieldset>
     </div>
   );
 });

@@ -51,9 +51,9 @@ export default memo(function GridSizeEditor({
   return (
     <div className="flex flex-col gap-2 tour-grid-size-editor">
       <div className="flex gap-2">
-        <label className="form-control w-full max-w-xs">
+        <fieldset className="fieldset w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Width</span>
+            <span className="label-text text-sm">Width</span>
           </div>
           <input
             ref={widthRef}
@@ -61,15 +61,12 @@ export default memo(function GridSizeEditor({
             min="0"
             step={1}
             defaultValue={grid.width}
-            className={cn(
-              'input input-bordered w-full max-w-xs min-w-0',
-              getInputSize(size)
-            )}
+            className={cn('input w-full max-w-xs min-w-0', getInputSize(size))}
           />
-        </label>
-        <label className="form-control w-full max-w-xs">
+        </fieldset>
+        <fieldset className="fieldset w-full max-w-xs">
           <div className="label">
-            <span className="label-text">Height</span>
+            <span className="label-text text-sm">Height</span>
           </div>
           <input
             ref={heightRef}
@@ -77,12 +74,9 @@ export default memo(function GridSizeEditor({
             min="0"
             step={1}
             defaultValue={grid.height}
-            className={cn(
-              'input input-bordered w-full max-w-xs min-w-0',
-              getInputSize(size)
-            )}
+            className={cn('input w-full max-w-xs min-w-0', getInputSize(size))}
           />
-        </label>
+        </fieldset>
       </div>
       <button
         type="button"

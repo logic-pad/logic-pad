@@ -1,0 +1,4 @@
+benchmark/data/*
+dist
+node_modules
+!.gitkeep

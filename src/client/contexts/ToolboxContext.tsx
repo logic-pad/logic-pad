@@ -1,4 +1,4 @@
-import { createContext, memo, useCallback, use, useState } from 'react';
+import React, { createContext, memo, useCallback, use, useState } from 'react';
 import { Color } from '@logic-pad/core/data/primitives';
 import { GridContext } from './GridContext.tsx';
 import Symbol from '@logic-pad/core/data/symbols/symbol';

@@ -6,13 +6,16 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { api, queryClient } from '../online/api';
 import Loading from '../components/Loading';
 import toast from 'react-hot-toast';
-import { Identity, UserBrief } from '../online/data';
+import { UserBrief } from '../online/data';
 import { useRouteProtection } from '../router/useRouteProtection';
 import { FaDiscord, FaGoogle, FaQuestion, FaTrash } from 'react-icons/fa';
-import { toRelativeDate } from '../uiHelper';
+import { cn, toRelativeDate } from '../uiHelper';
 import AuthProviders from '../online/AuthProviders';
 import { IoSettingsSharp } from 'react-icons/io5';
-import deferredRedirect from '../router/deferredRedirect';
+import storedRedirect from '../router/storedRedirect';
+import { router } from '../router/router';
+import { Account } from '../online/auth';
+import { FaXTwitter } from 'react-icons/fa6';
 
 interface SettingsSectionProps {
   header: ReactNode;
@@ -34,7 +37,6 @@ const SettingsSection = memo(function SettingsSection({
 });
 
 const ProfileSettings = memo(function ProfileSettings() {
-  useRouteProtection('login');
   const { me, refresh } = useOnline();
 
   const updateMe = useMutation({
@@ -44,6 +46,7 @@ const ProfileSettings = memo(function ProfileSettings() {
       queryClient.setQueryData(['me'], (old: UserBrief) => ({
         ...old,
         name: variables.name,
+        description: variables.description,
       }));
       return { me };
     },
@@ -74,8 +77,8 @@ const ProfileSettings = memo(function ProfileSettings() {
         </>
       }
     >
-      <label className="form-control w-full shrink-0">
-        <div className="label">
+      <fieldset className="fieldset w-full shrink-0">
+        <div className="label w-full justify-between items-center">
           <span className="label-text text-neutral-content text-lg">
             Username
           </span>
@@ -86,14 +89,14 @@ const ProfileSettings = memo(function ProfileSettings() {
         <input
           type="text"
           placeholder="Type here"
-          className="input input-bordered text-base-content w-full"
+          className="input text-base-content w-full"
           maxLength={128}
           value={username}
           onChange={e => setUsername(e.target.value)}
         />
-      </label>
-      <label className="form-control w-full shrink-0">
-        <div className="label">
+      </fieldset>
+      <fieldset className="fieldset w-full shrink-0">
+        <div className="label w-full justify-between items-center">
           <span className="label-text text-neutral-content text-lg">
             Description
           </span>
@@ -108,7 +111,7 @@ const ProfileSettings = memo(function ProfileSettings() {
           value={description}
           onChange={e => setDescription(e.target.value)}
         />
-      </label>
+      </fieldset>
       {updateMe.isPending ? (
         <Loading className="self-end w-fit" />
       ) : (
@@ -125,50 +128,54 @@ const ProfileSettings = memo(function ProfileSettings() {
   );
 });
 
-const IdentityEntry = memo(function IdentityEntry({
-  identity,
+const AccountEntry = memo(function AccountEntry({
+  account: account,
 }: {
-  identity: Identity;
+  account: Account;
 }) {
-  const deleteIdentity = useMutation({
-    mutationFn: api.deleteIdentity,
+  const unlinkAccount = useMutation({
+    mutationFn: async () => {
+      await api.unlinkAccount(account.providerId, account.accountId);
+    },
     onError(error) {
       toast.error(error.message);
     },
     onSettled: async () => {
-      await queryClient.refetchQueries({ queryKey: ['user', 'identities'] });
+      await queryClient.refetchQueries({ queryKey: ['user', 'accounts'] });
     },
   });
   const Icon = useMemo(() => {
-    switch (identity.provider) {
+    switch (account.providerId) {
       case 'google':
         return FaGoogle;
       case 'discord':
         return FaDiscord;
+      case 'twitter':
+        return FaXTwitter;
       default:
         return FaQuestion;
     }
-  }, [identity.provider]);
+  }, [account.providerId]);
 
   return (
     <div className="relative">
       <div className="flex gap-2 items-center">
         <span className="badge h-8 p-0 border-0 pe-2">
           <Icon className="h-8 w-8 p-2 rounded-full" />
-          <span className="capitalize">{identity.provider}</span>
+          <span className="capitalize">{account.providerId}</span>
         </span>
-        <span>{identity.email}</span>
+        <span>{account.email}</span>
       </div>
       <div className="opacity-70 mt-1">
-        Created {toRelativeDate(new Date(identity.createdAt))}
+        Created {toRelativeDate(new Date(account.createdAt))}
       </div>
       <div className="divider my-2" />
-      {deleteIdentity.isPending ? (
+      {unlinkAccount.isPending ? (
         <Loading className="w-8 h-8 absolute top-0 right-0" />
       ) : (
         <button
           className="absolute top-0 right-0 btn btn-ghost"
-          onClick={() => deleteIdentity.mutate(identity.id)}
+          onClick={() => unlinkAccount.mutate()}
         >
           <FaTrash />
         </button>
@@ -177,26 +184,29 @@ const IdentityEntry = memo(function IdentityEntry({
   );
 });
 
-const AddProviderButton = memo(function AddProviderButton() {
+const AddSignInMethodButton = memo(function AddSignInMethodButton() {
   return (
     <>
       <button
         className="btn btn-primary self-end max-w-xs"
         onClick={() =>
           (
-            document.getElementById('add_provider_modal') as HTMLDialogElement
+            document.getElementById(
+              'add_sign_in_method_modal'
+            ) as HTMLDialogElement
           ).showModal()
         }
       >
-        Log in with a new provider
+        Add another sign-in method
       </button>
-      <dialog id="add_provider_modal" className="modal">
+      <dialog id="add_sign_in_method_modal" className="modal">
         <div className="modal-box text-base-content flex flex-col gap-4">
-          <h3 className="font-semibold text-xl">
-            Add a provider to your account
-          </h3>
+          <h3 className="font-semibold text-xl">Pick a sign-in method</h3>
           <AuthProviders
-            onBeforeRedirect={() => deferredRedirect.set({ to: '/settings' })}
+            onClick={async provider => {
+              const redirectUrl = storedRedirect.set(router.state.location);
+              await api.linkAccount(provider, redirectUrl);
+            }}
           />
         </div>
         <form method="dialog" className="modal-backdrop">
@@ -207,42 +217,130 @@ const AddProviderButton = memo(function AddProviderButton() {
   );
 });
 
-const IdentitiesSettings = memo(function IdentitiesSettings() {
-  const identitiesQuery = useQuery({
-    queryKey: ['user', 'identities'],
-    queryFn: api.listIdentities,
+const ChangeEmailControl = memo(function ChangeEmailControl({
+  options,
+}: {
+  options: string[];
+}) {
+  const { me, refresh } = useOnline();
+
+  const updateMe = useMutation({
+    mutationFn: api.updateMe,
+    onMutate: async variables => {
+      await queryClient.cancelQueries({ queryKey: ['me'] });
+      queryClient.setQueryData(['me'], (old: UserBrief) => ({
+        ...old,
+        email: variables.email,
+      }));
+      return { me };
+    },
+    onError(error, _, context) {
+      toast.error(error.message);
+      queryClient.setQueryData(['me'], context?.me);
+    },
+    onSettled: async () => {
+      await refresh();
+    },
   });
+  const [email, setEmail] = useState(me?.email ?? '');
+
+  useEffect(() => {
+    setEmail(me?.email ?? '');
+  }, [me]);
+
+  if (!me) return null;
+  return (
+    <>
+      <fieldset className="fieldset w-full shrink-0">
+        <div className="label w-full justify-between items-center">
+          <span className="label-text text-neutral-content text-lg">
+            Primary email
+          </span>
+        </div>
+        <div className="label">
+          <span className="label-text text-neutral-content/80 whitespace-normal w-min min-w-full">
+            You can create multiple Logic Pad accounts, but each account must
+            have a unique primary email. Add a new sign-in method below to use a
+            different email.
+          </span>
+        </div>
+        <select
+          className="select w-full"
+          disabled={options.length < 2}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        >
+          {options.map(option => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </fieldset>
+      {updateMe.isPending ? (
+        <Loading className="self-end w-fit h-10" />
+      ) : (
+        <button
+          className={cn(
+            'btn btn-primary self-end max-w-xs',
+            options.length < 2 && 'hidden'
+          )}
+          onClick={async () => {
+            await updateMe.mutateAsync({ email });
+          }}
+        >
+          Save
+        </button>
+      )}
+    </>
+  );
+});
+
+const SecuritySettings = memo(function SecuritySettings() {
+  const accountsQuery = useQuery({
+    queryKey: ['user', 'accounts'],
+    queryFn: api.listAccounts,
+  });
+  const emailOptions = [
+    ...new Set(
+      (accountsQuery.data?.map(a => a.email).filter(Boolean) as string[]) ?? []
+    ),
+  ];
   return (
     <SettingsSection
       header={
         <>
-          <span className="text-2xl font-semibold">Providers</span>
-          <div>Identity providers that you use to log in</div>
+          <span className="text-2xl font-semibold">Security</span>
+          <div>Manage primary email and sign-in methods</div>
         </>
       }
     >
-      {identitiesQuery.isPending ? (
+      <ChangeEmailControl options={emailOptions} />
+      {accountsQuery.isPending ? (
         <Loading />
       ) : (
         <>
-          <div>
-            This account is associated with {identitiesQuery.data?.total}{' '}
-            providers
+          <div className="label w-full justify-between items-center">
+            <span className="label-text text-neutral-content text-lg">
+              Linked accounts
+            </span>
           </div>
+          <div>You have linked {accountsQuery.data?.length} accounts</div>
           <div>
-            {identitiesQuery.data?.results.map(identity => (
-              <IdentityEntry key={identity.id} identity={identity} />
+            {accountsQuery.data?.map(account => (
+              <AccountEntry key={account.id} account={account} />
             ))}
           </div>
         </>
       )}
-      <AddProviderButton />
+      <AddSignInMethodButton />
     </SettingsSection>
   );
 });
 
 export const Route = createLazyFileRoute('/_layout/settings')({
   component: memo(function Settings() {
+    useRouteProtection('login');
     return (
       <ResponsiveLayout>
         <div className="text-3xl mt-8">
@@ -252,7 +350,7 @@ export const Route = createLazyFileRoute('/_layout/settings')({
         <div className="divider" />
         <ProfileSettings />
         <div className="divider my-4" />
-        <IdentitiesSettings />
+        <SecuritySettings />
       </ResponsiveLayout>
     );
   }),

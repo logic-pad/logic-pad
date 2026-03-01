@@ -23,7 +23,7 @@ export default memo(function ShapeConfig({
   ] as unknown as GridData;
   return (
     <ConfigItem config={config}>
-      <div className="flex flex-col flex-[2] gap-2">
+      <div className="flex flex-col flex-2 gap-2">
         {config.resizable && (
           <GridSizeEditor
             size="xs"

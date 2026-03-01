@@ -1,9 +1,16 @@
-import { Suspense, lazy, memo, useMemo, useState } from 'react';
+import React, {
+  ReactNode,
+  Suspense,
+  lazy,
+  memo,
+  useMemo,
+  useState,
+} from 'react';
+import { r } from 'readable-regexp';
 import { cn } from '../../client/uiHelper.ts';
 import Loading from './Loading';
 import type { Options } from 'react-markdown';
 import { spoilerPlugin } from 'remark-inline-spoiler';
-import './markdown.css';
 import { useOnline } from '../contexts/OnlineContext.tsx';
 
 export interface MarkdownProps extends Readonly<Options> {
@@ -13,7 +20,44 @@ export interface MarkdownProps extends Readonly<Options> {
   onClickCapture?: React.MouseEventHandler;
 }
 
-const profileUrlRegex = /^\/profile\/([^/\s]+)\/?$/;
+const profileUrlRegex = r
+  .match(
+    r.lineStart,
+    r.exactly`/profile/`,
+    r.capture.oneOrMore.notCharIn('/', r.whitespace),
+    r.maybe`/`,
+    r.lineEnd
+  )
+  .toRegExp();
+
+const UserMention = memo(function UserMention({
+  href,
+  children,
+}: {
+  href: string;
+  children: ReactNode;
+}) {
+  const { isOnline, me } = useOnline();
+  const isMe = useMemo(
+    () => isOnline && me && profileUrlRegex.exec(href)?.[1] === me.id,
+    [isOnline, me, href]
+  );
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={cn(
+        'bg-accent/10 border-b border-accent rounded-lg no-underline!',
+        isMe
+          ? 'bg-accent text-accent-content'
+          : 'bg-accent/10 text-neutral-content'
+      )}
+    >
+      {children}
+    </a>
+  );
+});
 
 const MarkdownAsync = lazy(async () => {
   const { default: Markdown } = await import('react-markdown');
@@ -46,7 +90,7 @@ const MarkdownAsync = lazy(async () => {
         <MarkdownAsync
           className={cn(
             'spoiler',
-            revealSpoilers && 'spoiler-reveal !cursor-default'
+            revealSpoilers && 'spoiler-reveal cursor-default!'
           )}
           inline={true}
           onClickCapture={e => {
@@ -62,26 +106,7 @@ const MarkdownAsync = lazy(async () => {
     },
     a: function Link({ href, children }: { href?: string; children: any }) {
       if (href?.startsWith('/profile/') && String(children).startsWith('@')) {
-        const { isOnline, me } = useOnline();
-        const isMe = useMemo(
-          () => isOnline && me && profileUrlRegex.exec(href)?.[1] === me.id,
-          [isOnline, me, href]
-        );
-        return (
-          <a
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className={cn(
-              'bg-accent/10 border-b border-accent rounded-lg !no-underline',
-              isMe
-                ? 'bg-accent text-accent-content'
-                : 'bg-accent/10 text-neutral-content'
-            )}
-          >
-            {children}
-          </a>
-        );
+        return <UserMention href={href}>{children}</UserMention>;
       }
       return (
         <a href={href} target="_blank" rel="noreferrer">
@@ -110,9 +135,9 @@ const MarkdownAsync = lazy(async () => {
         return (
           <span
             className={cn(
-              'markdown',
+              'prose max-w-full',
               className,
-              (onClick || onClickCapture) && 'cursor-pointer'
+              (!!onClick || !!onClickCapture) && 'cursor-pointer'
             )}
             onClick={onClick}
             onClickCapture={onClickCapture}
@@ -128,9 +153,9 @@ const MarkdownAsync = lazy(async () => {
         return (
           <div
             className={cn(
-              'markdown',
+              'prose max-w-full',
               className,
-              (onClick || onClickCapture) && 'cursor-pointer'
+              (!!onClick || !!onClickCapture) && 'cursor-pointer'
             )}
             onClick={onClick}
             onClickCapture={onClickCapture}
@@ -149,7 +174,7 @@ const MarkdownAsync = lazy(async () => {
 
 export default memo(function Markdown(props: MarkdownProps) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<Loading className="h-5 w-20" />}>
       <MarkdownAsync {...props} />
     </Suspense>
   );

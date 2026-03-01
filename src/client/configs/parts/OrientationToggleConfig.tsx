@@ -40,7 +40,7 @@ const OrientationToggleRadio = memo(function OrientationToggleRadio({
       <input
         type="checkbox"
         name="radio-orientation-toggle"
-        className="absolute inset-0 appearance-none rounded checked:shadow-glow-md checked:shadow-accent checked:border-2 checked:border-accent"
+        className="absolute inset-0 appearance-none rounded-sm checked:shadow-glow-md checked:shadow-accent checked:border-2 checked:border-accent"
         checked={checked}
         onChange={e => {
           setChecked(e.target.checked);

@@ -1,4 +1,4 @@
-import { memo, Ref, useEffect, useId } from 'react';
+import React, { memo, Ref, useEffect, useId } from 'react';
 import { cn } from '../uiHelper.ts';
 import { State } from '@logic-pad/core/data/primitives';
 import { animate, stagger } from 'animejs';
@@ -11,7 +11,7 @@ export interface GridRingProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   width: number;
   height: number;
-  animated?: boolean;
+  allowAnimation?: boolean;
   className?: string;
   ref?: Ref<HTMLDivElement>;
 }
@@ -31,12 +31,12 @@ export default memo(function StateRing({
   children,
   width,
   height,
-  animated,
+  allowAnimation,
   className,
   ref,
   ...rest
 }: GridRingProps) {
-  animated = animated ?? true;
+  allowAnimation = allowAnimation ?? true;
   const id = useId();
   const { state } = useGridState();
   const location = useRouterState({ select: s => s.location });
@@ -44,7 +44,11 @@ export default memo(function StateRing({
   const { isTopLevel } = useEmbed();
 
   useEffect(() => {
-    if (State.isSatisfied(state.final) && !prefersReducedMotion && animated) {
+    if (
+      State.isSatisfied(state.final) &&
+      !prefersReducedMotion &&
+      allowAnimation
+    ) {
       animate(`#${id}.logic-animated .logic-tile`, {
         scale: [
           { to: 0.7, ease: 'outSine', duration: 100 },
@@ -53,10 +57,10 @@ export default memo(function StateRing({
         delay: stagger(20, { grid: [width, height], from: 'center' }),
       });
     }
-  }, [state.final, width, height, prefersReducedMotion, animated, id]);
+  }, [state.final, width, height, prefersReducedMotion, allowAnimation, id]);
 
   useEffect(() => {
-    if (prefersReducedMotion || !animated) {
+    if (prefersReducedMotion || !allowAnimation) {
       animate(`#${id}.logic-animated .logic-tile`, {
         scale: 1,
         duration: 0,
@@ -84,16 +88,18 @@ export default memo(function StateRing({
         'w-fit h-fit border-4 p-4 rounded-xl transition-all delay-150 duration-150 ease-out logic-animated',
         ringBorder(state.final),
         State.isSatisfied(state.final)
-          ? 'first:*:opacity-100 first:*:duration-[1.5s]'
-          : 'first:*:opacity-0 first:*:duration-[0.5s]',
+          ? '*:first:opacity-100 *:first:duration-[1.5s]'
+          : '*:first:opacity-0 *:first:duration-500',
         className
       )}
+      role="main"
+      aria-label={`Grid state: ${state.final}`}
       {...rest}
     >
       <div
         className={
-          animated && !prefersReducedMotion && isTopLevel
-            ? 'block fixed inset-0 transition-all ease-out bg-radient-circle-c from-transparent to-success/5 z-[1000] pointer-events-none'
+          allowAnimation && !prefersReducedMotion && isTopLevel
+            ? 'block fixed inset-0 transition-all ease-out bg-radial from-transparent to-success/5 z-1000 pointer-events-none'
             : 'hidden'
         }
       ></div>

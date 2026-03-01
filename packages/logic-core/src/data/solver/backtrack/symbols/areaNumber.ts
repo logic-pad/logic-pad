@@ -4,6 +4,7 @@ import BTModule, {
   BTGridData,
   BTTile,
   CheckResult,
+  checkSubtilePlacement,
   IntArray2D,
   Rating,
   createOneTileResult,
@@ -18,6 +19,9 @@ export default class AreaNumberBTModule extends BTModule {
   }
 
   public checkGlobal(grid: BTGridData): CheckResult | false {
+    const checkResult = checkSubtilePlacement(grid, this.instr);
+    if (checkResult !== undefined) return checkResult;
+
     const thisX = Math.floor(this.instr.x);
     const thisY = Math.floor(this.instr.y);
 

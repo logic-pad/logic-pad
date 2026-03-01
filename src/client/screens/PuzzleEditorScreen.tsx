@@ -2,7 +2,7 @@ import InstructionList from '../instructions/InstructionList';
 import { EditorEditControls } from '../components/EditControls';
 import { GridConsumer } from '../contexts/GridContext';
 import InstructionSearch from '../instructions/InstructionSearch';
-import { memo, useRef, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import ThreePaneLayout from '../components/ThreePaneLayout';
 import TouchControls from '../components/TouchControls';
 import ConfigContext from '../contexts/ConfigContext';
@@ -20,7 +20,6 @@ import PreviewModal, { PreviewRef } from '../editor/PreviewModal';
 import PuzzleSaveControl from '../components/PuzzleSaveControl';
 import { FaEye } from 'react-icons/fa';
 import { animate } from 'animejs';
-import DocumentTitle from '../components/DocumentTitle';
 import EditorTour from '../components/EditorTour';
 
 export interface PuzzleEditorScreenProps {
@@ -67,15 +66,6 @@ export default memo(function PuzzleEditorScreen({
             collapsible={true}
             left={
               <>
-                <GridConsumer>
-                  {({ metadata }) => (
-                    <DocumentTitle>
-                      {metadata.title.length > 0
-                        ? `${metadata.title} - Puzzle Editor - Logic Pad`
-                        : `Puzzle Editor - Logic Pad`}
-                    </DocumentTitle>
-                  )}
-                </GridConsumer>
                 <EditorSideTabs
                   editorTab={editorTab}
                   onEditorTabChange={setEditorTab}

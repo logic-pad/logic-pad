@@ -1,3 +1,4 @@
+import React from 'react';
 import { InstructionPartProps, PartPlacement, PartSpec } from './types';
 import Instruction from '@logic-pad/core/data/instruction';
 

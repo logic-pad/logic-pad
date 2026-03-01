@@ -39,10 +39,32 @@ export default memo(function Grid({
     [grid.connections, grid.width, grid.height]
   );
   return (
-    <div className={cn('relative', className)} style={containerStyle}>
+    <div
+      className={cn('relative select-none', className)}
+      style={containerStyle}
+    >
+      <span className="sr-only">
+        {`Grid with ${grid.width} by ${grid.height} tiles.`}
+        {grid.tiles
+          .map(
+            (row, line) =>
+              `Row ${line + 1}: ${row
+                .map(tile => {
+                  if (!tile.exists) return 'empty';
+                  if (tile.fixed) {
+                    return tile.color.toUpperCase();
+                  } else {
+                    return tile.color.toLowerCase();
+                  }
+                })
+                .join(' ')}`
+          )
+          .join('\n')}
+      </span>
       <div
         className="grid justify-center content-center absolute inset-0"
         style={gridStyle}
+        aria-hidden="true"
       >
         {grid.tiles.map((row, y) =>
           row.map((tile, x) => (

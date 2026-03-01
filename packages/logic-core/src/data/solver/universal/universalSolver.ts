@@ -1,6 +1,6 @@
-import { instance as undercluedInstance } from '../../rules/undercluedRule.js';
 import EventIteratingSolver from '../eventIteratingSolver.js';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 ('vite-apply-code-mod');
 
 export default class UniversalSolver extends EventIteratingSolver {
@@ -15,12 +15,5 @@ export default class UniversalSolver extends EventIteratingSolver {
     return new Worker(new URL('./universalWorker.js', import.meta.url), {
       type: 'module',
     });
-  }
-
-  public isInstructionSupported(instructionId: string): boolean {
-    if (super.isInstructionSupported(instructionId)) {
-      return true;
-    }
-    return instructionId === undercluedInstance.id;
   }
 }

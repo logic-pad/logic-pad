@@ -8,19 +8,20 @@ import Loading from '../components/Loading';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { useGrid } from '../contexts/GridContext';
-import deferredRedirect from '../router/deferredRedirect';
-import { SolutionHandling } from '../router/linkLoader';
+import storedRedirect from '../router/storedRedirect';
 import { useOnline } from '../contexts/OnlineContext';
 import RatedDifficulty from '../metadata/RatedDifficulty';
 import { api, ApiError, queryClient } from '../online/api';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
-import { pluralize, toRelativeDate } from '../uiHelper';
+import { cn, pluralize, safeClipboard, toRelativeDate } from '../uiHelper';
 import CommentSidebar from '../online/CommentSidebar';
+import { SolutionHandling } from '../router/linkLoaderValidator';
 
 // million-ignore
 const SignInWithProgress = memo(function SignInWithProgress() {
   const { metadata, grid, solution } = useGrid();
+  const navigate = useNavigate();
   return (
     <button
       className="btn btn-primary"
@@ -28,17 +29,19 @@ const SignInWithProgress = memo(function SignInWithProgress() {
         const data = await Compressor.compress(
           Serializer.stringifyPuzzle({ ...metadata, grid, solution })
         );
-        await deferredRedirect.setAndNavigate(
-          {
-            to: '/create',
-            search: {
-              loader: SolutionHandling.LoadVisible,
-              d: data,
-            },
-            ignoreBlocker: true,
+        await navigate({
+          to: '/auth',
+          search: {
+            redirect: storedRedirect.set({
+              to: '/create',
+              search: {
+                loader: SolutionHandling.LoadVisible,
+                d: data,
+              },
+            }),
           },
-          { to: '/auth', ignoreBlocker: true }
-        );
+          ignoreBlocker: true,
+        });
       }}
     >
       Sign in / sign up
@@ -149,12 +152,23 @@ const DeletePuzzle = memo(function DeletePuzzle() {
 // million-ignore
 const PublishPuzzle = memo(function PublishPuzzle() {
   const modalId = useId();
+  const { me } = useOnline();
   const { id } = useOnlinePuzzle();
   const { metadata, grid } = useGrid();
-  const publishPuzzle = useMutation({
-    mutationFn: async (data: Parameters<typeof api.savePuzzle>) => {
+  const [isUnlisted, setUnlisted] = useState(false);
+  const {
+    isPending,
+    isSuccess,
+    error,
+    reset,
+    mutateAsync: publishPuzzle,
+  } = useMutation({
+    mutationFn: async ([status, ...data]: [
+      ResourceStatus,
+      ...Parameters<typeof api.savePuzzle>,
+    ]) => {
       await api.savePuzzle(...data);
-      return await api.publishPuzzle(data[0]);
+      return await api.publishPuzzle(data[0], status);
     },
     onError(error) {
       if (!(error instanceof ApiError) || error.status !== 451)
@@ -167,26 +181,44 @@ const PublishPuzzle = memo(function PublishPuzzle() {
     },
   });
 
-  if (publishPuzzle.isPending) {
-    return (
-      <button className="btn btn-primary btn-disabled">
-        <Loading />
-      </button>
-    );
-  }
-
-  if (publishPuzzle.isSuccess) {
-    return (
-      <button className="btn btn-primary btn-disabled">Refreshing...</button>
-    );
-  }
-
   return (
     <>
+      {me && me.supporter > 0 ? (
+        <fieldset className="fieldset">
+          <label className="label cursor-pointer gap-12">
+            <div className="flex flex-col grow">
+              <span className="whitespace-normal text-base text-base-content">
+                Publish as unlisted
+              </span>
+              <span className="whitespace-normal text-sm">
+                Unlisted puzzles cannot be found through browsing or searching,
+                but can be accessed by anyone with the link.
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              className="toggle shrink-0"
+              checked={isUnlisted}
+              onChange={e => setUnlisted(e.target.checked)}
+            />
+          </label>
+        </fieldset>
+      ) : (
+        <p className="text-sm">
+          <Link className="link" target="_blank" to="/support">
+            Become a supporter
+          </Link>{' '}
+          to publish unlisted puzzles.
+        </p>
+      )}
       <button
-        className="btn btn-primary"
+        className={cn(
+          'btn btn-primary',
+          isPending || (isSuccess && 'btn-disabled')
+        )}
         onClick={async () => {
-          await publishPuzzle.mutateAsync([
+          await publishPuzzle([
+            isUnlisted ? ResourceStatus.Unlisted : ResourceStatus.Public,
             id!,
             metadata.title,
             metadata.description,
@@ -198,54 +230,126 @@ const PublishPuzzle = memo(function PublishPuzzle() {
           });
         }}
       >
-        Publish puzzle
-      </button>
-      {publishPuzzle.error instanceof ApiError &&
-        publishPuzzle.error.status === 451 && (
-          <dialog
-            id={`publishExternalPuzzleModal-${modalId}`}
-            className="modal modal-open"
-          >
-            <div className="modal-box flex flex-col gap-4 text-base font-thin">
-              <h3 className="font-bold text-xl text-accent">
-                Failed to publish your puzzle
-              </h3>
-              <p className="my-2">{publishPuzzle.error.message}</p>
-              <p>
-                Logic Pad is a place for creators to share their original
-                puzzles.{' '}
-                <b className="font-bold">
-                  Uploading puzzles from other games or publications is strictly
-                  prohibited due to copyright restrictions.
-                </b>{' '}
-                Even if the similarity is unintentional, this restriction still
-                applies.
-              </p>
-              <p>
-                Attempting to upload, or circumvent restrictions to upload,
-                copyrighted content will result in a ban from this platform.
-              </p>
-              <p>
-                If you love a puzzle game and want to share it with our
-                community, please create an original puzzle inspired by that
-                game and credit the source in your description. This allows you
-                to introduce others to the game while respecting the game
-                creator&apos;s intellectual property.
-              </p>
-              <div className="modal-action">
-                <form method="dialog">
-                  <button className="btn" onClick={() => publishPuzzle.reset()}>
-                    I understand
-                  </button>
-                </form>
-              </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button onClick={() => publishPuzzle.reset()}>close</button>
-            </form>
-          </dialog>
+        {isSuccess ? (
+          'Refreshing...'
+        ) : isPending ? (
+          <Loading />
+        ) : isUnlisted ? (
+          'Publish unlisted puzzle'
+        ) : (
+          'Publish public puzzle'
         )}
+      </button>
+      {error instanceof ApiError && error.status === 451 && (
+        <dialog
+          id={`publishExternalPuzzleModal-${modalId}`}
+          className="modal modal-open"
+        >
+          <div className="modal-box flex flex-col gap-4 text-base font-thin">
+            <h3 className="font-bold text-xl text-accent">
+              Failed to publish your puzzle
+            </h3>
+            <p className="my-2">{error.message}</p>
+            <p>
+              Logic Pad is a place for creators to share their original puzzles.{' '}
+              <b className="font-bold">
+                Uploading puzzles from other games or publications is strictly
+                prohibited due to copyright restrictions.
+              </b>{' '}
+              Even if the similarity is unintentional, this restriction still
+              applies.
+            </p>
+            <p>
+              Attempting to upload, or circumvent restrictions to upload,
+              copyrighted content will result in a ban from this platform.
+            </p>
+            <p>
+              If you love a puzzle game and want to share it with our community,
+              please create an original puzzle inspired by that game and credit
+              the source in your description. This allows you to introduce
+              others to the game while respecting the game creator&apos;s
+              intellectual property.
+            </p>
+            <div className="modal-action">
+              <form method="dialog">
+                <button className="btn" onClick={() => reset()}>
+                  I understand
+                </button>
+              </form>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={() => reset()}>close</button>
+          </form>
+        </dialog>
+      )}
     </>
+  );
+});
+
+const UnlistedToggle = memo(function UnlistedToggle({
+  isUnlisted,
+}: {
+  isUnlisted: boolean;
+}) {
+  const { id } = useOnlinePuzzle();
+  const { me } = useOnline();
+  const { isPending, mutateAsync: publishPuzzle } = useMutation({
+    mutationFn: async (data: Parameters<typeof api.publishPuzzle>) => {
+      return await api.publishPuzzle(...data);
+    },
+    onError(error) {
+      toast.error(error.message);
+    },
+    async onSuccess() {
+      await queryClient.refetchQueries({
+        queryKey: ['puzzle', 'edit', id],
+      });
+    },
+  });
+  if (!me || (me.supporter <= 0 && !isUnlisted)) {
+    return (
+      <p className="text-sm">
+        <Link className="link" target="_blank" to="/support">
+          Become a supporter
+        </Link>{' '}
+        to publish unlisted puzzles.
+      </p>
+    );
+  }
+  return (
+    <fieldset
+      className={cn('fieldset', isPending && 'pointer-events-none opacity-50')}
+    >
+      <label className="label cursor-pointer gap-12">
+        <div className="flex flex-col grow">
+          <span className="whitespace-normal text-base text-base-content">
+            Set puzzle to unlisted
+          </span>
+          <span className="whitespace-normal text-sm">
+            Unlisted puzzles cannot be found through browsing or searching, but
+            can be accessed by anyone with the link.
+          </span>
+        </div>
+        {isPending ? (
+          <Loading className="w-12" />
+        ) : (
+          <input
+            type="checkbox"
+            className="toggle shrink-0"
+            checked={isUnlisted}
+            onChange={async e => {
+              await publishPuzzle([
+                id!,
+                e.target.checked
+                  ? ResourceStatus.Unlisted
+                  : ResourceStatus.Public,
+              ]);
+            }}
+          />
+        )}
+      </label>
+    </fieldset>
   );
 });
 
@@ -253,10 +357,10 @@ const PublishPuzzle = memo(function PublishPuzzle() {
 export default memo(function EditorOnlineTab() {
   const { isOnline, me } = useOnline();
   const { id } = useOnlinePuzzle();
-  const { data, isLoading } = useQuery(puzzleEditQueryOptions(id));
+  const { data, isPending } = useQuery(puzzleEditQueryOptions(id));
   const [commentsOpen, setCommentsOpen] = useState(false);
 
-  if (isLoading) {
+  if (!!id && isPending) {
     return <Loading />;
   }
 
@@ -321,7 +425,9 @@ export default memo(function EditorOnlineTab() {
     <div className="flex flex-col gap-4 p-8 bg-base-100 text-base-content rounded-2xl shadow-lg w-full max-w-[800px] animate-online-tab">
       <p className="text-2xl font-bold">Online information</p>
       <div className="flex gap-4 items-center">
-        <div className="badge badge-lg badge-info p-4">Public</div>
+        <div className="badge badge-lg badge-info p-4 capitalize">
+          {data.status}
+        </div>
         <span className="badge badge-lg p-4 badge-neutral">
           <FaCheckSquare className="inline-block me-2" />{' '}
           {pluralize(data.solveCount)`solve``solves`}
@@ -342,12 +448,13 @@ export default memo(function EditorOnlineTab() {
         collapsible={false}
         ratedDifficulty={data.ratedDifficulty}
       />
+      <UnlistedToggle isUnlisted={data.status === ResourceStatus.Unlisted} />
       <button
         className="btn btn-primary"
         onClick={async () => {
           const url = new URL(window.location.href);
           url.pathname = '/solve/' + id;
-          await navigator.clipboard.writeText(url.href);
+          await safeClipboard.writeText(url.href);
           toast.success('Link copied!');
         }}
       >

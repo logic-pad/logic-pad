@@ -1,7 +1,6 @@
 import Solver from './solver.js';
 import UniversalSolver from './universal/universalSolver.js';
 import BacktrackSolver from './backtrack/backtrackSolver.js';
-import Z3Solver from './z3/z3Solver.js';
 import CspuzSolver from './cspuz/cspuzSolver.js';
 import AutoSolver from './auto/autoSolver.js';
 import InsightDrivenSolver from './insightDriven/insightDrivenSolver.js';
@@ -20,6 +19,5 @@ register(new UniversalSolver());
 // Solvers below the unviersal solver will not be picked by the auto solver
 
 register(new InsightDrivenSolver());
-register(new Z3Solver());
 
 export { allSolvers };

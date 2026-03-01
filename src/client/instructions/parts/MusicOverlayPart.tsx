@@ -184,7 +184,7 @@ export default memo(function MusicOverlayPart({
       width={grid.width}
       height={grid.height}
       bleed={BLEED}
-      onResize={size => setTileSize(size)}
+      onResize={setTileSize}
     >
       <div
         ref={targetRef}

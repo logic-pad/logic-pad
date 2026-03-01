@@ -2,7 +2,7 @@ import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompre
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { array } from '@logic-pad/core/data/dataHelper';
 import { Puzzle, PuzzleData } from '@logic-pad/core/data/puzzle';
-import { SolutionHandling } from './linkLoader';
+import { SolutionHandling } from './linkLoaderValidator';
 import { PuzzleFull } from '../online/data';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -14,6 +14,10 @@ interface OnlineLinkLoaderResult {
 }
 
 interface OnlineLinkLoaderParams {
+  /**
+   * Disables caching of the decoded puzzle
+   */
+  disableCache?: boolean;
   /**
    * Specifies how the solution should be loaded.
    */
@@ -28,6 +32,7 @@ export default function useOnlineLinkLoader(
   id: string,
   puzzle: PuzzleFull,
   {
+    disableCache = false,
     solutionHandling: solutionBehavior = SolutionHandling.LoadHidden,
     modifyPuzzle = puzzle => puzzle,
   }: OnlineLinkLoaderParams = {}
@@ -84,8 +89,9 @@ export default function useOnlineLinkLoader(
         ...result,
         initialPuzzle,
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    gcTime: disableCache ? 0 : undefined,
+    staleTime: disableCache ? 0 : undefined,
   });
   return result.data;
 }

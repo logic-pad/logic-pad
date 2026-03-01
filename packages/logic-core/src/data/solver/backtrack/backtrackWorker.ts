@@ -7,7 +7,9 @@ import BanPatternRule, {
 import CellCountRule, {
   instance as cellCountInstance,
 } from '../../rules/cellCountRule.js';
-import ConnectAllRule from '../../rules/connectAllRule.js';
+import ConnectAllRule, {
+  instance as connectAllInstance,
+} from '../../rules/connectAllRule.js';
 import RegionAreaRule, {
   instance as regionAreaInstance,
 } from '../../rules/regionAreaRule.js';
@@ -50,8 +52,8 @@ import Symbol from '../../symbols/symbol.js';
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
+import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
 import TileData from '../../tile.js';
-import { instance as connectAllInstance } from '../z3/modules/connectAllModule.js';
 import BTModule, { BTGridData, BTTile, IntArray2D, Rating } from './data.js';
 import BanPatternBTModule from './rules/banPattern.js';
 import CellCountBTModule from './rules/cellCount.js';
@@ -109,6 +111,8 @@ function translateToBTGridData(grid: GridData): BTGridData {
         module = new FocusBTModule(symbol as FocusSymbol);
       } else if (id === letterInstance.id) {
         continue;
+      } else if (id === unsupportedInstance.id) {
+        continue;
       }
 
       if (!module && symbol.necessaryForCompletion)
@@ -141,7 +145,11 @@ function translateToBTGridData(grid: GridData): BTGridData {
       module = new BanPatternBTModule(rule as BanPatternRule);
     } else if (rule.id === symbolsPerRegionInstance.id) {
       const allSymbols: Symbol[] = [];
-      grid.symbols.forEach(symbols => allSymbols.push(...symbols));
+      grid.symbols.forEach(symbols =>
+        allSymbols.push(
+          ...symbols.filter(symbol => symbol.necessaryForCompletion)
+        )
+      );
 
       module = new SymbolsPerRegionBTModule(
         rule as SymbolsPerRegionRule,
@@ -323,9 +331,13 @@ function solveUnderclued(input: GridData): GridData | null {
 
     // console.log(`Trying (${x}, ${y}) with ${color}`);
 
-    const newGrid = grid.fastCopyWith({
-      tiles: grid.setTile(x, y, tile.withColor(color)),
-    });
+    const newGrid = grid.copyWith(
+      {
+        tiles: grid.setTile(x, y, tile.withColor(color)),
+      },
+      false,
+      false
+    );
 
     // Solve
     let solution: GridData | undefined;
@@ -364,13 +376,21 @@ function solveUnderclued(input: GridData): GridData | null {
       if (!darkPossible && !lightPossible) return null;
 
       if (darkPossible && !lightPossible)
-        grid = grid.fastCopyWith({
-          tiles: grid.setTile(x, y, tile.withColor(Color.Dark)),
-        });
+        grid = grid.copyWith(
+          {
+            tiles: grid.setTile(x, y, tile.withColor(Color.Dark)),
+          },
+          false,
+          false
+        );
       if (!darkPossible && lightPossible)
-        grid = grid.fastCopyWith({
-          tiles: grid.setTile(x, y, tile.withColor(Color.Light)),
-        });
+        grid = grid.copyWith(
+          {
+            tiles: grid.setTile(x, y, tile.withColor(Color.Light)),
+          },
+          false,
+          false
+        );
     }
   }
 
@@ -397,12 +417,12 @@ onmessage = e => {
 
   solve(grid, solution => {
     // if (count === 0) console.timeLog('Solve time', 'First solution');
-    if (solution) {
-      if (solution.resetTiles().colorEquals(solution)) {
-        postMessage(null);
-        return false;
-      }
-    }
+    // if (solution) {
+    //   if (solution.resetTiles().colorEquals(solution)) {
+    //     postMessage(null);
+    //     return false;
+    //   }
+    // }
 
     postMessage(Serializer.stringifyGrid(solution));
 

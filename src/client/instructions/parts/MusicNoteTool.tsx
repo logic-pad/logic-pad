@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import ToolboxItem from '../../editor/ToolboxItem';
 import { PartPlacement, PartSpec } from './types';
 import { instance as musicGridInstance } from '@logic-pad/core/data/rules/musicGridRule';
@@ -11,13 +11,14 @@ import {
   getConfigurableLocation,
   useConfig,
 } from '../../contexts/ConfigContext.tsx';
-import { mousePosition } from '../../../client/uiHelper.ts';
 import { IoMusicalNote } from 'react-icons/io5';
 
 const NoteOverlay = memo(function NoteOverlay() {
   const { setLocation, setRef } = useConfig();
   const { grid, setGrid } = useGrid();
   const musicGrid = grid.musicGrid.value;
+  const noteOverlayRef = useRef<Map<string, HTMLDivElement | null>>(null);
+
   if (!musicGrid) return null;
   return (
     <>
@@ -31,7 +32,9 @@ const NoteOverlay = memo(function NoteOverlay() {
             line =>
               line.column === x &&
               !!line.rows[y] &&
-              (line.rows[y].note !== null || line.rows[y].velocity !== null)
+              (line.rows[y].note !== null ||
+                line.rows[y].instrument !== null ||
+                line.rows[y].velocity !== null)
           );
         }}
         onTileClick={(x, y, from, _to) => {
@@ -39,9 +42,7 @@ const NoteOverlay = memo(function NoteOverlay() {
           if (from === Color.Dark) {
             setLocation(getConfigurableLocation(grid, line.rows[y], line));
             setRef({
-              current: document
-                .elementsFromPoint(mousePosition.clientX, mousePosition.clientY)
-                .find(e => e.classList.contains('logic-tile')) as HTMLElement,
+              current: (noteOverlayRef.current?.get(`${x}-${y}`) ?? undefined)!,
             });
           } else {
             const line = musicGrid.controlLines.find(line => line.column === x);
@@ -57,10 +58,14 @@ const NoteOverlay = memo(function NoteOverlay() {
                       false,
                       Array.from(
                         { length: grid.height },
-                        () => new Row(null, null)
+                        () => new Row(null, null, null)
                       ).map((r, idx) =>
                         idx === y
-                          ? r.copyWith({ note: 'C4', velocity: null })
+                          ? r.copyWith({
+                              note: 'C4',
+                              instrument: null,
+                              velocity: null,
+                            })
                           : r
                       )
                     )
@@ -74,7 +79,7 @@ const NoteOverlay = memo(function NoteOverlay() {
                   musicGrid.setControlLine(
                     line.copyWith({
                       rows: line.rows.map((r, idx) =>
-                        idx === y ? new Row('C4', null) : r
+                        idx === y ? new Row('C4', null, null) : r
                       ),
                     })
                   )
@@ -94,8 +99,16 @@ const NoteOverlay = memo(function NoteOverlay() {
               (row, idx) =>
                 (row.note !== null || row.velocity !== null) && (
                   <div
+                    ref={el => {
+                      noteOverlayRef.current ??= new Map();
+                      const map = noteOverlayRef.current;
+                      map.set(`${line.column}-${idx}`, el);
+                      return () => {
+                        map.delete(`${line.column}-${idx}`);
+                      };
+                    }}
                     key={`${line.column}-${idx}`}
-                    className="absolute h-[1em] w-[1em] bg-gradient-to-r from-secondary from-5% via-20% via-secondary/20 to-secondary/0"
+                    className="absolute h-[1em] w-[1em] bg-linear-to-r from-secondary from-5% via-20% via-secondary/20 to-secondary/0 edit-target"
                     style={{ left: `${line.column}em`, top: `${idx}em` }}
                   >
                     {row.note !== null && (
@@ -103,8 +116,13 @@ const NoteOverlay = memo(function NoteOverlay() {
                         {row.note}
                       </div>
                     )}
+                    {row.instrument !== null && (
+                      <div className="badge badge-secondary absolute left-[0.33em] top-[3.4em] text-[0.13em] h-[1.3em] pr-[0.4em] rounded-l-none rounded-r-[1em] whitespace-nowrap pl-0">
+                        {row.instrument}
+                      </div>
+                    )}
                     {row.velocity !== null && (
-                      <div className="badge badge-secondary absolute left-[0.33em] top-[2.33em] text-[0.20em] h-[1.3em] pr-[0.4em] rounded-l-none rounded-r-[1em] whitespace-nowrap pl-0">
+                      <div className="badge badge-secondary absolute left-[0.33em] top-[3.7em] text-[0.18em] h-[1.3em] pr-[0.4em] rounded-l-none rounded-r-[1em] whitespace-nowrap pl-0">
                         {row.velocity}
                       </div>
                     )}

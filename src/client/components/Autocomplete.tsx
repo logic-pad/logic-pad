@@ -42,7 +42,7 @@ export default memo(function Autocomplete({
           type="text"
           tabIndex={0}
           placeholder={placeholder}
-          className="input w-full max-w-xs"
+          className="input w-full max-w-xs text-base-content"
           value={value}
           onChange={e => onChange?.(e.target.value)}
           onKeyDown={e => {
@@ -57,7 +57,7 @@ export default memo(function Autocomplete({
         <ul
           tabIndex={0}
           className={cn(
-            'dropdown-content z-[1] menu flex-nowrap overflow-y-auto p-2 shadow bg-base-100 text-base-content rounded-box w-full m-0 max-h-[50vh]',
+            'dropdown-content z-1 menu flex-nowrap overflow-y-auto p-2 shadow-sm bg-base-100 text-base-content rounded-box w-full m-0 max-h-[50vh]',
             results.length === 0 && 'hidden'
           )}
         >

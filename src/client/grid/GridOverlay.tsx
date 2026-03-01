@@ -1,4 +1,4 @@
-import { memo, Ref } from 'react';
+import React, { memo, Ref } from 'react';
 import { cn } from '../../client/uiHelper.ts';
 
 export interface GridOverlayProps {

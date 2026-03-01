@@ -1,4 +1,4 @@
-import {
+import React, {
   HTMLProps,
   memo,
   RefObject,
@@ -22,7 +22,7 @@ import PointerCaptureOverlay, {
 import handleTileClick from '../grid/handleTileClick';
 import { SymbolProps } from '../symbols';
 import GridData from '@logic-pad/core/data/grid';
-import { NumberSymbol } from '@logic-pad/core/index.ts';
+import NumberSymbol from '@logic-pad/core/data/symbols/numberSymbol';
 
 export interface SymbolToolProps extends HTMLProps<HTMLDivElement> {
   name: string;
@@ -58,7 +58,7 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
         !!grid.symbols
           .get(sample.id)
           ?.find(n => eq(n.x, position.x) && eq(n.y, position.y))),
-    [grid, sample.id, position, cursorPosition]
+    [location, position, grid.symbols, sample.id]
   );
 
   useEffect(() => {
@@ -166,9 +166,9 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
 });
 
 export default memo(function SymbolTool(props: SymbolToolProps) {
-  let {
+  let { id } = props;
+  const {
     name,
-    id,
     hotkey,
     sample,
     onNewSymbol,

@@ -12,7 +12,7 @@ export const Route = createLazyFileRoute('/_layout/search/puzzles')({
 
     return (
       <>
-        <div role="tablist" className="tabs tabs-lg tabs-bordered">
+        <div role="tablist" className="tabs tabs-lg tabs-border">
           <Link
             to="/search/puzzles"
             role="tab"
@@ -30,12 +30,13 @@ export const Route = createLazyFileRoute('/_layout/search/puzzles')({
         </div>
         <PuzzleSearchQuery
           params={search}
-          publicPuzzlesOnly={true}
+          searchType="public"
           onChange={async params => await navigate({ search: params })}
         />
         <div className="divider m-0" />
         <PuzzleSearchResults
           params={search}
+          searchType="public"
           to={puzzle => ({
             to: '/solve/$puzzleId',
             params: { puzzleId: puzzle.id },

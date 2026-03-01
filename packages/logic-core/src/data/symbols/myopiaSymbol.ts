@@ -1,5 +1,6 @@
 import { AnyConfig, ConfigType } from '../config.js';
 import { move } from '../dataHelper.js';
+import { SymbolMergeHandler } from '../events/onSymbolMerge.js';
 import GridData from '../grid.js';
 import {
   Color,
@@ -10,9 +11,9 @@ import {
   State,
   orientationToggle,
 } from '../primitives.js';
-import MultiEntrySymbol from './multiEntrySymbol.js';
+import Symbol from './symbol.js';
 
-export default class MyopiaSymbol extends MultiEntrySymbol {
+export default class MyopiaSymbol extends Symbol implements SymbolMergeHandler {
   public get title() {
     return this.diagonals ? 'Framed Myopia Arrow' : 'Myopia Arrow';
   }
@@ -215,6 +216,10 @@ export default class MyopiaSymbol extends MultiEntrySymbol {
       return State.Satisfied;
     if (allDirections.every(d => map[d].complete)) return State.Satisfied;
     return State.Incomplete;
+  }
+
+  public descriptionEquals(other: Symbol): boolean {
+    return this.id === other.id && this.explanation === other.explanation;
   }
 
   public copyWith({

@@ -1,4 +1,4 @@
-import { memo, useEffect, useId } from 'react';
+import React, { memo, useEffect, useId } from 'react';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api, bidirectionalInfiniteQuery } from './api';
@@ -34,7 +34,12 @@ export default memo(function CollectionSidebar({
     ...bidirectionalInfiniteQuery(
       ['collection', collectionId, 'puzzles', 'sidebar', puzzle?.id],
       (cursorBefore, cursorAfter) =>
-        api.listCollectionPuzzles(collectionId!, cursorBefore, cursorAfter),
+        api.listCollectionPuzzles(
+          collectionId!,
+          undefined,
+          cursorBefore,
+          cursorAfter
+        ),
       false
     ),
     initialData: {
@@ -96,7 +101,7 @@ export default memo(function CollectionSidebar({
             )}
           </div>
         </label>
-        <div className="drawer-side !overflow-x-visible !overflow-y-visible z-50 h-full w-full">
+        <div className="drawer-side overflow-x-visible! overflow-y-visible! z-50 h-full w-full">
           <label
             htmlFor={`collection-sidebar-${drawerId}`}
             aria-label="close sidebar"
@@ -108,7 +113,7 @@ export default memo(function CollectionSidebar({
                 <Link
                   to="/collection/$collectionId"
                   params={{ collectionId }}
-                  className="btn btn-ghost flex flex-col flex-nowrap gap-2 items-start text-start [&>*]:shrink-0 h-fit w-full px-2 -mx-2"
+                  className="btn btn-ghost flex flex-col flex-nowrap gap-2 items-start text-start *:shrink-0 h-fit w-full px-2 -mx-2"
                 >
                   <div className="text-accent text-sm uppercase">
                     {puzzle.series && puzzle.series.id === collectionId
@@ -123,7 +128,7 @@ export default memo(function CollectionSidebar({
                 </div>
               </div>
               <div className="divider" />
-              <div className="flex flex-col items-center w-full overflow-y-auto flex-1 [&>*]:shrink-0">
+              <div className="flex flex-col items-center w-full overflow-y-auto flex-1 *:shrink-0">
                 {puzzleList.isFetchingPreviousPage ? (
                   <Loading className="h-4 m-4 shrink-0" />
                 ) : puzzleList.hasPreviousPage ? (
@@ -138,7 +143,7 @@ export default memo(function CollectionSidebar({
                 ) : null}
                 {puzzleList.data?.pages.flatMap(page =>
                   page.results.map(puzzle => (
-                    <>
+                    <React.Fragment key={puzzle.id}>
                       <Link
                         key={puzzle.id}
                         className={cn(
@@ -166,7 +171,7 @@ export default memo(function CollectionSidebar({
                             'shrink-0',
                             puzzle.id === id
                               ? ''
-                              : '!bg-neutral [.wrapper:hover_&]:!bg-base-content/0 transition-colors [.wrapper:hover_&]:transition-none'
+                              : 'bg-neutral! [.wrapper:hover_&]:bg-base-content/0! transition-colors [.wrapper:hover_&]:transition-none'
                           )}
                         />
                         <div className="flex flex-col items-start gap-2">
@@ -185,7 +190,7 @@ export default memo(function CollectionSidebar({
                         </div>
                       </Link>
                       <div className="divider m-0" />
-                    </>
+                    </React.Fragment>
                   ))
                 )}
                 {puzzleList.isFetchingNextPage ? (

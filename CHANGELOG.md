@@ -1,3 +1,175 @@
+# 21/2/2026
+
+- Complete server rewrite for better performance and capacity
+- Less restrictive server limits
+  - Max collection size 250 -> unlimited
+  - Followed collections 250 -> unlimited
+  - Compressed puzzle size limit 5KB -> 7.5KB
+- Authentication
+  - Added support for signing in with X
+  - Authentication is now handled first-party by Logic Pad instead of relying on Appwrite
+  - You can now change your primary email
+- Supporter benefits
+  - Unlisted puzzles and collections
+  - Unlimited private puzzles
+  - Search puzzles by solve status
+  - Save puzzle solve progress to the server
+- Reduced supporter prices
+- The puzzle editor now auto-saves your progress
+- "I'm feeling lucky" no longer picks puzzles that you have solved before
+- Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
+- Updated Privacy Policy and Terms of Service
+- Reworked collection page UI
+- New set of SVG user avatars with better support for different names
+- Empty text symbols now display a placeholder question mark
+- Puzzle cards now show an indication of how the rated difficulty compares to design difficulty
+- The rated difficulty is now rounded up instead of down
+- Automatic collections are no longer shown in a profile's "created collections" section
+- Enhanced wrap-around visualization to show corners and look more more seamless
+- Fixed errors when switching between puzzle and collection search with filters enabled
+- Fixed network errors when a puzzle is rated right after solving
+- Fixed the puzzle editor sometimes not loading the newest version of an online puzzle
+- Puzzle completion SFX no longer plays in the editor
+- Fixed small issues with link preview rendering
+
+# 14/1/2026
+
+- Fixed "I'm feeling lucky" button not working
+- Fixed the "Followed collections" section not loading
+
+# 18/12/2025
+
+- Fixed puzzle image generation for hidden tiles
+- Fixed grid sounds playing incorrectly during puzzle image generation
+
+# 6/12/2025
+
+- Added sound effects to tile clicks and puzzle solves
+  - You can adjust the volume in site settings
+- Fixed incorrect site title in some pages
+
+# 4/12/2025
+
+- Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
+  - This is now supported by the backtrack and universal solvers
+- Removed the z3 solver
+- Improved card style for better readability and touchscreen support
+- The tile tool can now be dragged across tiles
+- The cspuz solver can now be used in more edge cases involving lotuses/galaxies
+- The solver support indicator now accurately reflects whether the selected symbol is supported in its current placement
+- Optimized symbols per region rule in the auto solver
+- Fixed the backtrack solver counting non-logic symbols (e.g. the hidden symbol) in symbols per region rule
+- Fixed text highlight being triggered by double-clicking on the grid in Firefox
+
+# 1/12/2025
+
+- Reworked all color themes again to improve contrast
+- Fixed notification layout when there are many notifications
+
+# 30/11/2025
+
+- Grid validation now runs automatically when a puzzle is loaded
+- Fixed repeated server errors in the collection sidebar for loved collections
+- Fixed missing grid validation when editing a published puzzle
+
+# 24/11/2025
+
+- The No Loops rule now only highlights the looped tiles
+- Fixed No Loops rule crashing on wrap-around grids
+- You can now use cmd+enter or ctrl+enter to add a new line in comments
+- You can now preview theme colors in the theme switcher
+
+# 22/11/2025
+
+- Added No Loops rule
+- You can now filter collections by type
+- Fixed solvers not aborting properly
+- Improved comment sidebar UI
+
+# 20/11/2025
+
+- Added Hollow Letter symbol
+- Fixed `GridData.copyTiles` not shifting symbol positions
+- Fixed incorrect assumptions about symbols per region rule in the auto solver
+- Improved color contrast for color radio buttons
+
+# 18/11/2025
+
+- Updated the design of Dead Ends to be compatible with viewpoints and consistent with Focus numbers
+- Updated solvers to indicate underclued grids with no deducible tiles
+- You can now reverse the order of puzzles in a collection
+  - Automatic collections are sorted by newest first by default
+- Automatic collections no longer appear on the front page
+  - If set to public, these collections will appear in your profile page instead
+- Newest puzzles and collections on the front page are now cached
+  - New updates may be delayed by up to 5 minutes
+
+# 16/11/2025
+
+- Improved markdown styling across the site
+- Added [Terms of Service](/terms)
+- Switched from Vercel Speed Insights to Sentry for anonymous performance monitoring
+  - See updated [Privacy Policy](/privacy-policy) for details.
+
+# 15/11/2025
+
+- Migrated to daisyUI v5 with tighter layout and color refresh
+- The source code of Logic Pad is now at [https://github.com/logic-pad](https://github.com/logic-pad)
+- Fixed clipboard tool on mobile and improve copy and paste visualization
+- The editor now falls back to its own clipboard if system clipboard access is denied
+
+# 14/11/2025
+
+- Added the clipboard tool for copying and pasting grid areas and rules across pages
+- Invalid create links now redirect to the solve page
+
+# 7/11/2025
+
+- Added Dead Ends variant to Focus Symbol
+  - Dead Ends are Focus Numbers of 1 that can stack with other symbols
+
+# 3/11/2025
+
+- Added Connect Zones rule to connect colored cells within each zone separately
+- Added Exact Count Per Zone rule to specify exact number of colored cells in each zone
+- Oversized grids are now validated in the background
+- Optimized validation performance for Connect All rule
+
+# 2/11/2025
+
+- Fixed broken canvas render in huge grids by lowering DPI
+
+# 7/10/2025
+
+- Added support for more instruments in music grids
+  - Added violin, xylophone, acoustic guitar, electric guitar, flute and trumpet
+  - Only the necessary instruments are loaded when playing a music grid
+- Invalid note names in music grids no longer crash the site
+- Fixed config popup disappearing in music grids when using the canvas grid renderer
+- Tweaked random time and frequency offset in music grids
+
+# 5/10/2025
+
+- Drum samples are no longer cut off when the BPM is high
+- Fixed music grid sometimes crashing when resizing the grid
+
+# 4/10/2025
+
+- You can now add private puzzles to private collections
+  - All puzzles must be public for a collection to become public
+- Optimized the random puzzle algorithm
+- Fixed puzzle cards being clicked when using drag-and-drop
+- Improve loading animation in some areas for stable page layout
+
+# 2/10/2025
+
+- Improved validation error messages to be more user-friendly
+
+# 26/9/2025
+
+- Optimized rendering for Viewpoint, Lotus, Minesweeper and Focus symbols by using pre-rendered SVGs
+- Optimized symbol rendering on very large grids
+
 # 24/9/2025
 
 - House symbols now contains a number and can be affected by Off-by-X rule

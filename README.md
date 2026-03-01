@@ -12,7 +12,7 @@ You are strongly recommended to discover the grid rules in-game before using Log
 
 ```bash
 # 1. Clone this repository
-git clone https://github.com/hlysine/logic-pad.git
+git clone https://github.com/logic-pad/logic-pad.git
 
 # 2. Restore dependencies
 cd logic-pad

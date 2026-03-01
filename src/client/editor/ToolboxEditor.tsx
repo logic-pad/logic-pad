@@ -14,8 +14,8 @@ export default memo(function ToolboxEditor() {
   const [showMoreTools, setShowMoreTools] = useSettings('showMoreTools');
 
   return (
-    <div className="grow overflow-y-auto overflow-x-hidden">
-      <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden">
+      <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
         <GridConsumer>
           {({ grid, setGrid }) => (
             <GridSizeEditor grid={grid} setGrid={setGrid} />
@@ -29,7 +29,7 @@ export default memo(function ToolboxEditor() {
           <span
             className={cn(
               'inline-block text-sm h-0 transition-[height]',
-              description && 'h-[2.5em]'
+              description && 'h-[3.5em]'
             )}
           >
             {description}

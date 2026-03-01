@@ -43,11 +43,15 @@ export default memo(function CustomIconSymbol({
           textClass
         )}
         style={textStyle}
+        aria-hidden="true"
       >
         <Suspense fallback={<Loading />}>
           <MdIcon icon={symbol.icon} />
         </Suspense>
       </pre>
+      <span className="sr-only">
+        {`Custom icon ${symbol.icon} at (${symbol.x}, ${symbol.y})`}
+      </span>
     </div>
   );
 });

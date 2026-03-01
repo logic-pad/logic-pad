@@ -1,3 +1,5 @@
+@reference "../../index.css";
+
 .logic-animated .logic-tile {
   transform: scale(0);
 }

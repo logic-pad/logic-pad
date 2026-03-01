@@ -1,8 +1,7 @@
-import { createContext, memo, use, useEffect, useState } from 'react';
+import React, { createContext, memo, use, useEffect, useState } from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import { useEdit } from './EditContext.tsx';
 import { PuzzleMetadata } from '@logic-pad/core/data/puzzle';
-import validateGrid from '@logic-pad/core/data/validate';
 import { useGridState } from './GridStateContext.tsx';
 import { invokeSetGrid } from '@logic-pad/core/data/events/onSetGrid';
 
@@ -60,7 +59,7 @@ export default memo(function GridContext({
   setMetadata: setExternalMetadata,
 }: GridContextProps) {
   const { recordEdit, clearHistory } = useEdit();
-  const { setState } = useGridState();
+  const { validateGrid } = useGridState();
 
   const [internalGrid, setInternalGrid] = useState(initialGrid ?? defaultGrid);
   const [solution, setSolution] = useState<GridData | null>(
@@ -77,14 +76,15 @@ export default memo(function GridContext({
 
   useEffect(() => {
     clearHistory(grid);
+    validateGrid(grid, solution);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [validateGrid]);
 
   const setGridRaw = (newGrid: GridData, sol?: GridData | null) => {
     newGrid = invokeSetGrid(grid, newGrid, sol === undefined ? solution : sol);
     setGrid(newGrid);
     if (sol !== undefined) setSolution(sol);
-    setState(validateGrid(newGrid, sol === undefined ? solution : sol));
+    validateGrid(newGrid, sol === undefined ? solution : sol);
     return newGrid;
   };
 

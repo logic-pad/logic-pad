@@ -14,27 +14,31 @@ import { handlesGridChange } from './data/events/onGridChange.js';
 import { handlesGridResize } from './data/events/onGridResize.js';
 import { handlesSetGrid, invokeSetGrid } from './data/events/onSetGrid.js';
 import { handlesSymbolDisplay } from './data/events/onSymbolDisplay.js';
+import { handlesSymbolMerge } from './data/events/onSymbolMerge.js';
 import { handlesSymbolValidation } from './data/events/onSymbolValidation.js';
-import GridData, { NEIGHBOR_OFFSETS } from './data/grid.js';
+import GridData, { NEIGHBOR_OFFSETS, NEIGHBOR_OFFSETS_8 } from './data/grid.js';
 import GridConnections from './data/gridConnections.js';
 import GridZones from './data/gridZones.js';
 import Instruction from './data/instruction.js';
-import { COMPARISONS, Color, Comparison, DIRECTIONS, Direction, MajorRule, Mode, ORIENTATIONS, Orientation, PuzzleType, State, WRAPPINGS, Wrapping, directionToggle, orientationToggle } from './data/primitives.js';
+import { COMPARISONS, Color, Comparison, DIRECTIONS, DRUM_SAMPLES, Direction, INSTRUMENTS, Instrument, MajorRule, Mode, ORIENTATIONS, Orientation, PuzzleType, State, WRAPPINGS, Wrapping, directionToggle, isDrumSample, orientationToggle } from './data/primitives.js';
 import { MetadataSchema, PuzzleSchema, getPuzzleTypes, puzzleEquals, validatePuzzleChecklist } from './data/puzzle.js';
 import BanPatternRule from './data/rules/banPatternRule.js';
 import CellCountPerZoneRule from './data/rules/cellCountPerZoneRule.js';
 import CellCountRule from './data/rules/cellCountRule.js';
 import CompletePatternRule from './data/rules/completePatternRule.js';
 import ConnectAllRule from './data/rules/connectAllRule.js';
+import ConnectZonesRule from './data/rules/connectZonesRule.js';
 import ContainsShapeRule from './data/rules/containsShapeRule.js';
 import CustomRule from './data/rules/customRule.js';
 import DifferentCountPerZoneRule from './data/rules/differentCountPerZoneRule.js';
+import ExactCountPerZoneRule from './data/rules/exactCountPerZoneRule.js';
 import ForesightRule from './data/rules/foresightRule.js';
 import { allRules } from './data/rules/index.js';
 import LyingSymbolRule from './data/rules/lyingSymbolRule.js';
 import { ControlLine, Row } from './data/rules/musicControlLine.js';
 import MusicGridRule from './data/rules/musicGridRule.js';
 import MysteryRule from './data/rules/mysteryRule.js';
+import NoLoopsRule from './data/rules/noLoopsRule.js';
 import OffByXRule from './data/rules/offByXRule.js';
 import PerfectionRule from './data/rules/perfectionRule.js';
 import RegionAreaRule from './data/rules/regionAreaRule.js';
@@ -60,7 +64,7 @@ import { getShapeVariants, normalizeShape, positionsToShape, sanitizePatternGrid
 import { allSolvers } from './data/solver/allSolvers.js';
 import AutoSolver from './data/solver/auto/autoSolver.js';
 import BacktrackSolver from './data/solver/backtrack/backtrackSolver.js';
-import BTModule, { BTGridData, BTTile, IntArray2D, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
+import BTModule, { BTGridData, BTTile, IntArray2D, checkSubtilePlacement, colorToBTTile, createOneTileResult, getOppositeColor } from './data/solver/backtrack/data.js';
 import BanPatternBTModule from './data/solver/backtrack/rules/banPattern.js';
 import CellCountBTModule from './data/solver/backtrack/rules/cellCount.js';
 import ConnectAllBTModule from './data/solver/backtrack/rules/connectAll.js';
@@ -84,25 +88,13 @@ import { gridToJson } from './data/solver/cspuz/jsonify.js';
 import EventIteratingSolver from './data/solver/eventIteratingSolver.js';
 import Solver from './data/solver/solver.js';
 import UniversalSolver from './data/solver/universal/universalSolver.js';
-import AreaNumberModule from './data/solver/z3/modules/areaNumberModule.js';
-import CellCountModule from './data/solver/z3/modules/cellCountModule.js';
-import ConnectAllModule from './data/solver/z3/modules/connectAllModule.js';
-import DartModule from './data/solver/z3/modules/dartModule.js';
-import { allZ3Modules } from './data/solver/z3/modules/index.js';
-import LetterModule from './data/solver/z3/modules/letterModule.js';
-import MyopiaModule from './data/solver/z3/modules/myopiaModule.js';
-import RegionAreaModule from './data/solver/z3/modules/regionAreaModule.js';
-import ViewpointModule from './data/solver/z3/modules/viewpointModule.js';
-import Z3Module from './data/solver/z3/modules/z3Module.js';
-import { convertDirection } from './data/solver/z3/utils.js';
-import Z3Solver from './data/solver/z3/z3Solver.js';
-import Z3SolverContext from './data/solver/z3/z3SolverContext.js';
 import AreaNumberSymbol from './data/symbols/areaNumberSymbol.js';
 import CustomIconSymbol from './data/symbols/customIconSymbol.js';
 import CustomSymbol from './data/symbols/customSymbol.js';
 import CustomTextSymbol from './data/symbols/customTextSymbol.js';
 import DartSymbol from './data/symbols/dartSymbol.js';
 import DirectionLinkerSymbol from './data/symbols/directionLinkerSymbol.js';
+import EveryLetterSymbol from './data/symbols/everyLetterSymbol.js';
 import FocusSymbol from './data/symbols/focusSymbol.js';
 import GalaxySymbol from './data/symbols/galaxySymbol.js';
 import HiddenSymbol from './data/symbols/hiddenSymbol.js';
@@ -111,14 +103,15 @@ import { allSymbols } from './data/symbols/index.js';
 import LetterSymbol from './data/symbols/letterSymbol.js';
 import LotusSymbol from './data/symbols/lotusSymbol.js';
 import MinesweeperSymbol from './data/symbols/minesweeperSymbol.js';
-import MultiEntrySymbol from './data/symbols/multiEntrySymbol.js';
 import MyopiaSymbol from './data/symbols/myopiaSymbol.js';
 import NumberSymbol from './data/symbols/numberSymbol.js';
 import Symbol from './data/symbols/symbol.js';
+import UnsupportedSymbol from './data/symbols/unsupportedSymbol.js';
 import ViewpointSymbol from './data/symbols/viewpointSymbol.js';
 import TileData from './data/tile.js';
 import TileConnections from './data/tileConnections.js';
 import validateGrid, { aggregateState, applyFinalOverrides } from './data/validate.js';
+import { GridValidator } from './data/validateAsync.js';
 
 export {
   ConfigType,
@@ -144,9 +137,11 @@ export {
   handlesSetGrid,
   invokeSetGrid,
   handlesSymbolDisplay,
+  handlesSymbolMerge,
   handlesSymbolValidation,
   GridData,
   NEIGHBOR_OFFSETS,
+  NEIGHBOR_OFFSETS_8,
   GridConnections,
   GridZones,
   Instruction,
@@ -154,7 +149,10 @@ export {
   Color,
   Comparison,
   DIRECTIONS,
+  DRUM_SAMPLES,
   Direction,
+  INSTRUMENTS,
+  Instrument,
   MajorRule,
   Mode,
   ORIENTATIONS,
@@ -164,6 +162,7 @@ export {
   WRAPPINGS,
   Wrapping,
   directionToggle,
+  isDrumSample,
   orientationToggle,
   MetadataSchema,
   PuzzleSchema,
@@ -175,9 +174,11 @@ export {
   CellCountRule,
   CompletePatternRule,
   ConnectAllRule,
+  ConnectZonesRule,
   ContainsShapeRule,
   CustomRule,
   DifferentCountPerZoneRule,
+  ExactCountPerZoneRule,
   ForesightRule,
   allRules,
   LyingSymbolRule,
@@ -185,6 +186,7 @@ export {
   Row,
   MusicGridRule,
   MysteryRule,
+  NoLoopsRule,
   OffByXRule,
   PerfectionRule,
   RegionAreaRule,
@@ -221,6 +223,7 @@ export {
   BTGridData,
   BTTile,
   IntArray2D,
+  checkSubtilePlacement,
   colorToBTTile,
   createOneTileResult,
   getOppositeColor,
@@ -247,25 +250,13 @@ export {
   EventIteratingSolver,
   Solver,
   UniversalSolver,
-  AreaNumberModule,
-  CellCountModule,
-  ConnectAllModule,
-  DartModule,
-  allZ3Modules,
-  LetterModule,
-  MyopiaModule,
-  RegionAreaModule,
-  ViewpointModule,
-  Z3Module,
-  convertDirection,
-  Z3Solver,
-  Z3SolverContext,
   AreaNumberSymbol,
   CustomIconSymbol,
   CustomSymbol,
   CustomTextSymbol,
   DartSymbol,
   DirectionLinkerSymbol,
+  EveryLetterSymbol,
   FocusSymbol,
   GalaxySymbol,
   HiddenSymbol,
@@ -274,14 +265,15 @@ export {
   LetterSymbol,
   LotusSymbol,
   MinesweeperSymbol,
-  MultiEntrySymbol,
   MyopiaSymbol,
   NumberSymbol,
   Symbol,
+  UnsupportedSymbol,
   ViewpointSymbol,
   TileData,
   TileConnections,
   validateGrid,
   aggregateState,
   applyFinalOverrides,
+  GridValidator,
 };

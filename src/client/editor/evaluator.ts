@@ -40,6 +40,5 @@ Object.entries(enclosure).forEach(([name, value]) => {
 });
 
 export default function evaluate(code: string): unknown {
-  // eslint-disable-next-line no-eval
   return window.eval?.(code);
 }

@@ -10,8 +10,8 @@ export default memo(function PrimaryMouseButtonToggle() {
       className="tooltip tooltip-info tooltip-bottom"
       data-tip="Whether to use left click for light tiles (Reload to take effect)"
     >
-      <div className="form-control">
-        <label className="label cursor-pointer">
+      <fieldset className="fieldset">
+        <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Flip mouse buttons by default</span>
           <input
             type="checkbox"
@@ -20,7 +20,7 @@ export default memo(function PrimaryMouseButtonToggle() {
             onChange={e => setFlippedPrimaryButton(e.currentTarget.checked)}
           />
         </label>
-      </div>
+      </fieldset>
     </div>
   );
 });

@@ -8,45 +8,33 @@ export interface ModeVariantLoaderProps {
   mode: Mode;
 }
 
-function isRule(rule: Rule | null): rule is Rule {
-  return rule !== null;
-}
-
-function isSymbol(symbol: Symbol | null): symbol is Symbol {
-  return symbol !== null;
-}
-
 export default memo(function ModeVariantLoader({
   mode,
 }: ModeVariantLoaderProps) {
   const { grid, setGridRaw } = useGrid();
   useEffect(() => {
     let changed = false;
-    const newGrid = grid
-      .withRules(rules =>
-        rules
-          .map(rule => {
-            const newRule = rule.modeVariant(mode);
-            if (newRule !== rule) changed = true;
-            return newRule;
-          })
-          .filter<Rule>(isRule)
-      )
-      .withSymbols(symbols => {
-        const symbolMap = new Map<string, Symbol[]>();
-        symbols.forEach((symbols, key) => {
-          const newSymbols = symbols
-            .map(symbol => {
-              const newSymbol = symbol.modeVariant(mode);
-              if (newSymbol !== symbol) changed = true;
-              return newSymbol;
-            })
-            .filter<Symbol>(isSymbol);
-          symbolMap.set(key, newSymbols);
-        });
-        return symbolMap;
-      });
-    if (changed) setGridRaw(newGrid);
+    const newRules: Rule[] = [];
+    for (const rule of grid.rules) {
+      const newRule = rule.modeVariant(mode);
+      if (newRule !== rule) changed = true;
+      if (newRule) newRules.push(newRule);
+    }
+    const newSymbols = new Map<string, Symbol[]>();
+    for (const [key, symbols] of grid.symbols) {
+      const newSymbolList: Symbol[] = [];
+      for (const symbol of symbols) {
+        const newSymbol = symbol.modeVariant(mode);
+        if (newSymbol !== symbol) changed = true;
+        if (newSymbol) newSymbolList.push(newSymbol);
+      }
+      newSymbols.set(key, newSymbolList);
+    }
+    if (changed) {
+      setGridRaw(
+        grid.copyWith({ rules: newRules, symbols: newSymbols }, false)
+      );
+    }
   }, [grid, mode, setGridRaw]);
   return null;
 });

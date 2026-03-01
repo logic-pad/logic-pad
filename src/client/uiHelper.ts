@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
+import toast from 'react-hot-toast';
 import { extendTailwindMerge } from 'tailwind-merge';
+import { HighlightColor } from './online/data';
 
 const twMerge = extendTailwindMerge({
   extend: {
@@ -9,24 +11,43 @@ const twMerge = extendTailwindMerge({
   },
 });
 
+export function getHighlightColor(highlight?: HighlightColor) {
+  switch (highlight) {
+    case 'primary':
+      return 'bg-primary/5 border-primary outline-primary shadow-primary';
+    case 'secondary':
+      return 'bg-secondary/5 border-secondary outline-secondary shadow-secondary';
+    case 'accent':
+      return 'bg-accent/5 border-accent outline-accent shadow-accent';
+    case 'info':
+      return 'bg-info/5 border-info outline-info shadow-info';
+    case 'success':
+      return 'bg-success/5 border-success outline-success shadow-success';
+    case 'error':
+      return 'bg-error/5 border-error outline-error shadow-error';
+    default:
+      return '';
+  }
+}
+
 const relativeTimeFormat = new Intl.RelativeTimeFormat('en');
 
 export function toRelativeDate(
   date: Date,
-  accuracy: 'second' | 'day' = 'second'
+  accuracy: 'second' | 'day' | 'exact' = 'second'
 ) {
   const msOffset = date.getTime() - Date.now();
   const absOffset = Math.abs(msOffset);
   if (absOffset < 10 * 1000 && accuracy === 'second') {
     return msOffset < 0 ? 'a few seconds ago' : 'in a few seconds';
-  } else if (absOffset < 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(Math.round(msOffset / 1000), 'second');
-  } else if (absOffset < 60 * 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 60 * 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(
       Math.round(msOffset / 1000 / 60),
       'minute'
     );
-  } else if (absOffset < 24 * 60 * 60 * 1000 && accuracy === 'second') {
+  } else if (absOffset < 24 * 60 * 60 * 1000 && accuracy !== 'day') {
     return relativeTimeFormat.format(
       Math.round(msOffset / 1000 / 60 / 60),
       'hour'
@@ -65,7 +86,7 @@ export function pluralize(count: number) {
       const plural = singular === strings1 ? strings2 : strings1;
       const strings = count === 1 ? singular : plural;
       if (strings.length === 1) return `${count} ${strings[0].trim()}`;
-      return strings[0] + count + strings[1];
+      return strings[0] + count.toString() + strings[1];
     };
   };
 }
@@ -104,3 +125,31 @@ document.addEventListener('pointerleave', updateMousePosition);
 document.addEventListener('pointerenter', updateMousePosition);
 document.addEventListener('pointerover', updateMousePosition);
 document.addEventListener('pointerout', updateMousePosition);
+
+export const safeClipboard = {
+  writeText: async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      toast.error(
+        'Failed to write to clipboard. Please allow clipboard access.'
+      );
+    }
+  },
+  write: async (items: ClipboardItem[]) => {
+    try {
+      await navigator.clipboard.write(items);
+    } catch {
+      toast.error(
+        'Failed to write to clipboard. Please allow clipboard access.'
+      );
+    }
+  },
+  readText: async () => {
+    try {
+      return await navigator.clipboard.readText();
+    } catch {
+      return '';
+    }
+  },
+};

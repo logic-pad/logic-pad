@@ -1,12 +1,6 @@
 import { memo } from 'react';
 import { cn } from '../../client/uiHelper.ts';
 import MinesweeperSymbolData from '@logic-pad/core/data/symbols/minesweeperSymbol';
-import {
-  BsChevronCompactDown,
-  BsChevronCompactUp,
-  BsChevronCompactRight,
-  BsChevronCompactLeft,
-} from 'react-icons/bs';
 
 export interface MinesweeperProps {
   textClass: string;
@@ -24,35 +18,29 @@ export default memo(function MinesweeperSymbol({
         textClass
       )}
     >
-      <span className={cn('absolute m-auto text-[0.6em]', textClass)}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 500 500"
+        className="absolute m-auto"
+        aria-hidden="true"
+      >
+        <path
+          fillRule="evenodd"
+          fill="currentColor"
+          d="M 247.888 54.188 C 249.219 53.518 250.787 53.518 252.117 54.188 L 308.749 82.504 C 312.006 84.109 312.308 88.639 309.297 90.658 C 307.872 91.612 306.041 91.716 304.52 90.943 L 250.002 63.693 L 195.484 90.943 C 192.247 92.594 188.436 90.121 188.623 86.497 C 188.708 84.788 189.719 83.259 191.257 82.504 Z M 386.967 110.047 C 388.382 110.514 389.49 111.623 389.957 113.037 L 409.979 173.104 C 411.148 176.542 408.158 179.959 404.601 179.257 C 402.919 178.924 401.551 177.703 401.022 176.081 L 381.74 118.262 L 323.922 98.981 C 320.465 97.86 319.519 93.416 322.214 90.986 C 323.483 89.837 325.279 89.471 326.9 90.025 Z M 445.812 247.888 C 446.482 249.219 446.482 250.787 445.812 252.117 L 417.496 308.749 C 415.891 312.006 411.361 312.308 409.342 309.297 C 408.388 307.872 408.284 306.041 409.057 304.52 L 436.307 250.002 L 409.057 195.484 C 407.406 192.247 409.879 188.436 413.503 188.623 C 415.212 188.708 416.741 189.719 417.496 191.257 Z M 389.953 386.967 C 389.486 388.382 388.377 389.49 386.963 389.957 L 326.896 409.979 C 323.458 411.148 320.041 408.158 320.743 404.601 C 321.076 402.919 322.297 401.551 323.919 401.022 L 381.738 381.74 L 401.019 323.922 C 402.14 320.465 406.584 319.519 409.014 322.214 C 410.163 323.483 410.529 325.279 409.975 326.9 Z M 252.112 445.812 C 250.781 446.482 249.213 446.482 247.883 445.812 L 191.251 417.496 C 187.994 415.891 187.692 411.361 190.703 409.342 C 192.128 408.388 193.959 408.284 195.48 409.057 L 249.998 436.307 L 304.516 409.057 C 307.753 407.406 311.564 409.879 311.377 413.503 C 311.292 415.212 310.281 416.741 308.743 417.496 Z M 110.047 113.033 C 110.514 111.618 111.623 110.51 113.037 110.043 L 173.104 90.021 C 176.542 88.852 179.959 91.842 179.257 95.399 C 178.924 97.081 177.703 98.449 176.081 98.978 L 118.262 118.26 L 98.981 176.078 C 97.86 179.535 93.416 180.481 90.986 177.786 C 89.837 176.517 89.471 174.721 90.025 173.1 Z M 54.188 252.112 C 53.518 250.781 53.518 249.213 54.188 247.883 L 82.504 191.251 C 84.109 187.994 88.639 187.692 90.658 190.703 C 91.612 192.128 91.716 193.959 90.943 195.48 L 63.693 249.998 L 90.943 304.516 C 92.594 307.753 90.121 311.564 86.497 311.377 C 84.788 311.292 83.259 310.281 82.504 308.743 Z M 113.033 389.953 C 111.618 389.486 110.51 388.377 110.043 386.963 L 90.021 326.896 C 88.852 323.458 91.842 320.041 95.399 320.743 C 97.081 321.076 98.449 322.297 98.978 323.919 L 118.26 381.738 L 176.078 401.019 C 179.535 402.14 180.481 406.584 177.786 409.014 C 176.517 410.163 174.721 410.529 173.1 409.975 Z"
+          strokeWidth={1}
+        ></path>
+      </svg>
+
+      <span
+        className={cn('absolute m-auto text-[0.6em]', textClass)}
+        aria-hidden="true"
+      >
         {symbol.number}
       </span>
-      <div className="absolute mx-auto top-0 mb-auto">
-        <BsChevronCompactUp size={'0.3em'} />
-      </div>
-      <div className="absolute mx-auto bottom-0 mt-auto">
-        <BsChevronCompactDown size={'0.3em'} />
-      </div>
-      <div className="absolute my-auto left-0 mr-auto">
-        <BsChevronCompactLeft size={'0.3em'} />
-      </div>
-      <div className="absolute my-auto right-0 ml-auto">
-        <BsChevronCompactRight size={'0.3em'} />
-      </div>
-      <div className="absolute flex justify-center items-center inset-0 rotate-45">
-        <div className="absolute mx-auto top-0 mb-auto">
-          <BsChevronCompactUp size={'0.3em'} />
-        </div>
-        <div className="absolute mx-auto bottom-0 mt-auto">
-          <BsChevronCompactDown size={'0.3em'} />
-        </div>
-        <div className="absolute my-auto left-0 mr-auto">
-          <BsChevronCompactLeft size={'0.3em'} />
-        </div>
-        <div className="absolute my-auto right-0 ml-auto">
-          <BsChevronCompactRight size={'0.3em'} />
-        </div>
-      </div>
+      <span className="sr-only">
+        {`Minesweeper number ${symbol.number} at (${symbol.x}, ${symbol.y})`}
+      </span>
     </div>
   );
 });

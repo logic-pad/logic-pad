@@ -1,4 +1,4 @@
-import { createContext, memo, use, useMemo, useState } from 'react';
+import React, { createContext, memo, use, useMemo, useState } from 'react';
 import { defaultGrid } from './GridContext';
 import { Puzzle } from '@logic-pad/core/data/puzzle';
 import { PuzzleFull } from '../online/data';

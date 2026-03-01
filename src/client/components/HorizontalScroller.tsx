@@ -1,11 +1,15 @@
-import { memo } from 'react';
-import { cn } from '../uiHelper';
+import React, { memo } from 'react';
+import { cn, getHighlightColor } from '../uiHelper';
 import { IoChevronForward } from 'react-icons/io5';
 import { BsChevronCompactRight } from 'react-icons/bs';
 import { Link, LinkProps } from '@tanstack/react-router';
+import Markdown from './Markdown';
+import { HighlightColor } from '../online/data';
 
 export interface HorizontalScrollerProps extends Partial<LinkProps> {
   title: string;
+  highlight?: HighlightColor;
+  description?: string;
   scrollable?: boolean;
   children: React.ReactNode;
   className?: string;
@@ -13,25 +17,34 @@ export interface HorizontalScrollerProps extends Partial<LinkProps> {
 
 export default memo(function HorizontalScroller({
   title,
+  description,
+  highlight,
   scrollable = true,
   children,
   className,
   ...props
 }: HorizontalScrollerProps) {
   return (
-    <>
-      <div
-        className="tooltip tooltip-info tooltip-right w-fit"
-        data-tip="View more"
+    <div
+      className={cn(
+        'flex flex-col gap-2 px-8 py-4 -mx-8 -my-4 mb-6',
+        highlight && 'outline-2 rounded-lg shadow-glow-xl',
+        getHighlightColor(highlight)
+      )}
+    >
+      <Link
+        className="btn btn-ghost text-2xl text-start font-normal justify-start w-fit"
+        {...props}
       >
-        <Link
-          className="btn btn-ghost text-2xl text-start font-normal justify-start w-fit"
-          {...props}
-        >
-          {title}
-          <IoChevronForward />
-        </Link>
-      </div>
+        {title}
+        <IoChevronForward />
+      </Link>
+
+      {description && (
+        <Markdown className="ms-4 prose-sm prose-h1:text-lg text-neutral-content/80">
+          {description}
+        </Markdown>
+      )}
 
       <div
         className={cn(
@@ -61,6 +74,6 @@ export default memo(function HorizontalScroller({
           </div>
         ) : null}
       </div>
-    </>
+    </div>
   );
 });

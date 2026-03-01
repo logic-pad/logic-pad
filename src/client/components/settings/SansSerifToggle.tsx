@@ -8,8 +8,8 @@ export default memo(function SansSerifToggle() {
       className="tooltip tooltip-info tooltip-bottom"
       data-tip="Use a sans-serif font for the whole site"
     >
-      <div className="form-control">
-        <label className="label cursor-pointer">
+      <fieldset className="fieldset">
+        <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Sans-serif font</span>
           <input
             type="checkbox"
@@ -18,7 +18,7 @@ export default memo(function SansSerifToggle() {
             onChange={e => setSansSerif(e.currentTarget.checked)}
           />
         </label>
-      </div>
+      </fieldset>
     </div>
   );
 });

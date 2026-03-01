@@ -140,3 +140,46 @@ export function createOneTileResult(
 
   return { tilesNeedCheck, ratings };
 }
+
+export function checkSubtilePlacement(
+  grid: BTGridData,
+  pos: Position
+): CheckResult | false | undefined {
+  const minX = Math.floor(pos.x);
+  const minY = Math.floor(pos.y);
+  if (minX === pos.x && minY === pos.y) return undefined;
+  const maxX = Math.ceil(pos.x);
+  const maxY = Math.ceil(pos.y);
+
+  let color: BTColor | null = null;
+  let complete = true;
+  for (let i = 0; i < 4; i++) {
+    const x = i % 2 === 0 ? minX : maxX;
+    const y = i < 2 ? minY : maxY;
+    if (!grid.isInBound(x, y)) return false;
+    const tile = grid.getTile(x, y);
+    if (tile === BTTile.NonExist) return false;
+    if (tile !== BTTile.Empty) {
+      if (color !== null && tile !== color) return false;
+      color = tile;
+    } else {
+      complete = false;
+    }
+  }
+
+  if (complete) {
+    return undefined;
+  } else {
+    const tilesNeedCheck = IntArray2D.create(grid.width, grid.height);
+    const ratings: Rating[] = [];
+    for (let i = 0; i < 4; i++) {
+      const x = i % 2 === 0 ? minX : maxX;
+      const y = i < 2 ? minY : maxY;
+      if (grid.getTile(x, y) === BTTile.Empty) {
+        tilesNeedCheck.set(x, y, 1);
+        ratings.push({ pos: { x, y }, score: 1 });
+      }
+    }
+    return { tilesNeedCheck, ratings };
+  }
+}

@@ -8,8 +8,7 @@ import {
 } from './_layout.profile.$userId';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import toast from 'react-hot-toast';
-import Loading from '../components/Loading';
-import { FaCheckSquare, FaEdit, FaUser } from 'react-icons/fa';
+import { FaCheckSquare, FaEdit, FaShieldAlt, FaUser } from 'react-icons/fa';
 import { pluralize, toRelativeDate } from '../uiHelper';
 import CollectionFollowButton from '../online/CollectionFollowButton';
 import { useOnline } from '../contexts/OnlineContext';
@@ -18,17 +17,17 @@ import PuzzleCard from '../online/PuzzleCard';
 import CollectionCard from '../online/CollectionCard';
 import Avatar from '../online/Avatar';
 import SupporterBadge from '../components/SupporterBadge';
+import Skeleton from '../components/Skeleton';
 
 export const Route = createLazyFileRoute('/_layout/profile/$userId')({
   component: memo(function ProfilePage() {
     useRouteProtection('online');
     const navigate = useNavigate();
     const { me } = useOnline();
-    const { data: userBrief } = useSuspenseQuery(
-      userBriefQueryOptions(Route.useParams().userId)
-    );
+    const userId = Route.useParams().userId;
+    const { data: userBrief } = useSuspenseQuery(userBriefQueryOptions(userId));
     const { data: userDetail, isPending } = useQuery(
-      userDetailQueryOptions(Route.useParams().userId)
+      userDetailQueryOptions(userId)
     );
 
     useEffect(() => {
@@ -81,12 +80,10 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
                 <div className="opacity-80">
                   Joined {toRelativeDate(new Date(userBrief.createdAt))}
                 </div>
-                {userDetail && (
-                  <div className="opacity-80">
-                    Last active{' '}
-                    {toRelativeDate(new Date(userDetail.accessedAt), 'day')}
-                  </div>
-                )}
+                <div className="opacity-80">
+                  Last active{' '}
+                  {toRelativeDate(new Date(userBrief.accessedAt), 'day')}
+                </div>
               </div>
             </div>
             {userBrief.id === me?.id && (
@@ -99,80 +96,38 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
           <div className="flex gap-4 items-center flex-wrap">
             <div className="flex-1 min-w-[320px]">{userBrief.description}</div>
             {isPending ? (
-              <Loading className="h-12 w-24" />
+              <Skeleton className="h-12 w-28" />
             ) : (
-              userDetail?.createdPuzzlesCollection && (
+              userDetail?.createdPuzzles && (
                 <CollectionFollowButton
-                  collectionId={userDetail.createdPuzzlesCollection}
+                  collectionId={userDetail.createdPuzzles.id}
                 />
               )
             )}
           </div>
         </section>
         <div className="divider" />
-        {isPending ? (
-          <Loading className="h-20" />
-        ) : (
-          <>
-            <HorizontalScroller
-              title="Created puzzles"
-              scrollable={false}
-              className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
-              to={
-                userDetail?.createdPuzzlesCollection
-                  ? '/collection/$collectionId'
-                  : undefined
-              }
-              params={
-                userDetail?.createdPuzzlesCollection
-                  ? { collectionId: userDetail!.createdPuzzlesCollection }
-                  : undefined
-              }
-            >
-              {userDetail!.createdPuzzles.map(puzzle => (
-                <PuzzleCard
-                  key={puzzle.id}
-                  puzzle={puzzle}
-                  expandable={false}
-                  to="/solve/$puzzleId"
-                  params={{ puzzleId: puzzle.id }}
-                />
-              ))}
-            </HorizontalScroller>
-            <HorizontalScroller
-              title="Created collections"
-              scrollable={false}
-              className="flex-wrap box-content max-h-[calc(96px*2+1rem)] w-full"
-              to="/search/collections"
-              search={{ q: `creator=${userBrief.id}` }}
-            >
-              {userDetail!.createdCollections.map(collection => (
-                <CollectionCard
-                  key={collection.id}
-                  collection={collection}
-                  expandable={false}
-                  to="/collection/$collectionId"
-                  params={{ collectionId: collection.id }}
-                />
-              ))}
-            </HorizontalScroller>
-            {userDetail?.solvedPuzzles && (
-              <HorizontalScroller
-                title="Solved puzzles"
-                scrollable={false}
-                className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
-                to={
-                  userDetail.solvedPuzzlesCollection
-                    ? '/collection/$collectionId'
-                    : undefined
-                }
-                params={
-                  userDetail.solvedPuzzlesCollection
-                    ? { collectionId: userDetail!.solvedPuzzlesCollection }
-                    : undefined
-                }
-              >
-                {userDetail.solvedPuzzles.map(puzzle => (
+        {(isPending || userDetail?.createdPuzzles) && (
+          <HorizontalScroller
+            title="Created puzzles"
+            scrollable={false}
+            className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
+            to={
+              userDetail?.createdPuzzles?.id
+                ? '/collection/$collectionId'
+                : undefined
+            }
+            params={
+              userDetail?.createdPuzzles?.id
+                ? { collectionId: userDetail?.createdPuzzles.id }
+                : undefined
+            }
+          >
+            {isPending
+              ? Array.from({ length: 8 }, (_, i) => (
+                  <Skeleton key={i} className="w-[320px] h-[116px]" />
+                ))
+              : userDetail?.createdPuzzles?.data.map(puzzle => (
                   <PuzzleCard
                     key={puzzle.id}
                     puzzle={puzzle}
@@ -181,9 +136,80 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
                     params={{ puzzleId: puzzle.id }}
                   />
                 ))}
-              </HorizontalScroller>
-            )}
-          </>
+          </HorizontalScroller>
+        )}
+        <HorizontalScroller
+          title="Created collections"
+          scrollable={false}
+          className="flex-wrap box-content max-h-[calc(96px*2+1rem)] w-full"
+          to="/search/collections"
+          search={{ q: `creator=${userBrief.id}` }}
+        >
+          {isPending
+            ? Array.from({ length: 8 }, (_, i) => (
+                <Skeleton key={i} className="w-[320px] h-[96px]" />
+              ))
+            : userDetail!.createdCollections.map(collection => (
+                <CollectionCard
+                  key={collection.id}
+                  collection={collection}
+                  expandable={false}
+                  to="/collection/$collectionId"
+                  params={{ collectionId: collection.id }}
+                />
+              ))}
+        </HorizontalScroller>
+        {userDetail?.lovedPuzzles && (
+          <HorizontalScroller
+            title="Loved puzzles"
+            scrollable={false}
+            className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
+            to="/collection/$collectionId"
+            params={{ collectionId: userDetail.lovedPuzzles.id }}
+          >
+            {userDetail.lovedPuzzles.data.map(puzzle => (
+              <PuzzleCard
+                key={puzzle.id}
+                puzzle={puzzle}
+                expandable={false}
+                to="/solve/$puzzleId"
+                params={{ puzzleId: puzzle.id }}
+              />
+            ))}
+          </HorizontalScroller>
+        )}
+        {userDetail?.solvedPuzzles && (
+          <HorizontalScroller
+            title="Solved puzzles"
+            scrollable={false}
+            className="flex-wrap box-content max-h-[calc(116px*2+1rem)] w-full"
+            to="/collection/$collectionId"
+            params={{ collectionId: userDetail.solvedPuzzles.id }}
+          >
+            {userDetail.solvedPuzzles.data.map(puzzle => (
+              <PuzzleCard
+                key={puzzle.id}
+                puzzle={puzzle}
+                expandable={false}
+                to="/solve/$puzzleId"
+                params={{ puzzleId: puzzle.id }}
+              />
+            ))}
+          </HorizontalScroller>
+        )}
+        {me?.roles.includes('moderator') && (
+          <div
+            className="tooltip tooltip-error tooltip-left fixed bottom-4 right-4"
+            data-tip="Mod view"
+          >
+            <Link
+              to="/mod/profile/$userId"
+              params={{ userId }}
+              className="btn btn-circle btn-error shadow-xl"
+            >
+              <FaShieldAlt size={22} />
+            </Link>
+          </div>
         )}
       </ResponsiveLayout>
     );

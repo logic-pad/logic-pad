@@ -25,6 +25,8 @@ import {
   orientationToggle,
   Position,
   Wrapping,
+  Instrument,
+  INSTRUMENTS,
 } from '../primitives.js';
 import { array, escape, unescape } from '../dataHelper.js';
 import { allRules } from '../rules/index.js';
@@ -74,7 +76,10 @@ export default class SerializerV0 extends SerializerBase {
     if (line.checkpoint) result.push('s');
     result.push(
       `r${line.rows
-        .map(row => `v${row.velocity ?? ''}n${row.note ?? ''}`)
+        .map(
+          row =>
+            `i${row.instrument ?? ''}v${row.velocity ?? ''}n${row.note ?? ''}`
+        )
         .join(',')}`
     );
     return result.join('|');
@@ -107,11 +112,15 @@ export default class SerializerV0 extends SerializerBase {
         case 'r':
           rows.push(
             ...value.split(',').map(row => {
-              const match = /^v([\d.]*?)n(.*)$/.exec(row);
-              if (!match) return new Row(null, null);
-              const [, velocity, note] = match;
+              const match = /^(?:i(\w*?))?v([\d.]*?)n(.*)$/.exec(row);
+              if (!match) return new Row(null, null, null);
+              const [, instrument, velocity, note] = match;
               return new Row(
                 note === '' ? null : note,
+                instrument === '' ||
+                !INSTRUMENTS.includes(instrument as Instrument)
+                  ? null
+                  : (instrument as Instrument),
                 velocity === '' ? null : Number(velocity)
               );
             })
@@ -219,6 +228,20 @@ export default class SerializerV0 extends SerializerBase {
                       config.field as keyof Instruction
                     ] as NullableNoteConfig['default']
                   )
+                )
+          )
+        );
+      case ConfigType.NullableInstrument:
+        return (
+          config.field +
+          '=' +
+          escape(
+            instruction[config.field as keyof Instruction] === null
+              ? ''
+              : String(
+                  instruction[
+                    config.field as keyof Instruction
+                  ] as NullableNoteConfig['default']
                 )
           )
         );
@@ -345,6 +368,11 @@ export default class SerializerV0 extends SerializerBase {
         ];
       case ConfigType.NullableNote:
         return [config.field, value === '' ? null : unescape(value)];
+      case ConfigType.NullableInstrument:
+        return [
+          config.field,
+          value === '' ? null : (unescape(value) as Instrument),
+        ];
       case ConfigType.SolvePath:
         return [
           config.field,

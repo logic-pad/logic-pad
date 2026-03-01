@@ -119,15 +119,20 @@ export default memo(function DartSymbol({ textClass, symbol }: DartProps) {
       <span
         className={cn('absolute text-[0.55em]', textClass)}
         style={orientations[direction].numberDisplacement}
+        aria-hidden="true"
       >
         {symbol.number}
       </span>
       <div
         className={cn('absolute', textClass, '-m-[0.10em]')}
         style={orientations[direction].arrowStitch}
+        aria-hidden="true"
       >
         <Icon size="0.7em" />
       </div>
+      <span className="sr-only">
+        {`Dart facing ${symbol.orientation} with number ${symbol.number} at (${symbol.x}, ${symbol.y})`}
+      </span>
     </div>
   );
 });

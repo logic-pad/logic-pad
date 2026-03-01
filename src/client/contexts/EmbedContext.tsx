@@ -1,4 +1,4 @@
-import { createContext, memo, use, useEffect, useState } from 'react';
+import React, { createContext, memo, use, useEffect, useState } from 'react';
 
 interface Features {
   instructions: boolean;

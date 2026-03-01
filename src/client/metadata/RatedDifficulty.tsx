@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import Difficulty from '../metadata/Difficulty';
+import Difficulty, { medianFromHistogram } from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
 import './ratedDifficulty.css';
 
@@ -7,23 +7,6 @@ export interface RatedDifficultyProps {
   collapsible?: boolean;
   ratedDifficulty: number[];
   className?: string;
-}
-
-function medianFromHistogram(ratedDifficulty: number[]) {
-  const total = ratedDifficulty.reduce((acc, val) => acc + val, 0);
-  const half = total / 2;
-
-  if (total === 0) return 0;
-
-  let current = 0;
-  for (let i = 0; i < ratedDifficulty.length; i++) {
-    current += ratedDifficulty[i];
-    if (current >= half) {
-      return i + 1;
-    }
-  }
-
-  return 0;
 }
 
 export default memo(function RatedDifficulty({
@@ -48,18 +31,19 @@ export default memo(function RatedDifficulty({
       <input
         type="checkbox"
         name="gui-editor-accordion"
+        aria-label="Toggle rated difficulty details"
         defaultChecked={!collapsible}
       />
       <div
         className={cn(
-          'collapse-title font-medium flex gap-2 items-center p-0 min-h-0 after:!top-3',
-          !collapsible && 'after:!hidden'
+          'collapse-title font-medium flex gap-2 items-center p-0 min-h-0 after:top-3!',
+          !collapsible && 'after:hidden!'
         )}
       >
         Rated difficulty:{' '}
         <Difficulty className="flex items-center" value={median} />
       </div>
-      <div className="collapse-content !p-0">
+      <div className="collapse-content p-0!">
         {median === 0 ? (
           <div className="opacity-50 my-4">No ratings yet</div>
         ) : (

@@ -76,6 +76,8 @@ export default class LetterSymbol extends Symbol {
   }
 
   public validateSymbol(grid: GridData): State {
+    if (!this.validateSubtilePlacement(grid)) return State.Error;
+
     const thisX = Math.floor(this.x);
     const thisY = Math.floor(this.y);
     let complete = true;

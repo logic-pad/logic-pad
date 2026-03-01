@@ -99,7 +99,7 @@ export default memo(function OutlineOverlay({
       width={width}
       height={height}
       bleed={BLEED}
-      onResize={size => setTileSize(size)}
+      onResize={setTileSize}
     ></GridCanvasOverlay>
   );
 });

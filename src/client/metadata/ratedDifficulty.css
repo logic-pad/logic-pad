@@ -1,3 +1,5 @@
+@reference "../index.css";
+
 .animate-grow {
   animation: grow 0.3s ease-out forwards;
 }

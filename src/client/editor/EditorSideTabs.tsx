@@ -27,8 +27,8 @@ export default memo(function EditorSideTabs({
   const { features } = useEmbed();
 
   return (
-    <div className="flex-1 flex flex-col gap-2">
-      <div role="tablist" className="tabs tabs-bordered shrink-0">
+    <div className="flex-1 flex flex-col gap-2 -mt-4">
+      <div role="tablist" className="tabs tabs-border shrink-0 justify-center">
         {Object.entries(panes).map(([name]) =>
           !features.metadata && name === 'Info' ? null : (
             <a
@@ -37,7 +37,7 @@ export default memo(function EditorSideTabs({
               className={cn(
                 'tab text-neutral-content',
                 editorTab === name && 'tab-active',
-                name === 'Info' && 'bg-primary text-primary-content font-bold'
+                name === 'Info' && 'font-black'
               )}
               onClick={() => onEditorTabChange(name as EditorTabKey)}
             >

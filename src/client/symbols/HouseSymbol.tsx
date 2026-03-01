@@ -16,7 +16,10 @@ export default memo(function HouseSymbol({ textClass, symbol }: HouseProps) {
         textClass
       )}
     >
-      <span className={cn('absolute m-auto text-[0.75em]', textClass)}>
+      <span
+        className={cn('absolute m-auto text-[0.75em]', textClass)}
+        aria-hidden="true"
+      >
         <BsHouse />
       </span>
       <span
@@ -24,8 +27,12 @@ export default memo(function HouseSymbol({ textClass, symbol }: HouseProps) {
           'absolute m-auto text-[0.4em] translate-y-[0.15em]',
           textClass
         )}
+        aria-hidden="true"
       >
         {symbol.number}
+      </span>
+      <span className="sr-only">
+        {`House number ${symbol.number} at (${symbol.x}, ${symbol.y})`}
       </span>
     </div>
   );

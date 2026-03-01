@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Color } from '@logic-pad/core/data/primitives';
 import mouseContext from './MouseContext';
 import { cn } from '../uiHelper';
@@ -102,23 +102,26 @@ export default memo(function PointerCaptureOverlay({
 
   const prevCoord = useRef({ x: -1, y: -1 });
 
-  const getPointerPosition = (
-    e:
-      | React.PointerEvent<HTMLDivElement>
-      | React.WheelEvent<HTMLDivElement>
-      | WheelEvent
-  ) => {
-    if (!e.currentTarget) return { x: -1, y: -1 };
-    return getPointerLocation(
-      e.currentTarget as HTMLDivElement,
-      e.clientX,
-      e.clientY,
-      width,
-      height,
-      step,
-      bleed
-    );
-  };
+  const getPointerPosition = useCallback(
+    (
+      e:
+        | React.PointerEvent<HTMLDivElement>
+        | React.WheelEvent<HTMLDivElement>
+        | WheelEvent
+    ) => {
+      if (!e.currentTarget) return { x: -1, y: -1 };
+      return getPointerLocation(
+        e.currentTarget as HTMLDivElement,
+        e.clientX,
+        e.clientY,
+        width,
+        height,
+        step,
+        bleed
+      );
+    },
+    [bleed, height, step, width]
+  );
 
   const getPointerColor = (x: number, y: number, targetColor: Color) => {
     const currentColor = colorMap(x, y, targetColor) ? targetColor : Color.Gray;
@@ -127,6 +130,7 @@ export default memo(function PointerCaptureOverlay({
 
   useEffect(() => {
     if (onWheel) {
+      const currentRef = ref?.current;
       const handle = (e: WheelEvent) => {
         const { x, y } = getPointerPosition(e);
         if (onWheel(x, y, e.deltaY)) {
@@ -134,10 +138,10 @@ export default memo(function PointerCaptureOverlay({
           e.stopPropagation();
         }
       };
-      ref?.current?.addEventListener('wheel', handle, { passive: false });
-      return () => ref?.current?.removeEventListener('wheel', handle);
+      currentRef?.addEventListener('wheel', handle, { passive: false });
+      return () => currentRef?.removeEventListener('wheel', handle);
     }
-  }, [onWheel]);
+  }, [getPointerPosition, onWheel, ref]);
 
   return (
     <div

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import ToolboxItem from '../ToolboxItem';
 import { useGrid } from '../../contexts/GridContext';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';

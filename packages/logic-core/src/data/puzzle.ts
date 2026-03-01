@@ -23,25 +23,28 @@ export type PuzzleMetadata = {
   difficulty: number;
 };
 
-export const MetadataSchema = z
-  .object({
-    title: z.string().min(1),
-    author: z.string().min(1),
-    description: z.string(),
-    difficulty: z.number().int().min(0).max(10),
-  })
-  .strict();
+export const MetadataSchema = z.strictObject(
+  {
+    title: z.string('Title must be a string').min(1, 'Title must not be empty'),
+    author: z
+      .string('Author must be a string')
+      .min(1, 'Author must not be empty'),
+    description: z.string('Description must be a string'),
+    difficulty: z
+      .number('Difficulty must be a number')
+      .int('Difficulty must be an integer')
+      .min(0, 'Difficulty must be at least 0')
+      .max(10, 'Difficulty must be at most 10'),
+  },
+  'Data must be an object'
+);
 
-export const PuzzleSchema = z
-  .object({
-    title: z.string().min(1),
-    author: z.string().min(1),
-    description: z.string(),
-    difficulty: z.number().int().min(0).max(10),
-    grid: z.instanceof(GridData),
-    solution: z.instanceof(GridData).nullable(),
-  })
-  .strict();
+export const PuzzleSchema = MetadataSchema.extend({
+  grid: z.instanceof(GridData, { error: 'Grid must be a GridData instance' }),
+  solution: z
+    .instanceof(GridData, { error: 'Solution must be a GridData instance' })
+    .nullable(),
+}).strict();
 
 export type PuzzleData = {
   /**

@@ -10,8 +10,8 @@ export default memo(function WrapAroundVisualizationToggle() {
       className="tooltip tooltip-info tooltip-bottom"
       data-tip="Whether to visualize edges of wrap-around grids"
     >
-      <div className="form-control">
-        <label className="label cursor-pointer">
+      <fieldset className="fieldset">
+        <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Visualize wrap-around grids</span>
           <input
             type="checkbox"
@@ -20,7 +20,7 @@ export default memo(function WrapAroundVisualizationToggle() {
             onChange={e => setVisualizeWrapArounds(e.currentTarget.checked)}
           />
         </label>
-      </div>
+      </fieldset>
     </div>
   );
 });

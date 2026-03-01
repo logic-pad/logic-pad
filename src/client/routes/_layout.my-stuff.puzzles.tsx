@@ -1,21 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
-import {
-  PrivatePuzzleSearchParams,
-  privatePuzzleSearchSchema,
-} from '../online/PuzzleSearchQuery';
-import { api, bidirectionalInfiniteQuery, queryClient } from '../online/api';
-import { router } from '../router/router';
+import { privatePuzzleSearchSchema } from '../online/PuzzleSearchQuery';
+import { queryClient } from '../online/api';
 import toast from 'react-hot-toast';
-
-export const myPuzzlesInfiniteQueryOptions = (
-  search: PrivatePuzzleSearchParams
-) =>
-  bidirectionalInfiniteQuery(
-    ['user', 'me', 'puzzles', search],
-    (cursorBefore, cursorAfter) =>
-      api.listMyPuzzles(search, cursorBefore, cursorAfter)
-  );
+import { searchOwnPuzzlesInfiniteQueryOptions } from '../online/PuzzleSearchResults';
 
 export const Route = createFileRoute('/_layout/my-stuff/puzzles')({
   validateSearch: zodValidator(privatePuzzleSearchSchema),
@@ -23,9 +11,7 @@ export const Route = createFileRoute('/_layout/my-stuff/puzzles')({
     try {
       await Promise.all([
         queryClient.ensureInfiniteQueryData(
-          myPuzzlesInfiniteQueryOptions(
-            router.state.location.search as PrivatePuzzleSearchParams
-          )
+          searchOwnPuzzlesInfiniteQueryOptions({})
         ),
       ]);
     } catch (error) {
@@ -35,4 +21,11 @@ export const Route = createFileRoute('/_layout/my-stuff/puzzles')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `My Puzzles - Logic Pad`,
+      },
+    ],
+  }),
 });

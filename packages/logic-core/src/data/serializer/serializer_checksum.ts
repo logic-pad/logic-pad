@@ -28,7 +28,7 @@ import { escape } from '../dataHelper.js';
 import { normalizeShape, tilesToShape } from '../shapes.js';
 
 export default class SerializerChecksum extends SerializerV0 {
-  public readonly version = 3 as number;
+  public readonly version = 4 as number;
 
   public parseTile(_str: string): TileData {
     throw new Error('Checksum serializer does not support parsing');
@@ -159,6 +159,8 @@ export default class SerializerChecksum extends SerializerV0 {
                 )
           )
         );
+      case ConfigType.NullableInstrument:
+        return config.field + '='; // do not include instrument in checksum
       case ConfigType.Tile:
       case ConfigType.Grid:
         return (

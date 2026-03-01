@@ -3,6 +3,7 @@ import { routeTree } from './routeTree.gen';
 import NotFound from './NotFound';
 import Error from './Error';
 import Loading from '../components/Loading';
+import * as Sentry from '@sentry/react';
 
 export const router = createRouter({
   routeTree,
@@ -20,3 +21,11 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN as string,
+  tunnel: (import.meta.env.VITE_API_ENDPOINT as string) + '/sentry',
+  release: import.meta.env.VITE_PACKAGE_VERSION as string,
+  integrations: [Sentry.tanstackRouterBrowserTracingIntegration(router)],
+  tracesSampleRate: 1,
+});

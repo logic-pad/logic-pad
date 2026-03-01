@@ -1,3 +1,86 @@
+# 0.26.3
+
+- Fixed publishing error
+
+# 0.26.2
+
+- Expose `stringifyTiles` and `parseTiles` methods in the public API of the serializer
+
+# 0.26.1
+
+- Added unsupported symbol to work with the auto solver
+
+# 0.26.0
+
+- Area numbers, letters, house numbers and hollow letters that are placed between tiles now require all touching tiles to be of the same color
+  - This is now supported by the backtrack and universal solvers
+- Removed the z3 solver
+- Changed `Solver.isInstructionSupported` to include grid data as parameter
+- More edge cases involving lotuses/galaxies are now marked as supported by the cspuz solver
+
+# 0.25.3
+
+- The No Loops rule now only highlights the looped tiles instead of all tiles of the looped color
+- Fixed No Loops rule crashing on wrap-around grids
+
+# 0.25.2
+
+- Fixed No Loops rule not satisfied in some cases
+
+# 0.25.1
+
+- Fixed package exports
+
+# 0.25.0
+
+- Added No Loops rule
+- Fixed solvers not aborting properly
+
+# 0.24.0
+
+- Added Hollow Letter (`every_letter`) symbol
+- Fixed `GridData.copyTiles` not shifting symbol positions
+- Marked symbols per region rule as non-additive for the auto solver
+
+# 0.23.2
+
+- Solvers can now yield an empty solution for underclued grids instead of yielding null
+
+# 0.23.1
+
+- Changed `GridData.pasteTiles` behavior to clear the affected area before pasting
+
+# 0.23.0
+
+- Refactored MultiEntrySymbol into an interface
+- Added Dead Ends as a variant of Focus Symbol
+
+# 0.22.1
+
+- Fixed typo and example grid in Connect Zones rule
+
+# 0.22.0
+
+- Added Connect Zones rule to connect colored cells within each zone separately
+- Added Exact Count Per Zone rule to specify exact number of colored cells in each zone
+- Optimized validation performance for Connect All rule
+
+# 0.21.0
+
+- Added support for async grid validation with web workers
+
+# 0.20.0
+
+- Added support for more instruments in music grids
+
+# 0.19.1
+
+- Improved puzzle object validation to output user-friendly messages
+
+# 0.19.0
+
+- New `copyWith` API to skip sanitization or event triggering
+
 # 0.18.0
 
 - House symbols now have configurable numbers

@@ -8,7 +8,7 @@ export interface GalaxyProps {
   symbol: GalaxySymbolData;
 }
 
-export default memo(function GalaxySymbol({ textClass }: GalaxyProps) {
+export default memo(function GalaxySymbol({ symbol, textClass }: GalaxyProps) {
   return (
     <div
       className={cn(
@@ -16,8 +16,14 @@ export default memo(function GalaxySymbol({ textClass }: GalaxyProps) {
         textClass
       )}
     >
-      <span className={cn('absolute m-auto text-[0.75em]', textClass)}>
+      <span
+        className={cn('absolute m-auto text-[0.75em]', textClass)}
+        aria-hidden="true"
+      >
         <TbGalaxy />
+      </span>
+      <span className="sr-only">
+        {`Galaxy symbol at (${symbol.x}, ${symbol.y})`}
       </span>
     </div>
   );

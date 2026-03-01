@@ -11,11 +11,15 @@ function gridToRawTiles(grid: GridData): Color[][] {
 }
 
 function rawTilesToGrid(rawTiles: Color[][], grid: GridData): GridData {
-  return grid.fastCopyWith({
-    tiles: array(grid.width, grid.height, (x, y) =>
-      grid.getTile(x, y).withColor(rawTiles[y][x])
-    ),
-  });
+  return grid.copyWith(
+    {
+      tiles: array(grid.width, grid.height, (x, y) =>
+        grid.getTile(x, y).withColor(rawTiles[y][x])
+      ),
+    },
+    false,
+    false
+  );
 }
 
 function getNextTile(
@@ -96,9 +100,13 @@ function solveUnderclued(input: GridData): GridData | null {
   }));
 
   function search(x: number, y: number, tile: TileData, color: Color): boolean {
-    const newGrid = grid.fastCopyWith({
-      tiles: grid.setTile(x, y, tile.withColor(color)),
-    });
+    const newGrid = grid.copyWith(
+      {
+        tiles: grid.setTile(x, y, tile.withColor(color)),
+      },
+      false,
+      false
+    );
 
     // Solve
     let solution: GridData | null | undefined;
@@ -137,13 +145,21 @@ function solveUnderclued(input: GridData): GridData | null {
       if (!darkPossible && !lightPossible) return null;
 
       if (darkPossible && !lightPossible)
-        grid = grid.fastCopyWith({
-          tiles: grid.setTile(x, y, tile.withColor(Color.Dark)),
-        });
+        grid = grid.copyWith(
+          {
+            tiles: grid.setTile(x, y, tile.withColor(Color.Dark)),
+          },
+          false,
+          false
+        );
       if (!darkPossible && lightPossible)
-        grid = grid.fastCopyWith({
-          tiles: grid.setTile(x, y, tile.withColor(Color.Light)),
-        });
+        grid = grid.copyWith(
+          {
+            tiles: grid.setTile(x, y, tile.withColor(Color.Light)),
+          },
+          false,
+          false
+        );
     }
   }
 
@@ -167,11 +183,11 @@ onmessage = e => {
   let count = 0;
 
   solve(grid, solution => {
-    if (solution) {
-      if (solution.resetTiles().colorEquals(solution)) {
-        solution = null;
-      }
-    }
+    // if (solution) {
+    //   if (solution.resetTiles().colorEquals(solution)) {
+    //     solution = null;
+    //   }
+    // }
     postMessage(solution ? Serializer.stringifyGrid(solution) : null);
 
     count += 1;

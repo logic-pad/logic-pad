@@ -1,4 +1,4 @@
-import { createContext, memo, use, useState } from 'react';
+import React, { createContext, memo, use, useState } from 'react';
 import GridData from '@logic-pad/core/data/grid';
 
 interface EditContext {

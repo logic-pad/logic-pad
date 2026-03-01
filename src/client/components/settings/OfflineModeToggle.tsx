@@ -8,8 +8,8 @@ export default memo(function OfflineModeToggle() {
       className="tooltip tooltip-info tooltip-bottom"
       data-tip="Disable all online features"
     >
-      <div className="form-control">
-        <label className="label cursor-pointer">
+      <fieldset className="fieldset">
+        <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Offline mode</span>
           <input
             type="checkbox"
@@ -18,7 +18,7 @@ export default memo(function OfflineModeToggle() {
             onChange={e => setOfflineMode(e.currentTarget.checked)}
           />
         </label>
-      </div>
+      </fieldset>
     </div>
   );
 });

@@ -5,7 +5,6 @@ import {
   CollectionSearchParams,
   collectionSearchSchema,
 } from '../online/CollectionSearchQuery';
-import { router } from '../router/router';
 import { zodValidator } from '@tanstack/zod-adapter';
 
 export const followedCollectionsInfiniteQueryOptions = (
@@ -23,9 +22,7 @@ export const Route = createFileRoute('/_layout/my-follows')({
     try {
       await Promise.all([
         queryClient.ensureInfiniteQueryData(
-          followedCollectionsInfiniteQueryOptions(
-            router.state.location.search as CollectionSearchParams
-          )
+          followedCollectionsInfiniteQueryOptions({})
         ),
       ]);
     } catch (error) {
@@ -35,4 +32,11 @@ export const Route = createFileRoute('/_layout/my-follows')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `My Follows - Logic Pad`,
+      },
+    ],
+  }),
 });

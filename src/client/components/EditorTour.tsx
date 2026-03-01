@@ -220,7 +220,7 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
     return null;
 
   return (
-    <div className="fixed w-screen bottom-0 z-[10000] flex justify-center p-4 pb-48 md:pb-28 xl:pb-4 pointer-events-none">
+    <div className="fixed w-screen bottom-0 z-10000 flex justify-center p-4 pb-48 md:pb-28 xl:pb-4 pointer-events-none">
       <div className="max-w-full p-4 w-[500px] bg-base-100 text-base-content border-2 border-accent rounded-2xl shadow-2xl flex flex-col gap-2 pointer-events-auto">
         <div className="uppercase text-xs text-base-content/50 tracking-wider font-semibold">
           {currentStep === null

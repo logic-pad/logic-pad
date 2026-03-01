@@ -5,7 +5,7 @@ import GridContext from '../contexts/GridContext';
 import DisplayContext from '../contexts/DisplayContext';
 import GridStateContext from '../contexts/GridStateContext';
 import EditContext from '../contexts/EditContext';
-import { GridData } from '@logic-pad/core/index';
+import GridData from '@logic-pad/core/data/grid';
 import { Puzzle, PuzzleMetadata } from '@logic-pad/core/data/puzzle';
 import FullScreenModal from '../components/FullScreenModal';
 import OnlineContext from '../contexts/OnlineContext';

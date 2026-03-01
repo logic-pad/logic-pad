@@ -1,4 +1,4 @@
-import {
+import React, {
   Suspense,
   lazy,
   memo,
@@ -284,11 +284,12 @@ export default memo(function PuzzleChecklist({
 
   const solverRequest = useRef(0);
   const [solveRef, setSolveRef] = useState<AbortController | null>(null);
-  const [solution, setSolution] = useState<TiedToGrid<GridData | null> | null>(
-    null
-  );
-  const [alternate, setAlternate] =
-    useState<TiedToGrid<GridData | null> | null>(null);
+  const [solution, setSolution] = useState<TiedToGrid<
+    GridData | 'empty' | null
+  > | null>(null);
+  const [alternate, setAlternate] = useState<TiedToGrid<
+    GridData | 'empty' | null
+  > | null>(null);
 
   useEffect(() => {
     if (solution && !solution.grid.resetTiles().equals(grid.resetTiles())) {
@@ -318,7 +319,9 @@ export default memo(function PuzzleChecklist({
   );
 
   const checklistComplete =
-    checklist.isValid && (solution === null || solution.value !== null);
+    checklist.isValid &&
+    (solution === null ||
+      (solution.value !== null && solution.value !== 'empty'));
 
   if (!features.checklist) return null;
 
@@ -344,29 +347,39 @@ export default memo(function PuzzleChecklist({
           <>
             <ChecklistItem
               key="solution"
-              type={solution.value !== null ? 'success' : 'error'}
+              type={
+                solution.value !== null && solution.value !== 'empty'
+                  ? 'success'
+                  : 'error'
+              }
               tooltip={
-                solution.value !== null
-                  ? 'Solution found. Click to view'
-                  : 'This puzzle has no solution'
+                solution.value === 'empty'
+                  ? 'None of the tiles can be filled'
+                  : solution.value !== null
+                    ? 'Solution found. Click to view'
+                    : 'This puzzle has no solution'
               }
             >
               <span className="flex-1 text-start">
-                {solution.value !== null ? 'Solution found' : 'No solution'}
+                {solution.value === 'empty'
+                  ? 'No deducible tiles'
+                  : solution.value !== null
+                    ? 'Solution found'
+                    : 'No solution'}
               </span>
-              {!!solution?.value && (
+              {!!solution?.value && solution.value !== 'empty' && (
                 <button
                   type="button"
                   className="btn btn-sm"
                   onClick={() => {
-                    setGrid(solution.value!);
+                    setGrid(solution.value as GridData);
                     setSolution({
-                      grid: solution.value!,
+                      grid: solution.value as GridData,
                       value: solution.value,
                     });
-                    if (alternate) {
+                    if (alternate && alternate.value !== 'empty') {
                       setAlternate({
-                        grid: solution.value!,
+                        grid: solution.value as GridData,
                         value: alternate.value,
                       });
                     }
@@ -388,32 +401,36 @@ export default memo(function PuzzleChecklist({
                 }
                 tooltip={
                   alternate !== null
-                    ? alternate.value !== null
-                      ? 'Click to view alternate solution'
-                      : 'The solution is unique'
+                    ? alternate.value === 'empty'
+                      ? 'None of the tiles can be filled'
+                      : alternate.value !== null
+                        ? 'Click to view alternate solution'
+                        : 'The solution is unique'
                     : 'Alternate solution not reported by solver'
                 }
               >
                 <span className="flex-1 text-start">
                   {alternate !== null
-                    ? alternate.value !== null
-                      ? 'Solution not unique'
-                      : 'Unique solution'
+                    ? alternate.value === 'empty'
+                      ? 'No deducible tiles'
+                      : alternate.value !== null
+                        ? 'Solution not unique'
+                        : 'Unique solution'
                     : 'Alternate unavailable'}
                 </span>
-                {!!alternate?.value && (
+                {!!alternate?.value && alternate.value !== 'empty' && (
                   <button
                     type="button"
                     className="btn btn-sm"
                     onClick={() => {
-                      setGrid(alternate.value!);
+                      setGrid(alternate.value as GridData);
                       if (solution)
                         setSolution({
-                          grid: alternate.value!,
+                          grid: alternate.value as GridData,
                           value: solution.value,
                         });
                       setAlternate({
-                        grid: alternate.value!,
+                        grid: alternate.value as GridData,
                         value: alternate.value,
                       });
                     }}
@@ -493,11 +510,21 @@ export default memo(function PuzzleChecklist({
                     )) {
                       if (!isAlternate) {
                         if (requestId !== solverRequest.current) break;
-                        setSolution({ grid, value: solution });
+                        setSolution({
+                          grid,
+                          value: solution?.resetTiles().colorEquals(solution)
+                            ? 'empty'
+                            : solution,
+                        });
                         isAlternate = true;
                       } else {
                         if (requestId !== solverRequest.current) break;
-                        setAlternate({ grid, value: solution });
+                        setAlternate({
+                          grid,
+                          value: solution?.resetTiles().colorEquals(solution)
+                            ? 'empty'
+                            : solution,
+                        });
                         break;
                       }
                     }

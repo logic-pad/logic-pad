@@ -14,7 +14,6 @@ import OnlineMetadata from '../metadata/OnlineMetadata';
 import PuzzleLoveButton from '../components/quickActions/PuzzleLoveButton';
 import PuzzleSolveControl from '../components/PuzzleSolveControl';
 import PuzzleEditButton from '../components/quickActions/PuzzleEditButton';
-import DocumentTitle from '../components/DocumentTitle';
 import Loading from '../components/Loading';
 
 const SharePuzzleImage = lazy(
@@ -37,7 +36,6 @@ export default memo(function SolveScreen({
       collapsible={false}
       left={
         <>
-          <DocumentTitle>Logic Pad</DocumentTitle>
           {topLeft}
           <div className="flex flex-col gap-2 justify-self-stretch flex-1 justify-center">
             <Metadata />

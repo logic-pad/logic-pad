@@ -1,4 +1,4 @@
-import { createContext, memo, use, useState } from 'react';
+import React, { createContext, memo, use, useState } from 'react';
 import { Position } from '@logic-pad/core/data/primitives';
 
 interface SolvePathContext {

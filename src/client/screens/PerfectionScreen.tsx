@@ -10,8 +10,7 @@ import { PartPlacement } from '../instructions/parts/types';
 import Metadata from '../metadata/Metadata';
 import { Mode, Position } from '@logic-pad/core/data/primitives';
 import ModeVariantLoader from '../router/ModeVariantLoader';
-import { lazy, memo, Suspense } from 'react';
-import DocumentTitle from '../components/DocumentTitle';
+import React, { lazy, memo, Suspense } from 'react';
 import PuzzleLoveButton from '../components/quickActions/PuzzleLoveButton';
 import PuzzleEditButton from '../components/quickActions/PuzzleEditButton';
 import PuzzleSolveControl from '../components/PuzzleSolveControl';
@@ -45,7 +44,6 @@ export default memo(function PerfectionScreen({
         collapsible={false}
         left={
           <>
-            <DocumentTitle>Logic Pad</DocumentTitle>
             {topLeft}
             <div className="flex flex-col gap-2 justify-self-stretch flex-1 justify-center">
               <Metadata />

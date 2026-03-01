@@ -20,11 +20,11 @@ export default memo(function OnlineMetadata() {
     <>
       <aside className="flex gap-2">
         <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
-          <FaCheckSquare className="inline-block me-2" />
+          <FaCheckSquare className="inline-block me-2" aria-hidden="true" />
           {pluralize(puzzle.data!.solveCount)`solve``solves`}
         </span>
         <span className="badge badge-ghost badge-lg p-4 bg-base-100 text-base-content border-0">
-          <FaHeart className="inline-block me-2" />
+          <FaHeart className="inline-block me-2" aria-hidden="true" />
           {pluralize(puzzle.data!.loveCount)`love``loves`}
         </span>
       </aside>

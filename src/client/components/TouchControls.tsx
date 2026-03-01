@@ -28,19 +28,19 @@ export default memo(function TouchControls() {
           step={0.2}
           value={Math.log2(scale)}
           onChange={e => setScale(2 ** Number(e.currentTarget.value))}
-          className="range m-2"
+          className="range w-full m-2"
         />
       </div>
       <div
         className="tooltip tooltip-left xl:tooltip-top flex tooltip-info h-10"
         data-tip="Toggle primary color"
       >
-        <label className="swap swap-flip text-2xl xl:text-lg h-fit xl:h-auto shadow-xl xl:shadow-sm">
+        <label className="swap swap-flip text-2xl xl:text-lg h-fit xl:h-auto shadow-xl xl:shadow-xs">
           <input type="checkbox" checked={inverted} onChange={onSwitch} />
-          <div className="swap-on bg-white text-black text-center flex justify-center items-center p-2 px-4 rounded-box w-24 h-24 xl:w-auto xl:h-auto">
+          <div className="swap-on bg-white text-black text-center flex justify-center items-center p-2 px-4 rounded-box w-24 h-24 xl:w-auto xl:h-10">
             W
           </div>
-          <div className="swap-off bg-black text-white text-center flex justify-center items-center p-2 px-4 rounded-box h-24 w-24 xl:w-auto xl:h-auto">
+          <div className="swap-off bg-black text-white text-center flex justify-center items-center p-2 px-4 rounded-box h-24 w-24 xl:w-auto xl:h-10">
             B
           </div>
         </label>

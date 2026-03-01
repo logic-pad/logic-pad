@@ -1,23 +1,22 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Suspense, lazy, memo, useEffect, useState } from 'react';
+import { Suspense, lazy, memo, useState } from 'react';
 import QuickAccessBar from '../components/QuickAccessBar';
 import Changelog from '../components/Changelog';
 import Loading from '../components/Loading';
-import GridData from '@logic-pad/core/data/grid';
-import GridConnections from '@logic-pad/core/data/gridConnections';
-import useLinkLoader from '../router/linkLoader';
 import PWAPrompt from '../components/PWAPrompt';
 import toast from 'react-hot-toast';
-import deferredRedirect from '../router/deferredRedirect';
 import FrontPageLists from '../online/FrontPageLists';
 import PersonalFrontPageLists from '../online/PersonalFrontPageLists';
 import { useOnline } from '../contexts/OnlineContext';
 import Footer from '../components/Footer';
-import { router } from '../router/router';
 import { api } from '../online/api';
+import NavigationSkip from '../components/NavigationSkip';
+import storedRedirect from '../router/storedRedirect';
+import { router } from '../router/router';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
+  const { GridData, GridConnections } = await import('@logic-pad/core');
 
   const grid = GridData.create([
     '.nwww',
@@ -54,7 +53,7 @@ const RandomPuzzle = memo(function RandomPuzzle() {
 
   return (
     <button
-      className="btn btn-ghost bg-base-100/10"
+      className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
       onClick={async () => {
         setLoading(true);
         try {
@@ -69,43 +68,22 @@ const RandomPuzzle = memo(function RandomPuzzle() {
         }
       }}
     >
-      I'm feeling lucky
+      I&apos;m feeling lucky
     </button>
   );
 });
 
+const ServerNote = lazy(() => import('../components/ServerNote'));
+
 export const Route = createFileRoute('/')({
   component: memo(function Home() {
+    const { isOnline, me, isPending } = useOnline();
     const navigate = useNavigate();
-    const { isOnline, me } = useOnline();
-    useLinkLoader('index', { cleanUrl: true, allowEmpty: true });
-    useEffect(() => {
-      let toastId: string | undefined;
-      void (async () => {
-        // this is likely due to OAuth errors
-        if ('error' in router.state.location.search) {
-          // display a toast and clear the search params
-          toastId = toast.error('An error occurred. Please try again.');
-          if (!(await deferredRedirect.execute())) {
-            void navigate({
-              to: '/',
-              search: {},
-              ignoreBlocker: true,
-            });
-          }
-        }
-      })();
-      return () => {
-        if (toastId) {
-          toast.dismiss(toastId);
-        }
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
     return (
       <>
         <main className="flex flex-col gap-4 items-stretch min-h-svh shrink-0">
           <div className="flex flex-col shrink-0">
+            <NavigationSkip />
             <PWAPrompt />
             <QuickAccessBar className="justify-end px-8 py-2" />
             <section className="flex flex-col xl:flex-row grow gap-32 items-center justify-center p-16 z-10">
@@ -118,14 +96,15 @@ export const Route = createFileRoute('/')({
               <div className="flex flex-wrap shrink-0 grow-0 justify-center gap-8">
                 <div className="relative w-32 h-32 inline-block">
                   <div className="absolute w-0 h-0 top-1/2 left-1/2 logo-glow fade-in-slow"></div>
-                  <img
-                    src="/logo.svg"
-                    className="absolute inset-0"
-                    alt="Logic Pad logo"
-                  />
+                  <div className="absolute inset-0 w-fit h-fit tooltip tooltip-bottom">
+                    <img src="/logo.svg" alt="Logic Pad logo" />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h1 className="text-accent text-4xl lg:text-6xl font-medium font-serif">
+                  <h1
+                    id="main-content"
+                    className="text-accent text-4xl lg:text-6xl font-medium font-serif"
+                  >
                     Logic Pad
                   </h1>
                   <span className="text-xl lg:text-2xl">
@@ -137,21 +116,21 @@ export const Route = createFileRoute('/')({
                       <Link
                         type="button"
                         to="/create"
-                        className="btn btn-md lg:btn-lg btn-accent"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent"
                       >
                         Create new puzzle
                       </Link>
                       <Link
                         type="button"
                         to="/search"
-                        className="btn btn-md lg:btn-lg btn-accent btn-outline"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent btn-outline"
                       >
                         Explore puzzles
                       </Link>
                       <Link
                         type="button"
                         to="/uploader"
-                        className="btn btn-ghost bg-base-100/10"
+                        className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
                       >
                         Bulk-import puzzles
                       </Link>
@@ -162,7 +141,7 @@ export const Route = createFileRoute('/')({
                       <Link
                         type="button"
                         to="/create"
-                        className="btn btn-md lg:btn-lg btn-accent"
+                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent"
                       >
                         Create new puzzle
                       </Link>
@@ -171,22 +150,39 @@ export const Route = createFileRoute('/')({
                       </div>
                     </div>
                   )}
+                  <ServerNote />
                   <Changelog />
                 </div>
               </div>
             </section>
           </div>
-          <section className="mt-8 px-8 pb-8 shrink-0 xl:px-32 flex flex-col gap-8 max-w-[calc(320px*4+3rem)] box-content self-center [&>*]:shrink-0">
-            {isOnline && (
-              <Suspense fallback={<Loading />}>
-                <FrontPageLists />
-              </Suspense>
-            )}
-            {isOnline && me && (
-              <Suspense fallback={<Loading />}>
+          <section className="mt-8 px-8 pb-8 shrink-0 xl:px-32 flex flex-col gap-8 max-w-[calc(320px*4+3rem)] box-content self-center *:shrink-0">
+            {isOnline && <FrontPageLists />}
+            {isOnline &&
+              (me ? (
                 <PersonalFrontPageLists />
-              </Suspense>
-            )}
+              ) : (
+                !isPending && (
+                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200/20 rounded-lg">
+                    <span className="text-center text-lg">
+                      Sign in to track your progress and upload your own puzzles
+                    </span>
+                    <button
+                      className="btn btn-accent btn-lg"
+                      onClick={() =>
+                        navigate({
+                          to: '/auth',
+                          search: {
+                            redirect: storedRedirect.set(router.state.location),
+                          },
+                        })
+                      }
+                    >
+                      Sign In / Sign Up
+                    </button>
+                  </div>
+                )
+              ))}
           </section>
         </main>
         <Footer />

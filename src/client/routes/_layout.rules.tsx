@@ -13,4 +13,11 @@ export const Route = createFileRoute('/_layout/rules')({
       </ResponsiveLayout>
     );
   }),
+  head: () => ({
+    meta: [
+      {
+        title: `Rules - Logic Pad`,
+      },
+    ],
+  }),
 });

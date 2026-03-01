@@ -18,8 +18,18 @@ export default memo(function AreaNumberSymbol({
         textClass
       )}
     >
-      <span className={cn('absolute m-auto text-[0.75em]', textClass)}>
+      <span
+        className={cn(
+          'absolute m-auto',
+          textClass,
+          String(symbol.number).length >= 3 ? 'text-[0.55em]' : 'text-[0.75em]'
+        )}
+        aria-hidden="true"
+      >
         {symbol.number}
+      </span>
+      <span className="sr-only">
+        {`Area number ${symbol.number} at (${symbol.x}, ${symbol.y})`}
       </span>
     </div>
   );

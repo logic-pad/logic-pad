@@ -4,6 +4,7 @@ import Configurable from '@logic-pad/core/data/configurable';
 import Autocomplete from '../../components/Autocomplete';
 import { FaTrashCan } from 'react-icons/fa6';
 import ConfigItem from './ConfigItem';
+import { Instrument } from '@logic-pad/core/data/primitives';
 
 export interface NullableNoteConfigProps {
   configurable: Configurable;
@@ -14,7 +15,7 @@ export interface NullableNoteConfigProps {
 const letters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const accidentals = ['bb', 'b', '', '#', 'x'];
 const octaves = [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-const noteNames: string[] = [
+const drumSamples: string[] = [
   'hihat',
   'hihat-open',
   'kick',
@@ -22,13 +23,15 @@ const noteNames: string[] = [
   'crash',
   'tom',
 ];
+const pitches: string[] = [];
 letters.forEach(letter => {
   accidentals.forEach(accidental => {
     octaves.forEach(octave => {
-      noteNames.push(`${letter}${accidental}${octave}`);
+      pitches.push(`${letter}${accidental}${octave}`);
     });
   });
 });
+export const noteNames = [...pitches, ...drumSamples];
 
 // million-ignore
 export default memo(function NullableNoteConfig({
@@ -39,6 +42,15 @@ export default memo(function NullableNoteConfig({
   const value = configurable[
     config.field as keyof typeof configurable
   ] as unknown as string | null;
+
+  // dirty check for more accurate autocomplete options
+  const instrument =
+    'instrument' in configurable &&
+    !!configurable.instrument &&
+    typeof configurable.instrument === 'string'
+      ? (configurable.instrument as Instrument)
+      : null;
+
   return (
     <ConfigItem config={config}>
       {value === null ? (
@@ -70,7 +82,14 @@ export default memo(function NullableNoteConfig({
           </div>
           <Autocomplete
             className="grow"
-            items={noteNames}
+            items={
+              instrument === Instrument.Drum
+                ? drumSamples
+                : instrument
+                  ? pitches
+                  : noteNames
+            }
+            all={true}
             value={value}
             onChange={e => {
               setConfig?.(config.field, e);

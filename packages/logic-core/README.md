@@ -8,7 +8,7 @@ This package is part of Logic Pad. [Bun >=v1.1.0](https://bun.sh/) is required f
 
 ```bash
 # 1. Clone this repository
-git clone https://github.com/hlysine/logic-pad.git
+git clone https://github.com/logic-pad/logic-pad.git
 
 # 2. Restore dependencies
 cd logic-pad

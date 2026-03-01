@@ -143,7 +143,7 @@ export default memo(function ConfigPopup() {
       if (!line) return;
       const newLine = line.copyWith({
         rows: line.rows.map((row, i) =>
-          i === location.row ? new Row(null, null) : row
+          i === location.row ? new Row(null, null, null) : row
         ),
       });
       if (newLine.isEmpty) {
@@ -190,7 +190,7 @@ export default memo(function ConfigPopup() {
     const handleClick = (e: PointerEvent) => {
       if (
         !popupRef.current?.contains(e.target as Node) &&
-        !(ref?.current && containsPoint(ref.current, e.clientX, e.clientY))
+        !(!ref?.current || containsPoint(ref.current, e.clientX, e.clientY))
       ) {
         const symbolOverlay =
           document.querySelector<HTMLElement>('.symbol-overlay');
@@ -321,7 +321,7 @@ export default memo(function ConfigPopup() {
         {(configurable instanceof Rule || configurable instanceof Symbol) && (
           <SupportLevel
             validate={!configurable.validateWithSolution}
-            solve={solver?.isInstructionSupported(configurable.id)}
+            solve={solver?.isInstructionSupported(grid, configurable)}
           />
         )}
         <div className="flex-1" />
@@ -330,18 +330,18 @@ export default memo(function ConfigPopup() {
             <button
               type="button"
               tabIndex={0}
-              className="btn btn-outline btn-info"
+              className="btn btn-sm btn-outline btn-info"
             >
               Add to presets
             </button>
             <div
               tabIndex={0}
-              className="dropdown-content z-[1] p-2 shadow-lg bg-base-200 text-base-content rounded-box w-72 flex gap-2 mb-2"
+              className="dropdown-content not-[.dropdown:focus-within_&]:pointer-events-none z-1 p-2 shadow-lg bg-base-200 text-base-content rounded-box w-72 flex gap-2 mb-2"
             >
               <input
                 type="text"
                 placeholder="Preset name"
-                className="input input-bordered input-sm w-full"
+                className="input input-sm w-full"
                 value={presetName}
                 onChange={e => setPresetName(e.target.value)}
               />
@@ -370,7 +370,7 @@ export default memo(function ConfigPopup() {
         >
           <button
             type="button"
-            className="btn btn-outline btn-error"
+            className="btn btn-sm btn-outline btn-error"
             onClick={deleteSymbol}
           >
             Delete

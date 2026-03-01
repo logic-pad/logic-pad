@@ -70,7 +70,7 @@ export default memo(function GridZoneOverlay({ grid }: GridZoneOverlay) {
       width={width}
       height={height}
       bleed={BLEED}
-      onResize={size => setTileSize(size)}
+      onResize={setTileSize}
     ></GridCanvasOverlay>
   );
 });

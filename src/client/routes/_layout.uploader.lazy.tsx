@@ -3,25 +3,28 @@ import { memo, RefObject, useMemo, useRef, useSyncExternalStore } from 'react';
 import { useRouteProtection } from '../router/useRouteProtection';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import { FaExternalLinkAlt, FaTrash, FaUpload } from 'react-icons/fa';
-import {
-  allSolvers,
-  Compressor,
-  GridData,
-  Serializer,
-  validateGrid,
-  validatePuzzleChecklist,
-} from '@logic-pad/core/index';
 import PQueue from 'p-queue';
+import { r } from 'readable-regexp';
 import Loading from '../components/Loading';
 import Difficulty from '../metadata/Difficulty';
 import PuzzleEditorModal, {
   PuzzleEditorRef,
 } from '../editor/PuzzleEditorModal';
-import { Puzzle, PuzzleMetadata } from '@logic-pad/core/data/puzzle';
+import {
+  Puzzle,
+  PuzzleMetadata,
+  validatePuzzleChecklist,
+} from '@logic-pad/core/data/puzzle';
 import { cn } from '../uiHelper';
 import toast from 'react-hot-toast';
 import { useOnline } from '../contexts/OnlineContext';
 import { api } from '../online/api';
+import { allSolvers } from '@logic-pad/core/data/solver/allSolvers';
+import GridData from '@logic-pad/core/data/grid';
+import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
+import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
+import validateGrid from '@logic-pad/core/data/validate';
+import { ResourceStatus } from '../online/data';
 
 const defaultSolver = [...allSolvers.values()][0];
 
@@ -96,7 +99,18 @@ function getErrorMessage(checklistItem: string) {
   }
 }
 
-const linkRegex = /https?:\/\/[\w\-.]+\/\w+\?(?:[\w=&])*d=([\w_%-]+)/gm;
+const linkRegex = r
+  .match(
+    r.exactly`http`.maybe`s`.exactly`://`,
+    r.oneOrMore.charIn('-.', r.word),
+    r.exactly`/`,
+    r.oneOrMore.word,
+    r.exactly`?`,
+    r.zeroOrMore.charIn('=&', r.word),
+    r.exactly`d=`,
+    r.capture.oneOrMore.charIn('_%-', r.word)
+  )
+  .toRegExp('gm');
 
 class UploadManager {
   private uploads: readonly UploadEntry[] = [];
@@ -322,7 +336,10 @@ class UploadManager {
                 puzzleData
               );
               try {
-                return await api.publishPuzzle(result.id);
+                return await api.publishPuzzle(
+                  result.id,
+                  ResourceStatus.Public
+                );
               } catch (_) {
                 await api.deletePuzzle(result.id);
               }
@@ -810,7 +827,7 @@ export const Route = createLazyFileRoute('/_layout/uploader')({
     return (
       <ResponsiveLayout>
         <div className="text-3xl mt-4">
-          <FaUpload className="inline-block me-4" />
+          <FaUpload className="inline-block me-4" aria-hidden="true" />
           Puzzle uploader
         </div>
         <div>
@@ -838,7 +855,7 @@ export const Route = createLazyFileRoute('/_layout/uploader')({
         <textarea
           ref={textareaRef}
           placeholder="Paste puzzle links here"
-          className="textarea textarea-bordered bg-base-100 text-base-content whitespace-pre font-mono h-48"
+          className="textarea w-full bg-base-100 text-base-content whitespace-pre font-mono h-48"
         ></textarea>
         <button
           className="btn btn-primary"

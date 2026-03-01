@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { createContext, memo, use, useEffect, useMemo } from 'react';
+import React, { createContext, memo, use, useEffect, useMemo } from 'react';
 import { api } from '../online/api';
 import { MeBrief } from '../online/data';
 import { useSettings } from './SettingsContext';
 import semverSatisfies from 'semver/functions/satisfies';
 import toast from 'react-hot-toast';
 import { cleanReload } from '../components/settings/ResetSite';
-import deferredRedirect from '../router/deferredRedirect';
+import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
 
 const defaultOnline = true;
-const apiVersionRange = '8.x';
+const apiVersionRange = '20.x';
 
 export interface OnlineContext {
   /**
@@ -93,7 +93,7 @@ export default memo(function OnlineContext({
           `Version mismatch ${onlineQuery.data!.version} != ${apiVersionRange} - max reloads reached`
         );
         const toastId = toast.error(
-          'This version is out of date, but automatically updates have failed.'
+          'This version is out of date. Please refresh the page or try again later.'
         );
         return () => {
           toast.dismiss(toastId);
@@ -110,9 +110,9 @@ export default memo(function OnlineContext({
           console.warn(
             `Version mismatch ${onlineQuery.data!.version} != ${apiVersionRange} - redirect set to ${router.state.location.href}`
           );
-          deferredRedirect.set(router.state.location);
+          storedRedirect.set(router.state.location);
         }
-        cleanReload();
+        void cleanReload();
       }
     } else if (onlineQuery.data && onlineResult.isOnline) {
       console.info(
@@ -120,7 +120,7 @@ export default memo(function OnlineContext({
       );
       if (sessionStorage.getItem('versionMismatchReload')) {
         sessionStorage.removeItem('versionMismatchReload');
-        deferredRedirect.execute();
+        void storedRedirect.execute();
       }
     }
   }, [onlineResult.versionMismatch, onlineQuery.data, onlineResult.isOnline]);

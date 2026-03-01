@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import InstructionData from '@logic-pad/core/data/instruction';
 import { State } from '@logic-pad/core/data/primitives';
 import { cn } from '../../client/uiHelper.ts';
@@ -25,11 +25,9 @@ export interface InstructionProps {
 function instructionBg(state: State) {
   switch (state) {
     case State.Satisfied:
-      return cn(
-        'bg-gradient-to-r from-success/50 via-primary/10 to-primary/10'
-      );
+      return cn('bg-linear-to-r from-success/50 via-primary/10 to-primary/10');
     case State.Error:
-      return cn('bg-gradient-to-r from-error/50 via-primary/10 to-primary/10');
+      return cn('bg-linear-to-r from-error/50 via-primary/10 to-primary/10');
     default:
       return cn('bg-primary/10');
   }
@@ -145,7 +143,7 @@ export default memo(function Instruction({
         </div>
         {children}
       </div>
-      <div className="h-[1px] bg-accent"></div>
+      <div className="h-px bg-accent"></div>
     </div>
   );
 });

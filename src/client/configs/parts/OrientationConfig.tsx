@@ -31,7 +31,7 @@ const OrientationRadio = memo(function OrientationRadio({
       <input
         type="radio"
         name="radio-orientation"
-        className="absolute inset-0 appearance-none rounded checked:shadow-glow-md checked:shadow-accent checked:border-2 checked:border-accent"
+        className="absolute inset-0 appearance-none rounded-sm checked:shadow-glow-md checked:shadow-accent checked:border-2 checked:border-accent"
         value={orientation}
         checked={value === orientation}
         onChange={e => {

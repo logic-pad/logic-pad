@@ -35,50 +35,48 @@ const NewCollectionModal = memo(function NewCollectionModal() {
     <dialog id="newCollectionModal" className="modal">
       <div className="modal-box text-base-content flex flex-col gap-4 items-stretch">
         <h3 className="font-bold text-xl">Create new collection</h3>
-        <label className="form-control w-full">
-          <div className="label">
-            <span className="label-text">Title</span>
-            <span className="label-text-alt">{title.length}/100</span>
-          </div>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Title</legend>
           <input
             type="text"
             placeholder="Collection title"
-            className="input input-bordered w-full"
+            className="input w-full"
             autoFocus
             maxLength={100}
             value={title}
             onChange={e => setTitle(e.target.value)}
           />
-        </label>
-        <label className="form-control">
-          <div className="label">
-            <span className="label-text">Description</span>
-            <span className="label-text-alt">{description.length}/500</span>
-          </div>
+          <p className="label">{title.length}/100</p>
+        </fieldset>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Description</legend>
           <textarea
-            className="textarea textarea-bordered h-24"
+            className="textarea h-24 w-full"
             placeholder="Optional"
             value={description}
             onChange={e => setDescription(e.target.value)}
           ></textarea>
-        </label>
-        <div className="form-control">
-          <label className="label cursor-pointer gap-4">
-            <div className="flex flex-col">
-              <span className="label-text">This is a puzzle series</span>
-              <span className="label-text opacity-80">
+          <div className="label">{description.length}/500</div>
+        </fieldset>
+        <fieldset className="fieldset">
+          <label className="label cursor-pointer gap-12">
+            <div className="flex flex-col grow">
+              <span className="whitespace-normal text-base-content">
+                This is a puzzle series
+              </span>
+              <span className="whitespace-normal">
                 A puzzle series contains puzzles made by you which should be
                 solved in order
               </span>
             </div>
             <input
               type="checkbox"
-              className="toggle"
+              className="toggle shrink-0"
               checked={isSeries}
               onChange={e => setIsSeries(e.target.checked)}
             />
           </label>
-        </div>
+        </fieldset>
         {createCollection.isPending ? (
           <Loading />
         ) : (

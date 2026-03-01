@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import { RouterProvider } from '@tanstack/react-router';
 import { themeKey } from './contexts/ThemeContext.tsx';
 import { cleanReload } from './components/settings/ResetSite.tsx';
@@ -11,21 +10,11 @@ import { queryClient } from './online/api.ts';
 import { useSettings } from './contexts/SettingsContext.tsx';
 import { router } from './router/router.tsx';
 
-import('@sentry/react').then(Sentry => {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN as string,
-    tunnel: (import.meta.env.VITE_API_ENDPOINT as string) + '/sentry',
-    release: import.meta.env.VITE_PACKAGE_VERSION,
-  });
-});
-
 // load the selected theme early to avoid flicker
 const savedTheme = localStorage.getItem(themeKey) ?? 'dark';
 document.documentElement.dataset.theme = savedTheme;
 
-const redirectDomains = (
-  import.meta.env.VITE_LEGACY_URL as string | undefined
-)?.split(',');
+const redirectDomains = import.meta.env.VITE_LEGACY_URL?.split(',');
 
 function Redirector() {
   if (redirectDomains?.includes(window.location.host)) {
@@ -85,7 +74,6 @@ ReactDOM.createRoot(document.getElementById('app')!).render(
           >
             {/* For canvas components to retrieve this color */}
           </div>
-          <SpeedInsights />
           <RouterProvider router={router} />
         </>
       </OnlineContext>

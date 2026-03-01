@@ -2,13 +2,15 @@ import GridData from '../../grid.js';
 import { Color, State } from '../../primitives.js';
 import { instance as lyingSymbolInstance } from '../../rules/lyingSymbolRule.js';
 import { instance as offByXInstance } from '../../rules/offByXRule.js';
-import { instance as lotusInstance } from '../../symbols/lotusSymbol.js';
-import { instance as galaxyInstance } from '../../symbols/galaxySymbol.js';
 import { instance as wrapAroundInstance } from '../../rules/wrapAroundRule.js';
+import { instance as areaNumberInstance } from '../../symbols/areaNumberSymbol.js';
+import { instance as letterInstance } from '../../symbols/letterSymbol.js';
 import { allSolvers } from '../allSolvers.js';
 import Solver from '../solver.js';
 import UndercluedRule from '../../rules/undercluedRule.js';
 import validateGrid from '../../validate.js';
+import Instruction from '../../instruction.js';
+import UnsupportedSymbol from '../../symbols/unsupportedSymbol.js';
 
 export default class AutoSolver extends Solver {
   public readonly id = 'auto';
@@ -36,10 +38,13 @@ export default class AutoSolver extends Solver {
     return false;
   }
 
-  public isInstructionSupported(instructionId: string): boolean {
+  public isInstructionSupported(
+    grid: GridData,
+    instruction: Instruction
+  ): boolean {
     for (const solver of allSolvers.values()) {
       if (solver.id === this.id) continue;
-      if (solver.isInstructionSupported(instructionId)) {
+      if (solver.isInstructionSupported(grid, instruction)) {
         return true;
       }
     }
@@ -98,7 +103,6 @@ export default class AutoSolver extends Solver {
   private async solveOne(
     generator: AsyncGenerator<GridData | null>
   ): Promise<GridData | null> {
-    // eslint-disable-next-line no-unreachable-loop
     for await (const grid of generator) {
       return grid;
     }
@@ -137,25 +141,31 @@ export default class AutoSolver extends Solver {
           yield* solver.solve(grid, abortSignal);
           return;
         } else {
-          let undercluedGrid = progressGrid
+          const undercluedGrid = progressGrid
             .withRules(rules =>
-              rules.filter(r => solver.isInstructionSupported(r.id))
+              rules.filter(r => solver.isInstructionSupported(progressGrid, r))
             )
             .withSymbols(symbols => {
-              for (const id of symbols.keys()) {
-                if (!solver.isInstructionSupported(id)) symbols.delete(id);
+              for (const [id, symbolList] of symbols.entries()) {
+                symbols.set(
+                  id,
+                  symbolList.map(symbol => {
+                    // special handling: do not delete area number and letter symbols as they can be solved
+                    // underclued even if the solver doesn't fully support them
+                    if (
+                      symbol.id === areaNumberInstance.id ||
+                      symbol.id === letterInstance.id
+                    )
+                      return symbol;
+                    if (solver.isInstructionSupported(progressGrid, symbol))
+                      return symbol;
+                    return new UnsupportedSymbol(symbol.x, symbol.y);
+                  })
+                );
               }
               return symbols;
             })
             .addRule(new UndercluedRule());
-          if (!solver.isGridSupported(undercluedGrid)) {
-            // special case for solvers that support lotus and galaxy symbols but not dual-color placement
-            undercluedGrid = undercluedGrid.withSymbols(symbols => {
-              symbols.delete(lotusInstance.id);
-              symbols.delete(galaxyInstance.id);
-              return symbols;
-            });
-          }
           if (!solver.isGridSupported(undercluedGrid)) continue;
           const undercluedSolution = await this.solveOne(
             this.solveWithProgress(

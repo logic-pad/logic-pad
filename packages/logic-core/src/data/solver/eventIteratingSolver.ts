@@ -24,12 +24,17 @@ export default abstract class EventIteratingSolver extends Solver {
   ): AsyncGenerator<GridData | null> {
     const worker = this.createWorker();
 
-    const terminateHandler = () => worker.terminate();
-    abortSignal?.addEventListener('abort', terminateHandler);
+    let terminateHandler: (() => void) | undefined;
 
     try {
       const iterator = new EventIterator<GridData | null>(
         ({ push, stop, fail }) => {
+          terminateHandler = () => {
+            worker.terminate();
+            stop();
+          };
+          abortSignal?.addEventListener('abort', terminateHandler);
+
           worker.postMessage(Serializer.stringifyGrid(grid.resetTiles()));
 
           worker.addEventListener(
@@ -58,7 +63,8 @@ export default abstract class EventIteratingSolver extends Solver {
       }
     } finally {
       worker.terminate();
-      abortSignal?.removeEventListener('abort', terminateHandler);
+      if (terminateHandler)
+        abortSignal?.removeEventListener('abort', terminateHandler);
     }
   }
 }

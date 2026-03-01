@@ -8,12 +8,13 @@ export default memo(function KeyboardLayoutDropdown() {
       className="tooltip tooltip-info tooltip-bottom"
       data-tip="Select your keyboard layout for hotkeys"
     >
-      <div className="form-control">
-        <label className="label cursor-pointer">
+      <fieldset className="fieldset">
+        <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Keyboard Layout</span>
           <select
-            className="select select-bordered"
+            className="select select-md w-fit select-bordered"
             value={keyboardLayout}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             onChange={e => setKeyboardLayout(e.currentTarget.value as any)}
           >
             <option value="qwerty">Qwerty</option>
@@ -22,7 +23,7 @@ export default memo(function KeyboardLayoutDropdown() {
             <option value="colemak">Colemak</option>
           </select>
         </label>
-      </div>
+      </fieldset>
     </div>
   );
 });

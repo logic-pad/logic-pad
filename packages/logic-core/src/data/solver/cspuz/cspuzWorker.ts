@@ -29,11 +29,7 @@ function postSolution(grid: GridData, solverResult: SolverResult) {
       }
       return tiles;
     });
-    if (solution.resetTiles().colorEquals(solution)) {
-      postMessage(null);
-    } else {
-      postMessage(Serializer.stringifyGrid(solution));
-    }
+    postMessage(Serializer.stringifyGrid(solution));
   }
 }
 

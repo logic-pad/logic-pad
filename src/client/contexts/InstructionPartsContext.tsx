@@ -1,4 +1,4 @@
-import { ReactNode, createContext, memo, use, useState } from 'react';
+import React, { ReactNode, createContext, memo, use, useState } from 'react';
 import { PartPlacement } from '../instructions/parts/types';
 
 interface InstructionPartsContext {

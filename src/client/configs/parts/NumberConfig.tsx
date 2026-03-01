@@ -27,6 +27,7 @@ export default memo(function NumberConfig({
         min={config.min}
         max={config.max}
         step={config.step ?? 1}
+        onFocus={e => e.target.select()}
         onChange={e => {
           if (config.step === 1)
             setConfig?.(config.field, Math.floor(Number(e.target.value)));

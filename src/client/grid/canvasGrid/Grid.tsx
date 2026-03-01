@@ -7,6 +7,7 @@ import { useTheme } from '../../contexts/ThemeContext.tsx';
 import { ColorInfo, clearTile, renderTile } from './tile';
 import GridData from '@logic-pad/core/data/grid';
 import TileConnections from '@logic-pad/core/data/tileConnections';
+import { useMaxCanvasSize } from '../canvasHelper.ts';
 
 interface GridRenderData {
   grid: GridData;
@@ -24,6 +25,8 @@ export default memo(function Grid({
   children,
   className,
 }: GridProps) {
+  const maxSize = useMaxCanvasSize();
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasCtx = useRef<CanvasRenderingContext2D | null>(null);
   const prevData = useRef<GridRenderData | null>(null);
@@ -62,9 +65,20 @@ export default memo(function Grid({
     [theme]
   );
 
+  const scale = useMemo(() => {
+    if (grid.width * size <= maxSize && grid.height * size <= maxSize) {
+      return 1;
+    }
+    return Math.min(
+      maxSize / (grid.width * size),
+      maxSize / (grid.height * size)
+    );
+  }, [grid.width, grid.height, size, maxSize]);
+
   useEffect(() => {
     canvasCtx.current ??= canvasRef.current?.getContext('2d') ?? null;
     if (!canvasCtx.current) return;
+    const renderSize = size * scale;
     const ctx = canvasCtx.current;
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
@@ -72,34 +86,69 @@ export default memo(function Grid({
         const oldTile = prevData.current?.grid.getTile(x, y);
         if (
           prevData.current?.colorInfo === colorInfo &&
-          prevData.current?.size === size &&
+          prevData.current?.size === renderSize &&
           prevData.current?.grid.width === grid.width &&
           prevData.current?.grid.height === grid.height &&
           oldTile?.equals(tile) &&
           prevData.current?.connections[y]?.[x]?.equals(tileConnections[y][x])
         )
           continue;
-        clearTile(ctx, x, y, size);
+        clearTile(ctx, x, y, renderSize);
         if (!tile.exists) continue;
-        renderTile(ctx, x, y, size, tile, tileConnections[y][x], colorInfo);
+        renderTile(
+          ctx,
+          x,
+          y,
+          renderSize,
+          tile,
+          tileConnections[y][x],
+          colorInfo
+        );
       }
     }
     prevData.current = {
       grid,
       connections: tileConnections,
-      size,
+      size: renderSize,
       colorInfo,
     };
-  }, [grid, size, canvasCtx, colorInfo, tileConnections]);
+  }, [grid, size, canvasCtx, colorInfo, tileConnections, scale]);
 
   return (
-    <div className={cn('relative', className)} style={containerStyle}>
+    <div
+      className={cn('relative select-none', className)}
+      style={containerStyle}
+    >
       <canvas
         ref={canvasRef}
-        width={grid.width * size}
-        height={grid.height * size}
+        width={grid.width * size * scale}
+        height={grid.height * size * scale}
+        style={useMemo(
+          () => ({
+            transformOrigin: 'top left',
+            transform: `scale(${1 / scale})`,
+          }),
+          [scale]
+        )}
         className="absolute inset-0"
-      />
+      >
+        {`Grid with ${grid.width} by ${grid.height} tiles.`}
+        {grid.tiles
+          .map(
+            (row, line) =>
+              `Row ${line + 1}: ${row
+                .map(tile => {
+                  if (!tile.exists) return 'empty';
+                  if (tile.fixed) {
+                    return tile.color.toUpperCase();
+                  } else {
+                    return tile.color.toLowerCase();
+                  }
+                })
+                .join(' ')}`
+          )
+          .join('\n')}
+      </canvas>
       <PointerCaptureOverlay
         width={grid.width}
         height={grid.height}

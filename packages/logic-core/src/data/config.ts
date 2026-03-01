@@ -5,6 +5,7 @@ import {
   DIRECTIONS,
   Direction,
   DirectionToggle,
+  Instrument,
   ORIENTATIONS,
   Orientation,
   OrientationToggle,
@@ -34,6 +35,7 @@ export enum ConfigType {
   Icon = 'icon',
   ControlLines = 'controlLines',
   NullableNote = 'nullableNote',
+  NullableInstrument = 'nullableInstrument',
   SolvePath = 'solvePath',
 }
 
@@ -134,6 +136,10 @@ export interface NullableNoteConfig extends Config<string | null> {
   readonly type: ConfigType.NullableNote;
 }
 
+export interface NullableInstrumentConfig extends Config<Instrument | null> {
+  readonly type: ConfigType.NullableInstrument;
+}
+
 export interface SolvePathConfig extends Config<Position[]> {
   readonly type: ConfigType.SolvePath;
 }
@@ -158,6 +164,7 @@ export type AnyConfig =
   | IconConfig
   | ControlLinesConfig
   | NullableNoteConfig
+  | NullableInstrumentConfig
   | SolvePathConfig;
 
 /**

@@ -1,3 +1,5 @@
+@reference "../index.css";
+
 .glow {
   box-shadow: 0px 0px 200px 200px oklch(var(--a));
 }

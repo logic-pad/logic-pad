@@ -1,3 +1,4 @@
+import React from 'react';
 import { AnyConfig, ConfigType } from '@logic-pad/core/data/config';
 import Configurable from '@logic-pad/core/data/configurable';
 

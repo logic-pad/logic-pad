@@ -4,7 +4,7 @@ import { memo, useEffect, useState } from 'react';
 import { defaultGrid, useGrid } from '../contexts/GridContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
-import { SolutionHandling } from './linkLoader';
+import { SolutionHandling } from './linkLoaderValidator';
 
 export default memo(function ExitBlocker() {
   const [enableExitConfirmation] = useSettings('enableExitConfirmation');

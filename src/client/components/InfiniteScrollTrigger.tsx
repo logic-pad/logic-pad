@@ -19,7 +19,8 @@ export default memo(function InfiniteScrollTrigger({
   useEffect(() => {
     if (!onLoadMore) return;
     if (!autoTrigger) return;
-    if (!buttonRef.current) return;
+    const currentButton = buttonRef.current;
+    if (!currentButton) return;
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
@@ -27,21 +28,21 @@ export default memo(function InfiniteScrollTrigger({
         }
       },
       {
-        root: buttonRef.current.closest('.infinite-scroll'),
+        root: currentButton.closest('.infinite-scroll'),
         rootMargin: '0px',
         threshold: 1.0,
       }
     );
-    if (buttonRef.current) {
-      observer.observe(buttonRef.current);
+    if (currentButton) {
+      observer.observe(currentButton);
     }
     return () => {
-      if (buttonRef.current) {
-        observer.unobserve(buttonRef.current);
+      if (currentButton) {
+        observer.unobserve(currentButton);
         observer.disconnect();
       }
     };
-  }, [onLoadMore]);
+  }, [onLoadMore, autoTrigger]);
   if (!onLoadMore) return null;
   return (
     <button

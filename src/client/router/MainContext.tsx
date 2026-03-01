@@ -1,5 +1,5 @@
 import { Puzzle } from '@logic-pad/core/data/puzzle';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import DisplayContext from '../contexts/DisplayContext';
 import EditContext from '../contexts/EditContext';
 import EmbedContext from '../contexts/EmbedContext';

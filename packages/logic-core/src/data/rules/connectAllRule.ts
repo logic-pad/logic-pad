@@ -68,22 +68,23 @@ export default class ConnectAllRule extends Rule {
     const visited = array(
       grid.width,
       grid.height,
-      (i, j) =>
-        !(grid.getTile(i, j).exists && grid.getTile(i, j).color === this.color)
+      (i, j) => !grid.getTile(i, j).exists
     );
     const islands: Position[][] = [];
     while (true) {
-      const seed = grid.find((_tile, x, y) => !visited[y][x]);
+      const seed = grid.find(
+        (tile, x, y) => !visited[y][x] && tile.color === this.color
+      );
       if (!seed) break;
       const positions: Position[] = [];
       grid.iterateArea(
         seed,
         tile => tile.color === this.color || tile.color === Color.Gray,
         (tile, x, y) => {
-          visited[y][x] = true;
           if (tile.color === Color.Gray) complete = false;
           positions.push({ x, y });
-        }
+        },
+        visited
       );
       islands.push(positions);
     }

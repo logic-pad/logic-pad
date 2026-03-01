@@ -1,4 +1,4 @@
-import { memo, useId } from 'react';
+import React, { memo, useId } from 'react';
 import './threePaneLayout.css';
 import { IoMenu } from 'react-icons/io5';
 
@@ -44,11 +44,11 @@ const CollapsibleThreePaneLayout = memo(function CollapsibleThreePaneLayout({
           </div>
         </div>
       </div>
-      <div className="drawer-side !overflow-x-visible !overflow-y-visible z-20 h-full w-full">
+      <div className="drawer-side visible! opacity-100! overflow-x-visible! overflow-y-visible! z-20 h-full w-full">
         <label
           htmlFor={`three-pane-${id}`}
           aria-label="close sidebar"
-          className="drawer-overlay"
+          className="drawer-overlay not-[:checked~.drawer-side>&]:opacity-0! not-[:checked~.drawer-side>&]:pointer-events-none transition-opacity"
         ></label>
         <div className="h-full w-full pointer-events-none">
           <div className="h-full w-[320px] max-w-full shrink-0 grow-0 flex flex-col p-4 gap-4 bg-neutral text-neutral-content self-stretch justify-between pointer-events-auto">

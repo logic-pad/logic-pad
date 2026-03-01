@@ -1,6 +1,6 @@
 import { useMonaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
-import { createContext, memo, use, useEffect, useState } from 'react';
+import React, { createContext, memo, use, useEffect, useState } from 'react';
 
 export const themeKey = 'theme';
 
@@ -19,6 +19,7 @@ export const SUPPORTED_THEMES = [
   ['garden', 'vs'],
   ['forest', 'hc-black'],
   ['aqua', 'Tomorrow-Night-Blue'],
+  ['sky', 'Tomorrow-Night-Blue'],
   ['lofi', 'hc-black'],
   ['pastel', 'GitHub'],
   ['fantasy', 'vs-dark'],

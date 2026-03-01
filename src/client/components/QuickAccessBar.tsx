@@ -16,7 +16,7 @@ export default memo(function QuickAccessBar({
   className,
 }: QuickAccessBarProps) {
   return (
-    <nav className={cn('flex items-center gap-1 [&>*]:shrink-0', className)}>
+    <nav className={cn('flex items-center gap-1 *:shrink-0', className)}>
       <Suspense fallback={<Loading className="w-24" />}>
         <ThemeSwitcher />
       </Suspense>

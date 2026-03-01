@@ -2,10 +2,10 @@ import { queryOptions, useQuery, useMutation } from '@tanstack/react-query';
 import { memo } from 'react';
 import toast from 'react-hot-toast';
 import { FaPlus } from 'react-icons/fa';
-import Loading from '../components/Loading';
 import { useOnline } from '../contexts/OnlineContext';
 import { api, queryClient } from './api';
 import { RiUserFollowFill } from 'react-icons/ri';
+import Skeleton from '../components/Skeleton';
 
 const collectionFollowQueryOptions = (collectionId: string, enabled: boolean) =>
   queryOptions({
@@ -65,7 +65,7 @@ export default memo(function CollectionFollowButton({
   });
 
   if (!isOnline || !me || collectionFollow.error) return null;
-  if (collectionFollow.isPending) return <Loading className="w-14" />;
+  if (collectionFollow.isPending) return <Skeleton className="h-10 w-28" />;
   return (
     <button
       className="tooltip tooltip-info tooltip-top btn btn-md btn-primary flex items-center w-fit focus:z-50"

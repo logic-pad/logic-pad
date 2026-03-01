@@ -1,4 +1,4 @@
-import { createContext, memo, use, useState } from 'react';
+import React, { createContext, memo, use, useState } from 'react';
 import Solver from '@logic-pad/core/data/solver/solver';
 
 interface SolverContext {

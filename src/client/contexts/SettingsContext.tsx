@@ -3,17 +3,19 @@ import { externalReducedMotion } from '../uiHelper';
 import { z } from 'zod';
 
 export const SiteSettingsSchema = z.object({
-  enableFancyAnimations: z.boolean().default(true),
-  enableExitConfirmation: z.boolean().default(true),
-  flipPrimaryMouseButton: z.boolean().default(false),
-  visualizeWrapArounds: z.boolean().default(true),
-  showMoreTools: z.boolean().default(false),
-  offlineMode: z.boolean().default(false),
-  sansSerifFont: z.boolean().default(false),
-  runEditorTour: z.boolean().default(true),
+  enableFancyAnimations: z.boolean().default(true).catch(true),
+  enableExitConfirmation: z.boolean().default(true).catch(true),
+  flipPrimaryMouseButton: z.boolean().default(false).catch(false),
+  visualizeWrapArounds: z.boolean().default(true).catch(true),
+  showMoreTools: z.boolean().default(false).catch(false),
+  offlineMode: z.boolean().default(false).catch(false),
+  sansSerifFont: z.boolean().default(false).catch(false),
+  runEditorTour: z.boolean().default(true).catch(true),
   keyboardLayout: z
     .enum(['qwerty', 'azerty', 'dvorak', 'colemak'])
-    .default('qwerty'),
+    .default('qwerty')
+    .catch('qwerty'),
+  sfxVolume: z.number().min(0).max(2).default(1).catch(1),
 });
 
 export type SiteSettings = z.infer<typeof SiteSettingsSchema>;

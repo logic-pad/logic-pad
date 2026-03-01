@@ -5,7 +5,6 @@ import Markdown from '../components/Markdown';
 import { cn, toRelativeDate } from '../uiHelper.ts';
 import UserCard from './UserCard.tsx';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
-import DocumentTitle from '../components/DocumentTitle.tsx';
 
 export interface MetadataProps {
   simplified?: boolean;
@@ -23,16 +22,19 @@ export default memo(function Metadata({
 
   return (
     <section className="flex flex-col gap-4 text-neutral-content">
-      <DocumentTitle>{metadata.title} - Logic Pad</DocumentTitle>
       <div
         className="tooltip tooltip-info tooltip-right w-fit"
-        data-tip={`Design difficulty: ${metadata.difficulty}`}
+        data-tip={
+          metadata.difficulty === 0
+            ? 'Unrated'
+            : `Design difficulty: ${metadata.difficulty}`
+        }
       >
         <Difficulty value={metadata.difficulty} />
       </div>
       <h1
         className={cn(
-          'flex-shrink-0 break-words',
+          'shrink-0 wrap-break-word',
           responsive ? 'text-3xl lg:text-4xl' : 'text-4xl'
         )}
       >
@@ -48,7 +50,9 @@ export default memo(function Metadata({
       </div>
       {!simplified && (
         <div className="overflow-y-auto">
-          <Markdown className={responsive ? 'lg:text-lg' : 'text-lg'}>
+          <Markdown
+            className={cn('max-w-full', responsive ? 'lg:prose-lg' : '')}
+          >
             {metadata.description}
           </Markdown>
         </div>

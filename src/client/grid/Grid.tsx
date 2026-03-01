@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import { Color } from '@logic-pad/core/data/primitives';
 import CanvasGrid from './canvasGrid/Grid';

@@ -5,8 +5,8 @@ import Loading from '../components/Loading';
 import { useRouteProtection } from '../router/useRouteProtection';
 import CollectionSearchQuery from '../online/CollectionSearchQuery';
 import CollectionCard from '../online/CollectionCard';
-import { myCollectionsInfiniteQueryOptions } from './_layout.my-stuff.collections';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
+import { searchOwnCollectionsInfiniteQueryOptions } from '../online/CollectionSearchResults';
 
 export const Route = createLazyFileRoute('/_layout/my-stuff/collections')({
   component: memo(function MyStuff() {
@@ -14,12 +14,12 @@ export const Route = createLazyFileRoute('/_layout/my-stuff/collections')({
     const navigate = Route.useNavigate();
     const search = Route.useSearch();
     const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery(
-      myCollectionsInfiniteQueryOptions(search)
+      searchOwnCollectionsInfiniteQueryOptions(search)
     );
 
     return (
       <>
-        <div role="tablist" className="tabs tabs-lg tabs-bordered">
+        <div role="tablist" className="tabs tabs-lg tabs-border">
           <Link
             to="/my-stuff/puzzles"
             role="tab"

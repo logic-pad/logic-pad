@@ -63,7 +63,11 @@ export default class AreaNumberSymbol extends NumberSymbol {
     return AreaNumberSymbol.EXAMPLE_GRID;
   }
 
-  public countTiles(grid: GridData): { completed: number; possible: number } {
+  public countTiles(
+    grid: GridData
+  ): { completed: number; possible: number } | null {
+    if (!this.validateSubtilePlacement(grid)) return null;
+
     const thisX = Math.floor(this.x);
     const thisY = Math.floor(this.y);
     const color = grid.getTile(thisX, thisY).color;

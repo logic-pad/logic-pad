@@ -13,4 +13,11 @@ export const Route = createFileRoute('/_layout/privacy-policy')({
       </ResponsiveLayout>
     );
   }),
+  head: () => ({
+    meta: [
+      {
+        title: `Privacy Policy - Logic Pad`,
+      },
+    ],
+  }),
 });

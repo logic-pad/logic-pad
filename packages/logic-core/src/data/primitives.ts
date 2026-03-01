@@ -188,3 +188,39 @@ export enum Mode {
   Solve = 'solve',
   Perfection = 'perfection',
 }
+
+export enum Instrument {
+  Piano = 'piano',
+  Drum = 'drum',
+  Violin = 'violin',
+  Xylophone = 'xylophone',
+  GuitarAcoustic = 'guitar-acoustic',
+  GuitarElectric = 'guitar-electric',
+  Flute = 'flute',
+  Trumpet = 'trumpet',
+}
+
+export const INSTRUMENTS: readonly Instrument[] = [
+  Instrument.Piano,
+  Instrument.Drum,
+  Instrument.Violin,
+  Instrument.Xylophone,
+  Instrument.GuitarAcoustic,
+  Instrument.GuitarElectric,
+  Instrument.Flute,
+  Instrument.Trumpet,
+];
+
+export const DRUM_SAMPLES = [
+  'snare',
+  'kick',
+  'hihat',
+  'hihat-open',
+  'crash',
+  'tom',
+  'rim',
+] as const;
+
+export function isDrumSample(note: string): boolean {
+  return DRUM_SAMPLES.includes(note as (typeof DRUM_SAMPLES)[number]);
+}

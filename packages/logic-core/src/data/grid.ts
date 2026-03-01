@@ -26,6 +26,17 @@ export const NEIGHBOR_OFFSETS: Position[] = [
   { x: 0, y: 1 },
 ];
 
+export const NEIGHBOR_OFFSETS_8: Position[] = [
+  { x: -1, y: 0 },
+  { x: 1, y: 0 },
+  { x: 0, y: -1 },
+  { x: 0, y: 1 },
+  { x: -1, y: -1 },
+  { x: 1, y: -1 },
+  { x: -1, y: 1 },
+  { x: 1, y: 1 },
+];
+
 export default class GridData {
   public readonly tiles: readonly (readonly TileData[])[];
   public readonly connections: GridConnections;
@@ -131,7 +142,9 @@ export default class GridData {
     connections?: GridConnections,
     zones?: GridZones,
     symbols?: ReadonlyMap<string, readonly Symbol[]>,
-    rules?: readonly Rule[]
+    rules?: readonly Rule[],
+    sanitize?: boolean,
+    triggerEvents?: boolean
   ): GridData;
 
   public static create(
@@ -141,37 +154,75 @@ export default class GridData {
     connections?: GridConnections,
     zones?: GridZones,
     symbols?: ReadonlyMap<string, readonly Symbol[]>,
-    rules?: readonly Rule[]
+    rules?: readonly Rule[],
+    sanitize?: boolean,
+    triggerEvents?: boolean
   ): GridData {
     if (typeof arrayOrWidth === 'number') {
+      let hasGridChangeSymbols = false;
+      let hasGridChangeRules = false;
+      if (triggerEvents) {
+        symbols?.forEach(list => {
+          list.forEach(sym => {
+            if (handlesGridChange(sym)) {
+              hasGridChangeSymbols = true;
+            }
+          });
+        });
+        rules?.forEach(rule => {
+          if (handlesGridChange(rule)) {
+            hasGridChangeRules = true;
+          }
+        });
+      }
       const newSymbols = symbols
-        ? GridData.deduplicateSymbols(symbols)
+        ? sanitize
+          ? GridData.deduplicateSymbols(symbols)
+          : triggerEvents && hasGridChangeSymbols
+            ? new Map(
+                [...symbols.entries()].map(([id, list]) => [id, list.slice()])
+              )
+            : symbols
         : new Map<string, Symbol[]>();
       // do not deduplicate all rules because it makes for bad editor experience
-      const newRules = rules ? GridData.deduplicateSingletonRules(rules) : [];
+      const newRules = rules
+        ? sanitize
+          ? GridData.deduplicateSingletonRules(rules)
+          : triggerEvents && hasGridChangeRules
+            ? rules.slice()
+            : rules
+        : [];
       const newGrid = new GridData(
         arrayOrWidth,
         height!,
         tiles,
         connections
-          ? GridConnections.validateEdges(connections, arrayOrWidth, height!)
-          : connections,
-        zones ? GridZones.validateEdges(zones, arrayOrWidth, height!) : zones,
+          ? sanitize
+            ? GridConnections.validateEdges(connections, arrayOrWidth, height!)
+            : connections
+          : undefined,
+        zones
+          ? sanitize
+            ? GridZones.validateEdges(zones, arrayOrWidth, height!)
+            : zones
+          : undefined,
         newSymbols,
         newRules
       );
-      newSymbols.forEach(list => {
-        list.forEach((sym, i) => {
-          if (handlesGridChange(sym)) {
-            list[i] = sym.onGridChange(newGrid);
+      if (triggerEvents) {
+        newSymbols.forEach(list => {
+          list.forEach((sym, i) => {
+            if (handlesGridChange(sym)) {
+              (list as Symbol[])[i] = sym.onGridChange(newGrid);
+            }
+          });
+        });
+        newRules.forEach((rule, i) => {
+          if (handlesGridChange(rule)) {
+            (newRules as Rule[])[i] = rule.onGridChange(newGrid);
           }
         });
-      });
-      newRules.forEach((rule, i) => {
-        if (handlesGridChange(rule)) {
-          newRules[i] = rule.onGridChange(newGrid);
-        }
-      });
+      }
       return newGrid;
     } else {
       const tiles = GridData.createTiles(arrayOrWidth);
@@ -184,23 +235,27 @@ export default class GridData {
    * @param param0 The properties to modify.
    * @returns The new grid with the modified properties.
    */
-  public copyWith({
-    width,
-    height,
-    tiles,
-    connections,
-    zones,
-    symbols,
-    rules,
-  }: {
-    width?: number;
-    height?: number;
-    tiles?: readonly (readonly TileData[])[];
-    connections?: GridConnections;
-    zones?: GridZones;
-    symbols?: ReadonlyMap<string, readonly Symbol[]>;
-    rules?: readonly Rule[];
-  }): GridData {
+  public copyWith(
+    {
+      width,
+      height,
+      tiles,
+      connections,
+      zones,
+      symbols,
+      rules,
+    }: {
+      width?: number;
+      height?: number;
+      tiles?: readonly (readonly TileData[])[];
+      connections?: GridConnections;
+      zones?: GridZones;
+      symbols?: ReadonlyMap<string, readonly Symbol[]>;
+      rules?: readonly Rule[];
+    },
+    sanitize = true,
+    triggerEvents = true
+  ): GridData {
     return GridData.create(
       width ?? this.width,
       height ?? this.height,
@@ -208,42 +263,9 @@ export default class GridData {
       connections ?? this.connections,
       zones ?? this.zones,
       symbols ?? this.symbols,
-      rules ?? this.rules
-    );
-  }
-
-  /**
-   * Copy the current grid while modifying the provided properties.
-   * Skip sanitization and event triggering for performance.
-   *
-   * @param param0 The properties to modify.
-   * @returns The new grid with the modified properties.
-   */
-  public fastCopyWith({
-    width,
-    height,
-    tiles,
-    connections,
-    zones,
-    symbols,
-    rules,
-  }: {
-    width?: number;
-    height?: number;
-    tiles?: readonly (readonly TileData[])[];
-    connections?: GridConnections;
-    zones?: GridZones;
-    symbols?: ReadonlyMap<string, readonly Symbol[]>;
-    rules?: readonly Rule[];
-  }): GridData {
-    return new GridData(
-      width ?? this.width,
-      height ?? this.height,
-      tiles ?? this.tiles,
-      connections ?? this.connections,
-      zones ?? this.zones,
-      symbols ?? this.symbols,
-      rules ?? this.rules
+      rules ?? this.rules,
+      sanitize,
+      triggerEvents
     );
   }
 
@@ -768,7 +790,7 @@ export default class GridData {
    */
   public iterateArea<T>(
     position: Position,
-    predicate: (tile: TileData) => boolean,
+    predicate: (tile: TileData, logicalX: number, logicalY: number) => boolean,
     callback: (
       tile: TileData,
       x: number,
@@ -779,7 +801,7 @@ export default class GridData {
     visited: boolean[][] = array(this.width, this.height, () => false)
   ): T | undefined {
     const tile = this.getTile(position.x, position.y);
-    if (!tile.exists || !predicate(tile)) {
+    if (!tile.exists || !predicate(tile, position.x, position.y)) {
       return;
     }
     const stack = [position];
@@ -796,7 +818,8 @@ export default class GridData {
         const next = { x: x + offset.x, y: y + offset.y };
         if (this.isPositionValid(next.x, next.y)) {
           const nextTile = this.getTile(next.x, next.y);
-          if (nextTile.exists && predicate(nextTile)) stack.push(next);
+          if (nextTile.exists && predicate(nextTile, next.x, next.y))
+            stack.push(next);
         }
       }
     }
@@ -817,7 +840,7 @@ export default class GridData {
   public iterateDirection<T>(
     position: Position,
     direction: Direction | Orientation,
-    predicate: (tile: TileData) => boolean,
+    predicate: (tile: TileData, logicalX: number, logicalY: number) => boolean,
     callback: (
       tile: TileData,
       x: number,
@@ -830,7 +853,8 @@ export default class GridData {
     return this.iterateDirectionAll(
       position,
       direction,
-      tile => tile.exists && predicate(tile),
+      (tile, logicalX, logicalY) =>
+        tile.exists && predicate(tile, logicalX, logicalY),
       callback,
       visited
     );
@@ -851,7 +875,7 @@ export default class GridData {
   public iterateDirectionAll<T>(
     position: Position,
     direction: Direction | Orientation,
-    predicate: (tile: TileData) => boolean,
+    predicate: (tile: TileData, logicalX: number, logicalY: number) => boolean,
     callback: (
       tile: TileData,
       x: number,
@@ -869,13 +893,72 @@ export default class GridData {
       }
       visited[arrPos.y][arrPos.x] = true;
       const tile = this.getTile(current.x, current.y);
-      if (!predicate(tile)) {
+      if (!predicate(tile, arrPos.x, arrPos.y)) {
         break;
       }
       const ret = callback(tile, arrPos.x, arrPos.y, current.x, current.y);
       if (ret !== undefined) return ret;
       current = move(current, direction);
     }
+  }
+
+  /**
+   * Reduce the grid by zones defined in the GridZones.
+   *
+   * @param reducer The reducer function to apply to each zone.
+   * @param initializer The initializer function to create the initial value for each zone.
+   * @param visited A 2D array to keep track of visited tiles. This array is modified by the function.
+   * @returns An array of reduced values, one for each zone.
+   */
+  public reduceByZone<T>(
+    reducer: (
+      acc: T,
+      tile: TileData,
+      x: number,
+      y: number,
+      logicalX: number,
+      logicalY: number
+    ) => T,
+    initializer: () => T,
+    visited: boolean[][] = array(this.width, this.height, () => false)
+  ) {
+    const zones: T[] = [];
+    while (true) {
+      const seed = this.find((tile, x, y) => tile.exists && !visited[y][x]);
+      if (!seed) break;
+      let zone = initializer();
+      const stack = [seed];
+      while (stack.length > 0) {
+        const { x, y } = stack.pop()!;
+        const { x: arrX, y: arrY } = this.toArrayCoordinates(x, y);
+        if (visited[arrY][arrX]) continue;
+        visited[arrY][arrX] = true;
+        zone = reducer(zone, this.getTile(arrX, arrY), arrX, arrY, x, y);
+        for (const offset of NEIGHBOR_OFFSETS) {
+          const next = this.toArrayCoordinates(x + offset.x, y + offset.y);
+          if (
+            !this.zones.edges.some(e => {
+              const { x: x1, y: y1 } = this.toArrayCoordinates(e.x1, e.y1);
+              const { x: x2, y: y2 } = this.toArrayCoordinates(e.x2, e.y2);
+              return (
+                (x1 === arrX &&
+                  y1 === arrY &&
+                  x2 === next.x &&
+                  y2 === next.y) ||
+                (x2 === arrX && y2 === arrY && x1 === next.x && y1 === next.y)
+              );
+            })
+          ) {
+            const nextTile = this.getTile(next.x, next.y);
+            if (nextTile.exists) {
+              stack.push(next);
+            }
+          }
+        }
+      }
+      zones.push(zone);
+    }
+    return zones;
   }
 
   /**
@@ -930,7 +1013,7 @@ export default class GridData {
         tiles[y][x] = tile.withColor(to);
       }
     );
-    return this.copyWith({ tiles });
+    return this.copyWith({ tiles }, false);
   }
 
   /**
@@ -942,15 +1025,18 @@ export default class GridData {
    * @returns The new grid with all tiles filled with the new color.
    */
   public floodFillAll(from: Color, to: Color, allowFixed: boolean): GridData {
-    return this.copyWith({
-      tiles: this.tiles.map(row =>
-        row.map(tile =>
-          tile.color === from && (allowFixed || !tile.fixed)
-            ? tile.withColor(to)
-            : tile
-        )
-      ),
-    });
+    return this.copyWith(
+      {
+        tiles: this.tiles.map(row =>
+          row.map(tile =>
+            tile.color === from && (allowFixed || !tile.fixed)
+              ? tile.withColor(to)
+              : tile
+          )
+        ),
+      },
+      false
+    );
   }
 
   /**
@@ -984,7 +1070,7 @@ export default class GridData {
       return tile;
     });
     if (!changed) return this;
-    let newGrid = this.copyWith({ tiles: newTiles });
+    let newGrid = this.copyWith({ tiles: newTiles }, false);
     this.symbols.forEach(list => {
       list.forEach(symbol => {
         if (handlesSetGrid(symbol)) {
@@ -1056,13 +1142,20 @@ export default class GridData {
     );
     const symbols = new Map<string, Symbol[]>();
     for (const [id, symbolList] of this.symbols) {
-      const newSymbolList = symbolList.filter(
-        symbol =>
-          symbol.x >= origin.x &&
-          symbol.y >= origin.y &&
-          symbol.x < origin.x + width &&
-          symbol.y < origin.y + height
-      );
+      const newSymbolList = symbolList
+        .filter(
+          symbol =>
+            symbol.x >= origin.x &&
+            symbol.y >= origin.y &&
+            symbol.x < origin.x + width &&
+            symbol.y < origin.y + height
+        )
+        .map(symbol =>
+          symbol.copyWith({
+            x: symbol.x - origin.x,
+            y: symbol.y - origin.y,
+          })
+        );
       if (newSymbolList.length > 0) symbols.set(id, newSymbolList);
     }
     return GridData.create(
@@ -1112,35 +1205,114 @@ export default class GridData {
         newTiles[origin.y + y][origin.x + x] = tile;
     });
     const connections = new GridConnections([
-      ...this.connections.edges,
-      ...grid.connections.edges.map(edge => ({
-        x1: edge.x1 + origin.x,
-        y1: edge.y1 + origin.y,
-        x2: edge.x2 + origin.x,
-        y2: edge.y2 + origin.y,
-      })),
+      ...this.connections.edges.filter(
+        edge =>
+          edge.x1 < origin.x ||
+          edge.y1 < origin.y ||
+          edge.x2 < origin.x ||
+          edge.y2 < origin.y ||
+          edge.x1 >= origin.x + grid.width ||
+          edge.y1 >= origin.y + grid.height ||
+          edge.x2 >= origin.x + grid.width ||
+          edge.y2 >= origin.y + grid.height
+      ),
+      ...grid.connections.edges
+        .map(edge => ({
+          x1: edge.x1 + origin.x,
+          y1: edge.y1 + origin.y,
+          x2: edge.x2 + origin.x,
+          y2: edge.y2 + origin.y,
+        }))
+        .filter(
+          edge =>
+            edge.x1 >= 0 &&
+            edge.y1 >= 0 &&
+            edge.x2 >= 0 &&
+            edge.y2 >= 0 &&
+            edge.x1 < this.width &&
+            edge.y1 < this.height &&
+            edge.x2 < this.width &&
+            edge.y2 < this.height
+        ),
     ]);
     const zones = new GridZones([
-      ...this.zones.edges,
-      ...grid.zones.edges.map(edge => ({
-        x1: edge.x1 + origin.x,
-        y1: edge.y1 + origin.y,
-        x2: edge.x2 + origin.x,
-        y2: edge.y2 + origin.y,
-      })),
+      ...this.zones.edges.filter(
+        edge =>
+          edge.x1 < origin.x ||
+          edge.y1 < origin.y ||
+          edge.x2 < origin.x ||
+          edge.y2 < origin.y ||
+          edge.x1 >= origin.x + grid.width ||
+          edge.y1 >= origin.y + grid.height ||
+          edge.x2 >= origin.x + grid.width ||
+          edge.y2 >= origin.y + grid.height
+      ),
+      ...grid.zones.edges
+        .map(edge => ({
+          x1: edge.x1 + origin.x,
+          y1: edge.y1 + origin.y,
+          x2: edge.x2 + origin.x,
+          y2: edge.y2 + origin.y,
+        }))
+        .filter(
+          edge =>
+            edge.x1 >= 0 &&
+            edge.y1 >= 0 &&
+            edge.x2 >= 0 &&
+            edge.y2 >= 0 &&
+            edge.x1 < this.width &&
+            edge.y1 < this.height &&
+            edge.x2 < this.width &&
+            edge.y2 < this.height
+        ),
     ]);
     const symbols = new Map(this.symbols);
     for (const [id, sourceList] of grid.symbols) {
-      const symbolList = sourceList.map(symbol =>
-        symbol.copyWith({ x: symbol.x + origin.x, y: symbol.y + origin.y })
-      );
+      const symbolList = sourceList
+        .filter(
+          symbol =>
+            symbol.x + origin.x >= 0 &&
+            symbol.y + origin.y >= 0 &&
+            symbol.x + origin.x < this.width &&
+            symbol.y + origin.y < this.height
+        )
+        .map(symbol =>
+          symbol.copyWith({ x: symbol.x + origin.x, y: symbol.y + origin.y })
+        );
       if (symbols.has(id)) {
-        symbols.set(id, [...symbols.get(id)!, ...symbolList]);
-      } else {
+        const newList = [
+          ...symbols
+            .get(id)!
+            .filter(
+              symbol =>
+                symbol.x < origin.x ||
+                symbol.y < origin.y ||
+                symbol.x >= origin.x + grid.width ||
+                symbol.y >= origin.y + grid.height
+            ),
+          ...symbolList,
+        ];
+        if (newList.length > 0) symbols.set(id, newList);
+        else symbols.delete(id);
+      } else if (symbolList.length > 0) {
         symbols.set(id, symbolList);
       }
     }
-    const rules = [...this.rules, ...grid.rules];
+    for (const id of [...symbols.keys()]) {
+      if (grid.symbols.has(id)) continue;
+      const newList = symbols
+        .get(id)!
+        .filter(
+          symbol =>
+            symbol.x < origin.x ||
+            symbol.y < origin.y ||
+            symbol.x >= origin.x + grid.width ||
+            symbol.y >= origin.y + grid.height
+        );
+      if (newList.length > 0) symbols.set(id, newList);
+      else symbols.delete(id);
+    }
+    const rules = GridData.deduplicateRules([...this.rules, ...grid.rules]);
     return this.copyWith({
       tiles: newTiles,
       connections,

@@ -1,7 +1,6 @@
 import { State } from '@logic-pad/core/data/primitives';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useGrid } from '../contexts/GridContext.tsx';
-import MultiEntrySymbol from '@logic-pad/core/data/symbols/multiEntrySymbol';
 import { useGridState } from '../contexts/GridStateContext.tsx';
 import Instruction from './Instruction';
 import EditTarget from './EditTarget';
@@ -22,10 +21,14 @@ import {
 } from '@dnd-kit/sortable';
 import RuleData from '@logic-pad/core/data/rules/rule';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers.ts';
+import {
+  handlesSymbolMerge,
+  SymbolMergeHandler,
+} from '@logic-pad/core/data/events/onSymbolMerge.ts';
 
 function Title({ children }: { children: React.ReactNode }) {
   return (
-    <div className="uppercase w-36 text-center bg-secondary bg-opacity-10 text-neutral-content mt-4 shrink-0">
+    <div className="uppercase w-36 text-center bg-secondary/10 text-neutral-content mt-4 shrink-0">
       {children}
     </div>
   );
@@ -98,7 +101,7 @@ export default memo(function InstructionList({
     const map = new Map<string, number[][]>();
     for (const [key, value] of grid.symbols ?? []) {
       if (value.length === 0) continue;
-      if (!(value[0] instanceof MultiEntrySymbol)) {
+      if (!handlesSymbolMerge(value[0])) {
         map.set(key, [value.map((_, i) => i)]);
         continue;
       }
@@ -111,7 +114,7 @@ export default memo(function InstructionList({
         const index = map
           .get(key)!
           .findIndex(x =>
-            (value[x[0]] as MultiEntrySymbol).descriptionEquals(s)
+            (value[x[0]] as unknown as SymbolMergeHandler).descriptionEquals(s)
           );
         if (index === -1) {
           map.get(key)!.push([i]);
@@ -202,7 +205,7 @@ export default memo(function InstructionList({
     >
       <div
         className={cn(
-          'flex flex-col items-end justify-start self-stretch py-[1px]',
+          'flex flex-col items-end justify-start self-stretch py-px',
           responsive ? 'w-[320px] sm:w-[640px] lg:w-[320px]' : 'w-[320px]'
         )}
       >

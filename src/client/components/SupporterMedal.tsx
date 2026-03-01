@@ -5,10 +5,12 @@ import { cn } from '../uiHelper';
 
 export interface SupporterMedalProps {
   supporter: number;
+  onClick?: () => void;
 }
 
 export default memo(function SupporterMedal({
   supporter,
+  onClick,
 }: SupporterMedalProps) {
   const cardFrameRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -38,10 +40,11 @@ export default memo(function SupporterMedal({
     <div
       ref={cardFrameRef}
       className={cn(
-        'w-fit h-fit transition-transform',
+        'w-fit h-fit transition-transform cursor-pointer',
         supporter === 0 && 'grayscale',
         supporter >= 3 && 'hover:scale-105'
       )}
+      onClick={onClick}
     >
       <div
         className={cn(
@@ -49,7 +52,7 @@ export default memo(function SupporterMedal({
           supporter >= 3 && 'hover:shadow-xl'
         )}
       >
-        <div ref={glowRef} className="glow absolute w-[1px] h-[1px]"></div>
+        <div ref={glowRef} className="glow absolute w-px h-px"></div>
         <div className="absolute bg-neutral inset-[2px] flex-1 rounded-full opacity-90 overflow-hidden"></div>
         <div className="absolute inset-[2px] flex-1 rounded-full opacity-90 overflow-hidden bg-accent/10"></div>
         <div className="absolute inset-8">

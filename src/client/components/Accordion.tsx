@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { cn } from '../uiHelper';
 
 export interface AccordionProps {

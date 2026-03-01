@@ -1,3 +1,4 @@
+import React from 'react';
 import Symbol from '@logic-pad/core/data/symbols/symbol';
 import { allSymbols as allSymbolData } from '@logic-pad/core/data/symbols/index';
 

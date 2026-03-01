@@ -187,8 +187,14 @@ const NotificationEntry = memo(function NotificationEntry({
   return (
     <Link
       to={notification.target ?? undefined}
+      preload={
+        notification.type !== NotificationType.System &&
+        notification.type !== NotificationType.Account
+          ? 'intent'
+          : false
+      }
       className={cn(
-        'flex items-center gap-4 rounded-lg p-4 w-full transition-colors',
+        'flex items-center gap-4 rounded-lg p-4 w-full transition-colors shrink-0',
         notification.read
           ? 'bg-base-300 hover:bg-base-200'
           : 'bg-secondary/10 hover:bg-secondary/20'
@@ -222,6 +228,7 @@ const NotificationEntry = memo(function NotificationEntry({
           e.preventDefault();
           deleteNotification.mutate();
         }}
+        aria-label="Delete notification"
       >
         <FaTrash size={16} />
       </button>
@@ -230,7 +237,7 @@ const NotificationEntry = memo(function NotificationEntry({
 });
 
 export default memo(function Notifications() {
-  const { isOnline, me } = useOnline();
+  const { isOnline, me, isPending } = useOnline();
   const [expand, setExpand] = useState(false);
   const notificationsCount = useQuery({
     queryKey: ['notification', 'count'],
@@ -261,6 +268,10 @@ export default memo(function Notifications() {
     )
   );
 
+  if (isPending) {
+    return <Loading className="w-10 h-10" />;
+  }
+
   if (!isOnline || !me) return null;
 
   return (
@@ -268,18 +279,23 @@ export default memo(function Notifications() {
       <button
         className="btn btn-square btn-ghost max-md:btn-sm text-neutral-content"
         onClick={() => setExpand(v => !v)}
+        aria-label={
+          expand
+            ? 'Close notifications'
+            : `${notificationsCount.data?.total ?? 0} new notifications`
+        }
       >
         <FaBell size={24} />
         {(notificationsCount.data?.total ?? 0) > 0 && (
-          <span className="badge badge-secondary absolute -top-1 -right-1">
+          <span className="badge badge-secondary badge-sm absolute -top-1 -right-1">
             {notificationsCount.data?.total}
           </span>
         )}
       </button>
       {expand && (
-        <div className="absolute w-0 h-0 bottom-0 right-0">
+        <div className="absolute w-0 h-0 bottom-0 right-0 text-base-content">
           <div className="z-50 fixed top-28 md:absolute md:top-2 right-0 flex flex-col items-center p-4 gap-2 max-w-[100vw] w-[500px] bg-base-100 shadow-lg rounded-xl min-h-52 max-h-[calc(100vh-10rem)] overflow-y-auto infinite-scroll">
-            <div className="flex justify-between items-center self-stretch">
+            <div className="flex justify-between items-center self-stretch shrink-0">
               <span className="text-secondary text-lg">Notifications</span>
               <div className="flex gap-2">
                 <div
@@ -329,16 +345,16 @@ export default memo(function Notifications() {
               ))
             )}
             {notifications.data?.pages[0]?.total === 0 && (
-              <div className="text-center text-sm opacity-70 mt-8">
+              <div className="text-center text-sm opacity-70 mt-8 shrink-0">
                 No notifications
               </div>
             )}
             {notifications.isFetching ? (
-              <Loading className="w-4 h-4" />
+              <Loading className="w-4 h-4 shrink-0" />
             ) : notifications.hasNextPage ? (
               <InfiniteScrollTrigger
                 onLoadMore={async () => await notifications.fetchNextPage()}
-                className="btn-sm"
+                className="btn-sm shrink-0"
               />
             ) : null}
           </div>

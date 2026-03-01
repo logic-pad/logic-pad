@@ -1,4 +1,11 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import debounce from 'lodash/debounce';
 import { FaSearch, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { z } from 'zod';
@@ -7,6 +14,7 @@ import { cn } from '../uiHelper';
 
 export const collectionSearchSchema = z.object({
   q: z.string().optional().catch(undefined),
+  type: z.enum(['handmade', 'created', 'auto']).optional().catch(undefined),
   sort: z
     .enum([
       'created-asc',
@@ -21,6 +29,61 @@ export const collectionSearchSchema = z.object({
 });
 
 export type CollectionSearchParams = z.infer<typeof collectionSearchSchema>;
+
+type FilterOption = {
+  id: string;
+  text: string | React.ReactElement;
+  applyFilter: (search: CollectionSearchParams) => CollectionSearchParams;
+  isActive: (search: CollectionSearchParams) => boolean;
+};
+
+type Filter = {
+  name: string;
+  options: FilterOption[];
+};
+
+const filters: Filter[] = [
+  {
+    name: 'Type',
+    options: [
+      {
+        id: 'any',
+        text: 'Any',
+        applyFilter: search => {
+          return { ...search, type: undefined };
+        },
+        isActive: search => !search.type,
+      },
+      {
+        id: 'handmade',
+        text: 'Handmade',
+        applyFilter: search => {
+          const newValue = search.type === 'handmade' ? undefined : 'handmade';
+          return { ...search, type: newValue };
+        },
+        isActive: search => search.type === 'handmade',
+      },
+      {
+        id: 'created',
+        text: "Creator's list",
+        applyFilter: search => {
+          const newValue = search.type === 'created' ? undefined : 'created';
+          return { ...search, type: newValue };
+        },
+        isActive: search => search.type === 'created',
+      },
+      {
+        id: 'auto',
+        text: 'Auto',
+        applyFilter: search => {
+          const newValue = search.type === 'auto' ? undefined : 'auto';
+          return { ...search, type: newValue };
+        },
+        isActive: search => search.type === 'auto',
+      },
+    ],
+  },
+];
 
 const orderings = [
   {
@@ -84,11 +147,11 @@ export default memo(function CollectionSearchQuery({
       >
         <label
           className={cn(
-            'input input-bordered bg-base-100 text-base-content flex items-center gap-2 w-full',
+            'input bg-base-100 text-base-content flex items-center gap-2 w-full',
             !me && 'input-disabled'
           )}
         >
-          <FaSearch />
+          <FaSearch aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -102,6 +165,28 @@ export default memo(function CollectionSearchQuery({
         </label>
       </div>
       <div className="grid grid-cols-[minmax(8rem,auto)_minmax(0,1fr)] items-start gap-y-2">
+        {filters.map(filter => (
+          <Fragment key={filter.name}>
+            <div>{filter.name}</div>
+            <div className="flex gap-2 flex-wrap">
+              {filter.options.map(option => (
+                <button
+                  key={option.id}
+                  className={cn(
+                    `btn btn-sm`,
+                    option.isActive(displayParams) ? '' : 'btn-ghost',
+                    !me && 'btn-disabled'
+                  )}
+                  onClick={() =>
+                    updateParams(option.applyFilter(displayParams))
+                  }
+                >
+                  {option.text}
+                </button>
+              ))}
+            </div>
+          </Fragment>
+        ))}
         <div className="mt-2">Sort by</div>
         <div className="flex gap-4 mt-2 flex-wrap">
           {orderings.map(ordering => (
@@ -129,9 +214,9 @@ export default memo(function CollectionSearchQuery({
               {ordering.text}
               {displayParams.sort?.startsWith(`${ordering.id}-`) &&
                 (displayParams.sort.endsWith('-asc') ? (
-                  <FaChevronUp />
+                  <FaChevronUp aria-label="Ascending" />
                 ) : (
-                  <FaChevronDown />
+                  <FaChevronDown aria-label="Descending" />
                 ))}
             </button>
           ))}

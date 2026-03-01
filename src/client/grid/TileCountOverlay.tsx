@@ -77,7 +77,7 @@ function canvasGradientLine(
 ) {
   if (typeof stroke === 'function') {
     const gradient = ctx?.createLinearGradient(startX, startY, endX, endY);
-    stroke(gradient!);
+    stroke(gradient);
     stroke = gradient!;
   }
   ctx.strokeStyle = stroke;
@@ -108,7 +108,9 @@ export default memo(function TileCountOverlay({ grid }: TileCountOverlayProps) {
     e => {
       if (!canvasRef.current) return;
       if (e.type === 'keydown') {
-        const rect = canvasRef.current.canvas.getBoundingClientRect();
+        const rect =
+          canvasRef.current.canvas.parentElement!.getBoundingClientRect(); // We need to get the container size, not the canvas size due to CSS scaling
+        const tileSize = rect.width / grid.width;
         const x = Math.floor((mousePosition.clientX - rect.left) / tileSize);
         const y = Math.floor((mousePosition.clientY - rect.top) / tileSize);
         setPosition({ x, y });
@@ -122,7 +124,7 @@ export default memo(function TileCountOverlay({ grid }: TileCountOverlayProps) {
       preventDefault: true,
       useKey: true,
     },
-    [canvasRef, tileSize]
+    [canvasRef, grid.width, grid.height]
   );
 
   useEffect(() => {
@@ -236,8 +238,8 @@ export default memo(function TileCountOverlay({ grid }: TileCountOverlayProps) {
           1,
           `${accentColor.substring(0, accentColor.length - 1)}/0)`
         );
-        canvasGradientLine(ctx, start1.x, start1.y, end1.x, end1.y, gradient!);
-        canvasGradientLine(ctx, start2.x, start2.y, end2.x, end2.y, gradient!);
+        canvasGradientLine(ctx, start1.x, start1.y, end1.x, end1.y, gradient);
+        canvasGradientLine(ctx, start2.x, start2.y, end2.x, end2.y, gradient);
       }
 
       canvasTextBox(
@@ -329,8 +331,8 @@ export default memo(function TileCountOverlay({ grid }: TileCountOverlayProps) {
           1,
           `${accentColor.substring(0, accentColor.length - 1)}/0)`
         );
-        canvasGradientLine(ctx, start1.x, start1.y, end1.x, end1.y, gradient!);
-        canvasGradientLine(ctx, start2.x, start2.y, end2.x, end2.y, gradient!);
+        canvasGradientLine(ctx, start1.x, start1.y, end1.x, end1.y, gradient);
+        canvasGradientLine(ctx, start2.x, start2.y, end2.x, end2.y, gradient);
       }
 
       canvasTextBox(
@@ -518,7 +520,7 @@ export default memo(function TileCountOverlay({ grid }: TileCountOverlayProps) {
       width={grid.width}
       height={grid.height}
       bleed={BLEED}
-      onResize={size => setTileSize(size)}
+      onResize={setTileSize}
     ></GridCanvasOverlay>
   );
 });

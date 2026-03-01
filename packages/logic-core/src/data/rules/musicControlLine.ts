@@ -1,5 +1,6 @@
 import { AnyConfig, ConfigType } from '../config.js';
 import Configurable from '../configurable.js';
+import { Instrument } from '../primitives.js';
 
 export class Row extends Configurable {
   public readonly title = 'Music Grid - Row';
@@ -17,6 +18,15 @@ export class Row extends Configurable {
       configurable: true,
     },
     {
+      type: ConfigType.NullableInstrument,
+      default: Instrument.Piano,
+      field: 'instrument',
+      description: 'Instrument',
+      explanation:
+        'The musical instrument to use. This has no effect if the current note is a drum sample.',
+      configurable: true,
+    },
+    {
       type: ConfigType.NullableNumber,
       default: 0.5,
       min: 0,
@@ -24,7 +34,7 @@ export class Row extends Configurable {
       step: 0.2,
       field: 'velocity',
       description: 'Velocity',
-      explanation: 'For piano notes, how hard the note is played.',
+      explanation: 'The volume to play the note at.',
       configurable: true,
     },
   ]);
@@ -36,6 +46,12 @@ export class Row extends Configurable {
      */
     public readonly note: string | null,
     /**
+     * The instrument to play the note with, or null to keep the current instrument from the previous control line.
+     * If this is null from the first control line, the instrument will be "piano".
+     * This has no effect if the current note is a drum sample.
+     */
+    public readonly instrument: Instrument | null,
+    /**
      * The velocity to play the note at, or null to keep the current velocity from the previous control line.
      * Ranges from 0 to 1
      */
@@ -43,6 +59,7 @@ export class Row extends Configurable {
   ) {
     super();
     this.note = note;
+    this.instrument = instrument;
     this.velocity = velocity;
   }
 
@@ -52,13 +69,16 @@ export class Row extends Configurable {
 
   public copyWith({
     note,
+    instrument,
     velocity,
   }: {
     note?: string | null;
+    instrument?: Instrument | null;
     velocity?: number | null;
   }): this {
     return new Row(
       note !== undefined ? note : this.note,
+      instrument !== undefined ? instrument : this.instrument,
       velocity !== undefined ? velocity : this.velocity
     ) as this;
   }

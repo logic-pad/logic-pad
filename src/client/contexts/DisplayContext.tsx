@@ -1,4 +1,4 @@
-import { createContext, memo, use, useState } from 'react';
+import React, { createContext, memo, use, useState } from 'react';
 
 interface DisplayContext {
   scale: number;

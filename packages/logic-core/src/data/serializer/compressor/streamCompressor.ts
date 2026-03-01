@@ -8,10 +8,12 @@ function ensureCompressionStream() {
   return Promise.resolve();
 }
 
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
 export default abstract class StreamCompressor extends CompressorBase {
   protected abstract get algorithm(): CompressionFormat;
 
-  /* eslint-disable @typescript-eslint/no-floating-promises */
   public async compress(input: string): Promise<string> {
     await ensureCompressionStream();
     const blobToBase64 = (blob: Blob): Promise<string> =>
@@ -21,11 +23,13 @@ export default abstract class StreamCompressor extends CompressorBase {
           resolve((reader.result as string).split(',')[1]);
         reader.readAsDataURL(blob);
       });
-    const byteArray = new TextEncoder().encode(input);
+    const byteArray = encoder.encode(input);
     const cs = new CompressionStream(this.algorithm);
     const writer = cs.writable.getWriter();
-    writer.write(byteArray);
-    writer.close();
+    writer.ready
+      .then(() => writer.write(byteArray))
+      .then(() => writer.close())
+      .catch(console.log);
     return new Response(cs.readable).blob().then(blobToBase64);
   }
 
@@ -34,10 +38,12 @@ export default abstract class StreamCompressor extends CompressorBase {
     const bytes = Uint8Array.from(atob(input), c => c.charCodeAt(0));
     const cs = new DecompressionStream(this.algorithm);
     const writer = cs.writable.getWriter();
-    writer.write(bytes);
-    writer.close();
-    return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
-      return new TextDecoder().decode(arrayBuffer);
+    writer.ready
+      .then(() => writer.write(bytes))
+      .then(() => writer.close())
+      .catch(console.log);
+    return new Response(cs.readable).arrayBuffer().then(arrayBuffer => {
+      return decoder.decode(arrayBuffer);
     });
   }
 }

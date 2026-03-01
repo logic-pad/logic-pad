@@ -1,8 +1,12 @@
+import { SymbolMergeHandler } from '../events/onSymbolMerge.js';
 import GridData from '../grid.js';
 import { State } from '../primitives.js';
-import MultiEntrySymbol from './multiEntrySymbol.js';
+import Symbol from './symbol.js';
 
-export default abstract class CustomSymbol extends MultiEntrySymbol {
+export default abstract class CustomSymbol
+  extends Symbol
+  implements SymbolMergeHandler
+{
   /**
    * **A custom symbol**
    *
@@ -36,6 +40,14 @@ export default abstract class CustomSymbol extends MultiEntrySymbol {
 
   public get validateWithSolution(): boolean {
     return true;
+  }
+
+  public descriptionEquals(other: Symbol): boolean {
+    return (
+      this.id === other.id &&
+      this.explanation === other.explanation &&
+      this.createExampleGrid().equals(other.createExampleGrid())
+    );
   }
 
   public withDescription(description: string): this {

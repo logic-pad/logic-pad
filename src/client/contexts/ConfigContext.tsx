@@ -1,4 +1,4 @@
-import { createContext, memo, use, useState } from 'react';
+import React, { createContext, memo, use, useState } from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import Rule from '@logic-pad/core/data/rules/rule';
 import Symbol from '@logic-pad/core/data/symbols/symbol';

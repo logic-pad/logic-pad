@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import { PiCheckerboardFill } from 'react-icons/pi';
 import { TbLayoutGridRemove, TbLayoutGrid } from 'react-icons/tb';
-import { PuzzleType } from '@logic-pad/core/index';
+import { type PuzzleType } from '@logic-pad/core/data/primitives';
 import { BsQuestionSquare } from 'react-icons/bs';
 import Difficulty from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
@@ -17,6 +17,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Link, LinkComponentProps } from '@tanstack/react-router';
 import SupporterBadge from '../components/SupporterBadge';
+
+type PuzzleTypeString = `${PuzzleType}`;
 
 export interface PuzzleCardProps extends Partial<LinkComponentProps> {
   puzzle: PuzzleBrief;
@@ -26,15 +28,15 @@ export interface PuzzleCardProps extends Partial<LinkComponentProps> {
   children?: ReactNode;
 }
 
-function getIconForType(type: PuzzleType) {
+function getIconForType(type: PuzzleTypeString) {
   switch (type) {
-    case PuzzleType.Music:
+    case 'music':
       return FaMusic;
-    case PuzzleType.Pattern:
+    case 'pattern':
       return PiCheckerboardFill;
-    case PuzzleType.Underclued:
+    case 'underclued':
       return TbLayoutGridRemove;
-    case PuzzleType.Logic:
+    case 'logic':
       return TbLayoutGrid;
   }
 }
@@ -44,13 +46,13 @@ export const PuzzleIcon = memo(function PuzzleIcon({
   className,
   size,
 }: {
-  types: PuzzleType[];
+  types: PuzzleTypeString[];
   className?: string;
   size: number;
 }) {
-  if (types.includes(PuzzleType.Underclued)) {
+  if (types.includes('underclued')) {
     // "Logic" tag is added for searching in underclued puzzles, no need to display both
-    types = types.filter(type => type !== PuzzleType.Logic);
+    types = types.filter(type => type !== 'logic');
   }
   const styles = useMemo(
     () => ({
@@ -140,8 +142,14 @@ export default memo(function PuzzleCard({
   children,
   ...props
 }: PuzzleCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: puzzle.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: puzzle.id });
   const RootComponent = props.to ? Link : 'a';
   return (
     <div
@@ -157,27 +165,35 @@ export default memo(function PuzzleCard({
       {...(dragDroppable ? attributes : {})}
       {...(dragDroppable ? listeners : {})}
       className={cn(
-        'w-[320px] h-[116px] hover:z-50 shrink-0 grow-0',
+        'w-[320px] h-[116px] [:hover]:z-50 shrink-0 grow-0',
         dragDroppable && 'touch-none'
       )}
     >
       <RootComponent
         preload={false}
         className={cn(
-          'relative w-full h-full hover:h-fit flex gap-4 items-center px-4 py-2 rounded-xl shadow-md wrapper hover:shadow-xl transition-all text-base-content',
+          'relative w-full h-full [:hover]:h-fit flex gap-4 items-center px-4 py-2 rounded-xl shadow-md wrapper [:hover]:shadow-xl [:hover]:outline-2 -outline-offset-2 outline-accent transition-all text-base-content',
           puzzle.status === ResourceStatus.Private
-            ? `bg-base-300/50 hover:bg-base-100`
-            : 'bg-base-300 hover:bg-base-100'
+            ? `bg-base-300/50 [:hover]:bg-base-100`
+            : 'bg-base-300 [:hover]:bg-base-100',
+          isDragging && 'pointer-events-none'
         )}
         role="button"
+        aria-label={`${puzzle.title} by ${puzzle.creator.name}; Types ${puzzle.types.join(', ')}; Difficulty ${puzzle.designDifficulty};  Size ${puzzle.width} by ${puzzle.height};  ${puzzle.solveCount} solves,  ${puzzle.loveCount} loves`}
         {...props}
       >
-        <PuzzleIcon types={puzzle.types} size={36} className="shrink-0" />
-        <div className="flex flex-col">
+        <PuzzleIcon
+          types={puzzle.types}
+          size={36}
+          className="shrink-0"
+          aria-hidden="true"
+        />
+        <div className="flex flex-col" aria-hidden="true">
           <h2
             className={cn(
               'text-lg font-bold whitespace-nowrap overflow-hidden text-ellipsis',
-              expandable && '[.wrapper:hover_&]:whitespace-normal'
+              expandable &&
+                '[.wrapper:hover_&]:whitespace-normal [.wrapper:hover_&]:wrap-break-word'
             )}
           >
             {puzzle.inSeries && (
@@ -185,39 +201,44 @@ export default memo(function PuzzleCard({
             )}{' '}
             {puzzle.title.length === 0 ? 'Untitled Puzzle' : puzzle.title}
           </h2>
-          <div className="badge badge-neutral bg-neutral/40 badge-md mt-1">
+          <div className="badge badge-neutral bg-neutral/20 text-base-content badge-md mt-1 gap-0">
             {puzzle.creator.name}
             <SupporterBadge supporter={puzzle.creator.supporter} />
           </div>
           <div className="flex gap-2 mt-2 text-sm">
-            <span>
-              {puzzle.width}&times;{puzzle.height}
-            </span>
-            <Difficulty value={puzzle.designDifficulty} size="sm" />
+            {puzzle.width} &times; {puzzle.height}
+            <Difficulty
+              value={puzzle.designDifficulty}
+              ratedDifficulty={puzzle.ratedDifficulty}
+              size="xs"
+            />
           </div>
-          {puzzle.status === ResourceStatus.Public ? (
-            <div className="flex gap-4 text-sm opacity-80">
-              <span className="flex items-center">
-                <FaCheckSquare className="me-2" /> {puzzle.solveCount}
-                <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
-                  {puzzle.solveCount === 1 ? 'solve' : 'solves'}
+          <div className="flex gap-4 text-sm opacity-80">
+            {puzzle.status !== ResourceStatus.Private && (
+              <>
+                <span className="flex items-center">
+                  <FaCheckSquare className="me-2" /> {puzzle.solveCount}
+                  <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
+                    {puzzle.solveCount === 1 ? 'solve' : 'solves'}
+                  </span>
                 </span>
-              </span>
-              <span className="flex items-center">
-                <FaHeart className="me-2" /> {puzzle.loveCount}
-                <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
-                  {puzzle.loveCount === 1 ? 'love' : 'loves'}
+                <span className="flex items-center">
+                  <FaHeart className="me-2" /> {puzzle.loveCount}
+                  <span className="hidden [.wrapper:hover_&]:inline-block ms-1">
+                    {puzzle.loveCount === 1 ? 'love' : 'loves'}
+                  </span>
                 </span>
-              </span>
-            </div>
-          ) : (
-            <div className="flex gap-4 text-sm opacity-80">
-              <span className="flex items-center">
+              </>
+            )}
+            {puzzle.status !== ResourceStatus.Public && (
+              <span className="flex items-center capitalize">
                 <FaEyeSlash className="me-2" />
-                Private
+                <span className="[.wrapper:hover_&]:hidden">
+                  {puzzle.status}
+                </span>
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         {children}
       </RootComponent>

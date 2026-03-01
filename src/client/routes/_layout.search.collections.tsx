@@ -1,21 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { zodValidator } from '@tanstack/zod-adapter';
-import {
-  CollectionSearchParams,
-  collectionSearchSchema,
-} from '../online/CollectionSearchQuery';
-import { api, bidirectionalInfiniteQuery, queryClient } from '../online/api';
-import { router } from '../router/router';
+import { collectionSearchSchema } from '../online/CollectionSearchQuery';
+import { queryClient } from '../online/api';
 import toast from 'react-hot-toast';
-
-export const searchCollectionsInfiniteQueryOptions = (
-  search: CollectionSearchParams
-) =>
-  bidirectionalInfiniteQuery(
-    ['collection', 'search', search],
-    (cursorBefore, cursorAfter) =>
-      api.searchCollections(search, cursorBefore, cursorAfter)
-  );
+import { searchCollectionsInfiniteQueryOptions } from '../online/CollectionSearchResults';
 
 export const Route = createFileRoute('/_layout/search/collections')({
   validateSearch: zodValidator(collectionSearchSchema),
@@ -23,9 +11,7 @@ export const Route = createFileRoute('/_layout/search/collections')({
     try {
       await Promise.all([
         queryClient.ensureInfiniteQueryData(
-          searchCollectionsInfiniteQueryOptions(
-            router.state.location.search as CollectionSearchParams
-          )
+          searchCollectionsInfiniteQueryOptions({})
         ),
       ]);
     } catch (error) {
@@ -35,4 +21,11 @@ export const Route = createFileRoute('/_layout/search/collections')({
       });
     }
   },
+  head: () => ({
+    meta: [
+      {
+        title: `Search Collections - Logic Pad`,
+      },
+    ],
+  }),
 });

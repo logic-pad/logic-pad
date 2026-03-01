@@ -1,15 +1,18 @@
 {
   "name": "@logic-pad/core",
-  "version": "0.18.0",
+  "version": "0.26.3",
   "type": "module",
   "files": [
     "dist",
     "assets"
   ],
-  "homepage": "https://github.com/hlysine/logic-pad",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://github.com/logic-pad/logic-pad",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hlysine/logic-pad.git"
+    "url": "https://github.com/logic-pad/logic-pad.git"
   },
   "keywords": [
     "logic",
@@ -20,20 +23,19 @@
     "grid"
   ],
   "license": "AGPL-3.0-only",
-  "main": "./dist/logic-core.umd.cjs",
-  "module": "./dist/logic-core.js",
+  "module": "./dist/src/index.js",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
     },
     "./data/*": {
-      "import": "./dist/data/*",
-      "require": "./dist/data/*"
+      "import": "./dist/src/data/*",
+      "require": "./dist/src/data/*"
     },
     "./polyfill/*": {
-      "import": "./dist/polyfill/*",
-      "require": "./dist/polyfill/*"
+      "import": "./dist/src/polyfill/*",
+      "require": "./dist/src/polyfill/*"
     },
     "./assets/*": {
       "import": "./assets/*",
@@ -42,30 +44,34 @@
   },
   "scripts": {
     "build": "rimraf dist/ && bun run codegen && bunx --bun tsc && bun run typegen",
-    "lint": "cd ../../ && eslint ./packages/logic-core --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "codegen": "bun ./scripts/genImports.ts && bun ./scripts/genEntry.ts",
     "typegen": "bun ./scripts/genTypes.ts",
+    "bench:prepare": "bun ./benchmark/prepareBench.ts",
+    "bench:run": "bun ./benchmark/runBench.ts",
     "prepublishOnly": "bun run build"
   },
   "engines": {
-    "bun": ">=1.1.0"
+    "bun": ">=1.1.0",
+    "node": ">=23.11.0"
   },
   "dependencies": {
     "compression-streams-polyfill": "^0.1.7",
     "event-iterator": "^2.0.0",
-    "grilops": "^0.1.2",
+    "lodash": "^4.17.21",
     "logic-pad-solver-core": "^0.1.2",
-    "z3-solver": "^4.13.0",
     "zod": "^4.0.17"
   },
   "devDependencies": {
     "@types/bun": "^1.2.20",
     "@types/glob": "^9.0.0",
+    "@types/lodash": "^4.17.20",
     "dts-bundle-generator": "^9.5.1",
     "fast-glob": "^3.3.3",
+    "p-queue": "^9.0.1",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "uint8-to-base64": "^0.2.1"
   },
   "trustedDependencies": [
     "esbuild"

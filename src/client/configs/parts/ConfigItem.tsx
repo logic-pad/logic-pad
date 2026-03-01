@@ -1,5 +1,5 @@
 import { AnyConfig } from '@logic-pad/core/data/config';
-import { memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { cn } from '../../uiHelper';
 import { FaChevronUp, FaInfoCircle } from 'react-icons/fa';
 

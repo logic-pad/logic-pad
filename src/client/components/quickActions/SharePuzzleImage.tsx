@@ -1,7 +1,7 @@
 import { memo, Ref, useEffect, useMemo, useRef, useState } from 'react';
 import MainGrid from '../../grid/MainGrid';
 import InstructionList from '../../instructions/InstructionList';
-import { cn } from '../../uiHelper';
+import { cn, safeClipboard } from '../../uiHelper';
 import Metadata from '../../metadata/Metadata';
 import Loading from '../Loading';
 import html2canvas from 'html2canvas-pro';
@@ -43,7 +43,7 @@ const CopyImageButton = memo(function CopyImageButton({
           canvas.toBlob(async blob => {
             if (!blob) return;
             const item = new ClipboardItem({ 'image/png': blob });
-            await navigator.clipboard.write([item]);
+            await safeClipboard.write([item]);
             setTooltip('Copied!');
           });
         }}
@@ -67,7 +67,7 @@ const PuzzleImage = memo(function PuzzleImage({
   gridOnly,
   ref,
 }: PuzzleImageProps) {
-  const { grid, metadata } = useGrid();
+  const { grid, solution, metadata } = useGrid();
   const { state } = useGridState();
   const { scale } = useDisplay();
 
@@ -89,10 +89,18 @@ const PuzzleImage = memo(function PuzzleImage({
       >
         <DisplayContext scale={resetScale ? 1 : scale} responsiveScale={false}>
           <GridStateContext state={resetGrid ? defaultState : state}>
-            <GridContext grid={newGrid} initialMetadata={metadata}>
+            <GridContext
+              grid={newGrid}
+              initialSolution={solution}
+              initialMetadata={metadata}
+            >
               <div className="flex flex-col gap-4">
                 {gridOnly || <Metadata simplified={true} responsive={false} />}
-                <MainGrid useToolboxClick={false} animated={false} />
+                <MainGrid
+                  useToolboxClick={false}
+                  allowAnimation={false}
+                  allowSounds={false}
+                />
               </div>
               {gridOnly || (
                 <div className="pr-2">
@@ -184,7 +192,7 @@ const ImageGenerator = memo(function ImageGenerator() {
   return (
     <div
       tabIndex={0}
-      className="dropdown-content flex flex-col bg-base-100 rounded-box z-[1] w-[320px] p-4 shadow mt-4 mb-4"
+      className="dropdown-content flex flex-col bg-base-100 rounded-box z-1 w-[320px] p-4 shadow-sm mt-4 mb-4"
     >
       <div className="overflow-hidden h-0 w-0 scale-50">
         <PuzzleImage
@@ -196,8 +204,8 @@ const ImageGenerator = memo(function ImageGenerator() {
       </div>
       <div className="flex flex-col gap-4">
         {image}
-        <div className="form-control">
-          <label className="label cursor-pointer">
+        <fieldset className="fieldset">
+          <label className="label w-full justify-between cursor-pointer">
             <span className="label-text">Reset grid</span>
             <input
               type="checkbox"
@@ -206,9 +214,9 @@ const ImageGenerator = memo(function ImageGenerator() {
               onChange={e => setResetGrid(e.target.checked)}
             />
           </label>
-        </div>
-        <div className="form-control">
-          <label className="label cursor-pointer">
+        </fieldset>
+        <fieldset className="fieldset">
+          <label className="label w-full justify-between cursor-pointer">
             <span className="label-text">Reset scale</span>
             <input
               type="checkbox"
@@ -217,9 +225,9 @@ const ImageGenerator = memo(function ImageGenerator() {
               onChange={e => setResetScale(e.target.checked)}
             />
           </label>
-        </div>
-        <div className="form-control">
-          <label className="label cursor-pointer">
+        </fieldset>
+        <fieldset className="fieldset">
+          <label className="label w-full justify-between cursor-pointer">
             <span className="label-text">Grid only</span>
             <input
               type="checkbox"
@@ -228,7 +236,7 @@ const ImageGenerator = memo(function ImageGenerator() {
               onChange={e => setGridOnly(e.target.checked)}
             />
           </label>
-        </div>
+        </fieldset>
         <CopyImageButton canvas={canvas} />
       </div>
     </div>

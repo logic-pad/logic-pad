@@ -1,5 +1,4 @@
 export default class TileConnections {
-  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
   [y: number]: {
     [x: number]: boolean;
   };
