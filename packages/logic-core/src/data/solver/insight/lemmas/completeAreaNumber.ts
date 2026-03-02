@@ -2,8 +2,7 @@ import GridData from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 import { instance as areaNumberInstance } from '../../../symbols/areaNumberSymbol.js';
-import { cell } from '../helper.js';
-import { array } from '../../../dataHelper.js';
+import { cell, modifyTiles } from '../helper.js';
 import { Color } from '../../../primitives.js';
 
 export default class CompleteAreaNumber extends InsightLemma {
@@ -46,10 +45,10 @@ export default class CompleteAreaNumber extends InsightLemma {
         );
       }
       if (minPossible === maxComplete && maxComplete > minComplete) {
-        const newTiles = array(grid.width, grid.height, (x, y) => {
-          const tile = grid.tiles[y][x];
+        const newTiles = modifyTiles(grid, (x, y, { get, setColor }) => {
+          const tile = get(x, y);
           if (regionMap[y][x] !== false && tile.exists && !tile.fixed) {
-            return tile.withColor(originTile.color);
+            setColor(x, y, originTile.color);
           }
           return tile;
         });
@@ -69,27 +68,28 @@ export default class CompleteAreaNumber extends InsightLemma {
         );
       }
       if (maxPossible === minComplete && maxComplete > minComplete) {
-        const newTiles = array(grid.width, grid.height, (x, y) => {
-          const tile = grid.tiles[y][x];
-          if (
-            tile.exists &&
-            !tile.fixed &&
-            tile.color === Color.Gray &&
-            regionMap[y][x] !== true
-          ) {
-            let isNeighboring = false;
-            isNeighboring ||= y > 0 && !!regionMap[y - 1][x];
-            isNeighboring ||= y < grid.height - 1 && !!regionMap[y + 1][x];
-            isNeighboring ||= x > 0 && !!regionMap[y][x - 1];
-            isNeighboring ||= x < grid.width - 1 && !!regionMap[y][x + 1];
-            if (isNeighboring) {
-              return tile.withColor(
-                originTile.color === Color.Dark ? Color.Light : Color.Dark
-              );
+        const newTiles = modifyTiles(
+          grid,
+          (x, y, { get, setOppositeColor }) => {
+            const tile = get(x, y);
+            if (
+              tile.exists &&
+              !tile.fixed &&
+              tile.color === Color.Gray &&
+              regionMap[y][x] !== true
+            ) {
+              let isNeighboring = false;
+              isNeighboring ||= y > 0 && !!regionMap[y - 1][x];
+              isNeighboring ||= y < grid.height - 1 && !!regionMap[y + 1][x];
+              isNeighboring ||= x > 0 && !!regionMap[y][x - 1];
+              isNeighboring ||= x < grid.width - 1 && !!regionMap[y][x + 1];
+              if (isNeighboring) {
+                setOppositeColor(x, y, originTile.color);
+              }
             }
+            return tile;
           }
-          return tile;
-        });
+        );
         context.setTiles(
           newTiles,
           proof.describe(`Area number at ${cell(position)} is complete`)

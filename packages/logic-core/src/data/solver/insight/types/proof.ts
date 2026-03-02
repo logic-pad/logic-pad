@@ -44,7 +44,7 @@ export default class Proof {
     const childrenStr = node.children
       .map(child => this.nodeToString(child, indent + '  '))
       .join('\n');
-    return `${indent}- ${node.source}:\n${indent}  ${node.description}\n${childrenStr}`;
+    return `${indent}- ${node.source} [${node.difficulty}]:\n${indent}  ${node.description}\n${childrenStr}`;
   }
 
   public toString(): string {
