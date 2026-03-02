@@ -13,9 +13,11 @@ export type RegionMap = (boolean | null)[][];
  * Tracks region connectivity and logical region relations.
  */
 export default class RegionStore extends InsightStore {
-  private disjointSet = new DisjointSet(0);
-  private connectedByLemma = new Map<string, Proof>();
-  private disconnectedByLemma = new Map<string, Proof>();
+  private cellDisjointSet = new DisjointSet(0);
+  private regionDisjointSet = new DisjointSet(0);
+  private connectionProofs = new Map<string, Proof>();
+  private regionConnectionProofs = new Map<number, Set<Proof>>();
+  private disconnectionProofs = new Map<string, Proof>();
   private cachedRegionMap = new Map<number, RegionMap>();
   private cachedGraphs = new Map<number, Graph>();
 
@@ -40,15 +42,27 @@ export default class RegionStore extends InsightStore {
     const valueA = this.toCellValue(cellA.x, cellA.y);
     const valueB = this.toCellValue(cellB.x, cellB.y);
 
-    const repA = this.disjointSet.find(valueA);
-    const repB = this.disjointSet.find(valueB);
+    const repA = this.cellDisjointSet.find(valueA);
+    const repB = this.cellDisjointSet.find(valueB);
 
     if (repA === repB) return true;
 
     const key = this.pairKey(repA, repB);
-    const deduction = this.connectedByLemma.get(key);
+    const deduction = this.connectionProofs.get(key);
     if (deduction) {
       proof?.add(deduction);
+      return true;
+    }
+
+    const regionRepA = this.regionDisjointSet.find(repA);
+    const regionRepB = this.regionDisjointSet.find(repB);
+    if (regionRepA === regionRepB) {
+      const regionProofs = this.regionConnectionProofs.get(regionRepA);
+      if (regionProofs) {
+        for (const regionProof of regionProofs) {
+          proof?.add(regionProof);
+        }
+      }
       return true;
     }
 
@@ -72,13 +86,13 @@ export default class RegionStore extends InsightStore {
     const valueA = this.toCellValue(cellA.x, cellA.y);
     const valueB = this.toCellValue(cellB.x, cellB.y);
 
-    const repA = this.disjointSet.find(valueA);
-    const repB = this.disjointSet.find(valueB);
+    const repA = this.cellDisjointSet.find(valueA);
+    const repB = this.cellDisjointSet.find(valueB);
 
     if (repA === repB) return false;
 
     const key = this.pairKey(repA, repB);
-    const deduction = this.disconnectedByLemma.get(key);
+    const deduction = this.disconnectionProofs.get(key);
     if (deduction) {
       proof?.add(deduction);
       return true;
@@ -93,24 +107,46 @@ export default class RegionStore extends InsightStore {
   public addConnected(cellA: Position, cellB: Position, proof: Proof): boolean {
     const valueA = this.toCellValue(cellA.x, cellA.y);
     const valueB = this.toCellValue(cellB.x, cellB.y);
-    const repA = this.disjointSet.find(valueA);
-    const repB = this.disjointSet.find(valueB);
+    const repA = this.cellDisjointSet.find(valueA);
+    const repB = this.cellDisjointSet.find(valueB);
 
     if (repA === repB) return false;
 
     const key = this.pairKey(repA, repB);
-    const disconnected = this.disconnectedByLemma.get(key);
+    const disconnected = this.disconnectionProofs.get(key);
     if (disconnected) {
       throw this.error(
         `Cannot connect ${region(cellA)} and ${region(cellB)}: they are already known to be disconnected.`
       );
     }
-    const existing = this.connectedByLemma.get(key);
+    const existing = this.connectionProofs.get(key);
     if (existing) {
       return false;
     }
 
-    this.connectedByLemma.set(key, proof);
+    this.connectionProofs.set(key, proof);
+    const oldRepA = this.regionDisjointSet.find(repA);
+    const oldRepB = this.regionDisjointSet.find(repB);
+    if (oldRepA === oldRepB) {
+      // The regions were already transitively connected, so we just need to add the proof to the region proofs.
+      const regionProofs =
+        this.regionConnectionProofs.get(oldRepA) ?? new Set<Proof>();
+      regionProofs.add(proof);
+      this.regionConnectionProofs.set(oldRepA, regionProofs);
+      return true;
+    }
+    this.regionDisjointSet.union(repA, repB);
+    const newRep = this.regionDisjointSet.find(repA);
+    this.regionConnectionProofs.set(
+      newRep,
+      new Set([
+        proof,
+        ...(this.regionConnectionProofs.get(oldRepA) || []),
+        ...(this.regionConnectionProofs.get(oldRepB) || []),
+      ])
+    );
+    this.regionConnectionProofs.delete(oldRepA);
+    this.regionConnectionProofs.delete(oldRepB);
     return true;
   }
 
@@ -124,24 +160,24 @@ export default class RegionStore extends InsightStore {
   ): boolean {
     const valueA = this.toCellValue(cellA.x, cellA.y);
     const valueB = this.toCellValue(cellB.x, cellB.y);
-    const repA = this.disjointSet.find(valueA);
-    const repB = this.disjointSet.find(valueB);
+    const repA = this.cellDisjointSet.find(valueA);
+    const repB = this.cellDisjointSet.find(valueB);
 
     if (repA === repB) return false;
 
     const key = this.pairKey(repA, repB);
-    const connected = this.connectedByLemma.get(key);
+    const connected = this.connectionProofs.get(key);
     if (connected) {
       throw this.error(
         `Cannot disconnect ${region(cellA)} and ${region(cellB)}: they are already known to be connected.`
       );
     }
-    const existing = this.disconnectedByLemma.get(key);
+    const existing = this.disconnectionProofs.get(key);
     if (existing) {
       return false;
     }
 
-    this.disconnectedByLemma.set(key, proof);
+    this.disconnectionProofs.set(key, proof);
     return true;
   }
 
@@ -194,7 +230,7 @@ export default class RegionStore extends InsightStore {
       );
       map[region.y][region.x] = true;
     }
-    for (const [key, existing] of this.connectedByLemma.entries()) {
+    for (const [key, existing] of this.connectionProofs.entries()) {
       const [rawA, rawB] = this.fromPairKey(key);
       if (rawA !== value && rawB !== value) continue;
       const otherPos = this.fromCellValue(rawA === value ? rawB : rawA);
@@ -215,7 +251,7 @@ export default class RegionStore extends InsightStore {
       }
       proof?.add(existing);
     }
-    for (const [key, existing] of this.disconnectedByLemma.entries()) {
+    for (const [key, existing] of this.disconnectionProofs.entries()) {
       const [rawA, rawB] = this.fromPairKey(key);
       if (rawA !== value && rawB !== value) continue;
       const otherPos = this.fromCellValue(rawA === value ? rawB : rawA);
@@ -290,7 +326,7 @@ export default class RegionStore extends InsightStore {
   private recompute(): void {
     const grid = this.context.grid;
     const size = grid.width * grid.height;
-    this.disjointSet = new DisjointSet(size);
+    this.cellDisjointSet = new DisjointSet(size);
     this.cachedRegionMap.clear();
     this.cachedGraphs.clear();
 
@@ -306,7 +342,7 @@ export default class RegionStore extends InsightStore {
             right.color !== Color.Gray &&
             right.color === tile.color
           ) {
-            this.disjointSet.union(
+            this.cellDisjointSet.union(
               this.toCellValue(row, col),
               this.toCellValue(row, col + 1)
             );
@@ -320,7 +356,7 @@ export default class RegionStore extends InsightStore {
             down.color !== Color.Gray &&
             down.color === tile.color
           ) {
-            this.disjointSet.union(
+            this.cellDisjointSet.union(
               this.toCellValue(row, col),
               this.toCellValue(row + 1, col)
             );
@@ -329,8 +365,23 @@ export default class RegionStore extends InsightStore {
       }
     }
 
-    this.connectedByLemma = this.rekeyMap(this.connectedByLemma);
-    this.disconnectedByLemma = this.rekeyMap(this.disconnectedByLemma);
+    this.connectionProofs = this.rekeyMap(this.connectionProofs);
+    this.disconnectionProofs = this.rekeyMap(this.disconnectionProofs);
+
+    this.regionDisjointSet = new DisjointSet(size);
+    this.regionConnectionProofs = new Map<number, Set<Proof>>();
+    for (const [key] of this.connectionProofs.entries()) {
+      const [repA, repB] = this.fromPairKey(key);
+      this.regionDisjointSet.union(repA, repB);
+    }
+    for (const [key, proof] of this.connectionProofs.entries()) {
+      const [rawA] = this.fromPairKey(key);
+      const repA = this.regionDisjointSet.find(rawA);
+      this.regionConnectionProofs.set(
+        repA,
+        (this.regionConnectionProofs.get(repA) ?? new Set<Proof>()).add(proof)
+      );
+    }
   }
 
   private rekeyMap(map: Map<string, Proof>): Map<string, Proof> {
@@ -339,8 +390,8 @@ export default class RegionStore extends InsightStore {
     for (const [key, deduction] of map.entries()) {
       const [rawA, rawB] = this.fromPairKey(key);
 
-      const repA = this.disjointSet.find(rawA);
-      const repB = this.disjointSet.find(rawB);
+      const repA = this.cellDisjointSet.find(rawA);
+      const repB = this.cellDisjointSet.find(rawB);
 
       if (repA === repB) continue;
 

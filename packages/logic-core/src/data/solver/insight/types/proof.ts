@@ -2,7 +2,7 @@ export interface ProofNode {
   source: string;
   description: string;
   difficulty: number;
-  children: ProofNode[];
+  children: Set<ProofNode>;
 }
 
 export default class Proof {
@@ -17,7 +17,7 @@ export default class Proof {
       source,
       description: '',
       difficulty: 0,
-      children: [],
+      children: new Set<ProofNode>(),
     });
   }
 
@@ -32,16 +32,12 @@ export default class Proof {
   }
 
   public add(deduction: Proof): this {
-    if (deduction instanceof Proof) {
-      this.root.children.push(deduction.root);
-    } else {
-      this.root.children.push(deduction);
-    }
+    this.root.children.add(deduction.root);
     return this;
   }
 
   private nodeToString(node: ProofNode, indent: string): string {
-    const childrenStr = node.children
+    const childrenStr = Array.from(node.children)
       .map(child => this.nodeToString(child, indent + '  '))
       .join('\n');
     return `${indent}- ${node.source} [${node.difficulty}]:\n${indent}  ${node.description}\n${childrenStr}`;

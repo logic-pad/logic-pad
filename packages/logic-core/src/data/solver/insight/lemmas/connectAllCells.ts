@@ -6,6 +6,7 @@ import ConnectAllRule, {
 import InsightContext from '../insightContext.js';
 import { array } from '../../../dataHelper.js';
 import { Position } from '../../../primitives.js';
+import { region } from '../helper.js';
 
 export default class ConnectAllCells extends InsightLemma {
   public readonly id = 'connect-all-cells';
@@ -43,10 +44,10 @@ export default class ConnectAllCells extends InsightLemma {
         islands.push(positions);
       }
       if (islands.length <= 1) continue;
-      const proof = this.proof()
-        .difficulty(2)
-        .describe(`Connect all ${color} cells`);
       for (let i = 1; i < islands.length; i++) {
+        const proof = this.proof()
+          .difficulty(2)
+          .describe(`Connect all ${color} cells at ${region(islands[i][0])}`);
         progress ||= context.regionStore.addConnected(
           islands[0][0],
           islands[i][0],
