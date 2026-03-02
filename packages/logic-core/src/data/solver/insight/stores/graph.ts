@@ -87,42 +87,78 @@ export class Graph {
     const discoveryTime = new Map<number, number>();
     const lowTime = new Map<number, number>();
     const parent = new Map<number, number | null>();
+    const childrenCount = new Map<number, number>();
     const articulationPoints = new Set<number>();
     let time = 0;
 
-    const dfs = (u: number): void => {
-      visited.add(u);
-      discoveryTime.set(u, time);
-      lowTime.set(u, time);
-      time += 1;
-      let children = 0;
-
-      for (const v of this.adjacency.get(u)!) {
-        if (!visited.has(v)) {
-          children += 1;
-          parent.set(v, u);
-          dfs(v);
-          lowTime.set(u, Math.min(lowTime.get(u)!, lowTime.get(v)!));
-
-          if (parent.get(u) === null && children > 1) {
-            articulationPoints.add(u);
-          }
-          if (
-            parent.get(u) !== null &&
-            lowTime.get(v)! >= discoveryTime.get(u)!
-          ) {
-            articulationPoints.add(u);
-          }
-        } else if (v !== parent.get(u)) {
-          lowTime.set(u, Math.min(lowTime.get(u)!, discoveryTime.get(v)!));
-        }
-      }
-    };
-
     for (const id of this.idToPositions.keys()) {
-      if (!visited.has(id)) {
-        parent.set(id, null);
-        dfs(id);
+      if (visited.has(id)) continue;
+
+      parent.set(id, null);
+      visited.add(id);
+      discoveryTime.set(id, time);
+      lowTime.set(id, time);
+      childrenCount.set(id, 0);
+      time += 1;
+
+      const stack: Array<{
+        node: number;
+        neighbors: number[];
+        nextNeighborIndex: number;
+      }> = [
+        {
+          node: id,
+          neighbors: [...(this.adjacency.get(id) ?? [])],
+          nextNeighborIndex: 0,
+        },
+      ];
+
+      while (stack.length > 0) {
+        const frame = stack[stack.length - 1];
+        const u = frame.node;
+
+        if (frame.nextNeighborIndex < frame.neighbors.length) {
+          const v = frame.neighbors[frame.nextNeighborIndex];
+          frame.nextNeighborIndex += 1;
+
+          if (!visited.has(v)) {
+            parent.set(v, u);
+            childrenCount.set(u, (childrenCount.get(u) ?? 0) + 1);
+
+            visited.add(v);
+            discoveryTime.set(v, time);
+            lowTime.set(v, time);
+            childrenCount.set(v, 0);
+            time += 1;
+
+            stack.push({
+              node: v,
+              neighbors: [...(this.adjacency.get(v) ?? [])],
+              nextNeighborIndex: 0,
+            });
+          } else if (v !== parent.get(u)) {
+            lowTime.set(u, Math.min(lowTime.get(u)!, discoveryTime.get(v)!));
+          }
+          continue;
+        }
+
+        stack.pop();
+        const parentNode = parent.get(u);
+
+        if (parentNode == null) {
+          if (parentNode === null && (childrenCount.get(u) ?? 0) > 1) {
+            articulationPoints.add(u);
+          }
+          continue;
+        }
+
+        lowTime.set(
+          parentNode,
+          Math.min(lowTime.get(parentNode)!, lowTime.get(u)!)
+        );
+        if (lowTime.get(u)! >= discoveryTime.get(parentNode)!) {
+          articulationPoints.add(parentNode);
+        }
       }
     }
 
