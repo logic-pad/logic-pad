@@ -16,7 +16,7 @@ export interface TileChange {
 export default class InsightContext {
   private _grid: GridData;
 
-  private _tileHistory: TileChange[] = [];
+  public tileHistory: TileChange[] = [];
 
   public constructor(grid: GridData) {
     this._grid = grid;
@@ -30,13 +30,6 @@ export default class InsightContext {
   }
 
   /**
-   * History of grid color changes with supporting proofs, ordered from oldest to newest.
-   */
-  public get tileHistory(): readonly TileChange[] {
-    return this._tileHistory;
-  }
-
-  /**
    * Updates grid colors and notifies all initialized stores.
    */
   public setTiles(
@@ -47,7 +40,7 @@ export default class InsightContext {
     this._grid = this._grid.copyWith({ tiles: newTiles }, false, false);
     this._regionStore?.onGridUpdate();
     this._numberSymbolStore?.onGridUpdate();
-    this._tileHistory.push({ oldGrid, newGrid: this._grid, proof });
+    this.tileHistory.push({ oldGrid, newGrid: this._grid, proof });
   }
 
   private _regionStore?: RegionStore;
