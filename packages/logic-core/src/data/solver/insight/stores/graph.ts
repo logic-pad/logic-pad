@@ -232,8 +232,12 @@ export class Graph {
   }
 
   private heuristic(id1: number, id2: number): number {
-    const pos1 = this.toPosition(this.idToPositions.get(id1)![0]);
-    const pos2 = this.toPosition(this.idToPositions.get(id2)![0]);
-    return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
+    const positions1 = this.idToPositions.get(id1)!;
+    const positions2 = this.idToPositions.get(id2)!;
+    const pos1 = this.toPosition(positions1[0]);
+    const pos2 = this.toPosition(positions2[0]);
+    const manhattan = Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y);
+    // Ensure heuristic is admissible for merged tiles
+    return Math.max(1, manhattan - positions1.length - positions2.length);
   }
 }
