@@ -1,3 +1,4 @@
+import BreakBannedPattern from './breakBannedPattern.js';
 import CompleteAreaNumber from './completeAreaNumber.js';
 import CompleteSubtileSymbol from './completeSubtileSymbol.js';
 import ConnectAllCells from './connectAllCells.js';
@@ -9,6 +10,7 @@ import OffByXAreaNumberConstrainedByRegionSize from './offByXAreaNumberConstrain
 const allLemmas: readonly InsightLemma[] = [
   new CompleteSubtileSymbol(),
   new OffByXAreaNumberConstrainedByRegionSize(),
+  new BreakBannedPattern(),
   new ConnectAllCells(),
   new ImpossibleAreaNumberColor(),
   new CompleteAreaNumber(),
