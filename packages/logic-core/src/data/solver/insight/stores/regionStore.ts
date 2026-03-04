@@ -45,9 +45,11 @@ export default class RegionStore extends InsightStore {
 
   public readonly id = 'regionStore';
 
-  public constructor(context: InsightContext) {
+  public constructor(context: InsightContext, initialize = true) {
     super(context);
-    this.recompute();
+    if (initialize) {
+      this.recompute();
+    }
   }
 
   /**
@@ -55,6 +57,23 @@ export default class RegionStore extends InsightStore {
    */
   public onGridUpdate(): void {
     this.recompute();
+  }
+
+  public copyWithContext(context: InsightContext): this {
+    const copy = new RegionStore(context, false) as this;
+    copy.cellDisjointSet = this.cellDisjointSet.copy();
+    copy.regionDisjointSet = this.regionDisjointSet.copy();
+    copy.connectionProofs = new Map(this.connectionProofs);
+    copy.regionConnectionProofs = new Map(
+      Array.from(this.regionConnectionProofs.entries()).map(([key, proofs]) => [
+        key,
+        new Set(proofs),
+      ])
+    );
+    copy.disconnectionProofs = new Map(this.disconnectionProofs);
+    copy.cachedRegionMap = new Map(this.cachedRegionMap);
+    copy.cachedGraphs = new Map(this.cachedGraphs);
+    return copy;
   }
 
   /**

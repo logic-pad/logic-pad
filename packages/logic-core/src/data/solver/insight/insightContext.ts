@@ -34,13 +34,23 @@ export default class InsightContext {
    */
   public setTiles(
     newTiles: readonly (readonly TileData[])[],
-    proof: Proof
+    proof?: Proof
   ): void {
     const oldGrid = this._grid;
     this._grid = this._grid.copyWith({ tiles: newTiles }, false, false);
     this._regionStore?.onGridUpdate();
     this._numberSymbolStore?.onGridUpdate();
-    this.tileHistory.push({ oldGrid, newGrid: this._grid, proof });
+    if (proof) {
+      this.tileHistory.push({ oldGrid, newGrid: this._grid, proof });
+    }
+  }
+
+  public copy(): InsightContext {
+    const copy = new InsightContext(this._grid);
+    copy.tileHistory = [...this.tileHistory];
+    copy._numberSymbolStore = this._numberSymbolStore?.copyWithContext(copy);
+    copy._regionStore = this._regionStore?.copyWithContext(copy);
+    return copy;
   }
 
   private _regionStore?: RegionStore;

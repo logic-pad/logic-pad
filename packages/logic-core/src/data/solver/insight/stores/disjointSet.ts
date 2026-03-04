@@ -1,7 +1,7 @@
 export default class DisjointSet {
-  private readonly parent: number[];
+  private parent: number[];
 
-  private readonly rank: number[];
+  private rank: number[];
 
   public constructor(size: number) {
     this.parent = Array.from({ length: size }, (_, i) => i);
@@ -29,5 +29,12 @@ export default class DisjointSet {
       this.parent[rootB] = rootA;
       this.rank[rootA] += 1;
     }
+  }
+
+  public copy(): DisjointSet {
+    const copy = new DisjointSet(0);
+    copy.parent = [...this.parent];
+    copy.rank = [...this.rank];
+    return copy;
   }
 }

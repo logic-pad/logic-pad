@@ -15,17 +15,19 @@ export interface NumberSymbolData {
  * Tracks true-number possibilities for number symbols.
  */
 export default class NumberSymbolStore extends InsightStore {
-  private readonly symbols = new Map<string, NumberSymbolData>();
-  private readonly offByX: OffByXRule | undefined;
+  private symbols = new Map<string, NumberSymbolData>();
+  private offByX: OffByXRule | undefined;
 
   public readonly id = 'numberSymbolStore';
 
-  public constructor(context: InsightContext) {
+  public constructor(context: InsightContext, initialize = true) {
     super(context);
     this.offByX = this.context.grid.rules.find(
       (rule): rule is OffByXRule => rule.id === offByXInstance.id
     );
-    this.initialize();
+    if (initialize) {
+      this.initialize();
+    }
   }
 
   private initialize(): void {
@@ -62,6 +64,18 @@ export default class NumberSymbolStore extends InsightStore {
 
   public onGridUpdate(): void {
     // Number-symbol deductions are independent of cell color updates.
+  }
+
+  public copyWithContext(context: InsightContext): this {
+    const copy = new NumberSymbolStore(context, false) as this;
+    copy.offByX = this.offByX;
+    for (const [tag, data] of this.symbols.entries()) {
+      copy.symbols.set(tag, {
+        possibilities: [...data.possibilities],
+        deductions: new Map<number, Proof>(data.deductions),
+      });
+    }
+    return copy;
   }
 
   /**

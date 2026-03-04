@@ -92,7 +92,9 @@ export default class CompleteAreaNumber extends InsightLemma {
         );
         context.setTiles(
           newTiles,
-          proof.describe(`Area number at ${cell(position)} is complete`)
+          proof.describe(
+            `Area number at ${cell(position)} is complete and must be surrounded`
+          )
         );
         progress = true;
       }

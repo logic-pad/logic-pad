@@ -14,6 +14,8 @@ export default abstract class InsightStore {
    */
   public abstract onGridUpdate(): void;
 
+  public abstract copyWithContext(context: InsightContext): this;
+
   protected error(message: string): InsightError {
     return new InsightError(this.id, message);
   }
