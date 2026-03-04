@@ -23,7 +23,7 @@ onmessage = e => {
 
   try {
     let restart = true;
-    while (restart) {
+    mainLoop: while (restart) {
       restart = false;
 
       for (const lemma of lemmas) {
@@ -33,9 +33,12 @@ onmessage = e => {
           context.tileHistory.forEach(history =>
             console.log(history.proof.toString())
           );
-          context.tileHistory.length = 0;
           restart = true;
-          break;
+          if (context.tileHistory.length > 0) {
+            break mainLoop;
+          } else {
+            break;
+          }
         } else {
           console.log(`%c${lemma.id}:\n  no changes`, 'color: darkgray');
         }
