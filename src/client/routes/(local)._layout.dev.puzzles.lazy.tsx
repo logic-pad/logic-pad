@@ -28,9 +28,6 @@ const NO_RATING = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 async function fetchDevPuzzles() {
   if (devPuzzles) return devPuzzles;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  // eslint-disable-next-line import-x/no-unresolved
   const response = (await import('../../../references/dev_puzzles.json')) as {
     default: {
       pid: number;
@@ -96,7 +93,7 @@ export const Route = createLazyFileRoute('/(local)/_layout/dev/puzzles')({
   component: memo(function DevPuzzles() {
     const [sort, setSort] = useState<
       'pid-asc' | 'pid-desc' | 'difficulty-asc' | 'difficulty-desc'
-    >('pid-asc');
+    >('difficulty-asc');
     const { data, fetchNextPage, hasNextPage, isFetching } = useInfiniteQuery(
       bidirectionalInfiniteQuery(
         ['dev-puzzle', 'search', sort],
