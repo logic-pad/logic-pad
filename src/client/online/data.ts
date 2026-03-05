@@ -56,7 +56,7 @@ export interface PuzzleBrief extends ResourceResponse {
   description: string;
   designDifficulty: number;
   ratedDifficulty: number[];
-  inSeries: boolean | null;
+  inSeries: boolean;
   solveCount: number;
   loveCount: number;
   types: PuzzleType[];

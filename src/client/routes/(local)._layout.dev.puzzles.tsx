@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/_layout/color')({
+export const Route = createFileRoute('/(local)/_layout/dev/puzzles')({
   beforeLoad: () => {
     if (import.meta.env.PROD) {
       throw notFound();
@@ -9,7 +9,7 @@ export const Route = createFileRoute('/_layout/color')({
   head: () => ({
     meta: [
       {
-        title: `Color Palette - Logic Pad`,
+        title: `Dev Puzzles - Logic Pad`,
       },
     ],
   }),

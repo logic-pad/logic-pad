@@ -27,7 +27,7 @@ const THEME_COLOR_NAMES = [
   'error-content',
 ] as const;
 
-export const Route = createLazyFileRoute('/_layout/color')({
+export const Route = createLazyFileRoute('/(local)/_layout/dev/color')({
   component: memo(function ColorPageLazy() {
     const [enabled, setEnabled] = useState(false);
     const { theme } = useTheme();

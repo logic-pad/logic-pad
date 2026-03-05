@@ -16,7 +16,7 @@ export const userRestrictionsQueryOptions = (userId: string) =>
     queryFn: () => api.modGetRestrictions(userId),
   });
 
-export const Route = createFileRoute('/_moderator/mod/profile/$userId')({
+export const Route = createFileRoute('/(moderator)/mod/profile/$userId')({
   remountDeps: ({ params }) => params.userId,
   loader: async ({ params }) => {
     try {

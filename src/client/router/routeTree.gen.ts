@@ -23,7 +23,6 @@ import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
 import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
 import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
 import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
-import { Route as LayoutColorRouteImport } from './../routes/_layout.color'
 import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
 import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
 import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
@@ -38,9 +37,12 @@ import { Route as LayoutMyStuffPuzzlesRouteImport } from './../routes/_layout.my
 import { Route as LayoutMyStuffCollectionsRouteImport } from './../routes/_layout.my-stuff.collections'
 import { Route as LayoutCreatePuzzleIdRouteImport } from './../routes/_layout.create.$puzzleId'
 import { Route as LayoutCollectionCollectionIdRouteImport } from './../routes/_layout.collection.$collectionId'
-import { Route as ModeratorModProfileUserIdRouteImport } from './../routes/_moderator.mod.profile.$userId'
+import { Route as moderatorModProfileUserIdRouteImport } from './../routes/(moderator).mod.profile.$userId'
+import { Route as localLayoutDevPuzzlesRouteImport } from './../routes/(local)._layout.dev.puzzles'
+import { Route as localLayoutDevColorRouteImport } from './../routes/(local)._layout.dev.color'
 
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
+const localLayoutLazyRouteImport = createFileRoute('/(local)/_layout')()
 
 const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
@@ -61,6 +63,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const localLayoutLazyRoute = localLayoutLazyRouteImport
+  .update({
+    id: '/(local)/_layout',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() => import('./../routes/(local)._layout.lazy').then((d) => d.Route))
 const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
   id: '/uploader',
   path: '/uploader',
@@ -113,13 +121,6 @@ const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
   import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
-)
-const LayoutColorRoute = LayoutColorRouteImport.update({
-  id: '/color',
-  path: '/color',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.color.lazy').then((d) => d.Route),
 )
 const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
   id: '/solve/',
@@ -224,22 +225,40 @@ const LayoutCollectionCollectionIdRoute =
       (d) => d.Route,
     ),
   )
-const ModeratorModProfileUserIdRoute =
-  ModeratorModProfileUserIdRouteImport.update({
-    id: '/_moderator/mod/profile/$userId',
+const moderatorModProfileUserIdRoute = moderatorModProfileUserIdRouteImport
+  .update({
+    id: '/(moderator)/mod/profile/$userId',
     path: '/mod/profile/$userId',
     getParentRoute: () => rootRouteImport,
-  } as any).lazy(() =>
-    import('./../routes/_moderator.mod.profile.$userId.lazy').then(
+  } as any)
+  .lazy(() =>
+    import('./../routes/(moderator).mod.profile.$userId.lazy').then(
       (d) => d.Route,
     ),
   )
+const localLayoutDevPuzzlesRoute = localLayoutDevPuzzlesRouteImport
+  .update({
+    id: '/dev/puzzles',
+    path: '/dev/puzzles',
+    getParentRoute: () => localLayoutLazyRoute,
+  } as any)
+  .lazy(() =>
+    import('./../routes/(local)._layout.dev.puzzles.lazy').then((d) => d.Route),
+  )
+const localLayoutDevColorRoute = localLayoutDevColorRouteImport
+  .update({
+    id: '/dev/color',
+    path: '/dev/color',
+    getParentRoute: () => localLayoutLazyRoute,
+  } as any)
+  .lazy(() =>
+    import('./../routes/(local)._layout.dev.color.lazy').then((d) => d.Route),
+  )
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof localLayoutLazyRouteWithChildren
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
-  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -263,13 +282,14 @@ export interface FileRoutesByFullPath {
   '/perfection': typeof LayoutPerfectionIndexRoute
   '/search/': typeof LayoutSearchIndexRoute
   '/solve': typeof LayoutSolveIndexRoute
-  '/mod/profile/$userId': typeof ModeratorModProfileUserIdRoute
+  '/dev/color': typeof localLayoutDevColorRoute
+  '/dev/puzzles': typeof localLayoutDevPuzzlesRoute
+  '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof localLayoutLazyRouteWithChildren
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
-  '/color': typeof LayoutColorRoute
   '/my-follows': typeof LayoutMyFollowsRoute
   '/privacy-policy': typeof LayoutPrivacyPolicyRoute
   '/rules': typeof LayoutRulesRoute
@@ -291,7 +311,9 @@ export interface FileRoutesByTo {
   '/perfection': typeof LayoutPerfectionIndexRoute
   '/search': typeof LayoutSearchIndexRoute
   '/solve': typeof LayoutSolveIndexRoute
-  '/mod/profile/$userId': typeof ModeratorModProfileUserIdRoute
+  '/dev/color': typeof localLayoutDevColorRoute
+  '/dev/puzzles': typeof localLayoutDevPuzzlesRoute
+  '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -299,7 +321,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
-  '/_layout/color': typeof LayoutColorRoute
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
   '/_layout/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/_layout/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -309,6 +330,7 @@ export interface FileRoutesById {
   '/_layout/support': typeof LayoutSupportRoute
   '/_layout/terms': typeof LayoutTermsRoute
   '/_layout/uploader': typeof LayoutUploaderRoute
+  '/(local)/_layout': typeof localLayoutLazyRouteWithChildren
   '/_layout/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/_layout/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/_layout/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -323,7 +345,9 @@ export interface FileRoutesById {
   '/_layout/perfection/': typeof LayoutPerfectionIndexRoute
   '/_layout/search/': typeof LayoutSearchIndexRoute
   '/_layout/solve/': typeof LayoutSolveIndexRoute
-  '/_moderator/mod/profile/$userId': typeof ModeratorModProfileUserIdRoute
+  '/(local)/_layout/dev/color': typeof localLayoutDevColorRoute
+  '/(local)/_layout/dev/puzzles': typeof localLayoutDevPuzzlesRoute
+  '/(moderator)/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -331,7 +355,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/redirect'
-    | '/color'
     | '/my-follows'
     | '/my-stuff'
     | '/privacy-policy'
@@ -355,13 +378,14 @@ export interface FileRouteTypes {
     | '/perfection'
     | '/search/'
     | '/solve'
+    | '/dev/color'
+    | '/dev/puzzles'
     | '/mod/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/redirect'
-    | '/color'
     | '/my-follows'
     | '/privacy-policy'
     | '/rules'
@@ -383,6 +407,8 @@ export interface FileRouteTypes {
     | '/perfection'
     | '/search'
     | '/solve'
+    | '/dev/color'
+    | '/dev/puzzles'
     | '/mod/profile/$userId'
   id:
     | '__root__'
@@ -390,7 +416,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/redirect'
     | '/_layout'
-    | '/_layout/color'
     | '/_layout/my-follows'
     | '/_layout/my-stuff'
     | '/_layout/privacy-policy'
@@ -400,6 +425,7 @@ export interface FileRouteTypes {
     | '/_layout/support'
     | '/_layout/terms'
     | '/_layout/uploader'
+    | '/(local)/_layout'
     | '/_layout/collection/$collectionId'
     | '/_layout/create/$puzzleId'
     | '/_layout/my-stuff/collections'
@@ -414,7 +440,9 @@ export interface FileRouteTypes {
     | '/_layout/perfection/'
     | '/_layout/search/'
     | '/_layout/solve/'
-    | '/_moderator/mod/profile/$userId'
+    | '/(local)/_layout/dev/color'
+    | '/(local)/_layout/dev/puzzles'
+    | '/(moderator)/mod/profile/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -422,7 +450,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   RedirectRoute: typeof RedirectRoute
   LayoutLazyRoute: typeof LayoutLazyRouteWithChildren
-  ModeratorModProfileUserIdRoute: typeof ModeratorModProfileUserIdRoute
+  localLayoutLazyRoute: typeof localLayoutLazyRouteWithChildren
+  moderatorModProfileUserIdRoute: typeof moderatorModProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -453,6 +482,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(local)/_layout': {
+      id: '/(local)/_layout'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof localLayoutLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/uploader': {
@@ -516,13 +552,6 @@ declare module '@tanstack/react-router' {
       path: '/my-follows'
       fullPath: '/my-follows'
       preLoaderRoute: typeof LayoutMyFollowsRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/color': {
-      id: '/_layout/color'
-      path: '/color'
-      fullPath: '/color'
-      preLoaderRoute: typeof LayoutColorRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/solve/': {
@@ -623,12 +652,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCollectionCollectionIdRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_moderator/mod/profile/$userId': {
-      id: '/_moderator/mod/profile/$userId'
+    '/(moderator)/mod/profile/$userId': {
+      id: '/(moderator)/mod/profile/$userId'
       path: '/mod/profile/$userId'
       fullPath: '/mod/profile/$userId'
-      preLoaderRoute: typeof ModeratorModProfileUserIdRouteImport
+      preLoaderRoute: typeof moderatorModProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(local)/_layout/dev/puzzles': {
+      id: '/(local)/_layout/dev/puzzles'
+      path: '/dev/puzzles'
+      fullPath: '/dev/puzzles'
+      preLoaderRoute: typeof localLayoutDevPuzzlesRouteImport
+      parentRoute: typeof localLayoutLazyRoute
+    }
+    '/(local)/_layout/dev/color': {
+      id: '/(local)/_layout/dev/color'
+      path: '/dev/color'
+      fullPath: '/dev/color'
+      preLoaderRoute: typeof localLayoutDevColorRouteImport
+      parentRoute: typeof localLayoutLazyRoute
     }
   }
 }
@@ -666,7 +709,6 @@ const LayoutSearchRouteWithChildren = LayoutSearchRoute._addFileChildren(
 )
 
 interface LayoutLazyRouteChildren {
-  LayoutColorRoute: typeof LayoutColorRoute
   LayoutMyFollowsRoute: typeof LayoutMyFollowsRoute
   LayoutMyStuffRoute: typeof LayoutMyStuffRouteWithChildren
   LayoutPrivacyPolicyRoute: typeof LayoutPrivacyPolicyRoute
@@ -687,7 +729,6 @@ interface LayoutLazyRouteChildren {
 }
 
 const LayoutLazyRouteChildren: LayoutLazyRouteChildren = {
-  LayoutColorRoute: LayoutColorRoute,
   LayoutMyFollowsRoute: LayoutMyFollowsRoute,
   LayoutMyStuffRoute: LayoutMyStuffRouteWithChildren,
   LayoutPrivacyPolicyRoute: LayoutPrivacyPolicyRoute,
@@ -711,12 +752,27 @@ const LayoutLazyRouteWithChildren = LayoutLazyRoute._addFileChildren(
   LayoutLazyRouteChildren,
 )
 
+interface localLayoutLazyRouteChildren {
+  localLayoutDevColorRoute: typeof localLayoutDevColorRoute
+  localLayoutDevPuzzlesRoute: typeof localLayoutDevPuzzlesRoute
+}
+
+const localLayoutLazyRouteChildren: localLayoutLazyRouteChildren = {
+  localLayoutDevColorRoute: localLayoutDevColorRoute,
+  localLayoutDevPuzzlesRoute: localLayoutDevPuzzlesRoute,
+}
+
+const localLayoutLazyRouteWithChildren = localLayoutLazyRoute._addFileChildren(
+  localLayoutLazyRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   RedirectRoute: RedirectRoute,
   LayoutLazyRoute: LayoutLazyRouteWithChildren,
-  ModeratorModProfileUserIdRoute: ModeratorModProfileUserIdRoute,
+  localLayoutLazyRoute: localLayoutLazyRouteWithChildren,
+  moderatorModProfileUserIdRoute: moderatorModProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

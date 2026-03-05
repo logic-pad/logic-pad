@@ -10,7 +10,6 @@ import {
   CollectionBrief,
   CollectionFollow,
   ResourceStatus,
-  ResourceResponse,
   UserDetail,
   FrontPage,
   Comment,
@@ -828,7 +827,7 @@ export const api = {
 };
 
 export const bidirectionalInfiniteQuery = <
-  TQueryFnData extends ListResponse<ResourceResponse>,
+  TQueryFnData extends ListResponse<{ id: string }>,
   TError = DefaultError,
   TData = InfiniteData<TQueryFnData>,
   TQueryKey extends QueryKey = QueryKey,

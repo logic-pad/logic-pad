@@ -7,7 +7,7 @@ import { toRelativeDate } from '../uiHelper';
 import Avatar from '../online/Avatar';
 import SupporterBadge from '../components/SupporterBadge';
 import { FaCheckSquare, FaEdit } from 'react-icons/fa';
-import { userAccountQueryOptions } from './_moderator.mod.profile.$userId';
+import { userAccountQueryOptions } from './(moderator).mod.profile.$userId';
 import UserRestrictions from '../online/moderator/UserRestrictions';
 import ModMessagePrompt, {
   modPrompt,
@@ -21,7 +21,7 @@ import UserStatus from '../online/moderator/UserStatus';
 import { api, queryClient } from '../online/api';
 import toast from 'react-hot-toast';
 
-export const Route = createLazyFileRoute('/_moderator/mod/profile/$userId')({
+export const Route = createLazyFileRoute('/(moderator)/mod/profile/$userId')({
   component: memo(function RouteComponent() {
     useRouteProtection('moderator');
     const userId = Route.useParams().userId;

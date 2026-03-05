@@ -2,10 +2,13 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -13,20 +16,37 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vite/client", "vite-plugin-pwa/react"],
+    "types": [
+      "vite/client",
+      "vite-plugin-pwa/react"
+    ],
     "paths": {
-      "@logic-pad/core/assets/*": ["./packages/logic-core/assets/*"],
-      "@logic-pad/core/*": ["./packages/logic-core/src/*"],
-      "@logic-pad/core": ["./packages/logic-core/src/index.ts"]
+      "@logic-pad/core/assets/*": [
+        "./packages/logic-core/assets/*"
+      ],
+      "@logic-pad/core/*": [
+        "./packages/logic-core/src/*"
+      ],
+      "@logic-pad/core": [
+        "./packages/logic-core/src/index.ts"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["**/*.global.d.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src",
+    "src/client/routes/(local)._layout.dev.color.tsx"
+  ],
+  "exclude": [
+    "**/*.global.d.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
