@@ -177,6 +177,7 @@ export default defineConfig({
         '@terrazzo/tiles',
         '@terrazzo/react-color-picker',
         '@terrazzo/use-color',
+        /dev_puzzles\.json$/,
       ],
     },
   },
