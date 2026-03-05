@@ -28,6 +28,8 @@ const NO_RATING = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 async function fetchDevPuzzles() {
   if (devPuzzles) return devPuzzles;
+  /* eslint-disable */
+  // @ts-ignore
   const response = (await import('../../../references/dev_puzzles.json')) as {
     default: {
       pid: number;
@@ -35,6 +37,7 @@ async function fetchDevPuzzles() {
       puzzleLink: string;
     }[];
   };
+  /* eslint-enable */
   devPuzzles = response.default.map(p => ({
     id: p.pid.toString(),
     difficulty: p.difficulty,
