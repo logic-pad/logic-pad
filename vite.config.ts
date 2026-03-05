@@ -36,7 +36,7 @@ export default defineConfig({
       outDir: '.vercel/output/static',
       includeAssets: ['favicon.ico', '*.svg', '*.png'],
       workbox: {
-        globIgnores: ['**/node_modules/**/*', '**/_moderator*'],
+        globIgnores: ['**/node_modules/**/*', '**/(moderator)*', '**/(local)*'],
         maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/api/, /^\/robots.txt/, /^\/sitemap.xml/],
       },
@@ -177,6 +177,7 @@ export default defineConfig({
         '@terrazzo/tiles',
         '@terrazzo/react-color-picker',
         '@terrazzo/use-color',
+        /\(local\)/, // exclude local-only modules
       ],
     },
   },

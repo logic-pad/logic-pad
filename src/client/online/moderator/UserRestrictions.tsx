@@ -1,5 +1,5 @@
 import { memo, RefObject, useEffect, useState } from 'react';
-import { userRestrictionsQueryOptions } from '../../routes/_moderator.mod.profile.$userId';
+import { userRestrictionsQueryOptions } from '../../routes/(moderator).mod.profile.$userId';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api, queryClient } from '../api';
 import toast from 'react-hot-toast';

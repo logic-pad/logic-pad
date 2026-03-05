@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/_layout/color')({
+export const Route = createFileRoute('/(local)/_layout/dev/color')({
   beforeLoad: () => {
     if (import.meta.env.PROD) {
       throw notFound();
