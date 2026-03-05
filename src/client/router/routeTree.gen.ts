@@ -38,6 +38,7 @@ import { Route as LayoutMyStuffCollectionsRouteImport } from './../routes/_layou
 import { Route as LayoutCreatePuzzleIdRouteImport } from './../routes/_layout.create.$puzzleId'
 import { Route as LayoutCollectionCollectionIdRouteImport } from './../routes/_layout.collection.$collectionId'
 import { Route as moderatorModProfileUserIdRouteImport } from './../routes/(moderator).mod.profile.$userId'
+import { Route as localLayoutDevPuzzlesRouteImport } from './../routes/(local)._layout.dev.puzzles'
 import { Route as localLayoutDevColorRouteImport } from './../routes/(local)._layout.dev.color'
 
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
@@ -235,6 +236,15 @@ const moderatorModProfileUserIdRoute = moderatorModProfileUserIdRouteImport
       (d) => d.Route,
     ),
   )
+const localLayoutDevPuzzlesRoute = localLayoutDevPuzzlesRouteImport
+  .update({
+    id: '/dev/puzzles',
+    path: '/dev/puzzles',
+    getParentRoute: () => localLayoutLazyRoute,
+  } as any)
+  .lazy(() =>
+    import('./../routes/(local)._layout.dev.puzzles.lazy').then((d) => d.Route),
+  )
 const localLayoutDevColorRoute = localLayoutDevColorRouteImport
   .update({
     id: '/dev/color',
@@ -273,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/search/': typeof LayoutSearchIndexRoute
   '/solve': typeof LayoutSolveIndexRoute
   '/dev/color': typeof localLayoutDevColorRoute
+  '/dev/puzzles': typeof localLayoutDevPuzzlesRoute
   '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesByTo {
@@ -301,6 +312,7 @@ export interface FileRoutesByTo {
   '/search': typeof LayoutSearchIndexRoute
   '/solve': typeof LayoutSolveIndexRoute
   '/dev/color': typeof localLayoutDevColorRoute
+  '/dev/puzzles': typeof localLayoutDevPuzzlesRoute
   '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesById {
@@ -334,6 +346,7 @@ export interface FileRoutesById {
   '/_layout/search/': typeof LayoutSearchIndexRoute
   '/_layout/solve/': typeof LayoutSolveIndexRoute
   '/(local)/_layout/dev/color': typeof localLayoutDevColorRoute
+  '/(local)/_layout/dev/puzzles': typeof localLayoutDevPuzzlesRoute
   '/(moderator)/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRouteTypes {
@@ -366,6 +379,7 @@ export interface FileRouteTypes {
     | '/search/'
     | '/solve'
     | '/dev/color'
+    | '/dev/puzzles'
     | '/mod/profile/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -394,6 +408,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/solve'
     | '/dev/color'
+    | '/dev/puzzles'
     | '/mod/profile/$userId'
   id:
     | '__root__'
@@ -426,6 +441,7 @@ export interface FileRouteTypes {
     | '/_layout/search/'
     | '/_layout/solve/'
     | '/(local)/_layout/dev/color'
+    | '/(local)/_layout/dev/puzzles'
     | '/(moderator)/mod/profile/$userId'
   fileRoutesById: FileRoutesById
 }
@@ -643,6 +659,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof moderatorModProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(local)/_layout/dev/puzzles': {
+      id: '/(local)/_layout/dev/puzzles'
+      path: '/dev/puzzles'
+      fullPath: '/dev/puzzles'
+      preLoaderRoute: typeof localLayoutDevPuzzlesRouteImport
+      parentRoute: typeof localLayoutLazyRoute
+    }
     '/(local)/_layout/dev/color': {
       id: '/(local)/_layout/dev/color'
       path: '/dev/color'
@@ -731,10 +754,12 @@ const LayoutLazyRouteWithChildren = LayoutLazyRoute._addFileChildren(
 
 interface localLayoutLazyRouteChildren {
   localLayoutDevColorRoute: typeof localLayoutDevColorRoute
+  localLayoutDevPuzzlesRoute: typeof localLayoutDevPuzzlesRoute
 }
 
 const localLayoutLazyRouteChildren: localLayoutLazyRouteChildren = {
   localLayoutDevColorRoute: localLayoutDevColorRoute,
+  localLayoutDevPuzzlesRoute: localLayoutDevPuzzlesRoute,
 }
 
 const localLayoutLazyRouteWithChildren = localLayoutLazyRoute._addFileChildren(
