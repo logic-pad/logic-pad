@@ -19,6 +19,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import OutlineOverlay from '../grid/OutlineOverlay';
 import InstructionPartPortal from '../instructions/InstructionPartPortal';
 import { PartPlacement } from '../instructions/parts/types';
+import { r } from 'readable-regexp';
 
 const solver = new InsightSolver();
 
@@ -47,38 +48,78 @@ function statusToText(status: Status): string {
   }
 }
 
-function RegionButton({
-  position,
+function HighlightButton({
+  type,
+  positions,
   overlayHandle,
 }: {
-  position: Position;
+  type: 'region' | 'cell';
+  positions: Position[];
   overlayHandle: RefObject<InsightOverlayHandle | null>;
 }) {
   const { grid } = useGrid();
+  const text = useMemo(() => {
+    if (positions.length === 1) {
+      return `${positions[0].x},${positions[0].y}`;
+    } else if (positions.length < 3) {
+      return positions.map(p => `${p.x},${p.y}`).join('\u3000');
+    } else {
+      return `${positions
+        .slice(0, 2)
+        .map(p => `${p.x},${p.y}`)
+        .join('\u3000')}...`;
+    }
+  }, [positions]);
   return (
     <button
-      className="btn btn-xs inline px-1.5 py-0.5 btn-neutral bg-info/10 border-0 border-b border-info"
+      className={cn(
+        'btn btn-xs inline px-1.5 py-0.5 btn-neutral border-0 border-b',
+        type === 'region'
+          ? 'bg-info/10 border-info'
+          : 'bg-accent/10 border-accent'
+      )}
       onClick={() => {
-        const positions = [];
-        const tile = grid.getTile(position.x, position.y);
-        if (tile.color === Color.Gray) {
-          positions.push(position);
-        } else {
-          grid.iterateArea(
-            position,
-            t => t.color === tile.color,
-            (_, x, y) => {
-              positions.push({ x, y });
-            }
-          );
+        const finalPositions = [];
+        for (const position of positions) {
+          const tile = grid.getTile(position.x, position.y);
+          if (type === 'cell' || tile.color === Color.Gray) {
+            finalPositions.push(position);
+          } else {
+            grid.iterateArea(
+              position,
+              t => t.color === tile.color,
+              (_, x, y) => {
+                finalPositions.push({ x, y });
+              }
+            );
+          }
         }
-        overlayHandle.current?.setPositions(positions, 'info');
+        overlayHandle.current?.setPositions(
+          finalPositions,
+          type === 'region' ? 'info' : 'accent'
+        );
       }}
     >
-      {position.x},{position.y}
+      {text}
     </button>
   );
 }
+
+const COORDINATES = r.oneOrMore.charIn`0-9`.exactly`,`.oneOrMore.charIn`0-9`;
+const COORDINATE_LIST = r
+  .zeroOrMore(r.match(COORDINATES).exactly`;`)
+  .match(COORDINATES);
+
+const regionRegex = r.lineStart.exactly`[`.capture(COORDINATE_LIST)
+  .exactly`]`.toRegExp();
+const cellRegex = r.lineStart.exactly`(`.capture(COORDINATE_LIST)
+  .exactly`)`.toRegExp();
+const bothRegex = r.capture
+  .oneOf(
+    r.exactly`[`.match(COORDINATE_LIST).exactly`]`,
+    r.exactly`(`.match(COORDINATE_LIST).exactly`)`
+  )
+  .toRegExp('g');
 
 function Description({
   description,
@@ -87,36 +128,39 @@ function Description({
   description: string;
   overlayHandle: RefObject<InsightOverlayHandle | null>;
 }) {
-  const parts = description.split(/(\[[0-9]+,[0-9]+\]|\([0-9]+,[0-9]+\))/g);
+  const parts = description.split(bothRegex);
+  console.log(parts);
   return (
     <>
       {parts.map((part, index) => {
-        const match = part.match(/^\[([0-9]+),([0-9]+)\]$/);
+        const match = part.match(regionRegex);
         if (match) {
-          const x = parseInt(match[1], 10);
-          const y = parseInt(match[2], 10);
+          const positions = match[1].split(';').map(coord => {
+            const [x, y] = coord.split(',').map(Number);
+            return { x, y };
+          });
           return (
-            <RegionButton
+            <HighlightButton
               key={index}
-              position={{ x, y }}
+              type="region"
+              positions={positions}
               overlayHandle={overlayHandle}
             />
           );
         }
-        const match2 = part.match(/^\(([0-9]+),([0-9]+)\)$/);
+        const match2 = part.match(cellRegex);
         if (match2) {
-          const x = parseInt(match2[1], 10);
-          const y = parseInt(match2[2], 10);
+          const positions = match2[1].split(';').map(coord => {
+            const [x, y] = coord.split(',').map(Number);
+            return { x, y };
+          });
           return (
-            <button
+            <HighlightButton
               key={index}
-              className="btn btn-xs inline px-1.5 py-0.5 btn-neutral bg-accent/10 border-0 border-b border-accent"
-              onClick={() =>
-                overlayHandle.current?.setPositions([{ x, y }], 'accent')
-              }
-            >
-              {x},{y}
-            </button>
+              type="cell"
+              positions={positions}
+              overlayHandle={overlayHandle}
+            />
           );
         }
         return <span key={index}>{part}</span>;

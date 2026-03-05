@@ -42,7 +42,7 @@ export default class ConnectAllRemovesDisconnectedRegions extends InsightLemma {
       context.setTiles(
         newTiles,
         proof.describe(
-          `Cells at ${disconnected.map(r => cell(r)).join(', ')} cannot be ${color} because they are disconnected from the rest of the ${color} cells`
+          `Cells at ${cell(disconnected)} cannot be ${color} because they are disconnected from the rest of the ${color} cells`
         )
       );
     }

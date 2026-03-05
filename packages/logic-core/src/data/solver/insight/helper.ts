@@ -2,11 +2,17 @@ import GridData from '../../grid.js';
 import { Color, Position } from '../../primitives.js';
 import TileData from '../../tile.js';
 
-export function cell(cell: Position): string {
+export function cell(cell: Position | Position[]): string {
+  if (Array.isArray(cell)) {
+    return `(${cell.map(c => `${c.x},${c.y}`).join(';')})`;
+  }
   return `(${cell.x},${cell.y})`;
 }
 
-export function region(representative: Position): string {
+export function region(representative: Position | Position[]): string {
+  if (Array.isArray(representative)) {
+    return `[${representative.map(c => `${c.x},${c.y}`).join(';')}]`;
+  }
   return `[${representative.x},${representative.y}]`;
 }
 

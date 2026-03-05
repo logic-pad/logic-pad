@@ -71,7 +71,7 @@ export default class ConnectThroughBottleneck extends InsightLemma {
           proof
             .copy()
             .describe(
-              `Cells at ${modified.map(p => cell(p)).join(', ')} are bottlenecks connecting ${regionMap.islands.map(island => region(island)).join(', ')}, so they must be filled in`
+              `Cells at ${cell(modified)} are bottlenecks connecting ${region(regionMap.islands)}, so they must be filled in`
             )
         );
         progress = true;
