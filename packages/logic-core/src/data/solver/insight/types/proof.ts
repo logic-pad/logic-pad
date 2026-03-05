@@ -36,6 +36,15 @@ export default class Proof {
     return this;
   }
 
+  public copy(): Proof {
+    return new Proof({
+      source: this.root.source,
+      description: this.root.description,
+      difficulty: this.root.difficulty,
+      children: new Set<ProofNode>(this.root.children),
+    });
+  }
+
   private nodeToString(node: ProofNode, indent: string): string {
     const childrenStr = Array.from(node.children)
       .map(child => this.nodeToString(child, indent + '  '))

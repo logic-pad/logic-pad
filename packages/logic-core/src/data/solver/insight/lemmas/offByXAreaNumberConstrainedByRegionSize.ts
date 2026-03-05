@@ -16,11 +16,10 @@ export default class OffByXAreaNumberConstrainedByRegionSize extends InsightLemm
   }
 
   public apply(context: InsightContext): boolean {
-    const grid = context.grid;
     const numberStore = context.numberSymbolStore;
     const regionStore = context.regionStore;
     let progress = false;
-    for (const [idx, symbol] of grid.symbols
+    for (const [idx, symbol] of context.grid.symbols
       .get(areaNumberInstance.id)
       ?.entries() ?? []) {
       const tag = numberStore.getTag(areaNumberInstance.id, idx);

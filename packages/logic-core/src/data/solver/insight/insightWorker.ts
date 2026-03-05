@@ -117,13 +117,25 @@ onmessage = e => {
   }
 
   if (context.tileHistory.length > 0) {
-    postMessage({
-      type: 'solve',
-      data: Serializer.stringifyGrid(context.grid),
-      proofs: request.reportProof
-        ? context.tileHistory.map(history => history.proof.root)
-        : undefined,
-    } satisfies Response);
+    if (request.completeSolve) {
+      postMessage({
+        type: 'solve',
+        data: Serializer.stringifyGrid(context.grid),
+        proofs: request.reportProof
+          ? context.tileHistory.map(history => history.proof.root)
+          : undefined,
+      } satisfies Response);
+    } else {
+      // Some lemmas output several steps at once
+      // Only report the first step to avoid overwhelming the UI
+      postMessage({
+        type: 'solve',
+        data: Serializer.stringifyGrid(context.tileHistory[0].newGrid),
+        proofs: request.reportProof
+          ? [context.tileHistory[0].proof.root]
+          : undefined,
+      } satisfies Response);
+    }
   } else {
     postMessage({
       type: 'solve',

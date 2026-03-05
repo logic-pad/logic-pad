@@ -1,7 +1,7 @@
 import { array } from '../../../dataHelper.js';
 import GridData from '../../../grid.js';
 import { Color, Position } from '../../../primitives.js';
-import { cell, region } from '../helper.js';
+import { cell, modifyTiles, region } from '../helper.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 
@@ -13,12 +13,11 @@ export default class ConnectThroughBottleneck extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    const grid = context.grid;
     const regionStore = context.regionStore;
     let progress = false;
-    const visited = array(grid.width, grid.height, () => false);
+    const visited = array(context.grid.width, context.grid.height, () => false);
     while (true) {
-      const seed = grid.find(
+      const seed = context.grid.find(
         (t, x, y) => !visited[y][x] && t.exists && t.color !== Color.Gray
       );
       if (!seed) break;
@@ -26,7 +25,7 @@ export default class ConnectThroughBottleneck extends InsightLemma {
       // Find a region with disconnected areas
       const proof = this.proof().difficulty(3);
       const regionMap = regionStore.getRegionMap(seed, proof);
-      const color = grid.getTile(seed.x, seed.y).color;
+      const color = context.grid.getTile(seed.x, seed.y).color;
       regionMap.cells.forEach((row, y) =>
         row.forEach((cell, x) => {
           if (cell !== false) visited[y][x] = true;
@@ -39,38 +38,44 @@ export default class ConnectThroughBottleneck extends InsightLemma {
       // of the shortest paths between the islands and the articulation points in the graph.
       const graph = regionStore.getGraph(seed, proof);
       const island1 = regionMap.islands[0];
-      const chokepoints: Position[] = [];
       for (let i = 1; i < regionMap.islands.length; i++) {
         const island2 = regionMap.islands[i];
         const path = graph.shortestPath(
           graph.getId(island1.x, island1.y),
           graph.getId(island2.x, island2.y)
         );
+        const chokepoints: Position[] = [];
         for (const id of path) {
           if (graph.articulationPoints.has(id)) {
             chokepoints.push(...graph.getPositions(id));
           }
         }
+        if (chokepoints.length === 0) continue;
+        const modified: Position[] = [];
+        const newTiles = modifyTiles(
+          context.grid,
+          (x, y, { get, setOneColor }) => {
+            const tile = get(x, y);
+            if (tile.exists && !tile.fixed && tile.color === Color.Gray) {
+              const position = chokepoints.find(p => p.x === x && p.y === y);
+              if (position) {
+                setOneColor(x, y, color);
+                modified.push(position);
+              }
+            }
+          }
+        );
+        if (modified.length === 0) continue;
+        context.setTiles(
+          newTiles,
+          proof
+            .copy()
+            .describe(
+              `Cells at ${modified.map(p => cell(p)).join(', ')} are bottlenecks connecting ${regionMap.islands.map(island => region(island)).join(', ')}, so they must be filled in`
+            )
+        );
+        progress = true;
       }
-      if (chokepoints.length === 0) continue;
-
-      // color all chokepoints and add a proof
-      const modified: Position[] = [];
-      const newTiles = grid.tiles.map(row => row.slice());
-      for (const chokePoint of chokepoints) {
-        const { x, y } = chokePoint;
-        if (grid.getTile(x, y).color === color) continue;
-        newTiles[y][x] = newTiles[y][x].copyWith({ color });
-        modified.push(chokePoint);
-      }
-      if (modified.length === 0) continue;
-      context.setTiles(
-        newTiles,
-        proof.describe(
-          `Cells at ${modified.map(p => cell(p)).join(', ')} are bottlenecks connecting ${regionMap.islands.map(island => region(island)).join(', ')}, so they must be filled in`
-        )
-      );
-      progress = true;
     }
     return progress;
   }
