@@ -10,6 +10,7 @@ import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import { PuzzleBrief, ResourceStatus } from '../online/data';
 import { getPuzzleTypes } from '@logic-pad/core/index';
 import ResponsiveLayout from '../components/ResponsiveLayout';
+import { TbLayoutGrid } from 'react-icons/tb';
 
 interface RawDevPuzzle {
   id: string;
@@ -145,70 +146,76 @@ export const Route = createLazyFileRoute('/(local)/_layout/dev/puzzles')({
 
     return (
       <ResponsiveLayout>
-        <div className="flex gap-4">
-          <input
-            type="radio"
-            name="sort"
-            id="pid-asc"
-            className="radio"
-            checked={sort === 'pid-asc'}
-            onChange={() => setSort('pid-asc')}
-          />
-          <label htmlFor="pid-asc">PID Ascending</label>
-          <input
-            type="radio"
-            name="sort"
-            id="pid-desc"
-            className="radio"
-            checked={sort === 'pid-desc'}
-            onChange={() => setSort('pid-desc')}
-          />
-          <label htmlFor="pid-desc">PID Descending</label>
-          <input
-            type="radio"
-            name="sort"
-            id="difficulty-asc"
-            className="radio"
-            checked={sort === 'difficulty-asc'}
-            onChange={() => setSort('difficulty-asc')}
-          />
-          <label htmlFor="difficulty-asc">Difficulty Ascending</label>
-          <input
-            type="radio"
-            name="sort"
-            id="difficulty-desc"
-            className="radio"
-            checked={sort === 'difficulty-desc'}
-            onChange={() => setSort('difficulty-desc')}
-          />
-          <label htmlFor="difficulty-desc">Difficulty Descending</label>
-        </div>
-
-        <div className="divider m-0" />
-        <div className="flex flex-col gap-4 items-center">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {data?.pages.flatMap(page =>
-              page.results.map(puzzle => (
-                <PuzzleCard
-                  key={puzzle.id}
-                  puzzle={puzzle}
-                  onClick={() => {
-                    const url = new URL(window.location.origin);
-                    url.pathname = '/solve';
-                    url.searchParams.set('d', puzzle.data);
-                    window.open(url.toString(), '_blank');
-                  }}
-                />
-              ))
-            )}
+        <div className="flex flex-col mt-8 items-center justify-between flex-wrap gap-12">
+          <div className="text-3xl self-start">
+            <TbLayoutGrid className="inline-block me-4" />
+            Dev Puzzles
           </div>
-          {isFetching ? (
-            <Loading className="h-fit" />
-          ) : hasNextPage ? (
-            <InfiniteScrollTrigger
-              onLoadMore={async () => await fetchNextPage()}
+          <div className="flex gap-4">
+            <input
+              type="radio"
+              name="sort"
+              id="pid-asc"
+              className="radio"
+              checked={sort === 'pid-asc'}
+              onChange={() => setSort('pid-asc')}
             />
-          ) : null}
+            <label htmlFor="pid-asc">PID Ascending</label>
+            <input
+              type="radio"
+              name="sort"
+              id="pid-desc"
+              className="radio"
+              checked={sort === 'pid-desc'}
+              onChange={() => setSort('pid-desc')}
+            />
+            <label htmlFor="pid-desc">PID Descending</label>
+            <input
+              type="radio"
+              name="sort"
+              id="difficulty-asc"
+              className="radio"
+              checked={sort === 'difficulty-asc'}
+              onChange={() => setSort('difficulty-asc')}
+            />
+            <label htmlFor="difficulty-asc">Difficulty Ascending</label>
+            <input
+              type="radio"
+              name="sort"
+              id="difficulty-desc"
+              className="radio"
+              checked={sort === 'difficulty-desc'}
+              onChange={() => setSort('difficulty-desc')}
+            />
+            <label htmlFor="difficulty-desc">Difficulty Descending</label>
+          </div>
+
+          <div className="divider m-0" />
+          <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-wrap gap-4 justify-center">
+              {data?.pages.flatMap(page =>
+                page.results.map(puzzle => (
+                  <PuzzleCard
+                    key={puzzle.id}
+                    puzzle={puzzle}
+                    onClick={() => {
+                      const url = new URL(window.location.origin);
+                      url.pathname = '/solve';
+                      url.searchParams.set('d', puzzle.data);
+                      window.open(url.toString(), '_blank');
+                    }}
+                  />
+                ))
+              )}
+            </div>
+            {isFetching ? (
+              <Loading className="h-fit" />
+            ) : hasNextPage ? (
+              <InfiniteScrollTrigger
+                onLoadMore={async () => await fetchNextPage()}
+              />
+            ) : null}
+          </div>
         </div>
       </ResponsiveLayout>
     );

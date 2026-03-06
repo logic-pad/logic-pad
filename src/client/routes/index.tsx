@@ -13,6 +13,7 @@ import { api } from '../online/api';
 import NavigationSkip from '../components/NavigationSkip';
 import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
+import { DevLinks } from './(local)._layout.lazy';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
@@ -150,6 +151,7 @@ export const Route = createFileRoute('/')({
                       </div>
                     </div>
                   )}
+                  <DevLinks />
                   <ServerNote />
                   <Changelog />
                 </div>
