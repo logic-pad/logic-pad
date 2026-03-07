@@ -23,7 +23,7 @@ export class Region {
     public readonly id: RegionId,
     public color: Color,
     public positions: Position[] = [],
-    public symbols: Symbol[] = [],
+    public symbols = new Set<Symbol>(),
     public connectedAreas = new Set<AreaId>(),
     public connectionProofs = new Set<Proof>(),
     public disconnectionProofs = new Set<Proof>()
@@ -59,7 +59,7 @@ export class Region {
       id,
       regionA.color === Color.Gray ? regionB.color : regionA.color,
       [...regionA.positions, ...regionB.positions],
-      [...regionA.symbols, ...regionB.symbols],
+      new Set([...regionA.symbols, ...regionB.symbols]),
       new Set([...regionA.connectedAreas, ...regionB.connectedAreas]),
       new Set([
         ...regionA.connectionProofs,
@@ -514,7 +514,7 @@ export default class RegionStore extends InsightStore {
         }
         region.positions.push(...area.positions);
         region.connectedAreas.add(area.id);
-        region.symbols.push(...area.symbols);
+        area.symbols.forEach(symbol => region.symbols.add(symbol));
       }
     }
 

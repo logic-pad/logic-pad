@@ -119,11 +119,33 @@ export default class AreaStore extends InsightStore {
     }
     for (const [_, symbols] of grid.symbols.entries()) {
       for (const symbol of symbols) {
-        const x = Math.floor(symbol.x);
-        const y = Math.floor(symbol.y);
-        const area = newCells[y][x];
-        if (area) {
-          area.symbols.push(symbol);
+        const minX = Math.floor(symbol.x);
+        const minY = Math.floor(symbol.y);
+        const maxX = Math.ceil(symbol.x);
+        const maxY = Math.ceil(symbol.y);
+        if (minX >= 0 && minY >= 0) {
+          const area = newCells[minY][minX];
+          if (area && !area.symbols.includes(symbol)) {
+            area.symbols.push(symbol);
+          }
+        }
+        if (minX >= 0 && maxY < grid.height) {
+          const area = newCells[maxY][minX];
+          if (area && !area.symbols.includes(symbol)) {
+            area.symbols.push(symbol);
+          }
+        }
+        if (maxX < grid.width && minY >= 0) {
+          const area = newCells[minY][maxX];
+          if (area && !area.symbols.includes(symbol)) {
+            area.symbols.push(symbol);
+          }
+        }
+        if (maxX < grid.width && maxY < grid.height) {
+          const area = newCells[maxY][maxX];
+          if (area && !area.symbols.includes(symbol)) {
+            area.symbols.push(symbol);
+          }
         }
       }
     }
