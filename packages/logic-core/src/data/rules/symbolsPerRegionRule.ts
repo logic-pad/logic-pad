@@ -154,6 +154,7 @@ export default class SymbolsPerRegionRule extends Rule {
       if (!seed) break;
       const completed: Position[] = [];
       const gray: Position[] = [];
+      const map = array(grid.width, grid.height, () => false);
       let nbSymbolsIn = 0;
       grid.iterateArea(
         { x: seed.x, y: seed.y },
@@ -161,13 +162,22 @@ export default class SymbolsPerRegionRule extends Rule {
         (_, x, y) => {
           completed.push({ x, y });
           visited[y][x] = true;
-          nbSymbolsIn += SymbolsPerRegionRule.countAllSymbolsOfPosition(
-            grid,
-            x,
-            y
-          );
-        }
+        },
+        map
       );
+      for (const [_, symbols] of grid.symbols) {
+        for (const symbol of symbols) {
+          if (!symbol.necessaryForCompletion) continue;
+          if (
+            map[Math.floor(symbol.y)][Math.floor(symbol.x)] ||
+            map[Math.floor(symbol.y)][Math.ceil(symbol.x)] ||
+            map[Math.ceil(symbol.y)][Math.floor(symbol.x)] ||
+            map[Math.ceil(symbol.y)][Math.ceil(symbol.x)]
+          ) {
+            nbSymbolsIn++;
+          }
+        }
+      }
       if (this.comparison !== Comparison.AtLeast && nbSymbolsIn > this.count) {
         return { state: State.Error, positions: completed };
       }
@@ -181,13 +191,22 @@ export default class SymbolsPerRegionRule extends Rule {
           tile => tile.color === Color.Gray || tile.color === this.color,
           (_, x, y) => {
             gray.push({ x, y });
-            nbSymbolsOut += SymbolsPerRegionRule.countAllSymbolsOfPosition(
-              grid,
-              x,
-              y
-            );
+            map[y][x] = true;
           }
         );
+        for (const [_, symbols] of grid.symbols) {
+          for (const symbol of symbols) {
+            if (!symbol.necessaryForCompletion) continue;
+            if (
+              map[Math.floor(symbol.y)][Math.floor(symbol.x)] ||
+              map[Math.floor(symbol.y)][Math.ceil(symbol.x)] ||
+              map[Math.ceil(symbol.y)][Math.floor(symbol.x)] ||
+              map[Math.ceil(symbol.y)][Math.ceil(symbol.x)]
+            ) {
+              nbSymbolsOut++;
+            }
+          }
+        }
       }
       if (this.comparison !== Comparison.AtMost && nbSymbolsOut < this.count) {
         return { state: State.Error, positions: gray };
@@ -225,27 +244,6 @@ export default class SymbolsPerRegionRule extends Rule {
 
   public withComparison(comparison: Comparison): this {
     return this.copyWith({ comparison });
-  }
-
-  private static countAllSymbolsOfPosition(
-    grid: GridData,
-    x: number,
-    y: number
-  ) {
-    let count = 0;
-    for (const symbolKind of grid.symbols.values()) {
-      if (
-        symbolKind.some(
-          symbol =>
-            Math.floor(symbol.x) === x &&
-            Math.floor(symbol.y) === y &&
-            symbol.necessaryForCompletion
-        )
-      ) {
-        count++;
-      }
-    }
-    return count;
   }
 }
 
