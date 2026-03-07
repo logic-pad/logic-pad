@@ -18,6 +18,10 @@ export default abstract class EventIteratingSolver extends Solver {
     }
   }
 
+  protected preprocessGrid(grid: GridData): GridData {
+    return grid.resetTiles();
+  }
+
   public async *solve(
     grid: GridData,
     abortSignal?: AbortSignal
@@ -35,7 +39,9 @@ export default abstract class EventIteratingSolver extends Solver {
           };
           abortSignal?.addEventListener('abort', terminateHandler);
 
-          worker.postMessage(Serializer.stringifyGrid(grid.resetTiles()));
+          worker.postMessage(
+            Serializer.stringifyGrid(this.preprocessGrid(grid))
+          );
 
           worker.addEventListener(
             'message',
@@ -52,8 +58,8 @@ export default abstract class EventIteratingSolver extends Solver {
           );
 
           worker.addEventListener('error', (e: ErrorEvent) => {
-            alert(`Error while solving!\n${e.message}`);
-            fail(e as unknown as Error);
+            console.log(e);
+            fail(new Error(e.message));
           });
         }
       );
