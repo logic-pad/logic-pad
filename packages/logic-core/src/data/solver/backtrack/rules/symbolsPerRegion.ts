@@ -1,3 +1,4 @@
+import { array } from '../../../dataHelper.js';
 import { Comparison, Position } from '../../../primitives.js';
 import SymbolsPerRegionRule from '../../../rules/symbolsPerRegionRule.js';
 import Symbol from '../../../symbols/symbol.js';
@@ -12,7 +13,7 @@ import BTModule, {
 export default class SymbolsPerRegionBTModule extends BTModule {
   public instr: SymbolsPerRegionRule;
 
-  private symbolCount: IntArray2D;
+  private symbolMap: Symbol[][][] = [];
 
   public constructor(
     instr: SymbolsPerRegionRule,
@@ -23,17 +24,33 @@ export default class SymbolsPerRegionBTModule extends BTModule {
     super();
     this.instr = instr;
 
-    this.symbolCount = IntArray2D.create(width, height);
-
+    this.symbolMap = array(width, height, () => []);
     for (const symbol of allSymbols) {
-      const symbolX = Math.floor(symbol.x);
-      const symbolY = Math.floor(symbol.y);
-
-      this.symbolCount.set(
-        symbolX,
-        symbolY,
-        this.symbolCount.get(symbolX, symbolY) + 1
-      );
+      if (Math.floor(symbol.x) >= 0 && Math.floor(symbol.y) >= 0) {
+        this.symbolMap[Math.floor(symbol.y)][Math.floor(symbol.x)].push(symbol);
+      }
+      if (
+        Math.ceil(symbol.x) !== Math.floor(symbol.x) &&
+        Math.ceil(symbol.x) < width &&
+        Math.floor(symbol.y) >= 0
+      ) {
+        this.symbolMap[Math.floor(symbol.y)][Math.ceil(symbol.x)].push(symbol);
+      }
+      if (
+        Math.ceil(symbol.y) !== Math.floor(symbol.y) &&
+        Math.floor(symbol.x) >= 0 &&
+        Math.ceil(symbol.y) < height
+      ) {
+        this.symbolMap[Math.ceil(symbol.y)][Math.floor(symbol.x)].push(symbol);
+      }
+      if (
+        Math.ceil(symbol.x) !== Math.floor(symbol.x) &&
+        Math.ceil(symbol.y) !== Math.floor(symbol.y) &&
+        Math.ceil(symbol.x) < width &&
+        Math.ceil(symbol.y) < height
+      ) {
+        this.symbolMap[Math.ceil(symbol.y)][Math.ceil(symbol.x)].push(symbol);
+      }
     }
   }
 
@@ -69,8 +86,8 @@ export default class SymbolsPerRegionBTModule extends BTModule {
     const sameTileQueue: Position[] = [pos];
     const usableTileQueue: Position[] = [];
 
-    let completed = 0;
-    let possible = 0;
+    const completed = new Set<Symbol>();
+    const possible = new Set<Symbol>();
 
     visited.set(pos.x, pos.y, id);
 
@@ -78,7 +95,9 @@ export default class SymbolsPerRegionBTModule extends BTModule {
     while (sameTileQueue.length > 0) {
       const curPos = sameTileQueue.pop()!;
 
-      completed += this.symbolCount.get(curPos.x, curPos.y);
+      this.symbolMap[curPos.y][curPos.x].forEach(symbol =>
+        completed.add(symbol)
+      );
 
       for (const edge of grid.getEdges(curPos)) {
         if ((visited.get(edge.x, edge.y) & 0b01111111) === id) continue;
@@ -95,7 +114,7 @@ export default class SymbolsPerRegionBTModule extends BTModule {
       }
     }
 
-    if (completed > this.instr.count) {
+    if (completed.size > this.instr.count) {
       return this.instr.comparison === Comparison.AtLeast;
     }
 
@@ -105,9 +124,11 @@ export default class SymbolsPerRegionBTModule extends BTModule {
     while (usableTileQueue.length > 0) {
       const curPos = usableTileQueue.pop()!;
 
-      possible += this.symbolCount.get(curPos.x, curPos.y);
+      this.symbolMap[curPos.y][curPos.x].forEach(symbol => {
+        if (!completed.has(symbol)) possible.add(symbol);
+      });
 
-      if (completed + possible >= this.instr.count) return true;
+      if (completed.size + possible.size >= this.instr.count) return true;
 
       for (const edge of grid.getEdges(curPos)) {
         if ((visited.get(edge.x, edge.y) & 0b01111111) === id) continue;
@@ -121,6 +142,6 @@ export default class SymbolsPerRegionBTModule extends BTModule {
       }
     }
 
-    return completed + possible >= this.instr.count;
+    return completed.size + possible.size >= this.instr.count;
   }
 }

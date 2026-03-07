@@ -2135,7 +2135,6 @@ declare global {
     withColor(color: Color): this;
     withCount(count: number): this;
     withComparison(comparison: Comparison): this;
-    private static countAllSymbolsOfPosition;
   }
   export declare class UniqueShapeRule extends RegionShapeRule {
     readonly title = 'Unique Shape Areas';
@@ -2538,7 +2537,7 @@ declare global {
   }
   export declare class SymbolsPerRegionBTModule extends BTModule {
     instr: SymbolsPerRegionRule;
-    private symbolCount;
+    private symbolMap;
     constructor(
       instr: SymbolsPerRegionRule,
       width: number,
