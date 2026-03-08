@@ -169,10 +169,10 @@ export default class SymbolsPerRegionRule extends Rule {
         for (const symbol of symbols) {
           if (!symbol.necessaryForCompletion) continue;
           if (
-            map[Math.floor(symbol.y)][Math.floor(symbol.x)] ||
-            map[Math.floor(symbol.y)][Math.ceil(symbol.x)] ||
-            map[Math.ceil(symbol.y)][Math.floor(symbol.x)] ||
-            map[Math.ceil(symbol.y)][Math.ceil(symbol.x)]
+            map[Math.floor(symbol.y)]?.[Math.floor(symbol.x)] ||
+            map[Math.floor(symbol.y)]?.[Math.ceil(symbol.x)] ||
+            map[Math.ceil(symbol.y)]?.[Math.floor(symbol.x)] ||
+            map[Math.ceil(symbol.y)]?.[Math.ceil(symbol.x)]
           ) {
             nbSymbolsIn++;
           }
@@ -198,10 +198,10 @@ export default class SymbolsPerRegionRule extends Rule {
           for (const symbol of symbols) {
             if (!symbol.necessaryForCompletion) continue;
             if (
-              map[Math.floor(symbol.y)][Math.floor(symbol.x)] ||
-              map[Math.floor(symbol.y)][Math.ceil(symbol.x)] ||
-              map[Math.ceil(symbol.y)][Math.floor(symbol.x)] ||
-              map[Math.ceil(symbol.y)][Math.ceil(symbol.x)]
+              map[Math.floor(symbol.y)]?.[Math.floor(symbol.x)] ||
+              map[Math.floor(symbol.y)]?.[Math.ceil(symbol.x)] ||
+              map[Math.ceil(symbol.y)]?.[Math.floor(symbol.x)] ||
+              map[Math.ceil(symbol.y)]?.[Math.ceil(symbol.x)]
             ) {
               nbSymbolsOut++;
             }

@@ -1,3 +1,7 @@
+# 0.27.1
+
+- Fixed out of bounds error in symbols per region rule
+
 # 0.27.0
 
 - Symbols per region rule now always count symbols at the edge or corner of regions
