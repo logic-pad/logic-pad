@@ -3,6 +3,7 @@ import UniversalSolver from './universal/universalSolver.js';
 import BacktrackSolver from './backtrack/backtrackSolver.js';
 import CspuzSolver from './cspuz/cspuzSolver.js';
 import AutoSolver from './auto/autoSolver.js';
+import InsightSolver from './insight/insightSolver.js';
 
 const allSolvers = new Map<string, Solver>();
 
@@ -14,5 +15,6 @@ register(new AutoSolver());
 register(new CspuzSolver());
 register(new BacktrackSolver());
 register(new UniversalSolver());
+register(new InsightSolver());
 
 export { allSolvers };
