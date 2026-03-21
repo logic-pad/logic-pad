@@ -1,3 +1,13 @@
+# 21/3/2026
+
+- Fixed hollow letters not working with the lying symbols rule
+
+# 27/2/2026
+
+- Enhanced wrap-around visualization to show corners and look more more seamless
+- Removed duplicate "Show comment" button
+- New set of SVG user avatars with better support for different names
+
 # 21/2/2026
 
 - Complete server rewrite for better performance and capacity
@@ -20,12 +30,10 @@
 - Server is now located in Amsterdam, Netherlands instead of Frankfurt, Germany
 - Updated Privacy Policy and Terms of Service
 - Reworked collection page UI
-- New set of SVG user avatars with better support for different names
 - Empty text symbols now display a placeholder question mark
 - Puzzle cards now show an indication of how the rated difficulty compares to design difficulty
 - The rated difficulty is now rounded up instead of down
 - Automatic collections are no longer shown in a profile's "created collections" section
-- Enhanced wrap-around visualization to show corners and look more more seamless
 - Fixed errors when switching between puzzle and collection search with filters enabled
 - Fixed network errors when a puzzle is rated right after solving
 - Fixed the puzzle editor sometimes not loading the newest version of an online puzzle

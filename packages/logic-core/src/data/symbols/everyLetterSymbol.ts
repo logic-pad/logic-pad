@@ -76,7 +76,10 @@ export default class EveryLetterSymbol extends Symbol {
     if (!this.validateSubtilePlacement(grid)) return State.Error;
 
     const uniqueLetters = new Set(
-      grid.symbols.get(this.id)?.map(s => (s as EveryLetterSymbol).letter)
+      grid.symbols
+        .get(this.id)
+        ?.filter((s): s is EveryLetterSymbol => s instanceof EveryLetterSymbol)
+        .map(s => s.letter)
     );
     if (uniqueLetters.size === 0) {
       return State.Satisfied;

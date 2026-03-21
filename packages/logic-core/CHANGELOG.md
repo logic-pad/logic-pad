@@ -1,3 +1,7 @@
+# 0.27.2
+
+- Fixed every letter symbol not working with lying symbols due to missing instance check
+
 # 0.27.1
 
 - Fixed out of bounds error in symbols per region rule
