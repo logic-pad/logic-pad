@@ -382,7 +382,7 @@ export function encodePlayback(
             ) {
               instruments.drum.value?.[
                 event.value as keyof typeof instruments.drum.value
-              ].stop(time);
+              ]?.stop(time);
             } else if (event.instrument === InstrumentType.Piano) {
               instruments.piano.value?.regular.keyUp({
                 note: event.value,
@@ -482,7 +482,7 @@ export function encodeImmediate(
         if (isDrumSample(row.note) || row.instrument === InstrumentType.Drum) {
           instruments.drum.value?.[
             row.note as keyof typeof instruments.drum.value
-          ].volume.setValueAtTime(
+          ]?.volume.setValueAtTime(
             normalizeVelocity(
               row.velocity,
               row.note,
@@ -493,7 +493,7 @@ export function encodeImmediate(
           );
           instruments.drum.value?.[
             row.note as keyof typeof instruments.drum.value
-          ].start(0, 0);
+          ]?.start(0, 0);
         } else if (row.instrument === InstrumentType.Piano) {
           targetPiano?.keyDown({
             note: row.note,
@@ -532,7 +532,7 @@ export function encodeImmediate(
         if (isDrumSample(row.note) || row.instrument === InstrumentType.Drum) {
           // do nothing for the moment
           // TODO: consider pedal state?
-          // drum[row.note as keyof typeof drum].stop(time);
+          // drum[row.note as keyof typeof drum]?.stop(time);
         } else if (row.instrument === InstrumentType.Piano) {
           targetPiano?.keyUp({
             note: row.note,
