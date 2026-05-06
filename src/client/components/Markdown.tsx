@@ -12,6 +12,13 @@ import Loading from './Loading';
 import type { Options } from 'react-markdown';
 import { spoilerPlugin } from 'remark-inline-spoiler';
 import { useOnline } from '../contexts/OnlineContext.tsx';
+import type { Spoiler } from 'mdast-util-inline-spoiler';
+
+declare module 'mdast' {
+  interface RootContentMap {
+    spoiler: Spoiler;
+  }
+}
 
 export interface MarkdownProps extends Readonly<Options> {
   className?: string;
@@ -66,17 +73,12 @@ const MarkdownAsync = lazy(async () => {
     remarkPlugins: [spoilerPlugin],
     remarkRehypeOptions: {
       handlers: {
-        spoiler: (_: any, node: { value: string }) => {
+        spoiler: (state, node: Spoiler) => {
           return {
             type: 'element',
             tagName: 'spoiler',
             properties: {},
-            children: [
-              {
-                type: 'text',
-                value: node.value,
-              },
-            ],
+            children: state.all(node),
           };
         },
       },
@@ -87,12 +89,11 @@ const MarkdownAsync = lazy(async () => {
     spoiler: function Spoiler({ children }: { children: any }) {
       const [revealSpoilers, setRevealSpoilers] = useState(false);
       return (
-        <MarkdownAsync
+        <span
           className={cn(
             'spoiler',
             revealSpoilers && 'spoiler-reveal cursor-default!'
           )}
-          inline={true}
           onClickCapture={e => {
             if (revealSpoilers) return;
             e.preventDefault();
@@ -101,7 +102,7 @@ const MarkdownAsync = lazy(async () => {
           }}
         >
           {children}
-        </MarkdownAsync>
+        </span>
       );
     },
     a: function Link({ href, children }: { href?: string; children: any }) {

@@ -60,7 +60,7 @@
     "react-mentions": "^4.4.10",
     "react-responsive": "^10.0.1",
     "readable-regexp": "^1.5.2",
-    "remark-inline-spoiler": "^1.0.1",
+    "remark-inline-spoiler": "^2.1.0",
     "retry-axios": "^4.0.1",
     "semver": "^7.7.2",
     "sitemap": "^8.0.0",
