@@ -25,6 +25,7 @@ import { puzzleEditQueryOptions } from '../routes/_layout.create.$puzzleId.tsx';
 import { useQuery } from '@tanstack/react-query';
 import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
 import { ResourceStatus } from '../online/data.ts';
+import toast from 'react-hot-toast';
 
 const SolverSelector = lazy(() => import('./SolverSelector'));
 
@@ -529,6 +530,7 @@ export default memo(function PuzzleChecklist({
                       }
                     }
                   } catch (ex) {
+                    if (ex instanceof Error) toast.error(ex.message);
                     console.error(ex);
                   } finally {
                     abortController.abort();

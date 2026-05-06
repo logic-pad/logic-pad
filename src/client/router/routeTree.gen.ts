@@ -23,6 +23,7 @@ import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
 import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
 import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
 import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
+import { Route as localLayoutRouteImport } from './../routes/(local)._layout'
 import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
 import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
 import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
@@ -41,9 +42,13 @@ import { Route as moderatorModProfileUserIdRouteImport } from './../routes/(mode
 import { Route as localLayoutDevPuzzlesRouteImport } from './../routes/(local)._layout.dev.puzzles'
 import { Route as localLayoutDevColorRouteImport } from './../routes/(local)._layout.dev.color'
 
+const localRouteImport = createFileRoute('/(local)')()
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
-const localLayoutLazyRouteImport = createFileRoute('/(local)/_layout')()
 
+const localRoute = localRouteImport.update({
+  id: '/(local)',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
@@ -63,12 +68,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const localLayoutLazyRoute = localLayoutLazyRouteImport
-  .update({
-    id: '/(local)/_layout',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-  .lazy(() => import('./../routes/(local)._layout.lazy').then((d) => d.Route))
 const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
   id: '/uploader',
   path: '/uploader',
@@ -122,6 +121,12 @@ const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
 } as any).lazy(() =>
   import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
 )
+const localLayoutRoute = localLayoutRouteImport
+  .update({
+    id: '/_layout',
+    getParentRoute: () => localRoute,
+  } as any)
+  .lazy(() => import('./../routes/(local)._layout.lazy').then((d) => d.Route))
 const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
   id: '/solve/',
   path: '/solve/',
@@ -240,7 +245,7 @@ const localLayoutDevPuzzlesRoute = localLayoutDevPuzzlesRouteImport
   .update({
     id: '/dev/puzzles',
     path: '/dev/puzzles',
-    getParentRoute: () => localLayoutLazyRoute,
+    getParentRoute: () => localLayoutRoute,
   } as any)
   .lazy(() =>
     import('./../routes/(local)._layout.dev.puzzles.lazy').then((d) => d.Route),
@@ -249,14 +254,14 @@ const localLayoutDevColorRoute = localLayoutDevColorRouteImport
   .update({
     id: '/dev/color',
     path: '/dev/color',
-    getParentRoute: () => localLayoutLazyRoute,
+    getParentRoute: () => localLayoutRoute,
   } as any)
   .lazy(() =>
     import('./../routes/(local)._layout.dev.color.lazy').then((d) => d.Route),
   )
 
 export interface FileRoutesByFullPath {
-  '/': typeof localLayoutLazyRouteWithChildren
+  '/': typeof localLayoutRouteWithChildren
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/my-follows': typeof LayoutMyFollowsRoute
@@ -287,7 +292,7 @@ export interface FileRoutesByFullPath {
   '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof localLayoutLazyRouteWithChildren
+  '/': typeof localLayoutRouteWithChildren
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/my-follows': typeof LayoutMyFollowsRoute
@@ -321,6 +326,8 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
+  '/(local)': typeof localRouteWithChildren
+  '/(local)/_layout': typeof localLayoutRouteWithChildren
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
   '/_layout/my-stuff': typeof LayoutMyStuffRouteWithChildren
   '/_layout/privacy-policy': typeof LayoutPrivacyPolicyRoute
@@ -330,7 +337,6 @@ export interface FileRoutesById {
   '/_layout/support': typeof LayoutSupportRoute
   '/_layout/terms': typeof LayoutTermsRoute
   '/_layout/uploader': typeof LayoutUploaderRoute
-  '/(local)/_layout': typeof localLayoutLazyRouteWithChildren
   '/_layout/collection/$collectionId': typeof LayoutCollectionCollectionIdRoute
   '/_layout/create/$puzzleId': typeof LayoutCreatePuzzleIdRoute
   '/_layout/my-stuff/collections': typeof LayoutMyStuffCollectionsRoute
@@ -416,6 +422,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/redirect'
     | '/_layout'
+    | '/(local)'
+    | '/(local)/_layout'
     | '/_layout/my-follows'
     | '/_layout/my-stuff'
     | '/_layout/privacy-policy'
@@ -425,7 +433,6 @@ export interface FileRouteTypes {
     | '/_layout/support'
     | '/_layout/terms'
     | '/_layout/uploader'
-    | '/(local)/_layout'
     | '/_layout/collection/$collectionId'
     | '/_layout/create/$puzzleId'
     | '/_layout/my-stuff/collections'
@@ -450,12 +457,19 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   RedirectRoute: typeof RedirectRoute
   LayoutLazyRoute: typeof LayoutLazyRouteWithChildren
-  localLayoutLazyRoute: typeof localLayoutLazyRouteWithChildren
+  localRoute: typeof localRouteWithChildren
   moderatorModProfileUserIdRoute: typeof moderatorModProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/(local)': {
+      id: '/(local)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof localRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout': {
       id: '/_layout'
       path: ''
@@ -482,13 +496,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(local)/_layout': {
-      id: '/(local)/_layout'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof localLayoutLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/uploader': {
@@ -553,6 +560,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/my-follows'
       preLoaderRoute: typeof LayoutMyFollowsRouteImport
       parentRoute: typeof LayoutLazyRoute
+    }
+    '/(local)/_layout': {
+      id: '/(local)/_layout'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof localLayoutRouteImport
+      parentRoute: typeof localRoute
     }
     '/_layout/solve/': {
       id: '/_layout/solve/'
@@ -664,14 +678,14 @@ declare module '@tanstack/react-router' {
       path: '/dev/puzzles'
       fullPath: '/dev/puzzles'
       preLoaderRoute: typeof localLayoutDevPuzzlesRouteImport
-      parentRoute: typeof localLayoutLazyRoute
+      parentRoute: typeof localLayoutRoute
     }
     '/(local)/_layout/dev/color': {
       id: '/(local)/_layout/dev/color'
       path: '/dev/color'
       fullPath: '/dev/color'
       preLoaderRoute: typeof localLayoutDevColorRouteImport
-      parentRoute: typeof localLayoutLazyRoute
+      parentRoute: typeof localLayoutRoute
     }
   }
 }
@@ -752,26 +766,36 @@ const LayoutLazyRouteWithChildren = LayoutLazyRoute._addFileChildren(
   LayoutLazyRouteChildren,
 )
 
-interface localLayoutLazyRouteChildren {
+interface localLayoutRouteChildren {
   localLayoutDevColorRoute: typeof localLayoutDevColorRoute
   localLayoutDevPuzzlesRoute: typeof localLayoutDevPuzzlesRoute
 }
 
-const localLayoutLazyRouteChildren: localLayoutLazyRouteChildren = {
+const localLayoutRouteChildren: localLayoutRouteChildren = {
   localLayoutDevColorRoute: localLayoutDevColorRoute,
   localLayoutDevPuzzlesRoute: localLayoutDevPuzzlesRoute,
 }
 
-const localLayoutLazyRouteWithChildren = localLayoutLazyRoute._addFileChildren(
-  localLayoutLazyRouteChildren,
+const localLayoutRouteWithChildren = localLayoutRoute._addFileChildren(
+  localLayoutRouteChildren,
 )
+
+interface localRouteChildren {
+  localLayoutRoute: typeof localLayoutRouteWithChildren
+}
+
+const localRouteChildren: localRouteChildren = {
+  localLayoutRoute: localLayoutRouteWithChildren,
+}
+
+const localRouteWithChildren = localRoute._addFileChildren(localRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   RedirectRoute: RedirectRoute,
   LayoutLazyRoute: LayoutLazyRouteWithChildren,
-  localLayoutLazyRoute: localLayoutLazyRouteWithChildren,
+  localRoute: localRouteWithChildren,
   moderatorModProfileUserIdRoute: moderatorModProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport

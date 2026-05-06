@@ -9,16 +9,14 @@
       "request": "launch",
       "name": "Chrome: logic-pad",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "bun: dev"
+      "webRoot": "${workspaceFolder}"
     },
     {
       "type": "firefox",
       "request": "launch",
       "name": "Firefox: logic-pad",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "bun: dev"
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }
