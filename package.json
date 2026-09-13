@@ -13,6 +13,7 @@
     "dev": "vite --host",
     "scan": "react-scan localhost:5173",
     "build": "bunx --bun tsc && bunx --bun vite build",
+    "start": "bun --smol src/ssr/index.ts",
     "lint": "eslint",
     "preview": "vite preview --host",
     "check-bundle": "bunx vite-bundle-visualizer",
@@ -24,8 +25,10 @@
   },
   "dependencies": {
     "@dnd-kit/sortable": "^10.0.0",
+    "@elysiajs/static": "^1.4.10",
     "@logic-pad/piano": "^0.2.2",
     "@monaco-editor/react": "^4.7.0",
+    "@napi-rs/canvas": "^0.1.84",
     "@sentry/react": "^10.9.0",
     "@sentry/vite-plugin": "^4.3.0",
     "@tanstack/react-query": "^5.84.2",
@@ -41,6 +44,7 @@
     "canvas-size": "^2.0.0",
     "clsx": "^2.1.1",
     "compression-streams-polyfill": "^0.1.7",
+    "elysia": "^1.4.18",
     "event-iterator": "^2.0.0",
     "events": "^3.3.0",
     "fuzzysort-esm": "^3.1.1",
@@ -70,9 +74,7 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
-    "@elysiajs/node": "^1.4.2",
     "@eslint/js": "^9.39.1",
-    "@napi-rs/canvas": "^0.1.84",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/router-vite-plugin": "^1.131.2",
@@ -84,11 +86,9 @@
     "@types/react-mentions": "^4.4.1",
     "@types/semver": "^7.7.1",
     "@typescript-eslint/parser": "^8.46.4",
-    "@vercel/node": "^5.3.23",
     "@vitejs/plugin-react": "^5.1.0",
     "caniuse-lite": "^1.0.30001733",
     "daisyui": "^5.5.4",
-    "elysia": "^1.4.18",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -98,7 +98,6 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.5.0",
-    "isbot": "^5.1.32",
     "jiti": "^2.6.1",
     "postcss": "^8.4.35",
     "prettier": "^3.6.2",
@@ -109,8 +108,7 @@
     "vite": "^8.0.0-beta.0",
     "vite-bundle-visualizer": "^1.2.1",
     "vite-plugin-pwa": "^1.0.2",
-    "vite-plugin-replace": "^0.1.1",
-    "vite-plugin-vercel": "^9.0.8"
+    "vite-plugin-replace": "^0.1.1"
   },
   "trustedDependencies": [
     "esbuild",

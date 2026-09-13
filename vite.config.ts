@@ -6,9 +6,17 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import { replaceCodePlugin } from 'vite-plugin-replace';
 import { execSync } from 'child_process';
-import vercel from 'vite-plugin-vercel';
 
-const commitHash = execSync('git rev-parse HEAD').toString().trim();
+const commitHash = (() => {
+  if (process.env.RAILWAY_GIT_COMMIT_SHA)
+    return process.env.RAILWAY_GIT_COMMIT_SHA;
+  try {
+    return execSync('git rev-parse HEAD').toString().trim();
+  } catch {
+    // git is not available in the Docker build
+    return 'unknown';
+  }
+})();
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -30,10 +38,8 @@ export default defineConfig({
       routesDirectory: './src/client/routes',
       generatedRouteTree: './src/client/router/routeTree.gen.ts',
     }),
-    vercel(),
     VitePWA({
       registerType: 'prompt',
-      outDir: '.vercel/output/static',
       includeAssets: ['favicon.ico', '*.svg', '*.png'],
       workbox: {
         globIgnores: ['**/node_modules/**/*', '**/(moderator)*', '**/(local)*'],
@@ -107,49 +113,6 @@ export default defineConfig({
     },
     port: 5173,
     open: true,
-  },
-  vercel: {
-    additionalEndpoints: [
-      {
-        source: './src/ssr/index.ts',
-        destination: '/ssr/[[...path]]',
-        isr: { expiration: 60 * 60 },
-        buildOptions: {
-          loader: {
-            '.node': 'copy',
-            '.ttf': 'file',
-            '.html': 'text',
-          },
-        },
-      },
-    ],
-    rewrites: [
-      { source: '/ssr/(.*)', destination: '/' },
-      { source: '/solve/:puzzleId', destination: '/ssr/solve/:puzzleId' },
-      {
-        source: '/collection/:collectionId',
-        destination: '/ssr/collection/:collectionId',
-      },
-      {
-        source: '/profile/:userId',
-        destination: '/ssr/profile/:userId',
-      },
-      {
-        source: '/api/preview/:type/:resourceId',
-        destination: '/ssr/api/preview/:type/:resourceId',
-      },
-      { source: '/sitemap.xml', destination: '/ssr/sitemap.xml' },
-      { source: '/((?!ssr).*)', destination: '/' },
-    ],
-    headers: [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-        ],
-      },
-    ],
   },
   preview: {
     headers: {

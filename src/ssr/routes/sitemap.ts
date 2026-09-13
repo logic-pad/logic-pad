@@ -1,8 +1,9 @@
 import Elysia from 'elysia';
 import { SitemapEntry } from '../../client/online/data';
-import { SitemapStream } from 'sitemap';
-import { createGzip } from 'zlib';
+import { SitemapStream, streamToPromise } from 'sitemap';
+import { createGzip } from 'node:zlib';
 import { api } from '../../client/online/api';
+import { SECURITY_HEADERS, SITE_URL } from '../config';
 
 const lastSitemapModification = new Date('2025-11-17T03:48:59Z');
 
@@ -21,12 +22,13 @@ export const sitemap = new Elysia()
         'content-encoding': 'gzip',
         'cache-control': 's-maxage=10, stale-while-revalidate',
         'x-robots-tag': 'index, follow',
+        ...SECURITY_HEADERS,
       },
     });
   })
   .get('/sitemap.xml', async () => {
     const smStream = new SitemapStream({
-      hostname: process.env.VITE_VERCEL_PROJECT_PRODUCTION_URL,
+      hostname: SITE_URL,
     });
     const pipeline = smStream.pipe(createGzip());
 
@@ -107,6 +109,6 @@ export const sitemap = new Elysia()
 
     // make sure to attach a write stream such as streamToPromise before ending
     smStream.end();
-    // stream write the response
-    return pipeline;
+    // collect the response into a single buffer
+    return streamToPromise(pipeline);
   });

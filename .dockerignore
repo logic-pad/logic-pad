@@ -1,0 +1,14 @@
+.git
+.vercel
+.tanstack
+node_modules
+dist
+dev-dist
+references
+scripts/temp
+.github
+.vscode
+*.log
+.env
+Dockerfile
+.dockerignore

@@ -2,15 +2,29 @@ import Elysia, { status, t } from 'elysia';
 import {
   createCanvas,
   loadImage,
+  Image,
   SKRSContext2D,
   GlobalFonts,
   Path2D,
 } from '@napi-rs/canvas';
-import fontPath from '../../../public/palatino.ttf';
+import { fileURLToPath } from 'node:url';
 import { api } from '../../client/online/api';
-import { PuzzleType } from '@logic-pad/core/index';
+import { PuzzleType } from '@logic-pad/core/data/primitives';
+import { SECURITY_HEADERS } from '../config';
+
+const fontPath = fileURLToPath(
+  new URL('../../../public/palatino.ttf', import.meta.url)
+);
 
 GlobalFonts.registerFromPath(fontPath, 'Palatino');
+
+// The logo is served from the same server, so load it from disk once
+// instead of making an HTTP round trip on every preview image.
+const logoPath = fileURLToPath(
+  new URL('../../../dist/pwa-512x512.png', import.meta.url)
+);
+let logoPromise: Promise<Image> | null = null;
+const loadLogo = () => (logoPromise ??= loadImage(logoPath));
 
 function getLines(
   ctx: SKRSContext2D,
@@ -175,6 +189,7 @@ export const image = new Elysia()
       headers: {
         'content-type': 'image/png',
         'cache-control': 's-maxage=3600, stale-while-revalidate',
+        ...SECURITY_HEADERS,
       },
     });
   })
@@ -191,9 +206,7 @@ export const image = new Elysia()
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Site logo
-      const logo = await loadImage(
-        `https://${process.env.VERCEL_URL}/pwa-512x512.png`
-      );
+      const logo = await loadLogo();
       const logoSize = 128;
       const margin = 84;
       ctx.drawImage(
@@ -336,9 +349,7 @@ export const image = new Elysia()
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Site logo
-      const logo = await loadImage(
-        `https://${process.env.VERCEL_URL}/pwa-512x512.png`
-      );
+      const logo = await loadLogo();
       const logoSize = 128;
       const margin = 84;
       ctx.drawImage(
@@ -462,9 +473,7 @@ export const image = new Elysia()
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Site logo
-      const logo = await loadImage(
-        `https://${process.env.VERCEL_URL}/pwa-512x512.png`
-      );
+      const logo = await loadLogo();
       const logoSize = 128;
       const margin = 84;
       ctx.drawImage(
