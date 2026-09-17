@@ -2,10 +2,13 @@ import { memo } from 'react';
 import ToolboxItem from '../ToolboxItem';
 import { Color } from '@logic-pad/core/data/primitives';
 import { RiEditBoxFill } from 'react-icons/ri';
-import { GridConsumer } from '../../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom } from '../../state/grid.ts';
 import PointerCaptureOverlay from '../../grid/PointerCaptureOverlay';
 
 export default memo(function TileTool() {
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   return (
     <ToolboxItem
       id="tile"
@@ -14,41 +17,34 @@ export default memo(function TileTool() {
       description="Left click to set a tile as fixed. Right click to remove a tile."
       hotkey="tools-1"
       gridOverlay={
-        <GridConsumer>
-          {({ grid, setGrid }) => {
-            return (
-              <PointerCaptureOverlay
-                width={grid.width}
-                height={grid.height}
-                colorMap={(x, y, color) => {
-                  if (color === Color.Dark) return grid.getTile(x, y).fixed;
-                  else if (color === Color.Light)
-                    return !grid.getTile(x, y).exists;
-                  return false;
-                }}
-                onTileClick={(x, y, from, to) => {
-                  if (from === Color.Dark || to === Color.Dark) {
-                    setGrid(
-                      grid.copyWith({
-                        tiles: grid.setTile(x, y, t =>
-                          t.withFixed(to === Color.Dark)
-                        ),
-                      })
-                    );
-                  } else if (from === Color.Light || to === Color.Light) {
-                    setGrid(
-                      grid.copyWith({
-                        tiles: grid.setTile(x, y, t =>
-                          t.withExists(to !== Color.Light)
-                        ),
-                      })
-                    );
-                  }
-                }}
-              />
-            );
+        <PointerCaptureOverlay
+          width={grid.width}
+          height={grid.height}
+          colorMap={(x, y, color) => {
+            if (color === Color.Dark) return grid.getTile(x, y).fixed;
+            else if (color === Color.Light) return !grid.getTile(x, y).exists;
+            return false;
           }}
-        </GridConsumer>
+          onTileClick={(x, y, from, to) => {
+            if (from === Color.Dark || to === Color.Dark) {
+              setGrid(
+                grid.copyWith({
+                  tiles: grid.setTile(x, y, t =>
+                    t.withFixed(to === Color.Dark)
+                  ),
+                })
+              );
+            } else if (from === Color.Light || to === Color.Light) {
+              setGrid(
+                grid.copyWith({
+                  tiles: grid.setTile(x, y, t =>
+                    t.withExists(to !== Color.Light)
+                  ),
+                })
+              );
+            }
+          }}
+        />
       }
       onTileClick={null}
     >

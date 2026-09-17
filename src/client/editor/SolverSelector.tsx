@@ -1,7 +1,8 @@
 import { Fragment, memo, useEffect, useMemo, useState } from 'react';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtom, useAtomValue } from 'jotai';
+import { gridAtom } from '../state/grid.ts';
 import { cn } from '../../client/uiHelper.ts';
-import { useSolver } from '../contexts/SolverContext.tsx';
+import { solverAtom } from '../state/solver.ts';
 import { GoInfo } from 'react-icons/go';
 import Solver from '@logic-pad/core/data/solver/solver';
 import { allSolvers } from '@logic-pad/core/data/solver/allSolvers';
@@ -12,8 +13,8 @@ export interface SolverSelectorProps {
 
 // million-ignore
 export default memo(function SolverSelector({ onSolve }: SolverSelectorProps) {
-  const { grid } = useGrid();
-  const { solver, setSolver } = useSolver();
+  const grid = useAtomValue(gridAtom);
+  const [solver, setSolver] = useAtom(solverAtom);
 
   const [environmentCheck, setEnvironmentCheck] = useState<boolean | undefined>(
     undefined

@@ -7,7 +7,8 @@ import React, {
   useState,
 } from 'react';
 import ToolboxItem from '../ToolboxItem';
-import { useGrid } from '../../contexts/GridContext';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom } from '../../state/grid.ts';
 import { TbClipboard } from 'react-icons/tb';
 import { Color, Position } from '@logic-pad/core/data/primitives';
 import { cn, safeClipboard } from '../../uiHelper';
@@ -67,7 +68,8 @@ const CopyOverlay = memo(function CopyOverlay({
 });
 
 export function ClipboardToolOverlay() {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const [firstPosition, setFirstPosition] = useState<Position | null>(null);
   const [currentPosition, setCurrentPosition] = useState<Position | null>(null);
   const [clipboardData, setClipboardData] = useState<GridData | null>(null);

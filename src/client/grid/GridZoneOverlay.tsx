@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../state/theme.ts';
 import GridCanvasOverlay, { RawCanvasRef } from './GridCanvasOverlay';
 import GridData from '@logic-pad/core/data/grid';
 

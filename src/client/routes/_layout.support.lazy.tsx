@@ -8,7 +8,7 @@ import {
   supporterPricesQueryOptions,
 } from './_layout.support';
 import { api } from '../online/api';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import SupporterMedal from '../components/SupporterMedal';
 import { toRelativeDate } from '../uiHelper';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';

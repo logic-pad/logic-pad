@@ -3,16 +3,20 @@ import { PartPlacement, PartSpec } from './types';
 import PerfectionRule, {
   instance as perfectionInstance,
 } from '@logic-pad/core/data/rules/perfectionRule';
-import { useGridState } from '../../contexts/GridStateContext';
 import { Color, State, Position } from '@logic-pad/core/data/primitives';
-import { useEdit } from '../../contexts/EditContext';
-import { useGrid } from '../../contexts/GridContext';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useSolvePath } from '../../contexts/SolvePathContext';
+import {
+  solvePathAtom,
+  visualizeSolvePathAtom,
+} from '../../state/solvePath.tsx';
 import { useDelta } from 'react-delta-hooks';
 import { RiErrorWarningFill } from 'react-icons/ri';
-import { useEmbed } from '../../contexts/EmbedContext';
 import { safeClipboard } from '../../uiHelper';
+import { gridAtom, setGridRawAtom } from '../../state/grid.ts';
+import { gridStateAtom } from '../../state/gridState.ts';
+import { undoAtom } from '../../state/editHistory.ts';
+import { embedChildrenAtom } from '../../state/embed.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 export interface PerfectionControlsPartProps {
   instruction: PerfectionRule;
@@ -21,12 +25,15 @@ export interface PerfectionControlsPartProps {
 export default memo(function PerfectionControlsPart({
   instruction,
 }: PerfectionControlsPartProps) {
-  const { grid, setGridRaw } = useGrid();
-  const { embedChildren } = useEmbed();
-  const { state } = useGridState();
-  const { undo } = useEdit();
-  const { solvePath, setSolvePath, visualizeSolvePath, setVisualizeSolvePath } =
-    useSolvePath();
+  const grid = useAtomValue(gridAtom);
+  const setGridRaw = useSetAtom(setGridRawAtom);
+  const embedChildren = useAtomValue(embedChildrenAtom);
+  const state = useAtomValue(gridStateAtom);
+  const undo = useSetAtom(undoAtom);
+  const solvePath = useAtomValue(solvePathAtom);
+  const setSolvePath = useSetAtom(solvePathAtom);
+  const visualizeSolvePath = useAtomValue(visualizeSolvePathAtom);
+  const setVisualizeSolvePath = useSetAtom(visualizeSolvePathAtom);
   const [tooltip, setTooltip] = useState<string | null>(null);
 
   useEffect(() => {

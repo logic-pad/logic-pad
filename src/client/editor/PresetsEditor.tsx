@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
-import { Presets, useToolbox } from '../contexts/ToolboxContext';
+import { Presets, presetsAtom, toolIdAtom } from '../state/toolbox.ts';
+import { useAtom, useAtomValue } from 'jotai';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { allSymbols } from '../symbols';
 import SymbolTool from './SymbolTool';
@@ -54,7 +55,8 @@ const PresetTool = memo(function PresetTool({
 });
 
 export default memo(function PresetsEditor() {
-  const { toolId, presets, setPresets } = useToolbox();
+  const toolId = useAtomValue(toolIdAtom);
+  const [presets, setPresets] = useAtom(presetsAtom);
 
   const sortablePresets = useMemo<SortablePreset[]>(
     () =>

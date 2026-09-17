@@ -11,7 +11,7 @@ import { cn } from '../../client/uiHelper.ts';
 import Loading from './Loading';
 import type { Options } from 'react-markdown';
 import { spoilerPlugin } from 'remark-inline-spoiler';
-import { useOnline } from '../contexts/OnlineContext.tsx';
+import { useOnline } from '../state/online.ts';
 import type { Spoiler } from 'mdast-util-inline-spoiler';
 
 declare module 'mdast' {

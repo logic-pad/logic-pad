@@ -2,20 +2,24 @@ import { memo, useRef } from 'react';
 import ToolboxItem from '../../editor/ToolboxItem';
 import { PartPlacement, PartSpec } from './types';
 import { instance as musicGridInstance } from '@logic-pad/core/data/rules/musicGridRule';
-import { useGrid } from '../../contexts/GridContext.tsx';
 import GridOverlay from '../../grid/GridOverlay';
 import PointerCaptureOverlay from '../../grid/PointerCaptureOverlay';
 import { Color } from '@logic-pad/core/data/primitives';
 import { ControlLine, Row } from '@logic-pad/core/data/rules/musicControlLine';
 import {
   getConfigurableLocation,
-  useConfig,
-} from '../../contexts/ConfigContext.tsx';
+  configLocationAtom,
+  configRefAtom,
+} from '../../state/config.ts';
 import { IoMusicalNote } from 'react-icons/io5';
+import { gridAtom, setGridAtom } from '../../state/grid.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 const NoteOverlay = memo(function NoteOverlay() {
-  const { setLocation, setRef } = useConfig();
-  const { grid, setGrid } = useGrid();
+  const setLocation = useSetAtom(configLocationAtom);
+  const setRef = useSetAtom(configRefAtom);
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const musicGrid = grid.musicGrid.value;
   const noteOverlayRef = useRef<Map<string, HTMLDivElement | null>>(null);
 

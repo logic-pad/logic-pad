@@ -6,7 +6,8 @@ import { Position } from '@logic-pad/core/data/primitives';
 import SolvePathEditorModal, {
   SolvePathEditorRef,
 } from './SolvePathEditorModal';
-import { useGrid } from '../../contexts/GridContext';
+import { useAtomValue } from 'jotai';
+import { gridAtom, metadataAtom } from '../../state/grid.ts';
 import ConfigItem from './ConfigItem';
 
 export interface SolvePathConfigProps {
@@ -20,7 +21,8 @@ export default memo(function SolvePathConfig({
   config,
   setConfig,
 }: SolvePathConfigProps) {
-  const { grid, metadata } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const metadata = useAtomValue(metadataAtom);
   const solvePath = configurable[
     config.field as keyof typeof configurable
   ] as unknown as Position[];

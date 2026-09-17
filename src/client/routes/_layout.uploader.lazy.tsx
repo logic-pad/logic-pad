@@ -17,7 +17,7 @@ import {
 } from '@logic-pad/core/data/puzzle';
 import { cn } from '../uiHelper';
 import toast from 'react-hot-toast';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { api } from '../online/api';
 import { allSolvers } from '@logic-pad/core/data/solver/allSolvers';
 import GridData from '@logic-pad/core/data/grid';

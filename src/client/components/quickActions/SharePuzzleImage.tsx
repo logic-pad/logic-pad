@@ -5,12 +5,11 @@ import { cn, safeClipboard } from '../../uiHelper';
 import Metadata from '../../metadata/Metadata';
 import Loading from '../Loading';
 import html2canvas from 'html2canvas-pro';
-import GridStateContext, {
-  defaultState,
-  useGridState,
-} from '../../contexts/GridStateContext';
-import GridContext, { useGrid } from '../../contexts/GridContext';
-import DisplayContext, { useDisplay } from '../../contexts/DisplayContext';
+import { defaultState, gridStateAtom } from '../../state/gridState.ts';
+import { gridAtom, metadataAtom, solutionAtom } from '../../state/grid.ts';
+import { scaleAtom } from '../../state/display.ts';
+import { PuzzleImageScope } from '../../state/scopes.tsx';
+import { useAtomValue } from 'jotai';
 import { FaAngleDown, FaCamera } from 'react-icons/fa';
 
 interface CopyImageButtonProps {
@@ -67,9 +66,11 @@ const PuzzleImage = memo(function PuzzleImage({
   gridOnly,
   ref,
 }: PuzzleImageProps) {
-  const { grid, solution, metadata } = useGrid();
-  const { state } = useGridState();
-  const { scale } = useDisplay();
+  const grid = useAtomValue(gridAtom);
+  const solution = useAtomValue(solutionAtom);
+  const metadata = useAtomValue(metadataAtom);
+  const state = useAtomValue(gridStateAtom);
+  const scale = useAtomValue(scaleAtom);
 
   const newGrid = useMemo(
     () => (resetGrid ? grid.resetTiles() : grid),
@@ -87,29 +88,27 @@ const PuzzleImage = memo(function PuzzleImage({
           gridOnly ? 'p-4' : 'py-4 pl-4 pr-0'
         )}
       >
-        <DisplayContext scale={resetScale ? 1 : scale} responsiveScale={false}>
-          <GridStateContext state={resetGrid ? defaultState : state}>
-            <GridContext
-              grid={newGrid}
-              initialSolution={solution}
-              initialMetadata={metadata}
-            >
-              <div className="flex flex-col gap-4">
-                {gridOnly || <Metadata simplified={true} responsive={false} />}
-                <MainGrid
-                  useToolboxClick={false}
-                  allowAnimation={false}
-                  allowSounds={false}
-                />
-              </div>
-              {gridOnly || (
-                <div className="pr-2">
-                  <InstructionList responsive={false} />
-                </div>
-              )}
-            </GridContext>
-          </GridStateContext>
-        </DisplayContext>
+        <PuzzleImageScope
+          grid={newGrid}
+          solution={solution}
+          metadata={metadata}
+          state={resetGrid ? defaultState : state}
+          scale={resetScale ? 1 : scale}
+        >
+          <div className="flex flex-col gap-4">
+            {gridOnly || <Metadata simplified={true} responsive={false} />}
+            <MainGrid
+              useToolboxClick={false}
+              allowAnimation={false}
+              allowSounds={false}
+            />
+          </div>
+          {gridOnly || (
+            <div className="pr-2">
+              <InstructionList responsive={false} />
+            </div>
+          )}
+        </PuzzleImageScope>
       </div>
     </div>
   );

@@ -1,6 +1,10 @@
 import { useMonaco } from '@monaco-editor/react';
+// eslint-disable-next-line import-x/no-duplicates -- resolver limitation: jotai's typesVersions stub makes 'jotai' and 'jotai/utils' look identical
+import { useAtom } from 'jotai';
+// eslint-disable-next-line import-x/no-duplicates -- resolver limitation: jotai's typesVersions stub makes 'jotai' and 'jotai/utils' look identical
+import { atomWithStorage } from 'jotai/utils';
 import { editor } from 'monaco-editor';
-import React, { createContext, memo, use, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 
 export const themeKey = 'theme';
 
@@ -40,30 +44,21 @@ export const SUPPORTED_THEMES = [
   ['sunset', 'vs-dark'],
 ];
 
-interface ThemeContext {
-  theme: string;
-  setTheme: (value: string) => void;
-}
-
-const Context = createContext<ThemeContext>({
-  theme: localStorage.getItem(themeKey) ?? 'dark',
-  setTheme: () => {},
+export const themeAtom = atomWithStorage(themeKey, 'dark', undefined, {
+  getOnInit: true,
 });
 
-export const useTheme = () => {
-  return use(Context);
-};
+export function useTheme() {
+  const [theme, setTheme] = useAtom(themeAtom);
+  return { theme, setTheme };
+}
 
-export const ThemeConsumer = Context.Consumer;
-
-export default memo(function ThemeContext({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem(themeKey) ?? 'dark'
-  );
+/**
+ * Applies the current theme to the document and to Monaco.
+ * Mount once at the app root.
+ */
+export default memo(function ThemeSynchronizer() {
+  const [theme] = useAtom(themeAtom);
   const monaco = useMonaco();
 
   useEffect(() => {
@@ -85,14 +80,5 @@ export default memo(function ThemeContext({
     }
   }, [theme, monaco]);
 
-  return (
-    <Context
-      value={{
-        theme,
-        setTheme,
-      }}
-    >
-      {children}
-    </Context>
-  );
+  return null;
 });

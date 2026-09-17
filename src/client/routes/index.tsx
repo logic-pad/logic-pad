@@ -7,7 +7,7 @@ import PWAPrompt from '../components/PWAPrompt';
 import toast from 'react-hot-toast';
 import FrontPageLists from '../online/FrontPageLists';
 import PersonalFrontPageLists from '../online/PersonalFrontPageLists';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import Footer from '../components/Footer';
 import { api } from '../online/api';
 import NavigationSkip from '../components/NavigationSkip';

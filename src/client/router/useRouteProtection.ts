@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import storedRedirect from './storedRedirect';
 import toast from 'react-hot-toast';

@@ -1,10 +1,11 @@
 import React, { HTMLProps, memo, useEffect, useMemo } from 'react';
-import { useToolbox } from '../contexts/ToolboxContext.tsx';
+import { setToolAtom, toolIdAtom } from '../state/toolbox.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { cn } from '../../client/uiHelper.ts';
 import { Color } from '@logic-pad/core/data/primitives';
-import { GridContext } from '../contexts/GridContext.tsx';
+import { GridActions } from '../state/grid.ts';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { SiteSettings, useSettings } from '../contexts/SettingsContext.tsx';
+import { SiteSettings, useSettings } from '../state/settings.ts';
 
 type HotkeyLayout = Record<
   SiteSettings['keyboardLayout'],
@@ -77,7 +78,7 @@ export interface ToolboxItemProps extends HTMLProps<HTMLDivElement> {
         y: number,
         target: Color,
         flood: boolean,
-        gridContext: GridContext
+        gridActions: GridActions
       ) => void)
     | null;
   children: React.ReactNode;
@@ -105,7 +106,8 @@ export default memo(function ToolboxItem({
   style,
   ...rest
 }: ToolboxItemProps) {
-  const { toolId, setTool } = useToolbox();
+  const toolId = useAtomValue(toolIdAtom);
+  const setTool = useSetAtom(setToolAtom);
   const [showMoreTools] = useSettings('showMoreTools');
   const [keyboardLayout] = useSettings('keyboardLayout');
 

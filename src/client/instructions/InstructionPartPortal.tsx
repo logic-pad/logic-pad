@@ -1,6 +1,10 @@
 import { ReactNode, useEffect } from 'react';
 import { PartPlacement } from './parts/types';
-import { useInstructionParts } from '../contexts/InstructionPartsContext';
+import {
+  addInstructionPartAtom,
+  removeInstructionPartAtom,
+} from '../state/instructionParts.ts';
+import { useSetAtom } from 'jotai';
 
 export interface InstructionPartPortalProps {
   children: ReactNode;
@@ -11,7 +15,8 @@ export default function InstructionPartPortal({
   placement,
   children,
 }: InstructionPartPortalProps) {
-  const { addPart, removePart } = useInstructionParts();
+  const addPart = useSetAtom(addInstructionPartAtom);
+  const removePart = useSetAtom(removeInstructionPartAtom);
 
   useEffect(() => {
     const part = children;

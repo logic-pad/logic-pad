@@ -1,5 +1,6 @@
 import { memo, useId, useRef } from 'react';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import {
   InfiniteData,
   infiniteQueryOptions,
@@ -9,7 +10,7 @@ import {
 import { api, bidirectionalInfiniteQuery, queryClient } from './api';
 import Loading from '../components/Loading';
 import { Comment, ListResponse } from './data';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import toast from 'react-hot-toast';
 import CommentEntry from './CommentEntry';
 import CommentTextarea, { CommentTextareaRef } from './CommentTextarea';
@@ -37,7 +38,7 @@ export default memo(function CommentSidebar({
 }: CommentSidebarProps) {
   const drawerId = useId();
   const { me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const commentList = useInfiniteQuery({
     ...commentListQueryOptions(id!),
     enabled: !!id && !!me && open,

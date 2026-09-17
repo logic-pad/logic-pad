@@ -5,29 +5,38 @@ import {
   FiCornerUpRight,
   FiRefreshCcw,
 } from 'react-icons/fi';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom, setGridRawAtom } from '../state/grid.ts';
 import { cn } from '../../client/uiHelper.ts';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useEdit } from '../contexts/EditContext.tsx';
-import { useEmbed } from '../contexts/EmbedContext.tsx';
+import {
+  redoAtom,
+  redoStackAtom,
+  undoAtom,
+  undoStackAtom,
+  clearHistoryAtom,
+} from '../state/editHistory.ts';
+import { embedChildrenAtom } from '../state/embed.tsx';
 import { useSearch } from '@tanstack/react-router';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import GridData from '@logic-pad/core/data/grid';
 import { IoMdColorFill } from 'react-icons/io';
 import mouseContext from '../grid/MouseContext.tsx';
-import { useGridState } from '../contexts/GridStateContext.tsx';
+import { gridValidatorAtom } from '../state/gridState.ts';
 import Loading from './Loading.tsx';
 
 export interface EditControlsProps {
   onReset?: () => void;
 }
 
+const noopSubscribe = () => () => {};
+
 const ValidatorStatus = memo(function ValidatorStatus() {
-  const { gridValidator } = useGridState();
+  const gridValidator = useAtomValue(gridValidatorAtom);
   const isLoading = useSyncExternalStore(
-    gridValidator.subscribeToLoad,
-    gridValidator.isLoading
+    gridValidator?.subscribeToLoad ?? noopSubscribe,
+    () => gridValidator?.isLoading() ?? false
   );
   return (
     <div
@@ -46,9 +55,13 @@ const ValidatorStatus = memo(function ValidatorStatus() {
 const EditControls = memo(function EditControls({
   onReset,
 }: EditControlsProps) {
-  const { grid, setGridRaw } = useGrid();
-  const { undoStack, redoStack, undo: undoEdit, redo: redoEdit } = useEdit();
-  const { embedChildren } = useEmbed();
+  const grid = useAtomValue(gridAtom);
+  const setGridRaw = useSetAtom(setGridRawAtom);
+  const undoStack = useAtomValue(undoStackAtom);
+  const redoStack = useAtomValue(redoStackAtom);
+  const undoEdit = useSetAtom(undoAtom);
+  const redoEdit = useSetAtom(redoAtom);
+  const embedChildren = useAtomValue(embedChildrenAtom);
 
   const undo = () => {
     const result = undoEdit(grid);
@@ -147,7 +160,8 @@ const EditControls = memo(function EditControls({
 export default EditControls;
 
 export function SolveEditControls() {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const search = useSearch({ from: undefined, strict: false });
   return (
     <EditControls
@@ -169,7 +183,8 @@ export function SolveEditControls() {
 }
 
 export function EditorEditControls() {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   return (
     <EditControls
       onReset={() => {
@@ -188,8 +203,9 @@ export interface PerfectionEditControlsProps {
 export function PerfectionEditControls({
   onReset,
 }: PerfectionEditControlsProps) {
-  const { grid, setGridRaw } = useGrid();
-  const { clearHistory } = useEdit();
+  const grid = useAtomValue(gridAtom);
+  const setGridRaw = useSetAtom(setGridRawAtom);
+  const clearHistory = useSetAtom(clearHistoryAtom);
   const search = useSearch({ from: undefined, strict: false });
 
   if (onReset) return <EditControls onReset={onReset} />;

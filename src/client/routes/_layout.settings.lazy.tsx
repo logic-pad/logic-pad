@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import ResponsiveLayout from '../components/ResponsiveLayout';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { api, queryClient } from '../online/api';
 import Loading from '../components/Loading';

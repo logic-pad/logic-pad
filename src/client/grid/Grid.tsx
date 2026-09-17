@@ -3,7 +3,7 @@ import GridData from '@logic-pad/core/data/grid';
 import { Color } from '@logic-pad/core/data/primitives';
 import CanvasGrid from './canvasGrid/Grid';
 import DOMGrid from './domGrid/Grid';
-import { useReducedMotion } from '../contexts/SettingsContext.tsx';
+import { useReducedMotion } from '../state/settings.ts';
 
 export interface GridProps {
   size: number;

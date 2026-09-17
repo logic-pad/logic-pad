@@ -4,7 +4,7 @@ import ResponsiveLayout from '../components/ResponsiveLayout';
 import { FaPaintBrush } from 'react-icons/fa';
 import ColorPicker from '../components/ColorPicker';
 import useColor, { formatCss } from '@terrazzo/use-color';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../state/theme.ts';
 
 const THEME_COLOR_NAMES = [
   'neutral',

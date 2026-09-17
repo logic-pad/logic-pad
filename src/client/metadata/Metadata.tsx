@@ -1,10 +1,11 @@
 import { memo } from 'react';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtomValue } from 'jotai';
+import { metadataAtom } from '../state/grid.ts';
 import Difficulty from './Difficulty';
 import Markdown from '../components/Markdown';
 import { cn, toRelativeDate } from '../uiHelper.ts';
 import UserCard from './UserCard.tsx';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
+import { onlinePuzzleAtom } from '../state/onlinePuzzle.ts';
 
 export interface MetadataProps {
   simplified?: boolean;
@@ -17,8 +18,8 @@ export default memo(function Metadata({
 }: MetadataProps) {
   simplified = simplified ?? false;
   responsive = responsive ?? true;
-  const { metadata } = useGrid();
-  const { puzzle } = useOnlinePuzzle();
+  const metadata = useAtomValue(metadataAtom);
+  const puzzle = useAtomValue(onlinePuzzleAtom);
 
   return (
     <section className="flex flex-col gap-4 text-neutral-content">

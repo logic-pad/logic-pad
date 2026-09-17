@@ -1,16 +1,24 @@
 import { Compressor, puzzleEquals, Serializer } from '@logic-pad/core/index';
 import { useBlocker, useNavigate } from '@tanstack/react-router';
 import { memo, useEffect, useState } from 'react';
-import { defaultGrid, useGrid } from '../contexts/GridContext';
-import { useSettings } from '../contexts/SettingsContext';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useAtomValue } from 'jotai';
+import {
+  defaultGrid,
+  gridAtom,
+  metadataAtom,
+  solutionAtom,
+} from '../state/grid.ts';
+import { useSettings } from '../state/settings.ts';
+import { lastSavedPuzzleAtom } from '../state/onlinePuzzle.ts';
 import { SolutionHandling } from './linkLoaderValidator';
 
 export default memo(function ExitBlocker() {
   const [enableExitConfirmation] = useSettings('enableExitConfirmation');
   const [willUpdate, setWillUpdate] = useState(false);
-  const { metadata, grid, solution } = useGrid();
-  const { lastSaved } = useOnlinePuzzle();
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
+  const solution = useAtomValue(solutionAtom);
+  const lastSaved = useAtomValue(lastSavedPuzzleAtom);
   const navigate = useNavigate();
 
   useEffect(() => {

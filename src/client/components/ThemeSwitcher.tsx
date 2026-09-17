@@ -1,18 +1,13 @@
 import { memo } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 import { cn } from '../../client/uiHelper.ts';
-import {
-  SUPPORTED_THEMES,
-  themeKey,
-  useTheme,
-} from '../contexts/ThemeContext.tsx';
+import { SUPPORTED_THEMES, useTheme } from '../state/theme.ts';
 
 export default memo(function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
 
   const switchTheme = (newTheme: string) => {
     setTheme(newTheme);
-    localStorage.setItem(themeKey, newTheme);
   };
 
   return (

@@ -1,10 +1,11 @@
 import { memo, useEffect, useRef } from 'react';
-import { useGrid } from '../contexts/GridContext';
+import { gridAtom } from '../state/grid.ts';
 import GridData from '@logic-pad/core/data/grid';
 import * as Tone from 'tone';
 import { Color, State } from '@logic-pad/core/data/primitives';
-import { useGridState } from '../contexts/GridStateContext';
-import { useSettings } from '../contexts/SettingsContext';
+import { gridStateAtom } from '../state/gridState.ts';
+import { useSettings } from '../state/settings.ts';
+import { useAtomValue } from 'jotai';
 
 const sfx = {
   complete: new Tone.Player('/samples/sfx_complete.mp3').toDestination(),
@@ -17,8 +18,8 @@ export interface GridSoundsProps {
 }
 
 export default memo(function GridSounds({ allowAnimation }: GridSoundsProps) {
-  const { grid } = useGrid();
-  const { state } = useGridState();
+  const grid = useAtomValue(gridAtom);
+  const state = useAtomValue(gridStateAtom);
   const previousGrid = useRef<GridData | null>(null);
   const [sfxVolume] = useSettings('sfxVolume');
   useEffect(() => {

@@ -6,10 +6,11 @@ import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompre
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { ZodError } from 'zod';
 import evaluate, { examples } from './evaluator';
-import { SUPPORTED_THEMES, useTheme } from '../contexts/ThemeContext.tsx';
-import { useToolbox } from '../contexts/ToolboxContext.tsx';
+import { SUPPORTED_THEMES, useTheme } from '../state/theme.ts';
+import { setToolAtom } from '../state/toolbox.ts';
 import handleTileClick from '../grid/handleTileClick';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useSetAtom } from 'jotai';
+import { metadataAtom, setGridAtom } from '../state/grid.ts';
 import { array } from '@logic-pad/core/data/dataHelper';
 import toast from 'react-hot-toast';
 import { r } from 'readable-regexp';
@@ -63,8 +64,9 @@ export default memo(function SourceCodeEditor({
   };
   const monaco = useMonaco();
   const { theme } = useTheme();
-  const { setTool } = useToolbox();
-  const { setGrid, setMetadata } = useGrid();
+  const setTool = useSetAtom(setToolAtom);
+  const setGrid = useSetAtom(setGridAtom);
+  const setMetadata = useSetAtom(metadataAtom);
 
   // Set the toolbox tool so that the grid is editable
   useEffect(() => {

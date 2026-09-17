@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { externalReducedMotion } from '../../uiHelper';
-import { useSettings } from '../../contexts/SettingsContext';
+import { useSettings } from '../../state/settings.ts';
 
 export default memo(function AnimationToggle() {
   const [enableFancyAnimations, setEnableFancyAnimations] = useSettings(

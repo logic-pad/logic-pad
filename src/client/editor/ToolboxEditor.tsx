@@ -1,26 +1,26 @@
 import { memo } from 'react';
-import { useToolbox } from '../contexts/ToolboxContext.tsx';
+import { toolDescriptionAtom, toolNameAtom } from '../state/toolbox.ts';
 import { allTools } from './tools';
 import { cn } from '../../client/uiHelper.ts';
 import GridSizeEditor from './GridSizeEditor';
-import { GridConsumer } from '../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom } from '../state/grid.ts';
 import InstructionPartOutlet from '../instructions/InstructionPartOutlet';
 import { PartPlacement } from '../instructions/parts/types';
-import { useSettings } from '../contexts/SettingsContext.tsx';
+import { useSettings } from '../state/settings.ts';
 import PresetsEditor from './PresetsEditor.tsx';
 
 export default memo(function ToolboxEditor() {
-  const { name, description } = useToolbox();
+  const name = useAtomValue(toolNameAtom);
+  const description = useAtomValue(toolDescriptionAtom);
   const [showMoreTools, setShowMoreTools] = useSettings('showMoreTools');
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden">
       <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
-        <GridConsumer>
-          {({ grid, setGrid }) => (
-            <GridSizeEditor grid={grid} setGrid={setGrid} />
-          )}
-        </GridConsumer>
+        <GridSizeEditor grid={grid} setGrid={setGrid} />
         <span className="divider mt-0 mb-0"></span>
         <div className="flex flex-col gap-2">
           <span className="text-sm font-bold">
@@ -40,14 +40,10 @@ export default memo(function ToolboxEditor() {
           {allTools.map((Tool, i) => (
             <Tool key={i} />
           ))}
-          <GridConsumer>
-            {({ grid }) => (
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.Toolbox}
-              />
-            )}
-          </GridConsumer>
+          <InstructionPartOutlet
+            grid={grid}
+            placement={PartPlacement.Toolbox}
+          />
         </div>
         <button
           type="button"

@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Position } from '@logic-pad/core/data/primitives';
 import OutlineOverlay from './OutlineOverlay';
-import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useTheme } from '../state/theme.ts';
 
 export interface ErrorOverlayProps {
   positions: readonly (readonly Position[])[];

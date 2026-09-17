@@ -1,6 +1,7 @@
-import { useOnline } from '../contexts/OnlineContext.tsx';
+import { useOnline } from '../state/online.ts';
 import { PiSignInBold } from 'react-icons/pi';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import {
   memo,
   RefObject,
@@ -12,7 +13,7 @@ import {
   useState,
 } from 'react';
 import storedRedirect from '../router/storedRedirect.ts';
-import { useGridState } from '../contexts/GridStateContext.tsx';
+import { gridStateAtom } from '../state/gridState.ts';
 import { State } from '@logic-pad/core/data/primitives';
 import onlineSolveTracker from '../router/onlineSolveTracker.ts';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
@@ -21,14 +22,14 @@ import Loading from './Loading.tsx';
 import Difficulty from '../metadata/Difficulty.tsx';
 import toast from 'react-hot-toast';
 import { animate } from 'animejs';
-import { useReducedMotion } from '../contexts/SettingsContext.tsx';
+import { useReducedMotion } from '../state/settings.ts';
 import { PuzzleFull, SolveSession } from '../online/data.ts';
 import CommentSidebar from '../online/CommentSidebar.tsx';
 import { FaComment, FaDownload, FaSave } from 'react-icons/fa';
 import { router } from '../router/router';
 import { cn, count } from '../uiHelper.ts';
 import { useNavigate } from '@tanstack/react-router';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { gridAtom, setGridAtom } from '../state/grid.ts';
 import { useHotkeys } from 'react-hotkeys-hook';
 import debounce from 'lodash/debounce';
 import GridData from '@logic-pad/core/data/grid.ts';
@@ -39,8 +40,8 @@ import { array } from '@logic-pad/core/index.ts';
 
 const SolveTrackerAnonymous = memo(function SolveTracker() {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
-  const { state } = useGridState();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const state = useAtomValue(gridStateAtom);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,7 +89,7 @@ const RatePuzzle = memo(function RatePuzzle({
 }: {
   initialRating: number;
 }) {
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const [rating, setRating] = useState(initialRating);
   const rateQuery = useMutation({
     mutationFn: (variables: Parameters<typeof api.ratePuzzle>) => {
@@ -172,7 +173,7 @@ const PuzzleCompleted = memo(function PuzzleCompleted({
   const panelRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const { me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const commentCount = useQuery({
     ...commentCountQueryOptions(id!),
     enabled: !!id && !!me,
@@ -250,8 +251,8 @@ const PuzzleSolving = memo(function PuzzleSolving({
   solved: boolean;
 }) {
   const { me } = useOnline();
-  const { id } = useOnlinePuzzle();
-  const { grid } = useGrid();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const grid = useAtomValue(gridAtom);
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -408,8 +409,9 @@ const PuzzleSolving = memo(function PuzzleSolving({
 
 const SolveTrackerSignedIn = memo(function SolveTracker() {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
-  const { grid, setGrid } = useGrid();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const { isPending, data } = useQuery({
     queryKey: ['solveSession', 'begin', id],
     queryFn: () => api.solveSessionBegin(id!),
@@ -445,7 +447,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
     };
   }
 
-  const { state } = useGridState();
+  const state = useAtomValue(gridStateAtom);
   const completePuzzle = useEffectEvent(async (grid: GridData) => {
     const solutionData =
       me!.supporter > 0
@@ -513,7 +515,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
 
 export default memo(function PuzzleSolveControl() {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
 
   if (!isOnline) {
     return (

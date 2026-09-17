@@ -5,7 +5,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { puzzleEditQueryOptions } from './_layout.create.$puzzleId';
 import useOnlineLinkLoader from '../router/onlineLinkLoader';
 import { SolutionHandling } from '../router/linkLoaderValidator';
-import MainContext from '../router/MainContext';
+import { PuzzleScope } from '../state/scopes.tsx';
 import ExitBlocker from '../router/ExitBlocker';
 import { useRouteProtection } from '../router/useRouteProtection';
 
@@ -21,7 +21,7 @@ export const Route = createLazyFileRoute('/_layout/create/$puzzleId')({
     });
 
     return (
-      <MainContext
+      <PuzzleScope
         puzzleId={result.puzzleId}
         puzzle={data}
         initialPuzzle={result.initialPuzzle}
@@ -29,7 +29,7 @@ export const Route = createLazyFileRoute('/_layout/create/$puzzleId')({
         <PuzzleEditorScreen>
           <ExitBlocker />
         </PuzzleEditorScreen>
-      </MainContext>
+      </PuzzleScope>
     );
   }),
 });

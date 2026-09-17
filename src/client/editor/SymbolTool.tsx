@@ -11,9 +11,11 @@ import Symbol from '@logic-pad/core/data/symbols/symbol';
 import ToolboxItem, { ToolboxHotkey } from './ToolboxItem';
 import {
   getConfigurableLocation,
-  useConfig,
-} from '../contexts/ConfigContext.tsx';
-import { useGrid } from '../contexts/GridContext.tsx';
+  configLocationAtom,
+  configRefAtom,
+} from '../state/config.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom } from '../state/grid.ts';
 import { Color, Position } from '@logic-pad/core/data/primitives';
 import { cn, eq, mousePosition } from '../../client/uiHelper.ts';
 import PointerCaptureOverlay, {
@@ -39,8 +41,11 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
   sample,
   onNewSymbol,
 }: Pick<SymbolToolProps, 'sample' | 'onNewSymbol'>) {
-  const { location, setLocation, setRef } = useConfig();
-  const { grid, setGrid } = useGrid();
+  const location = useAtomValue(configLocationAtom);
+  const setLocation = useSetAtom(configLocationAtom);
+  const setRef = useSetAtom(configRefAtom);
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const [position, setPosition] = useState<Position | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);

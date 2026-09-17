@@ -3,10 +3,11 @@ import MusicGridRule, {
   instance as musicGridInstance,
 } from '@logic-pad/core/data/rules/musicGridRule';
 import { memo, use, useEffect, useMemo, useRef, useState } from 'react';
-import { useGrid } from '../../contexts/GridContext.tsx';
 import GridCanvasOverlay, { RawCanvasRef } from '../../grid/GridCanvasOverlay';
-import { useTheme } from '../../contexts/ThemeContext.tsx';
+import { useTheme } from '../../state/theme.ts';
 import { Color } from '@logic-pad/core/data/primitives';
+import { gridAtom } from '../../state/grid.ts';
+import { useAtomValue } from 'jotai';
 
 const ToneImport = import('tone');
 const instrumentsImport = import('./instruments.ts');
@@ -43,7 +44,7 @@ export default memo(function MusicOverlayPart({
 }: MusicOverlayPartProps) {
   const Tone = use(ToneImport);
   const { playbackState } = use(instrumentsImport);
-  const { grid } = useGrid();
+  const grid = useAtomValue(gridAtom);
   const canvasRef = useRef<RawCanvasRef>(null);
   const [tileSize, setTileSize] = useState(0);
   const targetRef = useRef<HTMLDivElement>(null);

@@ -9,7 +9,7 @@ import React, {
 import debounce from 'lodash/debounce';
 import { FaSearch, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { z } from 'zod';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { cn } from '../uiHelper';
 
 export const collectionSearchSchema = z.object({

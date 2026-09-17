@@ -1,5 +1,6 @@
 import { memo, useEffect } from 'react';
-import { useGrid } from '../contexts/GridContext';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridRawAtom } from '../state/grid.ts';
 import { Mode } from '@logic-pad/core/data/primitives';
 import Symbol from '@logic-pad/core/data/symbols/symbol';
 import Rule from '@logic-pad/core/data/rules/rule';
@@ -11,7 +12,8 @@ export interface ModeVariantLoaderProps {
 export default memo(function ModeVariantLoader({
   mode,
 }: ModeVariantLoaderProps) {
-  const { grid, setGridRaw } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGridRaw = useSetAtom(setGridRawAtom);
   useEffect(() => {
     let changed = false;
     const newRules: Rule[] = [];

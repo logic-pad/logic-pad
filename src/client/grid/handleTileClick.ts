@@ -1,12 +1,12 @@
 import { Color } from '@logic-pad/core/data/primitives';
-import { GridContext } from '../contexts/GridContext.tsx';
+import { GridActions } from '../state/grid.ts';
 
 export default function handleTileClick(
   x: number,
   y: number,
   target: Color,
   flood: boolean,
-  { grid, setGrid }: GridContext,
+  { grid, setGrid }: GridActions,
   overrideFixedTiles: boolean
 ) {
   if (overrideFixedTiles) {
@@ -27,7 +27,6 @@ export default function handleTileClick(
   } else {
     const tile = grid.getTile(x, y);
     if (flood && target === Color.Gray) {
-      // target is Color.Gray if the tile is already the target color
       setGrid(grid.floodFillAll(Color.Gray, tile.color, false));
     } else if (flood && !tile.fixed) {
       setGrid(grid.floodFill({ x, y }, Color.Gray, target, false));

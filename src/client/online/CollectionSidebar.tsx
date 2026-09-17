@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useId } from 'react';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleAtom, onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { api, bidirectionalInfiniteQuery } from './api';
 import { RiPlayList2Fill } from 'react-icons/ri';
@@ -10,7 +11,7 @@ import { Link } from '@tanstack/react-router';
 import UserCard from '../metadata/UserCard';
 import Difficulty from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { ResourceStatus } from './data';
 import { router } from '../router/router';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
@@ -24,7 +25,8 @@ export default memo(function CollectionSidebar({
 }: CollectionSidebarProps) {
   const drawerId = useId();
   const { me } = useOnline();
-  const { id, puzzle } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const puzzle = useAtomValue(onlinePuzzleAtom);
   collectionId ??= puzzle?.series?.id;
   const collection = useQuery({
     ...collectionQueryOptions(collectionId!),

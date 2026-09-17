@@ -3,18 +3,21 @@ import { useNavigate } from '@tanstack/react-router';
 import { FaEdit } from 'react-icons/fa';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
-import { useGrid } from '../../contexts/GridContext';
-import { useOnline } from '../../contexts/OnlineContext';
-import { useOnlinePuzzle } from '../../contexts/OnlinePuzzleContext';
+import { useAtomValue } from 'jotai';
+import { gridAtom, metadataAtom, solutionAtom } from '../../state/grid.ts';
+import { useOnline } from '../../state/online.ts';
+import { onlinePuzzleIdAtom } from '../../state/onlinePuzzle.ts';
 import { useQuery } from '@tanstack/react-query';
 import { puzzleSolveQueryOptions } from '../../routes/_layout.solve.$puzzleId';
 
 export default memo(function PuzzleEditButton() {
   const navigate = useNavigate();
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const puzzleQuery = useQuery(puzzleSolveQueryOptions(id));
-  const { metadata, grid, solution } = useGrid();
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
+  const solution = useAtomValue(solutionAtom);
   return (
     <button
       className="tooltip tooltip-info tooltip-right btn btn-md btn-ghost flex items-center w-fit focus:z-50"

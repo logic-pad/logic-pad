@@ -1,5 +1,4 @@
 import { Suspense, lazy, memo, useEffect, useRef, useState } from 'react';
-import { useGrid } from '../../contexts/GridContext.tsx';
 import { InstructionPartProps, PartPlacement, PartSpec } from './types';
 import MusicGridRule, {
   instance as musicGridInstance,
@@ -12,6 +11,8 @@ import { array } from '@logic-pad/core/data/dataHelper';
 import GridData from '@logic-pad/core/data/grid';
 import type { CachedPlayback } from './instruments.ts';
 import { useSuspenseQueries } from '@tanstack/react-query';
+import { gridAtom, solutionAtom } from '../../state/grid.ts';
+import { useAtomValue } from 'jotai';
 
 const ToneImport = import('tone');
 const instrumentsImport = import('./instruments.ts');
@@ -50,7 +51,8 @@ const MusicControls = lazy(async function () {
           })
         ),
       });
-      const { grid, solution } = useGrid();
+      const grid = useAtomValue(gridAtom);
+      const solution = useAtomValue(solutionAtom);
       const previousGrid = useRef<GridData | null>(null);
       const [playState, setPlayState] = useState<'listen' | 'play' | 'none'>(
         'none'

@@ -4,7 +4,7 @@ import { SolutionHandling } from '../router/linkLoaderValidator';
 import useLinkLoader from '../router/linkLoader';
 import PuzzleEditorScreen from '../screens/PuzzleEditorScreen';
 import { IoWarningOutline } from 'react-icons/io5';
-import MainContext from '../router/MainContext';
+import { PuzzleScope } from '../state/scopes.tsx';
 import ExitBlocker from '../router/ExitBlocker';
 
 export const Route = createLazyFileRoute('/_layout/create/')({
@@ -16,7 +16,7 @@ export const Route = createLazyFileRoute('/_layout/create/')({
     });
 
     return (
-      <MainContext
+      <PuzzleScope
         initialPuzzle={result.initialPuzzle}
         puzzle={null}
         puzzleId={result.puzzleId}
@@ -50,7 +50,7 @@ export const Route = createLazyFileRoute('/_layout/create/')({
             </div>
           )}
         </PuzzleEditorScreen>
-      </MainContext>
+      </PuzzleScope>
     );
   }),
 });

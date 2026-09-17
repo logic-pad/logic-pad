@@ -3,8 +3,9 @@ import { memo, useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { FaCheck, FaEdit, FaReply, FaTrash } from 'react-icons/fa';
 import Markdown from '../components/Markdown';
-import { useOnline } from '../contexts/OnlineContext';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useOnline } from '../state/online.ts';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import UserCard from '../metadata/UserCard';
 import { toRelativeDate } from '../uiHelper';
 import { api, queryClient } from './api';
@@ -21,7 +22,7 @@ export default memo(function CommentEntry({
   onReply,
 }: CommentEntryProps) {
   const { me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<CommentTextareaRef>(null);
   const editable = !!me && me.id === comment.creator.id;

@@ -16,7 +16,7 @@ import {
   FaTrash,
 } from 'react-icons/fa';
 import { api, bidirectionalInfiniteQuery, queryClient } from '../online/api';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { ListResponse, Notification, NotificationType } from '../online/data';
 import Loading from './Loading';
 import { RiAccountCircleFill } from 'react-icons/ri';

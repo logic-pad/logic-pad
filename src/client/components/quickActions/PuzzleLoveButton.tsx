@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
-import { useOnline } from '../../contexts/OnlineContext';
-import { useOnlinePuzzle } from '../../contexts/OnlinePuzzleContext';
+import { useOnline } from '../../state/online.ts';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleIdAtom } from '../../state/onlinePuzzle.ts';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { api, queryClient } from '../../online/api';
 import Loading from '../Loading';
@@ -17,7 +18,7 @@ const puzzleLoveQueryOptions = (puzzleId: string | null, enabled: boolean) =>
 
 export default memo(function PuzzleLoveButton() {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const puzzleLove = useQuery(puzzleLoveQueryOptions(id, isOnline && !!me));
   const setPuzzleLove = useMutation({
     mutationKey: ['puzzle', 'love', 'set', id],

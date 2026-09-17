@@ -1,12 +1,14 @@
 import { memo } from 'react';
 import ToolboxItem from '../ToolboxItem';
 import { Color } from '@logic-pad/core/data/primitives';
-import { useGrid } from '../../contexts/GridContext';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { gridAtom, setGridAtom } from '../../state/grid.ts';
 import PointerCaptureOverlay from '../../grid/PointerCaptureOverlay';
 import { TbFrame } from 'react-icons/tb';
 
 function ZoneToolOverlay() {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   return (
     <PointerCaptureOverlay
       width={grid.width}

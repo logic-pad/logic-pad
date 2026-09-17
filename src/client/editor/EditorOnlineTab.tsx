@@ -1,5 +1,6 @@
 import { memo, useId, useState } from 'react';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { puzzleEditQueryOptions } from '../routes/_layout.create.$puzzleId';
 import { ResourceStatus } from '../online/data';
@@ -7,9 +8,9 @@ import { FaCheckSquare, FaHeart } from 'react-icons/fa';
 import Loading from '../components/Loading';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
-import { useGrid } from '../contexts/GridContext';
+import { gridAtom, metadataAtom, solutionAtom } from '../state/grid.ts';
 import storedRedirect from '../router/storedRedirect';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import RatedDifficulty from '../metadata/RatedDifficulty';
 import { api, ApiError, queryClient } from '../online/api';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -20,7 +21,9 @@ import { SolutionHandling } from '../router/linkLoaderValidator';
 
 // million-ignore
 const SignInWithProgress = memo(function SignInWithProgress() {
-  const { metadata, grid, solution } = useGrid();
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
+  const solution = useAtomValue(solutionAtom);
   const navigate = useNavigate();
   return (
     <button
@@ -59,7 +62,8 @@ const UploadPuzzle = memo(function UploadPuzzle() {
       toast.error(error.message);
     },
   });
-  const { metadata, grid } = useGrid();
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
   const navigate = useNavigate();
 
   if (uploadPuzzle.isPending) {
@@ -100,9 +104,11 @@ const UploadPuzzle = memo(function UploadPuzzle() {
 
 // million-ignore
 const DeletePuzzle = memo(function DeletePuzzle() {
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const navigate = useNavigate();
-  const { metadata, grid, solution } = useGrid();
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
+  const solution = useAtomValue(solutionAtom);
   const deletePuzzle = useMutation({
     mutationFn: async (puzzleId: string) => {
       await api.deletePuzzle(puzzleId);
@@ -153,8 +159,9 @@ const DeletePuzzle = memo(function DeletePuzzle() {
 const PublishPuzzle = memo(function PublishPuzzle() {
   const modalId = useId();
   const { me } = useOnline();
-  const { id } = useOnlinePuzzle();
-  const { metadata, grid } = useGrid();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(gridAtom);
   const [isUnlisted, setUnlisted] = useState(false);
   const {
     isPending,
@@ -292,7 +299,7 @@ const UnlistedToggle = memo(function UnlistedToggle({
 }: {
   isUnlisted: boolean;
 }) {
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const { me } = useOnline();
   const { isPending, mutateAsync: publishPuzzle } = useMutation({
     mutationFn: async (data: Parameters<typeof api.publishPuzzle>) => {
@@ -356,7 +363,7 @@ const UnlistedToggle = memo(function UnlistedToggle({
 // million-ignore
 export default memo(function EditorOnlineTab() {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const { data, isPending } = useQuery(puzzleEditQueryOptions(id));
   const [commentsOpen, setCommentsOpen] = useState(false);
 

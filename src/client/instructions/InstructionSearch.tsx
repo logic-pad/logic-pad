@@ -1,9 +1,10 @@
 import { memo, useState } from 'react';
 import { allRules } from '@logic-pad/core/data/rules/index';
-import { useGrid } from '../contexts/GridContext.tsx';
 import Rule from '@logic-pad/core/data/rules/rule';
 import Autocomplete from '../components/Autocomplete';
 import { cn } from '../uiHelper.ts';
+import { gridAtom, setGridAtom } from '../state/grid.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 const ruleList = [...allRules.values()].flatMap(rule => rule.searchVariants);
 const descriptionList = ruleList.map(x => x.description);
@@ -16,7 +17,8 @@ export interface InstructionSearchProps {
 export default memo(function InstructionSearch({
   className,
 }: InstructionSearchProps) {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(gridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const [search, setSearch] = useState('');
 
   const addRule = (rule: Rule) => {

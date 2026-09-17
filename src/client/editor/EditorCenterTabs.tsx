@@ -1,6 +1,6 @@
 import { Suspense, lazy, memo } from 'react';
 import Loading from '../components/Loading.tsx';
-import { useOnline } from '../contexts/OnlineContext.tsx';
+import { useOnline } from '../state/online.ts';
 
 const EditorMainGrid = lazy(() => import('./EditorMainGrid.tsx'));
 const EditorOnlineTab = lazy(() => import('./EditorOnlineTab.tsx'));

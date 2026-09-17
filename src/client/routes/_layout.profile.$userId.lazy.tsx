@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { FaCheckSquare, FaEdit, FaShieldAlt, FaUser } from 'react-icons/fa';
 import { pluralize, toRelativeDate } from '../uiHelper';
 import CollectionFollowButton from '../online/CollectionFollowButton';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import HorizontalScroller from '../components/HorizontalScroller';
 import PuzzleCard from '../online/PuzzleCard';
 import CollectionCard from '../online/CollectionCard';
