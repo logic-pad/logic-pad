@@ -1,14 +1,21 @@
-import React, { memo, Suspense, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import StateRing from './StateRing.tsx';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { getGridAtom, setGridAtom, solutionAtom } from '../state/grid.ts';
 import Grid from './Grid';
 import SymbolOverlay from './SymbolOverlay';
 import { State, Position } from '@logic-pad/core/data/primitives';
 import GridData from '@logic-pad/core/data/grid';
 import Loading from '../components/Loading';
-import { GridStateConsumer } from '../contexts/GridStateContext.tsx';
-import { useDisplay } from '../contexts/DisplayContext.tsx';
-import { useToolbox } from '../contexts/ToolboxContext.tsx';
+import { gridStateAtom } from '../state/gridState.ts';
+import { responsiveScaleAtom, scaleAtom } from '../state/display.ts';
+import { onTileClickAtom } from '../state/toolbox.ts';
 import handleTileClick from './handleTileClick';
 import TileCountOverlay from './TileCountOverlay';
 import InstructionPartOutlet from '../instructions/InstructionPartOutlet';
@@ -16,7 +23,8 @@ import { PartPlacement } from '../instructions/parts/types';
 import ErrorOverlay from './ErrorOverlay';
 import { usePinch } from '@use-gesture/react';
 import GridZoneOverlay from './GridZoneOverlay.tsx';
-import { useSettings } from '../contexts/SettingsContext.tsx';
+import { useSettings } from '../state/settings.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 const GridSounds = React.lazy(() => import('./GridSounds.tsx'));
 
@@ -68,10 +76,16 @@ export default memo(function MainGrid({
 }: MainGridProps) {
   allowAnimation = allowAnimation ?? true;
   allowSounds = allowSounds ?? true;
-  const gridContext = useGrid();
-  const { grid, solution } = gridContext;
-  const { scale, setScale, responsiveScale } = useDisplay();
-  const { onTileClick } = useToolbox();
+  const grid = useAtomValue(getGridAtom);
+  const solution = useAtomValue(solutionAtom);
+  const setGrid = useSetAtom(setGridAtom);
+  const state = useAtomValue(gridStateAtom);
+  const scale = useAtomValue(scaleAtom);
+  const setScale = useSetAtom(scaleAtom);
+  const responsiveScale = useAtomValue(responsiveScaleAtom);
+  const onTileClick = useAtomValue(onTileClickAtom);
+  // snapshot passed to tile click handlers so they read fresh state at event time
+  const gridActions = useMemo(() => ({ grid, setGrid }), [grid, setGrid]);
   const [tileConfig, setTileConfig] = useState<{
     width: number;
     height: number;
@@ -162,45 +176,39 @@ export default memo(function MainGrid({
         editable={useToolboxClick ? !!onTileClick : true}
         onTileClick={(x, y, target, flood) => {
           if (useToolboxClick && onTileClick) {
-            onTileClick(x, y, target, flood, gridContext);
+            onTileClick(x, y, target, flood, gridActions);
             return;
           }
-          handleTileClick(x, y, target, flood, gridContext, false);
+          handleTileClick(x, y, target, flood, gridActions, false);
         }}
         bleed={grid.wrapAround.value ? 0.5 : 0}
       >
-        <GridStateConsumer>
-          {({ state }) => (
-            <>
-              <SymbolOverlay
-                grid={grid}
-                solution={solution}
-                state={state.symbols}
-                editable={useToolboxClick}
-              />
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.GridOverlay}
-              />
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.MainGridOverlay}
-              />
-              <ErrorOverlay
-                positions={
-                  state.rules
-                    .map(rule => rule.state === State.Error && rule.positions)
-                    .filter(Boolean) as Position[][]
-                }
-                width={grid.width}
-                height={grid.height}
-              />
-              <GridZoneOverlay grid={grid} />
-              <TileCountOverlay grid={grid} />
-              {children}
-            </>
-          )}
-        </GridStateConsumer>
+        <SymbolOverlay
+          grid={grid}
+          solution={solution}
+          state={state.symbols}
+          editable={useToolboxClick}
+        />
+        <InstructionPartOutlet
+          grid={grid}
+          placement={PartPlacement.GridOverlay}
+        />
+        <InstructionPartOutlet
+          grid={grid}
+          placement={PartPlacement.MainGridOverlay}
+        />
+        <ErrorOverlay
+          positions={
+            state.rules
+              .map(rule => rule.state === State.Error && rule.positions)
+              .filter(Boolean) as Position[][]
+          }
+          width={grid.width}
+          height={grid.height}
+        />
+        <GridZoneOverlay grid={grid} />
+        <TileCountOverlay grid={grid} />
+        {children}
       </Grid>
     </StateRing>
   );

@@ -2,7 +2,7 @@ import { queryOptions, useQuery, useMutation } from '@tanstack/react-query';
 import { memo } from 'react';
 import toast from 'react-hot-toast';
 import { FaPlus } from 'react-icons/fa';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { api, queryClient } from './api';
 import { RiUserFollowFill } from 'react-icons/ri';
 import Skeleton from '../components/Skeleton';

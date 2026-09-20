@@ -1,6 +1,7 @@
 import React, { memo, useState } from 'react';
 import ToolboxItem from '../ToolboxItem';
-import { useGrid } from '../../contexts/GridContext';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { getGridAtom, setGridAtom } from '../../state/grid.ts';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import { TbRowInsertTop } from 'react-icons/tb';
 
@@ -15,7 +16,8 @@ export interface ResizeToolOverlayProps {
 }
 
 export function ResizeToolOverlay({ direction }: ResizeToolOverlayProps) {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(getGridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   const [action, setAction] = useState<ResizeAction | null>(null);
 
   const getPointerLocation = (e: React.PointerEvent<HTMLDivElement>) => {

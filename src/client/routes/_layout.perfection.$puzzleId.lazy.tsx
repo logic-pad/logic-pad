@@ -3,13 +3,14 @@ import { memo } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import useOnlineLinkLoader from '../router/onlineLinkLoader';
 import { puzzleSolveQueryOptions } from './_layout.solve.$puzzleId';
-import MainContext from '../router/MainContext';
 import PerfectionScreen from '../screens/PerfectionScreen';
 import SolveModeButton from '../components/quickActions/SolveModeButton';
 import { instance as foresightInstance } from '@logic-pad/core/data/rules/foresightRule';
 import PerfectionRule from '@logic-pad/core/data/rules/perfectionRule';
 import { useRouteProtection } from '../router/useRouteProtection';
 import CollectionSidebar from '../online/CollectionSidebar';
+import { PuzzleScope } from '../state/scopes/PuzzleScope';
+import { SolvePathScope } from '../state/scopes/SolvePathScope';
 
 export const Route = createLazyFileRoute('/_layout/perfection/$puzzleId')({
   component: memo(function OnlinePerfectionMode() {
@@ -33,16 +34,18 @@ export const Route = createLazyFileRoute('/_layout/perfection/$puzzleId')({
       },
     });
     return (
-      <MainContext
+      <PuzzleScope
         puzzleId={result.puzzleId}
         puzzle={data}
         initialPuzzle={result.initialPuzzle}
       >
-        <PerfectionScreen
-          quickActions={[<SolveModeButton key="solveModeButton" />]}
-          topLeft={<CollectionSidebar collectionId={search.collection} />}
-        />
-      </MainContext>
+        <SolvePathScope>
+          <PerfectionScreen
+            quickActions={[<SolveModeButton key="solveModeButton" />]}
+            topLeft={<CollectionSidebar collectionId={search.collection} />}
+          />
+        </SolvePathScope>
+      </PuzzleScope>
     );
   }),
 });

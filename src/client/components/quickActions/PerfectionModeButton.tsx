@@ -1,11 +1,12 @@
 import { memo } from 'react';
-import { useGrid } from '../../contexts/GridContext';
+import { useAtomValue } from 'jotai';
+import { getGridAtom } from '../../state/grid.ts';
 import { instance as musicGridInstance } from '@logic-pad/core/data/rules/musicGridRule';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { FaStar } from 'react-icons/fa';
 
 export default memo(function PerfectionModeButton() {
-  const { grid } = useGrid();
+  const grid = useAtomValue(getGridAtom);
   const pathname = useRouterState({ select: s => s.location.pathname });
   const search = useRouterState({ select: s => s.location.search });
   if (grid.findRule(r => r.id === musicGridInstance.id)) return null;

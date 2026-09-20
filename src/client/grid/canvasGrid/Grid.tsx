@@ -3,7 +3,7 @@ import { array } from '@logic-pad/core/data/dataHelper';
 import { cn } from '../../../client/uiHelper.ts';
 import { type GridProps } from '../Grid';
 import PointerCaptureOverlay from '../PointerCaptureOverlay';
-import { useTheme } from '../../contexts/ThemeContext.tsx';
+import { useTheme } from '../../state/theme.ts';
 import { ColorInfo, clearTile, renderTile } from './tile';
 import GridData from '@logic-pad/core/data/grid';
 import TileConnections from '@logic-pad/core/data/tileConnections';

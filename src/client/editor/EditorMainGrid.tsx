@@ -1,15 +1,15 @@
 import { memo } from 'react';
 import MainGrid from '../grid/MainGrid';
-import { GridConsumer } from '../contexts/GridContext';
 import RulerOverlay from '../grid/RulerOverlay';
 import ToolboxOverlay from './ToolboxOverlay';
+import { useAtomValue } from 'jotai';
+import { getGridAtom } from '../state/grid.ts';
 
 export default memo(function EditorMainGrid() {
+  const grid = useAtomValue(getGridAtom);
   return (
     <MainGrid useToolboxClick={true} key="Grid" allowAnimation={false}>
-      <GridConsumer>
-        {({ grid }) => <RulerOverlay width={grid.width} height={grid.height} />}
-      </GridConsumer>
+      <RulerOverlay width={grid.width} height={grid.height} />
       <ToolboxOverlay />
     </MainGrid>
   );

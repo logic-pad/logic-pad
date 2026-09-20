@@ -1,8 +1,9 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { useSettings } from '../contexts/SettingsContext';
+import { useSettings } from '../state/settings.ts';
 import { EditorTabKey } from '../editor/EditorSideTabs';
 import { animate } from 'animejs';
-import { useEmbed } from '../contexts/EmbedContext';
+import { useAtomValue } from 'jotai';
+import { embedFeaturesAtom, isTopLevelAtom } from '../state/embed.ts';
 
 interface TourStep {
   target: string;
@@ -25,7 +26,8 @@ export interface EditorTourProps {
 }
 
 export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
-  const { isTopLevel, features } = useEmbed();
+  const isTopLevel = useAtomValue(isTopLevelAtom);
+  const features = useAtomValue(embedFeaturesAtom);
   const [runEditorTour, setRunEditorTour] = useSettings('runEditorTour');
   const [currentStep, setCurrentStep] = useState<number | null>(null);
   const steps = useMemo<TourStep[]>(

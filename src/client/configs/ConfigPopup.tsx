@@ -1,13 +1,18 @@
 import { RefObject, memo, useEffect, useRef, useState } from 'react';
-import { getConfigurable, useConfig } from '../contexts/ConfigContext.tsx';
+import {
+  getConfigurable,
+  configLocationAtom,
+  configRefAtom,
+} from '../state/config.ts';
 import Config from './parts/Config';
 import Rule from '@logic-pad/core/data/rules/rule';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { getGridAtom, setGridAtom } from '../state/grid.ts';
 import Symbol from '@logic-pad/core/data/symbols/symbol';
-import { useToolbox } from '../contexts/ToolboxContext.tsx';
+import { presetsAtom } from '../state/toolbox.ts';
 import SupportLevel from '../components/SupportLevel';
 import { mousePosition } from '../../client/uiHelper.ts';
-import { useSolver } from '../contexts/SolverContext.tsx';
+import { solverAtom } from '../state/solver.ts';
 import { ControlLine, Row } from '@logic-pad/core/data/rules/musicControlLine';
 import AnnotatedText from '../components/AnnotatedText.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -77,10 +82,14 @@ function containsPoint(element: HTMLElement, clientX: number, clientY: number) {
 }
 
 export default memo(function ConfigPopup() {
-  const { location, ref, setLocation, setRef } = useConfig();
-  const { grid, setGrid } = useGrid();
-  const { presets, setPresets } = useToolbox();
-  const { solver } = useSolver();
+  const location = useAtomValue(configLocationAtom);
+  const ref = useAtomValue(configRefAtom);
+  const setLocation = useSetAtom(configLocationAtom);
+  const setRef = useSetAtom(configRefAtom);
+  const grid = useAtomValue(getGridAtom);
+  const setGrid = useSetAtom(setGridAtom);
+  const [presets, setPresets] = useAtom(presetsAtom);
+  const solver = useAtomValue(solverAtom);
 
   const configurable = location ? getConfigurable(grid, location) : undefined;
 

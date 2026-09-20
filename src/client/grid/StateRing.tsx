@@ -2,10 +2,11 @@ import React, { memo, Ref, useEffect, useId } from 'react';
 import { cn } from '../uiHelper.ts';
 import { State } from '@logic-pad/core/data/primitives';
 import { animate, stagger } from 'animejs';
-import { useGridState } from '../contexts/GridStateContext.tsx';
+import { gridStateAtom } from '../state/gridState.ts';
 import { useRouterState } from '@tanstack/react-router';
-import { useReducedMotion } from '../contexts/SettingsContext.tsx';
-import { useEmbed } from '../contexts/EmbedContext.tsx';
+import { useReducedMotion } from '../state/settings.ts';
+import { isTopLevelAtom } from '../state/embed.ts';
+import { useAtomValue } from 'jotai';
 
 export interface GridRingProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
@@ -38,10 +39,10 @@ export default memo(function StateRing({
 }: GridRingProps) {
   allowAnimation = allowAnimation ?? true;
   const id = useId();
-  const { state } = useGridState();
+  const state = useAtomValue(gridStateAtom);
   const location = useRouterState({ select: s => s.location });
   const prefersReducedMotion = useReducedMotion();
-  const { isTopLevel } = useEmbed();
+  const isTopLevel = useAtomValue(isTopLevelAtom);
 
   useEffect(() => {
     if (

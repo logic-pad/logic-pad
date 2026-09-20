@@ -1,9 +1,13 @@
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { PiSignInBold } from 'react-icons/pi';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
+import { useAtomValue, useSetAtom } from 'jotai';
+import {
+  lastSavedPuzzleAtom,
+  onlinePuzzleIdAtom,
+} from '../state/onlinePuzzle.ts';
 import { FaCloudUploadAlt, FaLink, FaSave } from 'react-icons/fa';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { getGridAtom, metadataAtom, solutionAtom } from '../state/grid.ts';
 import { cn, safeClipboard } from '../uiHelper.ts';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers.ts';
@@ -18,9 +22,11 @@ import GridData from '@logic-pad/core/data/grid';
 import DynamicRelativeTime from './DynamicRelativeTime.tsx';
 
 const CopyLink = memo(function CopyLink() {
-  const { grid, solution, metadata } = useGrid();
+  const grid = useAtomValue(getGridAtom);
+  const solution = useAtomValue(solutionAtom);
+  const metadata = useAtomValue(metadataAtom);
   const [tooltip, setTooltip] = useState<string | null>(null);
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   useEffect(() => {
     if (tooltip && tooltip.length > 0) {
       const timeout = window.setTimeout(() => setTooltip(null), 2000);
@@ -96,8 +102,10 @@ const SavePuzzle = memo(function SavePuzzle({
 }: {
   debounceDelay: number;
 }) {
-  const { id, setLastSaved } = useOnlinePuzzle();
-  const { metadata, grid } = useGrid();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const setLastSaved = useSetAtom(lastSavedPuzzleAtom);
+  const metadata = useAtomValue(metadataAtom);
+  const grid = useAtomValue(getGridAtom);
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const { isPending, mutate } = useMutation({
     mutationFn: (data: Parameters<typeof api.savePuzzle>) => {
@@ -193,7 +201,7 @@ export default memo(function PuzzleSaveControl({
   onTabSwitch,
 }: PuzzleSaveControlProps) {
   const { isOnline, me } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
 
   if (!isOnline) {
     return (

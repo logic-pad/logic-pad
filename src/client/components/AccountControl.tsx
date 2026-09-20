@@ -1,5 +1,5 @@
 import { memo, useRef } from 'react';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { IoCloudOffline } from 'react-icons/io5';
 import { api } from '../online/api';
 import Loading from './Loading';

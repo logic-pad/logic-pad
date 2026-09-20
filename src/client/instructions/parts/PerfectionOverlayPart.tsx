@@ -3,9 +3,13 @@ import { memo, useEffect, useRef, useState } from 'react';
 import PerfectionRule, {
   instance as perfectionInstance,
 } from '@logic-pad/core/data/rules/perfectionRule';
-import { useGrid } from '../../contexts/GridContext';
-import { useSolvePath } from '../../contexts/SolvePathContext';
+import {
+  solvePathAtom,
+  visualizeSolvePathAtom,
+} from '../../state/solvePath.ts';
 import GridCanvasOverlay, { RawCanvasRef } from '../../grid/GridCanvasOverlay';
+import { getGridAtom } from '../../state/grid.ts';
+import { useAtomValue } from 'jotai';
 
 const BLEED = 0;
 
@@ -33,8 +37,8 @@ function canvasTextBox(
 const PerfectionOverlay = memo(function PerfectionOverlay() {
   const canvasRef = useRef<RawCanvasRef>(null);
   const [tileSize, setTileSize] = useState(0);
-  const { grid } = useGrid();
-  const { solvePath } = useSolvePath();
+  const grid = useAtomValue(getGridAtom);
+  const solvePath = useAtomValue(solvePathAtom);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -73,7 +77,8 @@ export interface PerfectionOverlayPartProps {
 export default memo(function PerfectionOverlayPart({
   instruction,
 }: PerfectionOverlayPartProps) {
-  const { solvePath, visualizeSolvePath } = useSolvePath();
+  const solvePath = useAtomValue(solvePathAtom);
+  const visualizeSolvePath = useAtomValue(visualizeSolvePathAtom);
 
   if (!visualizeSolvePath || solvePath.length === 0 || instruction.editor)
     return null;

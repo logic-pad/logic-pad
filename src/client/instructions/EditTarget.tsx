@@ -1,19 +1,22 @@
 import { RefObject, memo, useRef } from 'react';
 import {
   getConfigurableLocation,
-  useConfig,
-} from '../contexts/ConfigContext.tsx';
-import { useGrid } from '../contexts/GridContext.tsx';
+  configLocationAtom,
+  configRefAtom,
+} from '../state/config.ts';
 import Configurable from '@logic-pad/core/data/configurable';
 import Symbol from '@logic-pad/core/data/symbols/symbol';
+import { getGridAtom } from '../state/grid.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 export interface EditTargetProps {
   configurable: Configurable;
 }
 
 export default memo(function EditTarget({ configurable }: EditTargetProps) {
-  const { setLocation, setRef } = useConfig();
-  const { grid } = useGrid();
+  const setLocation = useSetAtom(configLocationAtom);
+  const setRef = useSetAtom(configRefAtom);
+  const grid = useAtomValue(getGridAtom);
   const divRef = useRef<HTMLDivElement>(null);
   return (
     <div

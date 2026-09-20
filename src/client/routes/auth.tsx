@@ -4,7 +4,7 @@ import {
   useNavigate,
   useRouterState,
 } from '@tanstack/react-router';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import AuthProviders from '../online/AuthProviders';

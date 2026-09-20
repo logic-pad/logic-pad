@@ -1,4 +1,5 @@
-import React, { createContext, memo, use, useState } from 'react';
+import { atom } from 'jotai';
+import { RefObject } from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import Rule from '@logic-pad/core/data/rules/rule';
 import Symbol from '@logic-pad/core/data/symbols/symbol';
@@ -95,48 +96,11 @@ export function getConfigurableLocation(
   return undefined;
 }
 
-interface ConfigContext {
-  location: ConfigurableLocation | undefined;
-  ref: React.RefObject<HTMLElement> | undefined;
-  setLocation: (value: ConfigurableLocation | undefined) => void;
-  setRef: (value: React.RefObject<HTMLElement> | undefined) => void;
-}
+export const configLocationAtom = atom<ConfigurableLocation | undefined>(
+  undefined
+);
+export const configRefAtom = atom<RefObject<HTMLElement> | undefined>(
+  undefined
+);
 
-const Context = createContext<ConfigContext>({
-  location: undefined,
-  ref: undefined,
-  setLocation: () => {},
-  setRef: () => {},
-});
-
-export const useConfig = () => {
-  return use(Context);
-};
-
-export const ConfigConsumer = Context.Consumer;
-
-export default memo(function ConfigContext({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [location, setLocation] = useState<ConfigurableLocation | undefined>(
-    undefined
-  );
-  const [ref, setRef] = useState<React.RefObject<HTMLElement> | undefined>(
-    undefined
-  );
-
-  return (
-    <Context
-      value={{
-        location,
-        ref,
-        setLocation,
-        setRef,
-      }}
-    >
-      {children}
-    </Context>
-  );
-});
+export const configScopeAtoms = [configLocationAtom, configRefAtom];

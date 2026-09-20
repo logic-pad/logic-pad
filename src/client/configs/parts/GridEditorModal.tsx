@@ -1,18 +1,26 @@
-import { memo, Ref, useEffect, useImperativeHandle, useState } from 'react';
+import {
+  memo,
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import { cn } from '../../../client/uiHelper.ts';
-import EmbedContext from '../../contexts/EmbedContext.tsx';
 import PuzzleEditorScreen from '../../screens/PuzzleEditorScreen.tsx';
-import GridContext, {
-  GridConsumer,
+import {
   defaultGrid,
-} from '../../contexts/GridContext.tsx';
-import DisplayContext from '../../contexts/DisplayContext.tsx';
-import EditContext from '../../contexts/EditContext.tsx';
-import GridStateContext from '../../contexts/GridStateContext.tsx';
+  defaultMetadata,
+  getGridAtom,
+  setGridAtom,
+} from '../../state/grid.ts';
 import { useDelta } from 'react-delta-hooks';
 import FullScreenModal from '../../components/FullScreenModal.tsx';
-import OnlineContext from '../../contexts/OnlineContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { SyncAtomToRef } from '../../state/stateHelper.tsx';
+import { EmbeddedPuzzleScope } from '../../state/scopes/EmbeddedPuzzleScope.tsx';
+import { EmbedScope } from '../../state/scopes/EmbedScope.tsx';
 
 export interface GridEditorRef {
   open: (grid: GridData) => void;
@@ -23,16 +31,39 @@ export interface GridEditorModalProps {
   ref?: Ref<GridEditorRef>;
 }
 
+const CopyFromMainGridButton = memo(function CopyFromMainGridButton({
+  outerGrid,
+}: {
+  outerGrid: GridData;
+}) {
+  const setInnerGrid = useSetAtom(setGridAtom);
+  return (
+    <button
+      type="button"
+      className="btn"
+      onClick={() => {
+        setInnerGrid(outerGrid);
+      }}
+    >
+      Copy from main grid
+    </button>
+  );
+});
+
 export default memo(function GridEditorModal({
   onChange,
   ref,
 }: GridEditorModalProps) {
   const [open, setOpen] = useState(false);
-  const [tempGrid, setTempGrid] = useState<GridData>(defaultGrid);
+  const [initialGrid, setInitialGrid] = useState<GridData>(defaultGrid);
+  const gridRef = useRef<GridData>(defaultGrid);
+  // reads the grid of the parent puzzle scope, for "Copy from main grid"
+  const outerGrid = useAtomValue(getGridAtom);
 
   useImperativeHandle(ref, () => ({
     open: (grid: GridData) => {
-      setTempGrid(grid);
+      setInitialGrid(grid);
+      gridRef.current = grid;
       setOpen(true);
     },
   }));
@@ -41,9 +72,9 @@ export default memo(function GridEditorModal({
   useEffect(() => {
     if (!openDelta) return;
     if (openDelta.prev && !openDelta.curr) {
-      onChange(tempGrid);
+      onChange(gridRef.current);
     }
-  }, [onChange, openDelta, tempGrid]);
+  }, [onChange, openDelta]);
 
   return (
     <FullScreenModal
@@ -52,51 +83,36 @@ export default memo(function GridEditorModal({
       onClose={() => setOpen(false)}
     >
       {open && (
-        <GridConsumer>
-          {({ grid: outerGrid }) => (
-            <EmbedContext
-              name="grid-modal"
-              features={() => ({
-                instructions: false,
-                metadata: false,
-                checklist: false,
-                saveControl: false,
-                preview: false,
-              })}
-            >
-              <OnlineContext forceOffline={true}>
-                <DisplayContext>
-                  <EditContext>
-                    <GridStateContext>
-                      <GridContext grid={tempGrid} setGrid={setTempGrid}>
-                        <PuzzleEditorScreen>
-                          <button
-                            type="button"
-                            className="btn"
-                            onClick={() => {
-                              setTempGrid(outerGrid);
-                            }}
-                          >
-                            Copy from main grid
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={() => {
-                              setOpen(false);
-                            }}
-                          >
-                            Save and exit
-                          </button>
-                        </PuzzleEditorScreen>
-                      </GridContext>
-                    </GridStateContext>
-                  </EditContext>
-                </DisplayContext>
-              </OnlineContext>
-            </EmbedContext>
-          )}
-        </GridConsumer>
+        <EmbedScope
+          name="grid-modal"
+          features={{
+            instructions: false,
+            metadata: false,
+            checklist: false,
+            saveControl: false,
+            preview: false,
+          }}
+        >
+          <EmbeddedPuzzleScope
+            grid={initialGrid}
+            solution={null}
+            metadata={defaultMetadata}
+          >
+            <SyncAtomToRef atom={getGridAtom} ref={gridRef} />
+            <PuzzleEditorScreen>
+              <CopyFromMainGridButton outerGrid={outerGrid} />
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                Save and exit
+              </button>
+            </PuzzleEditorScreen>
+          </EmbeddedPuzzleScope>
+        </EmbedScope>
       )}
     </FullScreenModal>
   );

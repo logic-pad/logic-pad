@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useSettings } from '../../contexts/SettingsContext';
+import { useSettings } from '../../state/settings.ts';
 
 export default memo(function PrimaryMouseButtonToggle() {
   const [flippedPrimaryButton, setFlippedPrimaryButton] = useSettings(

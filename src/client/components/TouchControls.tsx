@@ -1,13 +1,15 @@
 import { memo, useState } from 'react';
 import mouseContext from '../grid/MouseContext';
-import { useDisplay } from '../contexts/DisplayContext.tsx';
-import { settingsStore } from '../contexts/SettingsContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { scaleAtom } from '../state/display.ts';
+import { getSetting } from '../state/settings.ts';
 
 export default memo(function TouchControls() {
   const [inverted, setInverted] = useState(
-    settingsStore.get('flipPrimaryMouseButton')
+    getSetting('flipPrimaryMouseButton')
   );
-  const { scale, setScale } = useDisplay();
+  const scale = useAtomValue(scaleAtom);
+  const setScale = useSetAtom(scaleAtom);
   const onSwitch = () => {
     setInverted(i => {
       const newValue = !i;

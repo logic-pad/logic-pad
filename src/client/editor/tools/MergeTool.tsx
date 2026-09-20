@@ -2,11 +2,13 @@ import { memo } from 'react';
 import ToolboxItem from '../ToolboxItem';
 import { Color } from '@logic-pad/core/data/primitives';
 import { RiMergeCellsHorizontal } from 'react-icons/ri';
-import { useGrid } from '../../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { getGridAtom, setGridAtom } from '../../state/grid.ts';
 import PointerCaptureOverlay from '../../grid/PointerCaptureOverlay';
 
 function MergeToolOverlay() {
-  const { grid, setGrid } = useGrid();
+  const grid = useAtomValue(getGridAtom);
+  const setGrid = useSetAtom(setGridAtom);
   return (
     <PointerCaptureOverlay
       width={grid.width}

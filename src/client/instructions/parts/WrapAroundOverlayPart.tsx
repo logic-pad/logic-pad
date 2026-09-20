@@ -4,10 +4,8 @@ import WrapAroundRule, {
   instance as wrapAroundInstance,
 } from '@logic-pad/core/data/rules/wrapAroundRule';
 import GridOverlay from '../../grid/GridOverlay.tsx';
-import { useGrid } from '../../contexts/GridContext.tsx';
 import Grid from '../../grid/Grid.tsx';
 import { computeTileSize } from '../../grid/MainGrid.tsx';
-import { useDisplay } from '../../contexts/DisplayContext.tsx';
 import { array } from '@logic-pad/core/data/dataHelper';
 import GridZones from '@logic-pad/core/data/gridZones';
 import GridData from '@logic-pad/core/data/grid';
@@ -21,8 +19,11 @@ import GridConnections from '@logic-pad/core/data/gridConnections';
 import { cn } from '../../uiHelper.ts';
 import SymbolOverlay from '../../grid/SymbolOverlay.tsx';
 import GridZoneOverlay from '../../grid/GridZoneOverlay.tsx';
-import { useSettings } from '../../contexts/SettingsContext.tsx';
-import { useGridState } from '../../contexts/GridStateContext.tsx';
+import { useSettings } from '../../state/settings.ts';
+import { getGridAtom } from '../../state/grid.ts';
+import { gridStateAtom } from '../../state/gridState.ts';
+import { scaleAtom, responsiveScaleAtom } from '../../state/display.ts';
+import { useAtomValue } from 'jotai';
 
 interface WrapAroundOverlayPartProps {
   instruction: WrapAroundRule;
@@ -601,9 +602,10 @@ const GridExtension = memo(function GridExtension({
 export default memo(function WrapAroundOverlayPart({
   instruction,
 }: WrapAroundOverlayPartProps) {
-  const { grid } = useGrid();
-  const { state } = useGridState();
-  const { scale, responsiveScale } = useDisplay();
+  const grid = useAtomValue(getGridAtom);
+  const state = useAtomValue(gridStateAtom);
+  const scale = useAtomValue(scaleAtom);
+  const responsiveScale = useAtomValue(responsiveScaleAtom);
   const [visualizeWrapArounds] = useSettings('visualizeWrapArounds');
   const extensions = useMemo(
     () => getExtensionGrids(grid, instruction),

@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import RatedDifficulty from './RatedDifficulty';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext';
-import { useOnline } from '../contexts/OnlineContext';
+import { useAtomValue } from 'jotai';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
+import { useOnline } from '../state/online.ts';
 import { useQuery } from '@tanstack/react-query';
 import { puzzleSolveQueryOptions } from '../routes/_layout.solve.$puzzleId';
 import Loading from '../components/Loading';
@@ -10,7 +11,7 @@ import { pluralize } from '../uiHelper';
 
 export default memo(function OnlineMetadata() {
   const { isOnline } = useOnline();
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const puzzle = useQuery(puzzleSolveQueryOptions(id));
   if (!isOnline || !id) return null;
   if (puzzle.isPending) {

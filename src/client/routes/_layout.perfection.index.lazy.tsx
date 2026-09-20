@@ -4,8 +4,9 @@ import useLinkLoader from '../router/linkLoader';
 import PerfectionRule from '@logic-pad/core/data/rules/perfectionRule';
 import PerfectionScreen from '../screens/PerfectionScreen';
 import { instance as foresightInstance } from '@logic-pad/core/data/rules/foresightRule';
-import MainContext from '../router/MainContext';
 import SolveModeButton from '../components/quickActions/SolveModeButton';
+import { PuzzleScope } from '../state/scopes/PuzzleScope';
+import { SolvePathScope } from '../state/scopes/SolvePathScope';
 
 export const Route = createLazyFileRoute('/_layout/perfection/')({
   component: memo(function PerfectionMode() {
@@ -26,15 +27,17 @@ export const Route = createLazyFileRoute('/_layout/perfection/')({
     });
 
     return (
-      <MainContext
+      <PuzzleScope
         puzzleId={result.puzzleId}
         puzzle={null}
         initialPuzzle={result.initialPuzzle}
       >
-        <PerfectionScreen
-          quickActions={[<SolveModeButton key="solveModeButton" />]}
-        />
-      </MainContext>
+        <SolvePathScope>
+          <PerfectionScreen
+            quickActions={[<SolveModeButton key="solveModeButton" />]}
+          />
+        </SolvePathScope>
+      </PuzzleScope>
     );
   }),
 });

@@ -2,7 +2,8 @@ import { Suspense, lazy, memo } from 'react';
 import { cn } from '../uiHelper.ts';
 import Loading from '../components/Loading.tsx';
 import MetadataEditor from './MetadataEditor.tsx';
-import { useEmbed } from '../contexts/EmbedContext.tsx';
+import { useAtomValue } from 'jotai';
+import { embedFeaturesAtom } from '../state/embed.ts';
 
 const ToolboxEditor = lazy(() => import('./ToolboxEditor.tsx'));
 const SourceCodeEditor = lazy(() => import('./SourceCodeEditor.tsx'));
@@ -24,7 +25,7 @@ export default memo(function EditorSideTabs({
   editorTab,
   onEditorTabChange,
 }: EditorSideTabsProps) {
-  const { features } = useEmbed();
+  const features = useAtomValue(embedFeaturesAtom);
 
   return (
     <div className="flex-1 flex flex-col gap-2 -mt-4">

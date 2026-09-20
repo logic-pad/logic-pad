@@ -3,7 +3,8 @@ import { PartPlacement } from './parts/types';
 import { PartComponent, allParts } from './parts';
 import Instruction from '@logic-pad/core/data/instruction';
 import GridData from '@logic-pad/core/data/grid';
-import { useInstructionParts } from '../contexts/InstructionPartsContext';
+import { instructionPartsAtom } from '../state/instructionParts.ts';
+import { useAtomValue } from 'jotai';
 import Loading from '../components/Loading';
 
 interface InstructionPartsContextOutlet {
@@ -14,7 +15,7 @@ const InstructionPartsContextOutlet = memo(
   function InstructionPartsContextOutlet({
     placement,
   }: InstructionPartsContextOutlet) {
-    const { parts } = useInstructionParts();
+    const parts = useAtomValue(instructionPartsAtom);
     return parts.get(placement) ?? null;
   }
 );

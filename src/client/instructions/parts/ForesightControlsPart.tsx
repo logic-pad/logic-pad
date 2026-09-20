@@ -1,15 +1,16 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useGrid } from '../../contexts/GridContext.tsx';
 import { PartPlacement, PartSpec } from './types';
 import ForesightRule, {
   instance as foresightInstance,
 } from '@logic-pad/core/data/rules/foresightRule';
 import { IoIosEye } from 'react-icons/io';
 import { Color, Position } from '@logic-pad/core/data/primitives';
-import { useTheme } from '../../contexts/ThemeContext.tsx';
+import { useTheme } from '../../state/theme.ts';
 import OutlineOverlay from '../../grid/OutlineOverlay.tsx';
 import GridData from '@logic-pad/core/data/grid';
 import InstructionPartPortal from '../InstructionPartPortal.tsx';
+import { getGridAtom, solutionAtom } from '../../state/grid.ts';
+import { useAtomValue } from 'jotai';
 
 export interface Foresight {
   grid: GridData | null;
@@ -25,7 +26,7 @@ const ForesightOverlayPart = memo(function ForesightOverlayPart({
   position,
 }: ForesightOverlayPartProps) {
   const { theme } = useTheme();
-  const { grid } = useGrid();
+  const grid = useAtomValue(getGridAtom);
   const accentColor = useMemo(
     () =>
       window.getComputedStyle(document.getElementById('color-ref-accent')!)
@@ -56,7 +57,8 @@ const animationInterval = 0.1;
 export default memo(function ForesightControlsPart({
   instruction,
 }: ForesightControlsPartProps) {
-  const { grid, solution } = useGrid();
+  const grid = useAtomValue(getGridAtom);
+  const solution = useAtomValue(solutionAtom);
   const [foresight, setForesightRaw] = useState<Foresight>(() => ({
     grid: null,
     position: null,

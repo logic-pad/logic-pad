@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import { RouterProvider } from '@tanstack/react-router';
-import { themeKey } from './contexts/ThemeContext.tsx';
+import { themeKey } from './state/theme.ts';
 import { cleanReload } from './components/settings/ResetSite.tsx';
 import { QueryClientProvider } from '@tanstack/react-query';
-import OnlineContext from './contexts/OnlineContext.tsx';
+import { VersionMismatchWatcher } from './state/online.ts';
 import { queryClient } from './online/api.ts';
-import { useSettings } from './contexts/SettingsContext.tsx';
+import { useSettings } from './state/settings.ts';
 import { router } from './router/router.tsx';
 
 // load the selected theme early to avoid flicker
@@ -46,37 +46,36 @@ window.addEventListener('vite:preloadError', async () => {
 ReactDOM.createRoot(document.getElementById('app')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <OnlineContext>
-        <>
-          <Redirector />
-          <FontSwitcher />
-          <div id="color-ref-error" className="text-error hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div id="color-ref-accent" className="text-accent hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div id="color-ref-secondary" className="text-secondary hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div id="color-ref-info" className="text-info hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div id="color-ref-black" className="text-black hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div id="color-ref-white" className="text-white hidden">
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <div
-            id="color-ref-neutral-content"
-            className="text-neutral-content/20 hidden"
-          >
-            {/* For canvas components to retrieve this color */}
-          </div>
-          <RouterProvider router={router} />
-        </>
-      </OnlineContext>
+      <>
+        <VersionMismatchWatcher />
+        <Redirector />
+        <FontSwitcher />
+        <div id="color-ref-error" className="text-error hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div id="color-ref-accent" className="text-accent hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div id="color-ref-secondary" className="text-secondary hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div id="color-ref-info" className="text-info hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div id="color-ref-black" className="text-black hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div id="color-ref-white" className="text-white hidden">
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <div
+          id="color-ref-neutral-content"
+          className="text-neutral-content/20 hidden"
+        >
+          {/* For canvas components to retrieve this color */}
+        </div>
+        <RouterProvider router={router} />
+      </>
     </QueryClientProvider>
   </React.StrictMode>
 );

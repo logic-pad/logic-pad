@@ -10,7 +10,7 @@ import QuickAccessBar from '../components/QuickAccessBar';
 import { useMediaQuery } from 'react-responsive';
 import { RiMenu2Fill } from 'react-icons/ri';
 import PWAPrompt from '../components/PWAPrompt';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import NavigationSkip from '../components/NavigationSkip';
 import { FaInfo } from 'react-icons/fa';
 import storedRedirect from '../router/storedRedirect';

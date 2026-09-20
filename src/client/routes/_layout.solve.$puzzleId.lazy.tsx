@@ -5,9 +5,9 @@ import PerfectionModeButton from '../components/quickActions/PerfectionModeButto
 import { useSuspenseQuery } from '@tanstack/react-query';
 import useOnlineLinkLoader from '../router/onlineLinkLoader';
 import { puzzleSolveQueryOptions } from './_layout.solve.$puzzleId';
-import MainContext from '../router/MainContext';
 import { useRouteProtection } from '../router/useRouteProtection';
 import CollectionSidebar from '../online/CollectionSidebar';
+import { PuzzleScope } from '../state/scopes/PuzzleScope';
 
 export const Route = createLazyFileRoute('/_layout/solve/$puzzleId')({
   component: memo(function OnlineSolveMode() {
@@ -18,7 +18,7 @@ export const Route = createLazyFileRoute('/_layout/solve/$puzzleId')({
     );
     const result = useOnlineLinkLoader('solve-online', data);
     return (
-      <MainContext
+      <PuzzleScope
         puzzleId={result.puzzleId}
         puzzle={data}
         initialPuzzle={result.initialPuzzle}
@@ -27,7 +27,7 @@ export const Route = createLazyFileRoute('/_layout/solve/$puzzleId')({
           quickActions={[<PerfectionModeButton key="-perfectionModeButton" />]}
           topLeft={<CollectionSidebar collectionId={search.collection} />}
         />
-      </MainContext>
+      </PuzzleScope>
     );
   }),
 });

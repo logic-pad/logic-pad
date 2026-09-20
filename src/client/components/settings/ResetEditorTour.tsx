@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useSettings } from '../../contexts/SettingsContext';
+import { useSettings } from '../../state/settings.ts';
 import { cn } from '../../uiHelper';
 
 export default memo(function ResetEditorTour() {

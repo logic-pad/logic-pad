@@ -1,7 +1,5 @@
 import { State } from '@logic-pad/core/data/primitives';
 import React, { memo, useMemo } from 'react';
-import { useGrid } from '../contexts/GridContext.tsx';
-import { useGridState } from '../contexts/GridStateContext.tsx';
 import Instruction from './Instruction';
 import EditTarget from './EditTarget';
 import { cn } from '../../client/uiHelper.ts';
@@ -25,6 +23,9 @@ import {
   handlesSymbolMerge,
   SymbolMergeHandler,
 } from '@logic-pad/core/data/events/onSymbolMerge.ts';
+import { getGridAtom, setGridAtom } from '../state/grid.ts';
+import { gridStateAtom } from '../state/gridState.ts';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 function Title({ children }: { children: React.ReactNode }) {
   return (
@@ -52,8 +53,9 @@ export default memo(function InstructionList({
 }: InstructionListProps) {
   editable = editable ?? false;
   responsive = responsive ?? true;
-  const { grid, setGrid } = useGrid();
-  const { state } = useGridState();
+  const grid = useAtomValue(getGridAtom);
+  const setGrid = useSetAtom(setGridAtom);
+  const state = useAtomValue(gridStateAtom);
   const filteredRules = useMemo<SortableItem[]>(() => {
     if (editable) {
       const uniqueIds = new Map<string, number>();

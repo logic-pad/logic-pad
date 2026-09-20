@@ -4,7 +4,7 @@ import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { NavigateOptions, useNavigate } from '@tanstack/react-router';
 import { array } from '@logic-pad/core/data/dataHelper';
 import { Puzzle } from '@logic-pad/core/data/puzzle';
-import { defaultGrid } from '../contexts/GridContext';
+import { defaultGrid } from '../state/grid.ts';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { router } from './router';
 import { PuzzleParams, SolutionHandling } from './linkLoaderValidator';

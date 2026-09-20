@@ -3,14 +3,14 @@ import { memo } from 'react';
 import useLinkLoader from '../router/linkLoader';
 import SolveScreen from '../screens/SolveScreen';
 import PerfectionModeLink from '../components/quickActions/PerfectionModeButton';
-import MainContext from '../router/MainContext';
+import { PuzzleScope } from '../state/scopes/PuzzleScope';
 
 export const Route = createLazyFileRoute('/_layout/solve/')({
   component: memo(function SolveMode() {
     const result = useLinkLoader('solve-offline', { allowEmpty: false });
 
     return (
-      <MainContext
+      <PuzzleScope
         puzzleId={result.puzzleId}
         puzzle={null}
         initialPuzzle={result.initialPuzzle}
@@ -18,7 +18,7 @@ export const Route = createLazyFileRoute('/_layout/solve/')({
         <SolveScreen
           quickActions={[<PerfectionModeLink key="perfectionModeLink" />]}
         />
-      </MainContext>
+      </PuzzleScope>
     );
   }),
 });

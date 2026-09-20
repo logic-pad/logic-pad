@@ -2,7 +2,6 @@ import { Mode } from '@logic-pad/core/data/primitives';
 import { SolveEditControls } from '../components/EditControls';
 import ThreePaneLayout from '../components/ThreePaneLayout';
 import TouchControls from '../components/TouchControls';
-import { GridConsumer } from '../contexts/GridContext';
 import MainGrid from '../grid/MainGrid';
 import InstructionList from '../instructions/InstructionList';
 import InstructionPartOutlet from '../instructions/InstructionPartOutlet';
@@ -15,6 +14,8 @@ import PuzzleLoveButton from '../components/quickActions/PuzzleLoveButton';
 import PuzzleSolveControl from '../components/PuzzleSolveControl';
 import PuzzleEditButton from '../components/quickActions/PuzzleEditButton';
 import Loading from '../components/Loading';
+import { getGridAtom } from '../state/grid.ts';
+import { useAtomValue } from 'jotai';
 
 const SharePuzzleImage = lazy(
   () => import('../components/quickActions/SharePuzzleImage')
@@ -31,6 +32,7 @@ export default memo(function SolveScreen({
   children,
   topLeft,
 }: SolveScreenProps) {
+  const grid = useAtomValue(getGridAtom);
   return (
     <ThreePaneLayout
       collapsible={false}
@@ -39,23 +41,15 @@ export default memo(function SolveScreen({
           {topLeft}
           <div className="flex flex-col gap-2 justify-self-stretch flex-1 justify-center">
             <Metadata />
-            <GridConsumer>
-              {({ grid }) => (
-                <InstructionPartOutlet
-                  grid={grid}
-                  placement={PartPlacement.LeftPanel}
-                />
-              )}
-            </GridConsumer>
+            <InstructionPartOutlet
+              grid={grid}
+              placement={PartPlacement.LeftPanel}
+            />
           </div>
-          <GridConsumer>
-            {({ grid }) => (
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.LeftBottom}
-              />
-            )}
-          </GridConsumer>
+          <InstructionPartOutlet
+            grid={grid}
+            placement={PartPlacement.LeftBottom}
+          />
           <OnlineMetadata />
           <div className="flex gap-1">
             <PuzzleLoveButton />

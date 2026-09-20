@@ -1,5 +1,5 @@
 import { Color } from '@logic-pad/core/data/primitives';
-import { settingsStore } from '../contexts/SettingsContext';
+import { getSetting } from '../state/settings.ts';
 
 class MouseContext {
   color: Color | null;
@@ -10,7 +10,7 @@ class MouseContext {
   constructor() {
     this.color = null;
     this.replacing = false;
-    this.inverted = settingsStore.get('flipPrimaryMouseButton');
+    this.inverted = getSetting('flipPrimaryMouseButton');
     this.modifierInverted = false;
   }
 

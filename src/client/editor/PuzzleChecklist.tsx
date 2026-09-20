@@ -8,23 +8,24 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useEmbed } from '../contexts/EmbedContext.tsx';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { getGridAtom, metadataAtom, setGridAtom } from '../state/grid.ts';
 import Accordion from '../components/Accordion';
-import { useGridState } from '../contexts/GridStateContext.tsx';
+import { gridStateAtom } from '../state/gridState.ts';
 import {
   PuzzleChecklist,
   PuzzleChecklistItem,
   validatePuzzleChecklist,
 } from '@logic-pad/core/data/puzzle';
 import GridData from '@logic-pad/core/data/grid';
-import { useSolver } from '../contexts/SolverContext.tsx';
+import { solverAtom } from '../state/solver.ts';
 import Loading from '../components/Loading';
 import { FaCheckCircle, FaInfoCircle, FaTimesCircle } from 'react-icons/fa';
 import { puzzleEditQueryOptions } from '../routes/_layout.create.$puzzleId.tsx';
 import { useQuery } from '@tanstack/react-query';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
+import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { ResourceStatus } from '../online/data.ts';
+import { embedFeaturesAtom } from '../state/embed.ts';
 
 const SolverSelector = lazy(() => import('./SolverSelector'));
 
@@ -274,12 +275,14 @@ export interface PuzzleChecklistProps {
 export default memo(function PuzzleChecklist({
   onTabSwitch,
 }: PuzzleChecklistProps) {
-  const { features } = useEmbed();
-  const { grid, metadata, setGrid } = useGrid();
-  const { state } = useGridState();
-  const { solver } = useSolver();
+  const features = useAtomValue(embedFeaturesAtom);
+  const grid = useAtomValue(getGridAtom);
+  const metadata = useAtomValue(metadataAtom);
+  const setGrid = useSetAtom(setGridAtom);
+  const state = useAtomValue(gridStateAtom);
+  const solver = useAtomValue(solverAtom);
 
-  const { id } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
   const { data, isLoading } = useQuery(puzzleEditQueryOptions(id));
 
   const solverRequest = useRef(0);

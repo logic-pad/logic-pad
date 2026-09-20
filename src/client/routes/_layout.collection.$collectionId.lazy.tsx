@@ -40,7 +40,7 @@ import {
 } from '../online/data';
 import { api, queryClient } from '../online/api';
 import toast from 'react-hot-toast';
-import { useOnline } from '../contexts/OnlineContext';
+import { useOnline } from '../state/online.ts';
 import EditableField from '../components/EditableField';
 import AddPuzzlesModal from '../online/AddPuzzlesModal';
 import {

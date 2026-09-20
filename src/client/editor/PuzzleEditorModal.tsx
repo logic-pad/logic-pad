@@ -1,18 +1,21 @@
-import { memo, Ref, useEffect, useImperativeHandle, useState } from 'react';
+import {
+  memo,
+  Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import GridData from '@logic-pad/core/data/grid';
 import { cn } from '../../client/uiHelper.ts';
-import EmbedContext from '../contexts/EmbedContext.tsx';
 import PuzzleEditorScreen from '../screens/PuzzleEditorScreen.tsx';
-import GridContext, { defaultGrid } from '../contexts/GridContext.tsx';
-import DisplayContext from '../contexts/DisplayContext.tsx';
-import EditContext from '../contexts/EditContext.tsx';
-import GridStateContext from '../contexts/GridStateContext.tsx';
+import { defaultGrid, getGridAtom, metadataAtom } from '../state/grid.ts';
 import { useDelta } from 'react-delta-hooks';
 import FullScreenModal from '../components/FullScreenModal.tsx';
-import OnlineContext from '../contexts/OnlineContext.tsx';
 import { PuzzleMetadata } from '@logic-pad/core/data/puzzle.ts';
-import SolverContext from '../contexts/SolverContext.tsx';
-import InstructionPartsContext from '../contexts/InstructionPartsContext.tsx';
+import { SyncAtomToRef } from '../state/stateHelper.tsx';
+import { EmbeddedPuzzleScope } from '../state/scopes/EmbeddedPuzzleScope.tsx';
+import { EmbedScope } from '../state/scopes/EmbedScope.tsx';
 
 export interface PuzzleEditorRef {
   open: (metadata: PuzzleMetadata, gridWithSolution: GridData) => void;
@@ -28,18 +31,26 @@ export default memo(function PuzzleEditorModal({
   ref,
 }: PuzzleEditorModalProps) {
   const [open, setOpen] = useState(false);
-  const [tempMetadata, setTempMetadata] = useState<PuzzleMetadata>(() => ({
-    title: '',
-    description: '',
-    author: '',
-    difficulty: 0,
-  }));
-  const [tempGrid, setTempGrid] = useState<GridData>(defaultGrid);
+  const [initialState, setInitialState] = useState<{
+    metadata: PuzzleMetadata;
+    grid: GridData;
+  }>({
+    metadata: {
+      title: '',
+      description: '',
+      author: '',
+      difficulty: 0,
+    },
+    grid: defaultGrid,
+  });
+  const metadataRef = useRef<PuzzleMetadata>(initialState.metadata);
+  const gridRef = useRef<GridData>(initialState.grid);
 
   useImperativeHandle(ref, () => ({
     open: (metadata: PuzzleMetadata, gridWithSolution: GridData) => {
-      setTempMetadata(metadata);
-      setTempGrid(gridWithSolution);
+      setInitialState({ metadata, grid: gridWithSolution });
+      metadataRef.current = metadata;
+      gridRef.current = gridWithSolution;
       setOpen(true);
     },
   }));
@@ -48,9 +59,9 @@ export default memo(function PuzzleEditorModal({
   useEffect(() => {
     if (!openDelta) return;
     if (openDelta.prev && !openDelta.curr) {
-      onChange(tempMetadata, tempGrid);
+      onChange(metadataRef.current, gridRef.current);
     }
-  }, [onChange, openDelta, tempMetadata, tempGrid]);
+  }, [onChange, openDelta]);
 
   return (
     open && (
@@ -59,47 +70,37 @@ export default memo(function PuzzleEditorModal({
         className={cn('modal', open && 'modal-open')}
         onClose={() => setOpen(false)}
       >
-        <EmbedContext
+        <EmbedScope
           name="grid-modal"
-          features={() => ({
+          features={{
             instructions: true,
             metadata: true,
             checklist: true,
             saveControl: false,
             preview: true,
-          })}
+          }}
         >
-          <OnlineContext forceOffline={true}>
-            <DisplayContext>
-              <EditContext>
-                <GridStateContext>
-                  <GridContext
-                    grid={tempGrid}
-                    setGrid={setTempGrid}
-                    metadata={tempMetadata}
-                    setMetadata={setTempMetadata}
-                  >
-                    <SolverContext>
-                      <InstructionPartsContext>
-                        <PuzzleEditorScreen>
-                          <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={() => {
-                              setOpen(false);
-                            }}
-                          >
-                            Save and exit
-                          </button>
-                        </PuzzleEditorScreen>
-                      </InstructionPartsContext>
-                    </SolverContext>
-                  </GridContext>
-                </GridStateContext>
-              </EditContext>
-            </DisplayContext>
-          </OnlineContext>
-        </EmbedContext>
+          <EmbeddedPuzzleScope
+            grid={initialState.grid}
+            solution={null}
+            metadata={initialState.metadata}
+            isolateInstructionsAndSolver
+          >
+            <SyncAtomToRef atom={getGridAtom} ref={gridRef} />
+            <SyncAtomToRef atom={metadataAtom} ref={metadataRef} />
+            <PuzzleEditorScreen>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setOpen(false);
+                }}
+              >
+                Save and exit
+              </button>
+            </PuzzleEditorScreen>
+          </EmbeddedPuzzleScope>
+        </EmbedScope>
       </FullScreenModal>
     )
   );

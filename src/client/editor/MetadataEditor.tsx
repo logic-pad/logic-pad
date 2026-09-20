@@ -1,17 +1,26 @@
 import { memo, useEffect } from 'react';
 import Difficulty from '../metadata/Difficulty.tsx';
-import { useGrid } from '../contexts/GridContext.tsx';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { metadataAtom } from '../state/grid.ts';
 import { cn } from '../../client/uiHelper.ts';
-import { useOnline } from '../contexts/OnlineContext.tsx';
-import { useOnlinePuzzle } from '../contexts/OnlinePuzzleContext.tsx';
+import { useOnline } from '../state/online.ts';
+import {
+  lastSavedPuzzleAtom,
+  onlinePuzzleAtom,
+  onlinePuzzleIdAtom,
+} from '../state/onlinePuzzle.ts';
 import UserCard from '../metadata/UserCard.tsx';
 import { Link } from '@tanstack/react-router';
 
 // million-ignore
 export default memo(function MetadataEditor() {
-  const { metadata, setMetadata } = useGrid();
+  const metadata = useAtomValue(metadataAtom);
+  const setMetadata = useSetAtom(metadataAtom);
   const { isOnline, me } = useOnline();
-  const { id, puzzle, lastSaved, setLastSaved } = useOnlinePuzzle();
+  const id = useAtomValue(onlinePuzzleIdAtom);
+  const puzzle = useAtomValue(onlinePuzzleAtom);
+  const lastSaved = useAtomValue(lastSavedPuzzleAtom);
+  const setLastSaved = useSetAtom(lastSavedPuzzleAtom);
 
   useEffect(() => {
     if (isOnline && !id && me !== null && metadata.author !== me.name) {
