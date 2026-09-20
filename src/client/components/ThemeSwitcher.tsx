@@ -37,6 +37,7 @@ export default memo(function ThemeSwitcher() {
               )}
               aria-label={themeChoice}
               role="option"
+              aria-selected={theme === themeChoice}
               value={themeChoice}
               onChange={e => switchTheme(e.currentTarget.value)}
             />

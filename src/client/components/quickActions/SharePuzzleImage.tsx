@@ -125,6 +125,7 @@ const ImageGenerator = memo(function ImageGenerator() {
       return (
         <img
           src={canvas.toDataURL()}
+          alt="Puzzle image"
           onContextMenu={e => e.stopPropagation()}
         />
       );
