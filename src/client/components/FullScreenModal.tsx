@@ -16,11 +16,11 @@ export default memo(function FullScreenModal({
   const id = useId();
   return (
     <dialog id={`grid-modal-${id}`} className={className}>
-      <div className="modal-box overflow-y-hidden p-0 flex flex-col w-dvw h-dvh max-w-none max-h-none rounded-none bg-neutral text-neutral-content shadow-inner">
+      <div className="modal-box overflow-y-hidden p-0 flex flex-col w-dvw h-dvh max-w-none max-h-none rounded-none shadow-inner">
         {/* An extra layer of div is needed so that the dialog box itself, and any fixed elements inside, are not scrollable. */}
         <div className="overflow-y-auto overscroll-contain w-dvw h-dvh">
           <div className="flex flex-col items-stretch w-full min-h-full xl:h-full">
-            <header className="flex shrink-0 flex-wrap justify-between items-center gap-4 px-8 py-2 shadow-md bg-base-100">
+            <header className="flex shrink-0 flex-wrap justify-between items-center gap-4 px-8 py-2 shadow-md bg-base-300">
               <span className="text-xl my-2">{title}</span>
               <form method="dialog">
                 <button
@@ -32,7 +32,7 @@ export default memo(function FullScreenModal({
                 </button>
               </form>
             </header>
-            <div className="flex flex-col items-stretch w-full h-full">
+            <div className="flex flex-col items-stretch w-full h-full pt-2">
               {children}
             </div>
           </div>
