@@ -55,7 +55,7 @@ export default memo(function UserCard({
           }}
           noArrow
         >
-          <div className="w-80 h-fit flex flex-col gap-4 bg-base-300 text-base-content shadow-lg rounded-2xl p-4 select-none">
+          <div className="w-80 h-fit flex flex-col gap-4 bg-base-300 text-base-content shadow-lg rounded-xl p-4 select-none">
             <div className="flex gap-4">
               <Avatar
                 userId={user.id}

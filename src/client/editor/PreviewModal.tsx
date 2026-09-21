@@ -44,7 +44,7 @@ export default memo(function PreviewModal({ ref }: PreviewModalProps) {
             <SolveScreen>
               <button
                 type="button"
-                className="btn btn-primary rounded-2xl"
+                className="btn btn-primary rounded-xl"
                 onClick={() => {
                   setInitialState(null);
                 }}

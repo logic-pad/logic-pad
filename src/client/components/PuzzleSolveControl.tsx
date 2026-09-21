@@ -60,7 +60,7 @@ const SolveTrackerAnonymous = memo(function SolveTracker() {
   if (!isOnline || !!me || !id) return null;
 
   return (
-    <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-200 text-base-content items-center justify-between">
+    <div className="flex p-2 ps-4 leading-8 rounded-xl shadow-md bg-base-200 text-base-content items-center justify-between">
       {solved || State.isSatisfied(state.final)
         ? 'Puzzle solved!'
         : 'Sign in to track solves'}
@@ -201,7 +201,7 @@ const PuzzleCompleted = memo(function PuzzleCompleted({
     <div className="overflow-hidden">
       <div
         ref={panelRef}
-        className="flex flex-col p-4 gap-4 leading-8 rounded-2xl shadow-md bg-base-200 text-base-content items-start justify-between"
+        className="flex flex-col p-4 gap-4 leading-8 rounded-xl shadow-md bg-base-200 text-base-content items-start justify-between"
       >
         <div className="flex items-center justify-between gap-2 w-full">
           <div className="text-2xl">Puzzle solved!</div>
@@ -341,7 +341,7 @@ const PuzzleSolving = memo(function PuzzleSolving({
   }, [solved, debouncedSave]);
 
   return (
-    <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-200 text-base-content text-sm items-center justify-between">
+    <div className="flex p-2 ps-4 rounded-xl shadow-md bg-base-200 text-base-content text-sm items-center justify-between">
       <span className="flex-auto">
         {solved ? (
           <>Auto-save off</>
@@ -473,7 +473,7 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
 
   if (isPending) {
     return (
-      <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-200 text-base-content items-center justify-between">
+      <div className="flex p-2 ps-4 leading-8 rounded-xl shadow-md bg-base-200 text-base-content items-center justify-between">
         <Loading />
       </div>
     );
@@ -506,7 +506,7 @@ export default memo(function PuzzleSolveControl() {
 
   if (!isOnline) {
     return (
-      <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-200 text-base-content items-center justify-between">
+      <div className="flex p-2 ps-4 leading-8 rounded-xl shadow-md bg-base-200 text-base-content items-center justify-between">
         Solving offline
       </div>
     );
@@ -514,7 +514,7 @@ export default memo(function PuzzleSolveControl() {
 
   if (!id) {
     return (
-      <div className="flex p-2 ps-4 leading-8 rounded-2xl shadow-md bg-base-200 text-base-content items-center justify-between">
+      <div className="flex p-2 ps-4 leading-8 rounded-xl shadow-md bg-base-200 text-base-content items-center justify-between">
         Solving locally
       </div>
     );

@@ -573,7 +573,7 @@ export default memo(function PuzzleChecklist({
 
   if (!collapsible) {
     return (
-      <div className="tour-puzzle-checklist bg-base-200 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
+      <div className="tour-puzzle-checklist bg-base-200 text-base-content rounded-xl p-4 flex flex-col gap-2 shadow-sm">
         <div className="font-medium flex items-center">{title}</div>
         <div className="flex flex-col gap-2 text-sm">{checklistContent}</div>
       </div>

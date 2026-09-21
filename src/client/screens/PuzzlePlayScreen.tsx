@@ -54,23 +54,25 @@ const SidebarContent = memo(function SidebarContent({
     return <CollectionPanel onBack={() => setPanel('main')} />;
   }
   return (
-    <>
-      {topLeft}
+    <div className="h-full flex flex-col justify-between">
+      <div>{topLeft}</div>
       <div className="flex flex-col gap-2 justify-self-stretch justify-center">
         <Metadata />
       </div>
-      <OnlineMetadata />
-      <div className="flex gap-1">
-        <PuzzleLoveButton />
-        <Suspense fallback={<Loading className="w-12 h-12" />}>
-          <SharePuzzleImage />
-        </Suspense>
-        <PuzzleEditButton />
-        {quickActions}
+      <div className="flex flex-col gap-2">
+        <OnlineMetadata />
+        <div className="flex gap-1">
+          <PuzzleLoveButton />
+          <Suspense fallback={<Loading className="w-12 h-12" />}>
+            <SharePuzzleImage />
+          </Suspense>
+          <PuzzleEditButton />
+          {quickActions}
+        </div>
+        <PuzzleSolveControl />
+        {children}
       </div>
-      <PuzzleSolveControl />
-      {children}
-    </>
+    </div>
   );
 });
 

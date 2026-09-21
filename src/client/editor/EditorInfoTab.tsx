@@ -45,7 +45,7 @@ export default memo(function EditorInfoTab({
         </div>
         <div className="min-w-0 lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
           {id && me ? (
-            <div className="h-[600px] bg-base-200 rounded-2xl p-4 shadow-sm">
+            <div className="h-[600px] bg-base-200 rounded-xl p-4 shadow-sm">
               <CommentPanel className="bg-base-200" />
             </div>
           ) : (

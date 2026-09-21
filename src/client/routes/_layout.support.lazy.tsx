@@ -207,7 +207,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                     </p>
                   </div>
                   <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
-                    <div className="flex w-72 p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between">
+                    <div className="flex w-72 p-2 ps-4 rounded-xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between">
                       <span className="flex-auto">
                         Last saved 10 seconds ago
                       </span>

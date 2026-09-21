@@ -78,7 +78,7 @@ export default memo(function EditorEditTab({
           {features.preview && (
             <>
               <button
-                className="btn rounded-2xl tour-preview shrink-0"
+                className="btn rounded-xl tour-preview shrink-0"
                 onClick={() => previewRef.current?.open(grid, metadata)}
               >
                 <FaEye size={18} />
