@@ -6,6 +6,7 @@ import { Color } from '@logic-pad/core/data/primitives';
 import { GridActions } from '../state/grid.ts';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { SiteSettings, useSettings } from '../state/settings.ts';
+import { tip } from '../../client/components/Tooltip.tsx';
 
 type HotkeyLayout = Record<
   SiteSettings['keyboardLayout'],
@@ -139,10 +140,10 @@ export default memo(function ToolboxItem({
 
   return (
     <div
-      className={cn('tooltip tooltip-info aspect-square', className)}
-      data-tip={name + (hotkeyCode ? ` (${hotkeyCode})` : '')}
+      className={cn('aspect-square', className)}
       style={{ ...style, order }}
       {...rest}
+      {...tip(name + (hotkeyCode ? ` (${hotkeyCode})` : ''))}
     >
       <button
         type="button"

@@ -16,6 +16,7 @@ import { solverAtom } from '../state/solver.ts';
 import { ControlLine, Row } from '@logic-pad/core/data/rules/musicControlLine';
 import AnnotatedText from '../components/AnnotatedText.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { tip } from '../components/Tooltip.tsx';
 
 const gap = 8;
 
@@ -373,10 +374,7 @@ export default memo(function ConfigPopup() {
             </div>
           </div>
         )}
-        <div
-          className="tooltip tooltip-error tooltip-top"
-          data-tip="(backspace/del)"
-        >
+        <div {...tip('(backspace/del)', undefined, 'error')}>
           <button
             type="button"
             className="btn btn-sm btn-outline btn-error"

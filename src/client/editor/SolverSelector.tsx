@@ -6,6 +6,7 @@ import { solverAtom } from '../state/solver.ts';
 import { GoInfo } from 'react-icons/go';
 import Solver from '@logic-pad/core/data/solver/solver';
 import { allSolvers } from '@logic-pad/core/data/solver/allSolvers';
+import { tip } from '../components/Tooltip.tsx';
 
 export interface SolverSelectorProps {
   onSolve?: (solver: Solver) => void;
@@ -39,12 +40,11 @@ export default memo(function SolverSelector({ onSolve }: SolverSelectorProps) {
 
   return (
     <div
-      className="tooltip tooltip-top tooltip-info"
-      data-tip={
+      {...tip(
         environmentCheck === false
           ? 'Your browser does not support the solver'
           : 'This may take a while. Editing the puzzle will cancel the operation'
-      }
+      )}
     >
       <div className="flex gap-1 items-center">
         <button

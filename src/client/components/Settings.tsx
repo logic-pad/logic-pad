@@ -10,13 +10,11 @@ import SansSerifToggle from './settings/SansSerifToggle';
 import ResetEditorTour from './settings/ResetEditorTour';
 import KeyboardLayoutDropdown from './settings/KeyboardLayoutDropdown';
 import SfxVolumeSlider from './settings/SfxVolumeSlider';
+import AppTooltips, { tip } from './Tooltip.tsx';
 
 export default memo(function Settings() {
   return (
-    <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Open settings"
-    >
+    <div {...tip('Open settings', 'bottom')}>
       <button
         type="button"
         aria-label="Open settings"
@@ -70,6 +68,8 @@ export default memo(function Settings() {
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
         </form>
+        {/* Native dialogs are in the top layer and cover the global tooltips */}
+        <AppTooltips />
       </dialog>
     </div>
   );

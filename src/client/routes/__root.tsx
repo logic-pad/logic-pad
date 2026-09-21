@@ -3,6 +3,7 @@ import ThemeSynchronizer from '../state/theme.ts';
 import TanStackDevTools from '../router/TanStackDevTools';
 import { memo } from 'react';
 import { Toaster } from 'react-hot-toast';
+import AppTooltips from '../components/Tooltip.tsx';
 
 export const Route = createRootRoute({
   head: () => ({
@@ -34,6 +35,7 @@ export const Route = createRootRoute({
           <Outlet />
           <TanStackDevTools />
         </div>
+        <AppTooltips />
       </div>
     );
   }),

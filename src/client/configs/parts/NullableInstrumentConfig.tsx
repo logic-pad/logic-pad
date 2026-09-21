@@ -7,6 +7,7 @@ import Configurable from '@logic-pad/core/data/configurable';
 import { INSTRUMENTS, Instrument } from '@logic-pad/core/data/primitives';
 import ConfigItem from './ConfigItem';
 import { FaTrashCan } from 'react-icons/fa6';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface NullableInstrumentConfigProps {
   configurable: Configurable;
@@ -40,10 +41,7 @@ export default memo(function NullableInstrumentConfig({
         </button>
       ) : (
         <div className="flex gap-2 items-center">
-          <div
-            className="tooltip tooltip-info tooltip-top"
-            data-tip="Clear value"
-          >
+          <div {...tip('Clear value')}>
             <button
               type="button"
               aria-label="Clear value"

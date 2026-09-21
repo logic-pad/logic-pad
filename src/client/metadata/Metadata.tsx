@@ -5,6 +5,7 @@ import Difficulty from './Difficulty';
 import Markdown from '../components/Markdown';
 import { cn, toRelativeDate } from '../uiHelper.ts';
 import UserCard from './UserCard.tsx';
+import { tip } from '../components/Tooltip.tsx';
 import { onlinePuzzleAtom } from '../state/onlinePuzzle.ts';
 
 export interface MetadataProps {
@@ -24,12 +25,13 @@ export default memo(function Metadata({
   return (
     <section className="flex flex-col gap-4 text-neutral-content">
       <div
-        className="tooltip tooltip-info tooltip-right w-fit"
-        data-tip={
+        className="w-fit"
+        {...tip(
           metadata.difficulty === 0
             ? 'Unrated'
-            : `Design difficulty: ${metadata.difficulty}`
-        }
+            : `Design difficulty: ${metadata.difficulty}`,
+          'right'
+        )}
       >
         <Difficulty value={metadata.difficulty} />
       </div>

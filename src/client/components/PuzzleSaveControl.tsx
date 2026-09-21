@@ -8,7 +8,8 @@ import {
 import { FaCloudUploadAlt, FaLink, FaSave } from 'react-icons/fa';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getGridAtom, metadataAtom, solutionAtom } from '../state/grid.ts';
-import { cn, safeClipboard } from '../uiHelper.ts';
+import { safeClipboard } from '../uiHelper.ts';
+import { FeedbackTooltip, tip } from './Tooltip.tsx';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers.ts';
 import { useMutation } from '@tanstack/react-query';
@@ -35,13 +36,7 @@ const CopyLink = memo(function CopyLink() {
   }, [tooltip]);
   const detailsRef = useRef<HTMLDetailsElement>(null);
   return (
-    <div
-      className={cn(
-        'tooltip tooltip-info tooltip-top flex-1',
-        tooltip && 'tooltip-open'
-      )}
-      data-tip={tooltip}
-    >
+    <FeedbackTooltip className="flex-1" message={tooltip}>
       <details ref={detailsRef} className="dropdown dropdown-end dropdown-top">
         <summary className="btn btn-sm btn-ghost">
           <FaLink size={20} />
@@ -93,7 +88,7 @@ const CopyLink = memo(function CopyLink() {
           </li>
         </ul>
       </details>
-    </div>
+    </FeedbackTooltip>
   );
 });
 
@@ -173,10 +168,7 @@ const SavePuzzle = memo(function SavePuzzle({
       )}
       <div className="flex items-center gap-2">
         <CopyLink />
-        <div
-          className="tooltip tooltip-left tooltip-info"
-          data-tip="Save (Ctrl+S)"
-        >
+        <div {...tip('Save (Ctrl+S)', 'left')}>
           {isPending ? (
             <Loading className="h-8 w-12 px-3" />
           ) : (
@@ -220,7 +212,7 @@ export default memo(function PuzzleSaveControl({
         Sign in to upload
         <div className="flex items-center gap-2">
           <CopyLink />
-          <div className="tooltip tooltip-top tooltip-info" data-tip="Sign in">
+          <div {...tip('Sign in')}>
             <button className="btn btn-sm btn-ghost" onClick={onTabSwitch}>
               <PiSignInBold size={22} />
             </button>
@@ -236,7 +228,7 @@ export default memo(function PuzzleSaveControl({
         Editing locally
         <div className="flex items-center gap-2">
           <CopyLink />
-          <div className="tooltip tooltip-top tooltip-info" data-tip="Upload">
+          <div {...tip('Upload')}>
             <button className="btn btn-sm btn-ghost" onClick={onTabSwitch}>
               <FaCloudUploadAlt size={22} />
             </button>

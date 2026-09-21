@@ -1,13 +1,11 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function KeyboardLayoutDropdown() {
   const [keyboardLayout, setKeyboardLayout] = useSettings('keyboardLayout');
   return (
-    <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Select your keyboard layout for hotkeys"
-    >
+    <div {...tip('Select your keyboard layout for hotkeys', 'bottom')}>
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Keyboard Layout</span>

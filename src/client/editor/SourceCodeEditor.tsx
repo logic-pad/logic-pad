@@ -14,6 +14,7 @@ import { metadataAtom, setGridAtom } from '../state/grid.ts';
 import { array } from '@logic-pad/core/data/dataHelper';
 import toast from 'react-hot-toast';
 import { r } from 'readable-regexp';
+import { tip } from '../components/Tooltip.tsx';
 
 const defaultCode = `/** @type Puzzle */
 ({
@@ -205,8 +206,11 @@ export default memo(function SourceCodeEditor({
         </div>
       </div>
       <div
-        className="tooltip w-full tooltip-right"
-        data-tip="Source code is NOT saved in the puzzle link! Remember to back up your code."
+        className="w-full"
+        {...tip(
+          'Source code is NOT saved in the puzzle link! Remember to back up your code.',
+          'right'
+        )}
       >
         <button
           type="button"

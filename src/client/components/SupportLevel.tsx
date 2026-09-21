@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { BiSolidFlagCheckered } from 'react-icons/bi';
 import { cn } from '../../client/uiHelper.ts';
 import { RiRobot2Fill } from 'react-icons/ri';
+import { tip } from './Tooltip.tsx';
 
 export interface SupportLevelProps {
   validate?: boolean;
@@ -17,12 +18,11 @@ export default memo(function SupportLevel({
       <span className="text-xs opacity-70">Support:</span>
       {validate !== undefined && (
         <div
-          className="tooltip tooltip-top tooltip-info"
-          data-tip={
+          {...tip(
             validate
               ? 'Validates solution automatically'
               : 'Only checks against provided solution'
-          }
+          )}
         >
           <BiSolidFlagCheckered
             size={22}
@@ -32,8 +32,7 @@ export default memo(function SupportLevel({
       )}
       {solve !== undefined && (
         <div
-          className="tooltip tooltip-top tooltip-info"
-          data-tip={solve ? 'Supported by solver' : 'Not supported by solver'}
+          {...tip(solve ? 'Supported by solver' : 'Not supported by solver')}
         >
           <RiRobot2Fill
             size={22}

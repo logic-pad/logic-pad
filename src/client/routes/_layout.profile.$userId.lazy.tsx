@@ -18,6 +18,7 @@ import CollectionCard from '../online/CollectionCard';
 import Avatar from '../online/Avatar';
 import SupporterBadge from '../components/SupporterBadge';
 import Skeleton from '../components/Skeleton';
+import { tip } from '../components/Tooltip.tsx';
 
 export const Route = createLazyFileRoute('/_layout/profile/$userId')({
   component: memo(function ProfilePage() {
@@ -199,8 +200,8 @@ export const Route = createLazyFileRoute('/_layout/profile/$userId')({
         )}
         {me?.roles.includes('moderator') && (
           <div
-            className="tooltip tooltip-error tooltip-left fixed bottom-4 right-4"
-            data-tip="Mod view"
+            className="fixed bottom-4 right-4"
+            {...tip('Mod view', 'left', 'error')}
           >
             <Link
               to="/mod/profile/$userId"

@@ -6,6 +6,7 @@ import PuzzleEditorScreen from '../screens/PuzzleEditorScreen';
 import { IoWarningOutline } from 'react-icons/io5';
 import ExitBlocker from '../router/ExitBlocker';
 import { PuzzleScope } from '../state/scopes/PuzzleScope';
+import { tip } from '../components/Tooltip.tsx';
 
 export const Route = createLazyFileRoute('/_layout/create/')({
   component: memo(function CreateMode() {
@@ -25,8 +26,10 @@ export const Route = createLazyFileRoute('/_layout/create/')({
           <ExitBlocker />
           {result && result.solutionStripped && (
             <div
-              className="tooltip tooltip-top tooltip-info flex shrink-0"
-              data-tip="The puzzle solution has been removed to avoid spoiling the puzzle. Click to reload the puzzle with its original solution."
+              className="flex shrink-0"
+              {...tip(
+                'The puzzle solution has been removed to avoid spoiling the puzzle. Click to reload the puzzle with its original solution.'
+              )}
             >
               <div role="alert" className="alert shadow-lg gap-2">
                 <IoWarningOutline className="text-warning" size={24} />

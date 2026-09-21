@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import Difficulty, { medianFromHistogram } from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
+import { tip } from '../components/Tooltip.tsx';
 import './ratedDifficulty.css';
 
 export interface RatedDifficultyProps {
@@ -51,11 +52,11 @@ export default memo(function RatedDifficulty({
             {ratedDifficulty.map((value, index) => (
               <div
                 key={index}
-                className="w-1/3 bg-secondary tooltip tooltip-info origin-bottom animate-grow"
+                className="w-1/3 bg-secondary origin-bottom animate-grow"
                 style={{
                   height: `${(value / max) * 100}%`,
                 }}
-                data-tip={value}
+                {...tip(value)}
               ></div>
             ))}
             {ratedDifficulty.map((_, index) => (

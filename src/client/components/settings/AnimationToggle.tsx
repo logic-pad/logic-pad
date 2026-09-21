@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { externalReducedMotion } from '../../uiHelper';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function AnimationToggle() {
   const [enableFancyAnimations, setEnableFancyAnimations] = useSettings(
@@ -9,12 +10,12 @@ export default memo(function AnimationToggle() {
   const external = externalReducedMotion();
   return (
     <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip={
+      {...tip(
         external
           ? 'Fancy animations are disabled by the browser'
-          : 'Toggle fancy animations'
-      }
+          : 'Toggle fancy animations',
+        'bottom'
+      )}
     >
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">

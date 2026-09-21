@@ -6,6 +6,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import GridEditorModal, { GridEditorRef } from './GridEditorModal';
 import { FaTrashCan } from 'react-icons/fa6';
 import ConfigItem from './ConfigItem';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface NullableGridConfigProps {
   configurable: Configurable;
@@ -37,10 +38,7 @@ export default memo(function GridConfig({
         </button>
       ) : (
         <div className="flex gap-2 items-center">
-          <div
-            className="tooltip tooltip-info tooltip-top"
-            data-tip="Clear value"
-          >
+          <div {...tip('Clear value')}>
             <button
               type="button"
               aria-label="Clear value"

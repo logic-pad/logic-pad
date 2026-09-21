@@ -12,6 +12,7 @@ import {
 import { useDelta } from 'react-delta-hooks';
 import { RiErrorWarningFill } from 'react-icons/ri';
 import { safeClipboard } from '../../uiHelper';
+import { FeedbackTooltip } from '../../components/Tooltip.tsx';
 import { getGridAtom, setGridRawAtom } from '../../state/grid.ts';
 import { gridStateAtom } from '../../state/gridState.ts';
 import { undoAtom } from '../../state/editHistory.ts';
@@ -140,9 +141,10 @@ export default memo(function PerfectionControlsPart({
                 onChange={e => setVisualizeSolvePath(e.currentTarget.checked)}
               />
             </label>
-            <div
-              className="tooltip"
-              data-tip={tooltip ?? 'Copy solve path as text'}
+            <FeedbackTooltip
+              variant="neutral"
+              message={tooltip}
+              content="Copy solve path as text"
             >
               <button
                 className="btn btn-sm btn-neutral"
@@ -156,7 +158,7 @@ export default memo(function PerfectionControlsPart({
               >
                 Copy solve path
               </button>
-            </div>
+            </FeedbackTooltip>
           </fieldset>
         </div>
         <progress

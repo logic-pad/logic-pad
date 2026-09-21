@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { ToolboxHotkey } from './ToolboxItem';
+import { tip } from '../components/Tooltip.tsx';
 
 interface SortablePreset {
   id: string;
@@ -93,10 +94,7 @@ export default memo(function PresetsEditor() {
             Quickly place identical symbols with presets.
           </span>
         </div>
-        <div
-          className="tooltip tooltip-left tooltip-info"
-          data-tip="Remove selected preset"
-        >
+        <div {...tip('Remove selected preset', 'left')}>
           <button
             type="button"
             aria-label="Remove selected preset"

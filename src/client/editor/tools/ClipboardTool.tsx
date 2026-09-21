@@ -20,6 +20,7 @@ import { FaPaste } from 'react-icons/fa';
 import debounce from 'lodash/debounce';
 import { useHotkeys } from 'react-hotkeys-hook';
 import mouseContext from '../../grid/MouseContext';
+import { tip } from '../../components/Tooltip.tsx';
 
 interface Rect {
   x: number;
@@ -216,8 +217,8 @@ export function ClipboardToolOverlay() {
         {clipboardData && firstPosition && (
           <>
             <button
-              className="absolute btn btn-info btn-circle text-[1em] transition-all opacity-30 hover:opacity-100 peer tooltip tooltip-info tooltip-top"
-              data-tip="Paste here"
+              className="absolute btn btn-info btn-circle text-[1em] transition-all opacity-30 hover:opacity-100 peer"
+              {...tip('Paste here')}
               style={{
                 left: `${firstPosition.x + 0.1}em`,
                 top: `${firstPosition.y + 0.1}em`,

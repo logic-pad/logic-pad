@@ -3,6 +3,7 @@ import { ConfigType, NullableBooleanConfig } from '@logic-pad/core/data/config';
 import Configurable from '@logic-pad/core/data/configurable';
 import { FaTrashCan } from 'react-icons/fa6';
 import ConfigItem from './ConfigItem';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface NullableBooleanConfigProps {
   configurable: Configurable;
@@ -33,10 +34,7 @@ export default memo(function BooleanConfig({
         </button>
       ) : (
         <div className="flex gap-2 items-center">
-          <div
-            className="tooltip tooltip-info tooltip-top"
-            data-tip="Clear value"
-          >
+          <div {...tip('Clear value')}>
             <button
               type="button"
               aria-label="Clear value"

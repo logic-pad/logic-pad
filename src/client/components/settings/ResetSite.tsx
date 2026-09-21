@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { tip } from '../Tooltip.tsx';
 
 export async function cleanReload() {
   try {
@@ -16,10 +17,7 @@ export async function cleanReload() {
 
 export default memo(function ResetSite() {
   return (
-    <div
-      className="tooltip tooltip-error tooltip-top"
-      data-tip="Reset the whole site"
-    >
+    <div {...tip('Reset the whole site', 'top', 'error')}>
       <button
         type="button"
         aria-label="Reset site"

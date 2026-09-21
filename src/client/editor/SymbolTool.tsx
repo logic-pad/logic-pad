@@ -197,7 +197,7 @@ export default memo(function SymbolTool(props: SymbolToolProps) {
       onTileClick={(x, y, target, flood, gridContext) => {
         handleTileClick(x, y, target, flood, gridContext, true);
       }}
-      buttonClassName="text-[42px]"
+      buttonClassName="relative text-[42px]"
       {...rest}
     >
       <div className="absolute w-[1em] h-[1em]">

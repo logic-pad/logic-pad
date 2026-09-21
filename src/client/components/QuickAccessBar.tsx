@@ -6,6 +6,7 @@ import AccountControl from './AccountControl.tsx';
 import Notifications from './Notifications.tsx';
 import { Link } from '@tanstack/react-router';
 import { FaHeart } from 'react-icons/fa';
+import { tip } from './Tooltip.tsx';
 const ThemeSwitcher = lazy(() => import('./ThemeSwitcher'));
 
 export interface QuickAccessBarProps {
@@ -21,10 +22,7 @@ export default memo(function QuickAccessBar({
         <ThemeSwitcher />
       </Suspense>
       <Settings />
-      <div
-        className="tooltip tooltip-info tooltip-bottom"
-        data-tip="Support Logic Pad"
-      >
+      <div {...tip('Support Logic Pad', 'bottom')}>
         <Link
           to="/support"
           className="btn btn-square btn-ghost max-md:btn-sm text-neutral-content"

@@ -8,6 +8,7 @@ import { api, queryClient } from '../../online/api';
 import Loading from '../Loading';
 import toast from 'react-hot-toast';
 import { PuzzleFull } from '../../online/data';
+import { tip } from '../Tooltip.tsx';
 
 const puzzleLoveQueryOptions = (puzzleId: string | null, enabled: boolean) =>
   queryOptions({
@@ -63,10 +64,11 @@ export default memo(function PuzzleLoveButton() {
   if (puzzleLove.isPending) return <Loading className="w-14" />;
   return (
     <button
-      className="tooltip tooltip-info tooltip-right btn btn-md btn-ghost flex items-center w-fit focus:z-50"
-      data-tip={
-        puzzleLove.data!.loved ? 'Unlove this puzzle' : 'Love this puzzle'
-      }
+      className="btn btn-md btn-ghost flex items-center w-fit focus:z-50"
+      {...tip(
+        puzzleLove.data!.loved ? 'Unlove this puzzle' : 'Love this puzzle',
+        'right'
+      )}
       onClick={async () => {
         const newLove = await setPuzzleLove.mutateAsync([
           id,

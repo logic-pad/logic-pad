@@ -20,6 +20,7 @@ import UserModerations from '../online/moderator/UserModerations';
 import UserStatus from '../online/moderator/UserStatus';
 import { api, queryClient } from '../online/api';
 import toast from 'react-hot-toast';
+import { tip } from '../components/Tooltip.tsx';
 
 export const Route = createLazyFileRoute('/(moderator)/mod/profile/$userId')({
   component: memo(function RouteComponent() {
@@ -87,8 +88,8 @@ export const Route = createLazyFileRoute('/(moderator)/mod/profile/$userId')({
                   </span>
                 ))}
                 <div
-                  className="tooltip tooltip-error tooltip-bottom ms-2"
-                  data-tip="Remove user name"
+                  className="ms-2"
+                  {...tip('Remove user name', 'bottom', 'error')}
                 >
                   <button
                     className="btn btn-xs btn-error"
@@ -139,10 +140,7 @@ export const Route = createLazyFileRoute('/(moderator)/mod/profile/$userId')({
               </div>
               <div className="flex-1 flex gap-2 min-w-[320px] mt-2">
                 <span>{userBrief.description}</span>
-                <div
-                  className="tooltip tooltip-error tooltip-top"
-                  data-tip="Remove user description"
-                >
+                <div {...tip('Remove user description', 'top', 'error')}>
                   <button
                     className="btn btn-xs btn-error"
                     onClick={() =>

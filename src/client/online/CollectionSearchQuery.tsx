@@ -11,6 +11,7 @@ import { FaSearch, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { z } from 'zod';
 import { useOnline } from '../state/online.ts';
 import { cn } from '../uiHelper';
+import { tip } from '../components/Tooltip.tsx';
 
 export const collectionSearchSchema = z.object({
   q: z.string().optional().catch(undefined),
@@ -141,10 +142,7 @@ export default memo(function CollectionSearchQuery({
   }, []);
   return (
     <>
-      <div
-        className={cn('w-full', !me && 'tooltip tooltip-info tooltip-top')}
-        data-tip={!me && 'Log in to search'}
-      >
+      <div className="w-full" {...tip(!me && 'Log in to search')}>
         <label
           className={cn(
             'input bg-base-100 text-base-content flex items-center gap-2 w-full',

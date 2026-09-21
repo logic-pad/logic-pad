@@ -1,13 +1,11 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function OfflineModeToggle() {
   const [offlineMode, setOfflineMode] = useSettings('offlineMode');
   return (
-    <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Disable all online features"
-    >
+    <div {...tip('Disable all online features', 'bottom')}>
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Offline mode</span>

@@ -5,6 +5,7 @@ import { BsChevronCompactRight } from 'react-icons/bs';
 import { Link, LinkProps } from '@tanstack/react-router';
 import Markdown from './Markdown';
 import { HighlightColor } from '../online/data';
+import { tip } from './Tooltip.tsx';
 
 export interface HorizontalScrollerProps extends Partial<LinkProps> {
   title: string;
@@ -61,8 +62,8 @@ export default memo(function HorizontalScroller({
           !!children &&
           (!Array.isArray(children) || children.length > 0) && (
             <Link
-              className="tooltip tooltip-info tooltip-left btn btn-ghost self-center px-0"
-              data-tip="View more"
+              className="btn btn-ghost self-center px-0"
+              {...tip('View more', 'left')}
               {...props}
             >
               <BsChevronCompactRight size={36} />

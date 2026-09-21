@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function PrimaryMouseButtonToggle() {
   const [flippedPrimaryButton, setFlippedPrimaryButton] = useSettings(
@@ -7,8 +8,10 @@ export default memo(function PrimaryMouseButtonToggle() {
   );
   return (
     <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Whether to use left click for light tiles (Reload to take effect)"
+      {...tip(
+        'Whether to use left click for light tiles (Reload to take effect)',
+        'bottom'
+      )}
     >
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">

@@ -25,6 +25,7 @@ import { IoMdColorFill } from 'react-icons/io';
 import mouseContext from '../grid/MouseContext.tsx';
 import { gridValidatorAtom } from '../state/gridState.ts';
 import Loading from './Loading.tsx';
+import { tip } from './Tooltip.tsx';
 
 export interface EditControlsProps {
   onReset?: () => void;
@@ -40,8 +41,8 @@ const ValidatorStatus = memo(function ValidatorStatus() {
   );
   return (
     <div
-      className="tooltip tooltip-info tooltip-top h-12 w-12 px-2 flex items-center justify-center"
-      data-tip={isLoading ? 'Validating...' : 'Validated'}
+      className="h-12 w-12 px-2 flex items-center justify-center"
+      {...tip(isLoading ? 'Validating...' : 'Validated')}
     >
       {isLoading ? (
         <Loading className="px-1 rounded-box" aria-hidden="true" />
@@ -109,40 +110,22 @@ const EditControls = memo(function EditControls({
       <ValidatorStatus />
       <ul className="menu menu-horizontal shrink-0 justify-center flex-1 gap-2">
         <li className={cn(undoStack.length === 0 && 'disabled')}>
-          <a
-            className="tooltip tooltip-info"
-            role="button"
-            data-tip="Undo (Z)"
-            onClick={undo}
-          >
+          <a role="button" {...tip('Undo (Z)')} onClick={undo}>
             <FiCornerUpLeft />
           </a>
         </li>
         <li>
-          <a
-            className="tooltip tooltip-info"
-            role="button"
-            data-tip="Restart (R)"
-            onClick={restart}
-          >
+          <a role="button" {...tip('Restart (R)')} onClick={restart}>
             <FiRefreshCcw />
           </a>
         </li>
         <li className={cn(redoStack.length === 0 && 'disabled')}>
-          <a
-            className="tooltip tooltip-info"
-            role="button"
-            data-tip="Redo (Y)"
-            onClick={redo}
-          >
+          <a role="button" {...tip('Redo (Y)')} onClick={redo}>
             <FiCornerUpRight />
           </a>
         </li>
       </ul>
-      <div
-        className="tooltip tooltip-info tooltip-top h-12"
-        data-tip="Enable flood fill"
-      >
+      <div className="h-12" {...tip('Enable flood fill')}>
         <button
           className={cn(
             'btn h-12 aspect-square px-2 rounded-box',

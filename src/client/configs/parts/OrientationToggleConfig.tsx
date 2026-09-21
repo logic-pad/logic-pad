@@ -13,6 +13,7 @@ import { FaArrowUp } from 'react-icons/fa';
 import { orientationToRotation } from '@logic-pad/core/data/dataHelper';
 import ConfigItem from './ConfigItem.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface OrientationToggleConfigProps {
   configurable: Configurable;
@@ -126,8 +127,8 @@ export default memo(function OrientationToggleConfig({
   return (
     <ConfigItem config={config}>
       <div
-        className="grid grid-cols-3 grid-rows-3 tooltip tooltip-info tooltip-top"
-        data-tip="Keyboard arrow keys supported"
+        className="grid grid-cols-3 grid-rows-3"
+        {...tip('Keyboard arrow keys supported')}
       >
         <OrientationToggleRadio
           checked={value.up}

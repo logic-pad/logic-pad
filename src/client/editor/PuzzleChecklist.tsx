@@ -26,6 +26,7 @@ import { useQuery } from '@tanstack/react-query';
 import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { ResourceStatus } from '../online/data.ts';
 import { embedFeaturesAtom } from '../state/embed.ts';
+import { tip } from '../components/Tooltip.tsx';
 
 const SolverSelector = lazy(() => import('./SolverSelector'));
 
@@ -39,10 +40,7 @@ function ChecklistItem({
   tooltip?: string;
 }) {
   return (
-    <div
-      className="flex items-center gap-2 tooltip tooltip-top tooltip-info"
-      data-tip={tooltip}
-    >
+    <div className="flex items-center gap-2" {...tip(tooltip)}>
       {type === 'success' ? (
         <FaCheckCircle size={22} className="text-success" />
       ) : type === 'error' ? (

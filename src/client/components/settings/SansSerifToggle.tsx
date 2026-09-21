@@ -1,13 +1,11 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function SansSerifToggle() {
   const [sansSerif, setSansSerif] = useSettings('sansSerifFont');
   return (
-    <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Use a sans-serif font for the whole site"
-    >
+    <div {...tip('Use a sans-serif font for the whole site', 'bottom')}>
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">
           <span className="label-text">Sans-serif font</span>

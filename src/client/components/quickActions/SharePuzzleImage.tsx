@@ -11,6 +11,7 @@ import { scaleAtom } from '../../state/display.ts';
 import { useAtomValue } from 'jotai';
 import { FaAngleDown, FaCamera } from 'react-icons/fa';
 import { PuzzleImageScope } from '../../state/scopes/PuzzleImageScope.tsx';
+import { FeedbackTooltip, tip } from '../Tooltip.tsx';
 
 interface CopyImageButtonProps {
   canvas?: HTMLCanvasElement | null;
@@ -27,13 +28,7 @@ const CopyImageButton = memo(function CopyImageButton({
     }
   }, [tooltip]);
   return (
-    <div
-      className={cn(
-        'tooltip tooltip-info tooltip-top flex-1',
-        tooltip && 'tooltip-open'
-      )}
-      data-tip={tooltip}
-    >
+    <FeedbackTooltip className="flex-1" message={tooltip}>
       <button
         className="btn btn-primary w-full"
         disabled={!canvas}
@@ -49,7 +44,7 @@ const CopyImageButton = memo(function CopyImageButton({
       >
         Copy to clipboard
       </button>
-    </div>
+    </FeedbackTooltip>
   );
 });
 
@@ -248,9 +243,9 @@ export default memo(function SharePuzzleImage() {
   return (
     <details className="dropdown dropdown-open dropdown-bottom xl:dropdown-top self-center">
       <summary
-        className="tooltip tooltip-info tooltip-right btn btn-md btn-ghost flex items-center w-fit focus:z-50"
+        className="btn btn-md btn-ghost flex items-center w-fit focus:z-50"
         role="button"
-        data-tip={open ? 'Close panel' : 'Share puzzle image'}
+        {...tip(open ? 'Close panel' : 'Share puzzle image', 'right')}
         onClick={() => setOpen(v => !v)}
       >
         {open ? <FaAngleDown size={24} /> : <FaCamera size={24} />}

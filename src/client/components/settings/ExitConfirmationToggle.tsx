@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function ExitConfirmationToggle() {
   const [enableExitConfirmation, setEnableExitConfirmation] = useSettings(
@@ -7,8 +8,10 @@ export default memo(function ExitConfirmationToggle() {
   );
   return (
     <div
-      className="tooltip tooltip-info tooltip-bottom"
-      data-tip="Whether Logic Pad should ask for confirmation before leaving the page"
+      {...tip(
+        'Whether Logic Pad should ask for confirmation before leaving the page',
+        'bottom'
+      )}
     >
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">

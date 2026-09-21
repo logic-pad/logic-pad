@@ -37,6 +37,7 @@ import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompre
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers.ts';
 import DynamicRelativeTime from './DynamicRelativeTime.tsx';
 import { array } from '@logic-pad/core/index.ts';
+import { tip } from './Tooltip.tsx';
 
 const SolveTrackerAnonymous = memo(function SolveTracker() {
   const { isOnline, me } = useOnline();
@@ -64,7 +65,7 @@ const SolveTrackerAnonymous = memo(function SolveTracker() {
         ? 'Puzzle solved!'
         : 'Sign in to track solves'}
       <div className="flex items-center gap-2">
-        <div className="tooltip tooltip-top tooltip-info" data-tip="Sign in">
+        <div {...tip('Sign in')}>
           <button
             className="btn btn-sm btn-ghost"
             onClick={async () => {
@@ -205,10 +206,7 @@ const PuzzleCompleted = memo(function PuzzleCompleted({
         <div className="flex items-center justify-between gap-2 w-full">
           <div className="text-2xl">Puzzle solved!</div>
           {me!.supporter > 0 && (
-            <div
-              className="tooltip tooltip-left tooltip-info"
-              data-tip="Load saved solution"
-            >
+            <div {...tip('Load saved solution', 'left')}>
               <button className="btn btn-ghost" onClick={loadSolution}>
                 <FaDownload />
               </button>
@@ -362,10 +360,11 @@ const PuzzleSolving = memo(function PuzzleSolving({
       </span>
       <div className="flex-1" />
       <div
-        className="tooltip tooltip-left tooltip-info shrink-0"
-        data-tip={
-          me!.supporter > 0 ? 'Save (Ctrl+S)' : 'Require supporter status'
-        }
+        className="shrink-0"
+        {...tip(
+          me!.supporter > 0 ? 'Save (Ctrl+S)' : 'Require supporter status',
+          'left'
+        )}
       >
         {isPending && me!.supporter > 0 ? (
           <Loading className="h-8 w-12 px-3" />

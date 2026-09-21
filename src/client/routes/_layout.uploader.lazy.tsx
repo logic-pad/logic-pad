@@ -25,6 +25,7 @@ import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import validateGrid from '@logic-pad/core/data/validate';
 import { ResourceStatus } from '../online/data';
+import { tip } from '../components/Tooltip.tsx';
 
 const defaultSolver = [...allSolvers.values()][0];
 
@@ -545,10 +546,7 @@ const UploadEntryRow = memo(function UploadEntryRow({
           {entry.status === 'online' ? me?.name : entry.metadata.author}
         </div>
         <Difficulty value={entry.metadata.difficulty} size="xs" />
-        <div
-          className="tooltip tooltip-info tooltip-top"
-          data-tip="Open in a new tab"
-        >
+        <div {...tip('Open in a new tab')}>
           <button
             className="btn btn-sm btn-square btn-ghost"
             onClick={async () => {
@@ -587,10 +585,7 @@ const UploadEntryRow = memo(function UploadEntryRow({
           </button>
         </div>
         {entry.status !== 'online' && (
-          <div
-            className="tooltip tooltip-error tooltip-top"
-            data-tip="Delete this puzzle"
-          >
+          <div {...tip('Delete this puzzle', 'top', 'error')}>
             <button
               className="btn btn-sm btn-ghost btn-square text-error"
               onClick={() => uploadManager.current.delete(entry.data)}
@@ -607,10 +602,7 @@ const UploadEntryRow = memo(function UploadEntryRow({
           {entry.data}
         </div>
         {entry.status === 'malformed' && (
-          <div
-            className="tooltip tooltip-error tooltip-top"
-            data-tip="Delete this puzzle"
-          >
+          <div {...tip('Delete this puzzle', 'top', 'error')}>
             <button
               className="btn btn-sm btn-ghost btn-square text-error"
               onClick={() => uploadManager.current.delete(entry.data)}
@@ -704,10 +696,7 @@ const UploadEntryRow = memo(function UploadEntryRow({
     ) : null;
   const uploadControls =
     entry.status === 'local' && entry.checklistStatus ? (
-      <div
-        className="tooltip tooltip-left tooltip-info"
-        data-tip="Publish this puzzle"
-      >
+      <div {...tip('Publish this puzzle', 'left')}>
         <button
           className="btn btn-sm btn-primary"
           onClick={() => {
@@ -718,10 +707,7 @@ const UploadEntryRow = memo(function UploadEntryRow({
         </button>
       </div>
     ) : entry.status !== 'online' ? (
-      <div
-        className="tooltip tooltip-left tooltip-error"
-        data-tip="Pass checklist before uploading"
-      >
+      <div {...tip('Pass checklist before uploading', 'left', 'error')}>
         <div className="btn btn-sm btn-disabled">
           <FaUpload />
         </div>

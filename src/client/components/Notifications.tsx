@@ -26,6 +26,7 @@ import { cn, toRelativeDate } from '../uiHelper';
 import { Link } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
 import InfiniteScrollTrigger from './InfiniteScrollTrigger';
+import { tip } from './Tooltip.tsx';
 
 const markAllAsRead = (notificationIds: string[]) =>
   mutationOptions({
@@ -298,10 +299,7 @@ export default memo(function Notifications() {
             <div className="flex justify-between items-center self-stretch shrink-0">
               <span className="text-secondary text-lg">Notifications</span>
               <div className="flex gap-2">
-                <div
-                  className="tooltip tooltip-info tooltip-left"
-                  data-tip="Mark all as read"
-                >
+                <div {...tip('Mark all as read', 'left')}>
                   <button
                     className={cn(
                       'btn btn-ghost btn-sm',
@@ -316,10 +314,7 @@ export default memo(function Notifications() {
                     <FaCheckDouble size={16} />
                   </button>
                 </div>
-                <div
-                  className="tooltip tooltip-info tooltip-left"
-                  data-tip="Delete all read"
-                >
+                <div {...tip('Delete all read', 'left')}>
                   <button
                     className={cn(
                       'btn btn-ghost btn-sm',

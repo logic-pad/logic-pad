@@ -6,6 +6,7 @@ import { useOnline } from '../state/online.ts';
 import { api, queryClient } from './api';
 import { RiUserFollowFill } from 'react-icons/ri';
 import Skeleton from '../components/Skeleton';
+import { tip } from '../components/Tooltip.tsx';
 
 const collectionFollowQueryOptions = (collectionId: string, enabled: boolean) =>
   queryOptions({
@@ -68,12 +69,12 @@ export default memo(function CollectionFollowButton({
   if (collectionFollow.isPending) return <Skeleton className="h-10 w-28" />;
   return (
     <button
-      className="tooltip tooltip-info tooltip-top btn btn-md btn-primary flex items-center w-fit focus:z-50"
-      data-tip={
+      className="btn btn-md btn-primary flex items-center w-fit focus:z-50"
+      {...tip(
         collectionFollow.data.followed
           ? 'Unfollow this collection'
           : 'Follow this collection'
-      }
+      )}
       onClick={async () => {
         const newFollow = await setCollectionFollow.mutateAsync([
           collectionId,

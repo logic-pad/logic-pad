@@ -9,6 +9,7 @@ import { useOnline } from '../../state/online.ts';
 import { onlinePuzzleIdAtom } from '../../state/onlinePuzzle.ts';
 import { useQuery } from '@tanstack/react-query';
 import { puzzleSolveQueryOptions } from '../../routes/_layout.solve.$puzzleId';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function PuzzleEditButton() {
   const navigate = useNavigate();
@@ -20,12 +21,13 @@ export default memo(function PuzzleEditButton() {
   const solution = useAtomValue(solutionAtom);
   return (
     <button
-      className="tooltip tooltip-info tooltip-right btn btn-md btn-ghost flex items-center w-fit focus:z-50"
-      data-tip={
+      className="btn btn-md btn-ghost flex items-center w-fit focus:z-50"
+      {...tip(
         puzzleQuery.data?.creator.id === me?.id
           ? 'Edit this puzzle'
-          : 'Remix this puzzle'
-      }
+          : 'Remix this puzzle',
+        'right'
+      )}
       onClick={async () => {
         if (
           isOnline &&

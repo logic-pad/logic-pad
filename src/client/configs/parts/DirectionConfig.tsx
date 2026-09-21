@@ -7,6 +7,7 @@ import { directionToRotation } from '@logic-pad/core/data/dataHelper';
 import Configurable from '@logic-pad/core/data/configurable';
 import ConfigItem from './ConfigItem.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface DirectionConfigProps {
   configurable: Configurable;
@@ -76,8 +77,8 @@ export default memo(function DirectionConfig({
   return (
     <ConfigItem config={config}>
       <div
-        className="grid grid-cols-3 grid-rows-3 tooltip tooltip-info tooltip-top"
-        data-tip="Keyboard arrow keys supported"
+        className="grid grid-cols-3 grid-rows-3"
+        {...tip('Keyboard arrow keys supported')}
       >
         <DirectionRadio
           value={value}

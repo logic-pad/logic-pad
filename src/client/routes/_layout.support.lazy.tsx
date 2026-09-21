@@ -23,6 +23,7 @@ import {
 import { router } from '../router/router';
 import storedRedirect from '../router/storedRedirect';
 import { TbLayoutGrid } from 'react-icons/tb';
+import { tip } from '../components/Tooltip.tsx';
 
 export const Route = createLazyFileRoute('/_layout/support')({
   component: memo(function RouteComponent() {
@@ -212,8 +213,8 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       </span>
                       <div className="flex-1" />
                       <div
-                        className="tooltip tooltip-left tooltip-info shrink-0"
-                        data-tip="Save (Ctrl+S)"
+                        className="shrink-0"
+                        {...tip('Save (Ctrl+S)', 'left')}
                       >
                         <button className="btn btn-sm btn-ghost">
                           <FaSave size={22} />

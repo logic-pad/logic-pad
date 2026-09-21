@@ -4,6 +4,7 @@ import { FaSearch, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { z } from 'zod';
 import { useOnline } from '../state/online.ts';
 import { cn } from '../uiHelper';
+import { tip } from '../components/Tooltip.tsx';
 
 export type SearchType = 'public' | 'own' | 'published' | 'all';
 
@@ -356,10 +357,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
   }, []);
   return (
     <>
-      <div
-        className={cn('w-full', !me && 'tooltip tooltip-info tooltip-top')}
-        data-tip={!me && 'Log in to search'}
-      >
+      <div className="w-full" {...tip(!me && 'Log in to search')}>
         <label
           className={cn(
             'input bg-base-100 text-base-content flex items-center gap-2 w-full',
@@ -387,11 +385,11 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
             <Fragment key={filter.name}>
               <div className="text-sm">{filter.name}</div>
               <div
-                className={cn(
-                  'flex gap-2 flex-wrap',
-                  promptForSupporter && 'tooltip tooltip-left tooltip-info'
+                className="flex gap-2 flex-wrap"
+                {...tip(
+                  promptForSupporter ? 'Requires supporter status' : '',
+                  'left'
                 )}
-                data-tip={promptForSupporter ? 'Requires supporter status' : ''}
               >
                 {filter.options.map(option => (
                   <button

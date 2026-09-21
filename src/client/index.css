@@ -805,9 +805,12 @@ summary::marker {
   content: '';
 }
 
-.tooltip::before,
-.tooltip::after {
-  z-index: 100;
+.react-tooltip .react-tooltip-content-wrapper {
+  padding: 0.25rem 0.5rem;
+}
+
+.react-tooltip.no-padding .react-tooltip-content-wrapper {
+  padding: 0;
 }
 
 @utility fade-in-slow {

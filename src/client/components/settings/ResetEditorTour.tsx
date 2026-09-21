@@ -1,17 +1,18 @@
 import { memo } from 'react';
 import { useSettings } from '../../state/settings.ts';
 import { cn } from '../../uiHelper';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function ResetEditorTour() {
   const [runEditorTour, setRunEditorTour] = useSettings('runEditorTour');
   return (
     <div
-      className="tooltip tooltip-info tooltip-left"
-      data-tip={
+      {...tip(
         runEditorTour
           ? 'Open the editor to see the tour'
-          : 'Show the tour in the editor'
-      }
+          : 'Show the tour in the editor',
+        'left'
+      )}
     >
       <button
         className={cn('btn', runEditorTour && 'btn-disabled')}

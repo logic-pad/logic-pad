@@ -5,6 +5,7 @@ import Autocomplete from '../../components/Autocomplete';
 import { FaTrashCan } from 'react-icons/fa6';
 import ConfigItem from './ConfigItem';
 import { Instrument } from '@logic-pad/core/data/primitives';
+import { tip } from '../../components/Tooltip.tsx';
 
 export interface NullableNoteConfigProps {
   configurable: Configurable;
@@ -65,10 +66,7 @@ export default memo(function NullableNoteConfig({
         </button>
       ) : (
         <div className="flex gap-2 items-center">
-          <div
-            className="tooltip tooltip-info tooltip-top"
-            data-tip="Clear value"
-          >
+          <div {...tip('Clear value')}>
             <button
               type="button"
               aria-label="Clear value"

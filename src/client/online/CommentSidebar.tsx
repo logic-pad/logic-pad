@@ -16,6 +16,7 @@ import CommentEntry from './CommentEntry';
 import CommentTextarea, { CommentTextareaRef } from './CommentTextarea';
 import { IoSend } from 'react-icons/io5';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
+import { tip } from '../components/Tooltip.tsx';
 
 export interface CommentSidebarProps {
   open: boolean;
@@ -205,10 +206,7 @@ export default memo(function CommentSidebar({
                   ref={inputRef}
                   onPostComment={text => addComment.mutate([id, text])}
                 />
-                <div
-                  className="tooltip tooltip-info tooltip-left shrink-0"
-                  data-tip="Send (enter)"
-                >
+                <div className="shrink-0" {...tip('Send (enter)', 'left')}>
                   <button
                     className="btn btn-ghost btn-square btn-sm"
                     onClick={() => inputRef.current?.sendComment()}

@@ -4,6 +4,7 @@ import { getGridAtom } from '../../state/grid.ts';
 import { instance as musicGridInstance } from '@logic-pad/core/data/rules/musicGridRule';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { FaStar } from 'react-icons/fa';
+import { tip } from '../Tooltip.tsx';
 
 export default memo(function PerfectionModeButton() {
   const grid = useAtomValue(getGridAtom);
@@ -14,8 +15,8 @@ export default memo(function PerfectionModeButton() {
     <Link
       to={pathname.replace('/solve', '/perfection')}
       search={search}
-      className="tooltip tooltip-info tooltip-right btn btn-md btn-ghost flex items-center w-fit focus:z-50"
-      data-tip="Switch to perfection mode"
+      className="btn btn-md btn-ghost flex items-center w-fit focus:z-50"
+      {...tip('Switch to perfection mode', 'right')}
     >
       <FaStar size={24} />
     </Link>
