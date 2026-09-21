@@ -74,7 +74,7 @@ export default memo(function Difficulty({
         <BsQuestionCircleFill
           size={18}
           aria-hidden="true"
-          className="text-neutral-content opacity-100 bg-transparent"
+          className="text-base-content opacity-100 bg-transparent"
         />
       </div>
     );

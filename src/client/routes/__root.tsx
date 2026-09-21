@@ -15,7 +15,7 @@ export const Route = createRootRoute({
   }),
   component: memo(function Root() {
     return (
-      <div className="h-dvh w-dvw overflow-y-auto overflow-x-hidden bg-neutral text-neutral-content">
+      <div className="h-dvh w-dvw overflow-y-auto overflow-x-hidden bg-base-100 text-base-content">
         <ThemeSynchronizer />
         <HeadContent />
         <Toaster

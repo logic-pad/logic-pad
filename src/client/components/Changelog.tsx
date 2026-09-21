@@ -61,7 +61,7 @@ const ChangelogButton = lazy(async () => {
               <span className="opacity-80">View changelog &gt;&gt;</span>
             </div>
             <div className="max-h-22 max-w-162 text-ellipsis overflow-hidden">
-              <Markdown className="prose-sm prose-h1:text-lg text-neutral-content">
+              <Markdown className="prose-sm prose-h1:text-lg text-base-content">
                 {changelogSections[0].content}
               </Markdown>
             </div>

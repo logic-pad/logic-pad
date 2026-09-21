@@ -58,7 +58,7 @@ const UserMention = memo(function UserMention({
         'bg-accent/10 border-b border-accent rounded-lg no-underline!',
         isMe
           ? 'bg-accent text-accent-content'
-          : 'bg-accent/10 text-neutral-content'
+          : 'bg-accent/10 text-base-content'
       )}
     >
       {children}

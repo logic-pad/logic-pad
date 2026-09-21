@@ -13,6 +13,7 @@ import { api } from '../online/api';
 import NavigationSkip from '../components/NavigationSkip';
 import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
+import PuzzleSurface from '../components/PuzzleSurface.tsx';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
@@ -31,13 +32,9 @@ const FrontPageGrid = lazy(async () => {
   return {
     default: memo(function FrontPageGrid() {
       return (
-        <Grid
-          type="canvas"
-          size={100}
-          grid={grid}
-          editable={false}
-          className="absolute left-1/2 xl:right-0 top-1/2 -translate-x-1/2 -translate-y-1/2 shrink -rotate-[5deg] opacity-75 fade-in-fast"
-        />
+        <PuzzleSurface className="w-fit h-fit p-4 pointer-events-none">
+          <Grid type="canvas" size={72} grid={grid} editable={false} />
+        </PuzzleSurface>
       );
     }),
   };
@@ -48,12 +45,12 @@ const RandomPuzzle = memo(function RandomPuzzle() {
   const navigate = useNavigate();
 
   if (loading) {
-    return <Loading className="bg-base-100/10" />;
+    return <Loading className="bg-base-200/50" />;
   }
 
   return (
     <button
-      className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
+      className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-200/50"
       onClick={async () => {
         setLoading(true);
         try {
@@ -82,16 +79,26 @@ export const Route = createFileRoute('/')({
     return (
       <>
         <main className="flex flex-col gap-4 items-stretch min-h-svh shrink-0">
-          <div className="flex flex-col shrink-0">
+          <div className="flex flex-col shrink-0 max-w-[calc(320px*4+3rem)] self-center">
             <NavigationSkip />
             <PWAPrompt />
             <QuickAccessBar className="justify-end px-8 py-2" />
-            <section className="flex flex-col xl:flex-row grow gap-32 items-center justify-center p-16 z-10">
-              <div className="relative order-1 grow shrink self-stretch overflow-visible pointer-events-none -z-10 min-h-64 m-16">
+            <section className="flex flex-col xl:flex-row grow gap-32 items-center justify-center p-4 z-10">
+              <div className="relative order-1 grow shrink self-stretch overflow-visible min-h-64 m-2 sm:m-16 hidden xl:block">
                 <div className="absolute w-0 h-0 top-1/2 left-1/2 logo-glow fade-in-fast"></div>
-                <Suspense fallback={null}>
-                  <FrontPageGrid />
-                </Suspense>
+                <div className="hover-3d w-[392px] h-[392px] -rotate-5">
+                  <Suspense fallback={null}>
+                    <FrontPageGrid />
+                  </Suspense>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
               </div>
               <div className="flex flex-wrap shrink-0 grow-0 justify-center gap-8">
                 <div className="relative w-32 h-32 inline-block">
@@ -116,21 +123,21 @@ export const Route = createFileRoute('/')({
                       <Link
                         type="button"
                         to="/create"
-                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent"
+                        className="btn h-fit py-1 btn-lg sm:py-4 sm:px-6 btn-accent"
                       >
                         Create new puzzle
                       </Link>
                       <Link
                         type="button"
                         to="/search"
-                        className="btn btn-md h-fit py-1 sm:btn-lg sm:py-4 sm:px-6 btn-accent btn-outline"
+                        className="btn h-fit py-1 btn-lg sm:py-4 sm:px-6 btn-accent btn-outline"
                       >
                         Explore puzzles
                       </Link>
                       <Link
                         type="button"
                         to="/uploader"
-                        className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-100/10"
+                        className="btn btn-ghost h-fit py-1 sm:py-2 bg-base-200/50"
                       >
                         Bulk-import puzzles
                       </Link>
@@ -163,7 +170,7 @@ export const Route = createFileRoute('/')({
                 <PersonalFrontPageLists />
               ) : (
                 !isPending && (
-                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200/20 rounded-lg">
+                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200 rounded-lg">
                     <span className="text-center text-lg">
                       Sign in to track your progress and upload your own puzzles
                     </span>

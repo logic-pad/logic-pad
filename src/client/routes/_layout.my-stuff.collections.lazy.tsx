@@ -23,14 +23,14 @@ export const Route = createLazyFileRoute('/_layout/my-stuff/collections')({
           <Link
             to="/my-stuff/puzzles"
             role="tab"
-            className="tab text-neutral-content"
+            className="tab text-base-content"
           >
             Puzzles
           </Link>
           <Link
             to="/my-stuff/collections"
             role="tab"
-            className="tab tab-active text-neutral-content"
+            className="tab tab-active text-base-content"
           >
             Collections
           </Link>

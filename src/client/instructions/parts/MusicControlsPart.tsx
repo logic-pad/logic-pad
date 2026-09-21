@@ -203,6 +203,6 @@ export default memo(function MusicControlsPart({
 });
 
 export const spec: PartSpec = {
-  placement: PartPlacement.LeftPanel,
+  placement: PartPlacement.SideBar,
   instructionId: musicGridInstance.id,
 };

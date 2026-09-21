@@ -206,6 +206,6 @@ export default memo(function ForesightControlsPart({
 });
 
 export const spec: PartSpec = {
-  placement: PartPlacement.LeftBottom,
+  placement: PartPlacement.SideBar,
   instructionId: foresightInstance.id,
 };

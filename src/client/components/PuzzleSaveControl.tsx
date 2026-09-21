@@ -37,11 +37,14 @@ const CopyLink = memo(function CopyLink() {
   const detailsRef = useRef<HTMLDetailsElement>(null);
   return (
     <FeedbackTooltip className="flex-1" message={tooltip}>
-      <details ref={detailsRef} className="dropdown dropdown-end dropdown-top">
+      <details
+        ref={detailsRef}
+        className="dropdown dropdown-end dropdown-bottom"
+      >
         <summary className="btn btn-sm btn-ghost">
           <FaLink size={20} />
         </summary>
-        <ul className="menu dropdown-content bg-base-300 rounded-box z-50 mb-2 w-52 p-2 shadow-sm">
+        <ul className="menu dropdown-content bg-base-300 rounded-box z-50 mt-2 w-52 p-2 shadow-sm">
           <li>
             <a
               onClick={async () => {
@@ -158,7 +161,7 @@ const SavePuzzle = memo(function SavePuzzle({
   }, [grid, metadata, debouncedSave]);
 
   return (
-    <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between tour-upload">
+    <div className="flex p-2 ps-4 gap-4 rounded-xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between tour-upload">
       {lastSavedTime ? (
         <>
           Last saved <DynamicRelativeTime time={lastSavedTime} />
@@ -197,7 +200,7 @@ export default memo(function PuzzleSaveControl({
 
   if (!isOnline) {
     return (
-      <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
+      <div className="flex p-2 ps-4 gap-4 rounded-xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
         Editing offline
         <div className="flex items-center gap-2">
           <CopyLink />
@@ -208,7 +211,7 @@ export default memo(function PuzzleSaveControl({
 
   if (!me) {
     return (
-      <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
+      <div className="flex p-2 ps-4 gap-4 rounded-xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
         Sign in to upload
         <div className="flex items-center gap-2">
           <CopyLink />
@@ -224,7 +227,7 @@ export default memo(function PuzzleSaveControl({
 
   if (!id) {
     return (
-      <div className="flex p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
+      <div className="flex p-2 ps-4 gap-4 rounded-xl shadow-md bg-base-100 text-base-content items-center justify-between tour-upload">
         Editing locally
         <div className="flex items-center gap-2">
           <CopyLink />

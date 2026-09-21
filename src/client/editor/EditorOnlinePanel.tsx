@@ -2,22 +2,21 @@ import { memo, useId, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { puzzleEditQueryOptions } from '../routes/_layout.create.$puzzleId';
-import { ResourceStatus } from '../online/data';
+import { puzzleEditQueryOptions } from '../routes/_layout.create.$puzzleId.tsx';
+import { ResourceStatus } from '../online/data.ts';
 import { FaCheckSquare, FaHeart } from 'react-icons/fa';
-import Loading from '../components/Loading';
+import Loading from '../components/Loading.tsx';
 import { Compressor } from '@logic-pad/core/data/serializer/compressor/allCompressors';
 import { Serializer } from '@logic-pad/core/data/serializer/allSerializers';
 import { getGridAtom, metadataAtom, solutionAtom } from '../state/grid.ts';
-import storedRedirect from '../router/storedRedirect';
+import storedRedirect from '../router/storedRedirect.ts';
 import { useOnline } from '../state/online.ts';
-import RatedDifficulty from '../metadata/RatedDifficulty';
-import { api, ApiError, queryClient } from '../online/api';
+import RatedDifficulty from '../metadata/RatedDifficulty.tsx';
+import { api, ApiError, queryClient } from '../online/api.ts';
 import { Link, useNavigate } from '@tanstack/react-router';
 import toast from 'react-hot-toast';
-import { cn, pluralize, safeClipboard, toRelativeDate } from '../uiHelper';
-import CommentSidebar from '../online/CommentSidebar';
-import { SolutionHandling } from '../router/linkLoaderValidator';
+import { cn, pluralize, safeClipboard, toRelativeDate } from '../uiHelper.ts';
+import { SolutionHandling } from '../router/linkLoaderValidator.tsx';
 
 // million-ignore
 const SignInWithProgress = memo(function SignInWithProgress() {
@@ -361,11 +360,10 @@ const UnlistedToggle = memo(function UnlistedToggle({
 });
 
 // million-ignore
-export default memo(function EditorOnlineTab() {
+export default memo(function EditorOnlinePanel() {
   const { isOnline, me } = useOnline();
   const id = useAtomValue(onlinePuzzleIdAtom);
   const { data, isPending } = useQuery(puzzleEditQueryOptions(id));
-  const [commentsOpen, setCommentsOpen] = useState(false);
 
   if (!!id && isPending) {
     return <Loading />;
@@ -373,7 +371,7 @@ export default memo(function EditorOnlineTab() {
 
   if (!id || !data) {
     return (
-      <div className="flex flex-col gap-4 p-8 bg-base-100 text-base-content rounded-2xl shadow-lg w-full max-w-[800px] animate-online-tab">
+      <div className="flex flex-col gap-4 p-8 bg-base-200 text-base-content rounded-2xl shadow-sm w-full animate-online-tab">
         <p className="text-2xl font-bold">Editing locally</p>
         {!isOnline ? (
           <p>Go online to upload your puzzle and access it from anywhere.</p>
@@ -402,7 +400,7 @@ export default memo(function EditorOnlineTab() {
 
   if (data.status === ResourceStatus.Private) {
     return (
-      <div className="flex flex-col gap-4 p-8 bg-base-100 text-base-content rounded-2xl shadow-lg w-full max-w-[800px] animate-online-tab">
+      <div className="flex flex-col gap-4 p-8 bg-base-200 text-base-content rounded-2xl shadow-sm w-full animate-online-tab">
         <p className="text-2xl font-bold">Online information</p>
         <div className="flex gap-2 items-center">
           <div className="badge badge-lg badge-neutral p-4">Private</div>
@@ -429,19 +427,21 @@ export default memo(function EditorOnlineTab() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-8 bg-base-100 text-base-content rounded-2xl shadow-lg w-full max-w-[800px] animate-online-tab">
+    <div className="flex flex-col gap-4 p-8 bg-base-200 text-base-content rounded-2xl shadow-sm w-full animate-online-tab">
       <p className="text-2xl font-bold">Online information</p>
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center flex-wrap">
         <div className="badge badge-lg badge-info p-4 capitalize">
           {data.status}
         </div>
-        <span className="badge badge-lg p-4 badge-neutral">
-          <FaCheckSquare className="inline-block me-2" />{' '}
-          {pluralize(data.solveCount)`solve``solves`}
-        </span>
-        <span className="badge badge-lg p-4 badge-neutral">
-          <FaHeart className="inline-block me-2" />{' '}
-          {pluralize(data.loveCount)`love``loves`}
+        <span className="flex gap-4 items-center flex-wrap">
+          <span className="badge badge-lg p-4 badge-neutral whitespace-nowrap">
+            <FaCheckSquare className="inline-block me-2" />{' '}
+            {pluralize(data.solveCount)`solve``solves`}
+          </span>
+          <span className="badge badge-lg p-4 badge-neutral whitespace-nowrap">
+            <FaHeart className="inline-block me-2" />{' '}
+            {pluralize(data.loveCount)`love``loves`}
+          </span>
         </span>
       </div>
       <div>
@@ -467,15 +467,6 @@ export default memo(function EditorOnlineTab() {
       >
         Copy solve link
       </button>
-      <div className="divider" />
-      <p className="text-2xl font-bold">Comments</p>
-      <button className="btn w-full" onClick={() => setCommentsOpen(true)}>
-        Open comments
-      </button>
-      <CommentSidebar
-        open={commentsOpen}
-        onClose={() => setCommentsOpen(false)}
-      />
     </div>
   );
 });

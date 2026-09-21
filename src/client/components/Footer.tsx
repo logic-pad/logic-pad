@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 export default memo(function Footer() {
   return (
-    <footer className="footer footer-center bg-base-200/20 text-neutral-content rounded-sm p-4 gap-4 shrink-0 self-stretch">
+    <footer className="footer footer-center bg-base-200 text-base-content rounded-sm p-4 gap-4 shrink-0 self-stretch">
       <aside>
         <p className="font-semibold">
           Logic Pad -{' '}

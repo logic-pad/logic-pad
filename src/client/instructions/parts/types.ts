@@ -1,8 +1,7 @@
 import Instruction from '@logic-pad/core/data/instruction';
 
 export enum PartPlacement {
-  LeftPanel = 'left-panel',
-  LeftBottom = 'left-bottom',
+  SideBar = 'side-bar',
   MainGridOverlay = 'main-grid-overlay',
   GridOverlay = 'grid-overlay',
   Toolbox = 'toolbox',

@@ -33,7 +33,7 @@ export default memo(function MetadataEditor() {
   }, [isOnline, id, me, metadata, setMetadata, setLastSaved, lastSaved]);
 
   return (
-    <div className="bg-base-100 text-base-content rounded-2xl p-4 flex flex-col grow h-full gap-2 shadow-sm tour-metadata-editor">
+    <div className="bg-base-200 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow-sm tour-metadata-editor">
       <fieldset className="fieldset">
         <div className="label justify-between">
           <span className="label-text">Title</span>
@@ -105,7 +105,7 @@ export default memo(function MetadataEditor() {
           </span>
         </div>
         <textarea
-          className="textarea h-full resize-none"
+          className="textarea h-60 w-full resize-none"
           placeholder="Optional text"
           maxLength={500}
           value={metadata.description}

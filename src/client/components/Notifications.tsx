@@ -278,7 +278,7 @@ export default memo(function Notifications() {
   return (
     <div className="relative w-fit h-fit">
       <button
-        className="btn btn-square btn-ghost max-md:btn-sm text-neutral-content"
+        className="btn btn-square btn-ghost max-md:btn-sm text-base-content"
         onClick={() => setExpand(v => !v)}
         aria-label={
           expand

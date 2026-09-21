@@ -12,11 +12,7 @@ export default memo(function ThemeSwitcher() {
 
   return (
     <div className="dropdown">
-      <div
-        tabIndex={0}
-        role="button"
-        className="btn btn-ghost text-neutral-content"
-      >
+      <div tabIndex={0} role="button" className="btn btn-ghost">
         Theme
         <FiChevronDown />
       </div>

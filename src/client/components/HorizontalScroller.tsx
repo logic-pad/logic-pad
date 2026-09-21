@@ -42,7 +42,7 @@ export default memo(function HorizontalScroller({
       </Link>
 
       {description && (
-        <Markdown className="ms-4 prose-sm prose-h1:text-lg text-neutral-content/80">
+        <Markdown className="ms-4 prose-sm prose-h1:text-lg text-base-content/80">
           {description}
         </Markdown>
       )}

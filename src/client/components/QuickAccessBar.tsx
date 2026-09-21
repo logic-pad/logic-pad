@@ -23,10 +23,7 @@ export default memo(function QuickAccessBar({
       </Suspense>
       <Settings />
       <div {...tip('Support Logic Pad', 'bottom')}>
-        <Link
-          to="/support"
-          className="btn btn-square btn-ghost max-md:btn-sm text-neutral-content"
-        >
+        <Link to="/support" className="btn btn-square btn-ghost max-md:btn-sm">
           <FaHeart size={22} />
         </Link>
       </div>

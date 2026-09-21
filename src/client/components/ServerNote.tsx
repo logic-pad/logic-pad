@@ -19,7 +19,7 @@ export default memo(function Changelog() {
         getHighlightColor(data.note.highlight)
       )}
     >
-      <Markdown className="prose-sm prose-h1:text-lg text-neutral-content text-wrap whitespace-normal">
+      <Markdown className="prose-sm prose-h1:text-lg text-base-content text-wrap whitespace-normal">
         {data.note.content}
       </Markdown>
     </div>

@@ -172,6 +172,6 @@ export default memo(function PerfectionControlsPart({
 });
 
 export const spec: PartSpec = {
-  placement: PartPlacement.LeftBottom,
+  placement: PartPlacement.SideBar,
   instructionId: perfectionInstance.id,
 };

@@ -38,6 +38,9 @@ const options: editor.IStandaloneEditorConstructionOptions = {
   wrappingStrategy: 'advanced',
   wordWrap: 'on',
   formatOnType: true,
+  // The container can be resized after mount (tab switches, responsive
+  // breakpoints), so let Monaco observe and follow its container's size.
+  automaticLayout: true,
 };
 
 export interface SourceCodeEditorProps {
@@ -163,35 +166,34 @@ export default memo(function SourceCodeEditor({
   };
 
   return (
-    <>
-      <div className="basis-0 grow shrink min-h-[70vh] xl:min-h-[40vh] self-stretch dropdown dropdown-right text-nowrap overflow-visible">
-        <div className="inline-block w-full h-full lg:focus-within:w-[max(100%-400px-1rem,min(800px,50vw))] transition-[width] duration-75">
-          <Editor
-            loading={loading}
-            theme={SUPPORTED_THEMES.find(([t]) => t === theme)?.[1]}
-            width="100%"
-            height="100%"
-            className="focus-within:z-30 rounded-box"
-            defaultLanguage="javascript"
-            defaultValue={(() => {
-              let saved = window.localStorage.getItem('sourceCode');
-              if (!saved || saved.length === 0) saved = defaultCode;
-              else if (/^return\s+/.test(saved.trim())) {
-                saved =
-                  '/** @type Puzzle */\n(' +
-                  saved
-                    .trim()
-                    .replace(/^return\s+/, '')
-                    .replace(/;\s*$/, '') +
-                  ')';
-              }
-              return saved;
-            })()}
-            options={options}
-            onMount={handleEditorDidMount}
-          />
-        </div>
-        <div className="dropdown-content inline-block relative! inset-0! shadow-xl bg-base-300 text-base-content rounded-box z-10 ml-4 p-4 w-[400px] h-full overflow-y-auto">
+    <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-2 p-2">
+      <div className="h-[60vh] lg:h-auto lg:flex-1 lg:min-h-0 rounded-box overflow-hidden">
+        <Editor
+          loading={loading}
+          theme={SUPPORTED_THEMES.find(([t]) => t === theme)?.[1]}
+          width="100%"
+          height="100%"
+          defaultLanguage="javascript"
+          defaultValue={(() => {
+            let saved = window.localStorage.getItem('sourceCode');
+            if (!saved || saved.length === 0) saved = defaultCode;
+            else if (/^return\s+/.test(saved.trim())) {
+              saved =
+                '/** @type Puzzle */\n(' +
+                saved
+                  .trim()
+                  .replace(/^return\s+/, '')
+                  .replace(/;\s*$/, '') +
+                ')';
+            }
+            return saved;
+          })()}
+          options={options}
+          onMount={handleEditorDidMount}
+        />
+      </div>
+      <div className="lg:w-[400px] shrink-0 flex flex-col gap-4 min-h-0">
+        <div className="hidden lg:block flex-1 min-h-0 overflow-y-auto bg-base-200 text-base-content rounded-box p-4 shadow-sm">
           <div className="flex flex-col flex-nowrap gap-2">
             <h3 className="text-lg text-base-content">Quick reference</h3>
             {examples.map(
@@ -204,22 +206,22 @@ export default memo(function SourceCodeEditor({
             )}
           </div>
         </div>
-      </div>
-      <div
-        className="w-full"
-        {...tip(
-          'Source code is NOT saved in the puzzle link! Remember to back up your code.',
-          'right'
-        )}
-      >
-        <button
-          type="button"
-          className="btn btn-primary w-full"
-          onClick={parseJs}
+        <div
+          className="w-full shrink-0"
+          {...tip(
+            'Source code is NOT saved in the puzzle link! Remember to back up your code.',
+            'top'
+          )}
         >
-          Load puzzle
-        </button>
+          <button
+            type="button"
+            className="btn btn-primary w-full"
+            onClick={parseJs}
+          >
+            Load puzzle
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 });

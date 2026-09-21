@@ -30,7 +30,7 @@ async function fetchDevPuzzles() {
   if (devPuzzles) return devPuzzles;
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // eslint-disable-next-line import-x/no-unresolved
+
   const response = (await import('../../../references/dev_puzzles.json')) as {
     default: {
       pid: number;

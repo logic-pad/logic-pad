@@ -8,7 +8,7 @@ import SolveModeButton from '../components/quickActions/SolveModeButton';
 import { instance as foresightInstance } from '@logic-pad/core/data/rules/foresightRule';
 import PerfectionRule from '@logic-pad/core/data/rules/perfectionRule';
 import { useRouteProtection } from '../router/useRouteProtection';
-import CollectionSidebar from '../online/CollectionSidebar';
+import CollectionSidebar from '../online/CollectionButton';
 import { PuzzleScope } from '../state/scopes/PuzzleScope';
 import { SolvePathScope } from '../state/scopes/SolvePathScope';
 

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useSettings } from '../state/settings.ts';
-import { EditorTabKey } from '../editor/EditorSideTabs';
+import { EditorTab } from '../editor/EditorTopBar';
 import { animate } from 'animejs';
 import { useAtomValue } from 'jotai';
 import { embedFeaturesAtom, isTopLevelAtom } from '../state/embed.ts';
@@ -12,20 +12,15 @@ interface TourStep {
   afterStep?: () => void;
 }
 
-function toggleEditorSideBar(expanded: boolean) {
-  const sideBarCheckbox = document.getElementsByClassName(
-    'three-pane-checkbox'
-  ) as HTMLCollectionOf<HTMLInputElement>;
-  for (const checkbox of sideBarCheckbox) {
-    checkbox.checked = expanded;
-  }
-}
-
 export interface EditorTourProps {
-  setEditorTab: (tab: EditorTabKey) => void;
+  setEditorTab: (tab: EditorTab) => void;
+  setToolboxCollapsed: (collapsed: boolean) => void;
 }
 
-export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
+export default memo(function EditorTour({
+  setEditorTab,
+  setToolboxCollapsed,
+}: EditorTourProps) {
   const isTopLevel = useAtomValue(isTopLevelAtom);
   const features = useAtomValue(embedFeaturesAtom);
   const [runEditorTour, setRunEditorTour] = useSettings('runEditorTour');
@@ -37,14 +32,14 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
         content: (
           <>
             <div>
-              The Tools tab contains everything you need to modify the grid.
+              The Edit tab contains everything you need to modify the grid.
             </div>
             <div>You can start by changing the size of the grid.</div>
           </>
         ),
         beforeStep: () => {
-          setEditorTab('Tools');
-          toggleEditorSideBar(true);
+          setEditorTab('Edit');
+          setToolboxCollapsed(false);
         },
       },
       {
@@ -62,8 +57,8 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          setEditorTab('Tools');
-          toggleEditorSideBar(true);
+          setEditorTab('Edit');
+          setToolboxCollapsed(false);
         },
       },
       {
@@ -78,8 +73,8 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          setEditorTab('Tools');
-          toggleEditorSideBar(false);
+          setEditorTab('Edit');
+          setToolboxCollapsed(true);
         },
       },
       {
@@ -94,7 +89,8 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          toggleEditorSideBar(false);
+          setEditorTab('Edit');
+          setToolboxCollapsed(true);
         },
       },
       {
@@ -109,7 +105,6 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
         ),
         beforeStep: () => {
           setEditorTab('Info');
-          toggleEditorSideBar(true);
         },
       },
       {
@@ -123,8 +118,8 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          setEditorTab('Tools');
-          toggleEditorSideBar(false);
+          setEditorTab('Edit');
+          setToolboxCollapsed(true);
         },
       },
       {
@@ -142,7 +137,8 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          toggleEditorSideBar(false);
+          setEditorTab('Edit');
+          setToolboxCollapsed(true);
         },
       },
       {
@@ -160,11 +156,12 @@ export default memo(function EditorTour({ setEditorTab }: EditorTourProps) {
           </>
         ),
         beforeStep: () => {
-          toggleEditorSideBar(false);
+          setEditorTab('Edit');
+          setToolboxCollapsed(true);
         },
       },
     ],
-    [setEditorTab]
+    [setEditorTab, setToolboxCollapsed]
   );
   useEffect(() => {
     setCurrentStep(null);

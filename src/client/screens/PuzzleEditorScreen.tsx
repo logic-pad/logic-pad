@@ -1,40 +1,37 @@
-import InstructionList from '../instructions/InstructionList';
-import { EditorEditControls } from '../components/EditControls';
-import InstructionSearch from '../instructions/InstructionSearch';
-import React, { memo, useRef, useState } from 'react';
-import ThreePaneLayout from '../components/ThreePaneLayout';
-import TouchControls from '../components/TouchControls';
-import ConfigPopup from '../configs/ConfigPopup';
-import EditorSideTabs, { EditorTabKey } from '../editor/EditorSideTabs';
-import PuzzleChecklist from '../editor/PuzzleChecklist';
-import InstructionPartOutlet from '../instructions/InstructionPartOutlet';
-import { PartPlacement } from '../instructions/parts/types';
-import ModeVariantLoader from '../router/ModeVariantLoader';
+import React, { memo, Suspense, lazy, useState } from 'react';
 import { Mode } from '@logic-pad/core/data/primitives';
-import EditorCenterTabs from '../editor/EditorCenterTabs';
-import PreviewModal, { PreviewRef } from '../editor/PreviewModal';
-import PuzzleSaveControl from '../components/PuzzleSaveControl';
-import { FaEye } from 'react-icons/fa';
-import { animate } from 'animejs';
+import ModeVariantLoader from '../router/ModeVariantLoader';
+import EditorTopBar, { EditorTab } from '../editor/EditorTopBar';
+import EditorEditTab from '../editor/EditorEditTab';
+import EditorInfoTab from '../editor/EditorInfoTab';
+import Loading from '../components/Loading';
 import EditorTour from '../components/EditorTour';
-import { getGridAtom, metadataAtom } from '../state/grid.ts';
 import { useAtomValue } from 'jotai';
 import { embedFeaturesAtom } from '../state/embed.ts';
 import { EditorScope } from '../state/scopes/EditorScope.tsx';
+import { animate } from 'animejs';
+
+const SourceCodeEditor = lazy(() => import('../editor/SourceCodeEditor'));
 
 export interface PuzzleEditorScreenProps {
   children?: React.ReactNode;
 }
 
+/**
+ * The puzzle editor. A screen-width top bar below the app nav hosts basic
+ * puzzle info, cloud save controls and the tab switcher, while the three
+ * full-screen tabs (Info / Edit / Code) fill the remaining space.
+ */
 export default memo(function PuzzleEditorScreen({
   children,
 }: PuzzleEditorScreenProps) {
-  const grid = useAtomValue(getGridAtom);
-  const metadata = useAtomValue(metadataAtom);
   const features = useAtomValue(embedFeaturesAtom);
-  const [editorTab, setEditorTab] = useState<EditorTabKey>('Tools');
-  const previewRef = useRef<PreviewRef>(null);
-  const switchToTab = (tab: EditorTabKey) => {
+  const [editorTab, setEditorTab] = useState<EditorTab>('Edit');
+  const [toolboxCollapsed, setToolboxCollapsed] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < 1280
+  );
+
+  const switchToTab = (tab: EditorTab) => {
     if (editorTab !== tab) {
       setEditorTab(tab);
     } else if (tab === 'Info') {
@@ -60,68 +57,32 @@ export default memo(function PuzzleEditorScreen({
       });
     }
   };
+
   return (
     <EditorScope>
-      <ThreePaneLayout
-        collapsible={true}
-        left={
-          <>
-            <EditorSideTabs
-              editorTab={editorTab}
-              onEditorTabChange={setEditorTab}
-            />
-            <div className="shrink-0 flex-col gap-1 hidden has-[*]:flex">
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.LeftPanel}
-              />
-              <InstructionPartOutlet
-                grid={grid}
-                placement={PartPlacement.LeftBottom}
-              />
-            </div>
-            <TouchControls />
-            <EditorEditControls />
-            <ModeVariantLoader mode={Mode.Create} />
-          </>
-        }
-        center={
-          <EditorCenterTabs
-            editorMode={editorTab === 'Info' ? 'info' : 'grid'}
+      <div className="flex flex-col flex-1 min-h-0 self-stretch pb-28 lg:pb-0">
+        <EditorTopBar tab={editorTab} onTabChange={switchToTab}>
+          {children}
+        </EditorTopBar>
+        {editorTab === 'Info' && features.metadata ? (
+          <EditorInfoTab onChecklistAction={() => switchToTab('Info')} />
+        ) : editorTab === 'Code' ? (
+          <Suspense fallback={<Loading />}>
+            <SourceCodeEditor loading={<Loading />} />
+          </Suspense>
+        ) : (
+          <EditorEditTab
+            toolboxCollapsed={toolboxCollapsed}
+            onToggleToolbox={() => setToolboxCollapsed(c => !c)}
+            onGoToInfoTab={() => switchToTab('Info')}
           />
-        }
-        right={
-          <>
-            <div className="h-full flex flex-col items-center justify-center gap-4">
-              {features.instructions && (
-                <InstructionSearch className="tour-instruction-search z-10" />
-              )}
-              <InstructionList editable={features.instructions} />
-              <ConfigPopup key="config-popup" />
-            </div>
-            <div className="pb-2 w-full flex flex-col self-center items-stretch justify-end gap-2 shrink-0 max-w-[320px]">
-              {children}
-              {features.preview && (
-                <>
-                  <button
-                    className="btn rounded-2xl tour-preview"
-                    onClick={() => previewRef.current?.open(grid, metadata)}
-                  >
-                    <FaEye size={18} />
-                    Preview puzzle
-                  </button>
-                  <PreviewModal ref={previewRef} />
-                </>
-              )}
-              <PuzzleChecklist onTabSwitch={() => switchToTab('Info')} />
-              {features.saveControl && (
-                <PuzzleSaveControl onTabSwitch={() => switchToTab('Info')} />
-              )}
-            </div>
-          </>
-        }
+        )}
+        <ModeVariantLoader mode={Mode.Create} />
+      </div>
+      <EditorTour
+        setEditorTab={switchToTab}
+        setToolboxCollapsed={setToolboxCollapsed}
       />
-      <EditorTour setEditorTab={switchToTab} />
     </EditorScope>
   );
 });

@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 export default memo(function Error({ error, info }: ErrorComponentProps) {
   return (
-    <div className="flex flex-col items-center justify-center self-stretch flex-1 bg-neutral gap-4">
+    <div className="flex flex-col items-center justify-center self-stretch flex-1 gap-4">
       <meta name="robots" content="noindex" />
       <h1 className="text-4xl">Unexpected error</h1>
       <div>

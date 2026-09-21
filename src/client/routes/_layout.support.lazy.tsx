@@ -107,7 +107,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
         )}
 
         <section className="self-stretch">
-          <div className="rounded-box p-8 md:p-10 border border-neutral-content/15 text-neutral-content">
+          <div className="rounded-box p-8 md:p-10 border border-base-content/15 text-base-content">
             <div className="flex flex-col items-center text-center gap-4">
               <blockquote className="text-lg italic leading-relaxed max-w-4xl">
                 Logic Pad is a project born out of love for the game{' '}
@@ -131,10 +131,10 @@ export const Route = createLazyFileRoute('/_layout/support')({
         </section>
 
         <div className="self-stretch sticky top-2 z-10">
-          <div className="bg-neutral/70 text-neutral-content backdrop-blur rounded-box p-3 border border-neutral-content/20">
+          <div className="bg-base-100/70 text-base-content backdrop-blur rounded-box p-3 border border-base-content/20">
             <div className="flex flex-wrap justify-center gap-2">
               <a
-                className="btn btn-sm btn-ghost text-neutral-content"
+                className="btn btn-sm btn-ghost text-base-content"
                 onClick={() => {
                   document
                     .getElementById('benefits')
@@ -144,7 +144,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 Benefits
               </a>
               <a
-                className="btn btn-sm btn-ghost text-neutral-content"
+                className="btn btn-sm btn-ghost text-base-content"
                 onClick={() => {
                   document
                     .getElementById('funding')
@@ -154,7 +154,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 Funding
               </a>
               <a
-                className="btn btn-sm btn-ghost text-neutral-content"
+                className="btn btn-sm btn-ghost text-base-content"
                 onClick={() => {
                   document
                     .getElementById('how-it-works')
@@ -164,7 +164,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 How It Works
               </a>
               <a
-                className="btn btn-sm btn-ghost text-neutral-content"
+                className="btn btn-sm btn-ghost text-base-content"
                 onClick={() => {
                   document
                     .getElementById('pricing')
@@ -175,7 +175,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
               </a>
               {me && (
                 <a
-                  className="btn btn-sm btn-ghost text-neutral-content"
+                  className="btn btn-sm btn-ghost text-base-content"
                   onClick={() => {
                     document
                       .getElementById('payments')
@@ -195,18 +195,18 @@ export const Route = createLazyFileRoute('/_layout/support')({
               Supporter Benefits
             </h2>
             <div className="space-y-4 self-stretch">
-              <article className="rounded-box bg-neutral/35 p-4 md:p-5">
+              <article className="rounded-box bg-base-200 p-4 md:p-5">
                 <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
                   <div className="flex-1">
                     <h3 className="font-semibold text-xl mt-2">
                       Cloud solve progress across devices
                     </h3>
-                    <p className="text-neutral-content/80 mt-2">
+                    <p className="text-base-content/80 mt-2">
                       Save your solve progress in the cloud and access it from
                       any device.
                     </p>
                   </div>
-                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-neutral-content/20 bg-neutral/20 flex items-center justify-center text-sm text-neutral-content/60 pointer-events-none">
+                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
                     <div className="flex w-72 p-2 ps-4 rounded-2xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between">
                       <span className="flex-auto">
                         Last saved 10 seconds ago
@@ -228,17 +228,17 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 </div>
               </article>
 
-              <article className="rounded-box bg-neutral/25 p-4 md:p-5">
+              <article className="rounded-box bg-base-200/70 p-4 md:p-5">
                 <div className="flex flex-col md:flex-row-reverse gap-4 items-stretch md:items-center">
                   <div className="flex-1">
                     <h3 className="font-semibold text-xl mt-2">
                       Search by solve status
                     </h3>
-                    <p className="text-neutral-content/80 mt-2">
+                    <p className="text-base-content/80 mt-2">
                       Filter by solve status when searching for puzzles.
                     </p>
                   </div>
-                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-neutral-content/20 bg-neutral/20 flex items-center justify-center text-sm text-neutral-content/60 pointer-events-none">
+                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
                     <div className="grid grid-cols-[minmax(4rem,auto)_minmax(0,1fr)] items-center gap-y-1">
                       <div className="text-sm">Solve</div>
                       <div className="flex gap-2 flex-wrap">
@@ -260,18 +260,18 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 </div>
               </article>
 
-              <article className="rounded-box bg-neutral/35 p-4 md:p-5">
+              <article className="rounded-box bg-base-200 p-4 md:p-5">
                 <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
                   <div className="flex-1">
                     <h3 className="font-semibold text-xl mt-2">
                       Unlisted puzzle and collection publishing
                     </h3>
-                    <p className="text-neutral-content/80 mt-2">
+                    <p className="text-base-content/80 mt-2">
                       Publish unlisted puzzles and collections and keep them
                       even if your supporter status expires.
                     </p>
                   </div>
-                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-neutral-content/20 bg-neutral/20 flex items-center justify-center text-sm text-neutral-content/60 pointer-events-none">
+                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
                     <fieldset className="fieldset w-80">
                       <label className="label cursor-pointer gap-2">
                         <div className="flex flex-col grow">
@@ -295,18 +295,18 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 </div>
               </article>
 
-              <article className="rounded-box bg-neutral/25 p-4 md:p-5">
+              <article className="rounded-box bg-base-200/70 p-4 md:p-5">
                 <div className="flex flex-col md:flex-row-reverse gap-4 items-stretch md:items-center">
                   <div className="flex-1">
                     <h3 className="font-semibold text-xl mt-2">
                       Unlimited private puzzle storage
                     </h3>
-                    <p className="text-neutral-content/80 mt-2">
+                    <p className="text-base-content/80 mt-2">
                       Store unlimited private puzzles instead of a maximum of
                       50.
                     </p>
                   </div>
-                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-neutral-content/20 bg-neutral/20 flex items-center justify-center text-sm text-neutral-content/60 pointer-events-none">
+                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
                     <div className="relative w-76 h-20 flex gap-4 items-center px-4 py-2 rounded-xl shadow-md text-base-content bg-base-300/50">
                       <TbLayoutGrid size={36} className="shrink-0" />
                       <div className="flex flex-col gap-1" aria-hidden="true">
@@ -324,17 +324,17 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 </div>
               </article>
 
-              <article className="rounded-box bg-neutral/35 p-4 md:p-5">
+              <article className="rounded-box bg-base-200 p-4 md:p-5">
                 <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
                   <div className="flex-1">
                     <h3 className="font-semibold text-xl mt-2">
                       Animated supporter badge
                     </h3>
-                    <p className="text-neutral-content/80 mt-2">
+                    <p className="text-base-content/80 mt-2">
                       Get an animated supporter badge next to your username.
                     </p>
                   </div>
-                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-neutral-content/20 bg-neutral/20 flex items-center justify-center text-sm text-neutral-content/60 pointer-events-none">
+                  <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
                     <span className="text-3xl">
                       {me?.name ?? 'You'}
                       <span className="relative w-fit h-[0.91em] inline-block text-accent align-baseline ms-[0.3em]">
@@ -350,7 +350,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 self-stretch">
           <section id="funding" className="h-full scroll-m-24">
-            <div className="rounded-box bg-neutral/30 h-full p-6">
+            <div className="rounded-box bg-base-200 h-full p-6">
               <div>
                 <h2 className="text-2xl text-accent font-semibold mb-4">
                   Where Your Support Goes
@@ -360,7 +360,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                     <div className="badge badge-accent">1</div>
                     <div>
                       <h3 className="font-semibold text-lg">Server costs</h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         Your support helps cover server costs so that Logic Pad
                         can be completely ad-free for everyone.
                       </p>
@@ -372,7 +372,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         Scaling infrastructure
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         Your support helps fund improvements to the site and new
                         features that require more server resources.
                       </p>
@@ -384,7 +384,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         Reward for creators
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         In the future, most of the supporter revenue will go
                         towards rewarding puzzle creators for their high-quality
                         puzzles.
@@ -397,7 +397,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
           </section>
 
           <section id="how-it-works" className="h-full scroll-m-24">
-            <div className="rounded-box bg-neutral/30 h-full p-6">
+            <div className="rounded-box bg-base-200 h-full p-6">
               <div>
                 <h2 className="text-2xl text-accent font-semibold mb-4">
                   How Supporter Status Works
@@ -409,7 +409,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         One-time Purchase
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         Each purchase is a non-recurring payment that adds time
                         to your supporter duration.
                       </p>
@@ -421,7 +421,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         Stacks with Existing Time
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         New purchases extend your current supporter period, so
                         you never lose time.
                       </p>
@@ -433,7 +433,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         Expiration Notifications
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         You&apos;ll receive in-site notifications when your
                         supporter status is about to expire.
                       </p>
@@ -445,7 +445,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                       <h3 className="font-semibold text-lg">
                         Content Retention
                       </h3>
-                      <p className="text-neutral-content/80">
+                      <p className="text-base-content/80">
                         Contents created with supporter benefits are kept even
                         if your supporter status expires, so your creations are
                         always safe.
@@ -478,7 +478,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                 supporterPrices.map(price => (
                   <div
                     key={price.priceId}
-                    className="rounded-box bg-base-100/20 shadow border border-neutral-content/15 hover:bg-base-100/30 hover:shadow-lg w-72 transition-all"
+                    className="rounded-box bg-base-100/20 shadow border border-base-content/15 hover:bg-base-100/30 hover:shadow-lg w-72 transition-all"
                   >
                     <div className="p-6">
                       <div className="text-center mb-4">
@@ -525,7 +525,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
         ) : (
           <section
             id="pricing"
-            className="self-stretch rounded-box bg-neutral/30 scroll-m-24"
+            className="self-stretch rounded-box bg-base-200 scroll-m-24"
           >
             <div className="p-8 flex flex-col items-center gap-6">
               <h2 className="text-3xl font-semibold text-accent mb-4 text-center">
@@ -552,7 +552,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
         {me && (
           <section
             id="payments"
-            className="p-6 self-stretch flex flex-col items-center rounded-box bg-neutral/30 scroll-m-24"
+            className="p-6 self-stretch flex flex-col items-center rounded-box bg-base-200 scroll-m-24"
           >
             <h2 className="text-3xl font-semibold text-accent mb-6 text-center">
               Payment History

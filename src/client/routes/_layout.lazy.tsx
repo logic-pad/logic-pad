@@ -64,7 +64,7 @@ export const LayoutWithTopNav = memo(function LayoutWithTopNav() {
     <Link
       key="create"
       to="/create"
-      className="text-lg text-neutral-content flex items-center gap-2"
+      className="text-lg text-base-content flex items-center gap-2"
     >
       Create
     </Link>,
@@ -74,7 +74,7 @@ export const LayoutWithTopNav = memo(function LayoutWithTopNav() {
       <Link
         key="search"
         to="/search"
-        className="text-lg text-neutral-content flex items-center gap-2"
+        className="text-lg text-base-content flex items-center gap-2"
       >
         Explore
       </Link>
@@ -83,7 +83,7 @@ export const LayoutWithTopNav = memo(function LayoutWithTopNav() {
       <Link
         key="uploader"
         to="/uploader"
-        className="text-lg text-neutral-content flex items-center gap-2"
+        className="text-lg text-base-content flex items-center gap-2"
       >
         Upload
       </Link>
@@ -119,7 +119,7 @@ export const LayoutWithTopNav = memo(function LayoutWithTopNav() {
           )}
           <Link
             to="/"
-            className="text-xl md:text-3xl text-neutral-content flex items-center gap-2 font-serif"
+            className="text-xl md:text-3xl text-base-content flex items-center gap-2 font-serif"
           >
             <img
               src="/logo.svg"

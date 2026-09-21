@@ -35,6 +35,6 @@ export default memo(function UndercluedPart() {
 });
 
 export const spec: PartSpec = {
-  placement: PartPlacement.LeftPanel,
+  placement: PartPlacement.SideBar,
   instructionId: undercluedInstance.id,
 };

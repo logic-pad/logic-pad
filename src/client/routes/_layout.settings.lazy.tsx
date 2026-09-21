@@ -79,10 +79,8 @@ const ProfileSettings = memo(function ProfileSettings() {
     >
       <fieldset className="fieldset w-full shrink-0">
         <div className="label w-full justify-between items-center">
-          <span className="label-text text-neutral-content text-lg">
-            Username
-          </span>
-          <span className="label-text-alt text-neutral-content">
+          <span className="label-text text-base-content text-lg">Username</span>
+          <span className="label-text-alt text-base-content">
             {username.length}/128
           </span>
         </div>
@@ -97,10 +95,10 @@ const ProfileSettings = memo(function ProfileSettings() {
       </fieldset>
       <fieldset className="fieldset w-full shrink-0">
         <div className="label w-full justify-between items-center">
-          <span className="label-text text-neutral-content text-lg">
+          <span className="label-text text-base-content text-lg">
             Description
           </span>
-          <span className="label-text-alt text-neutral-content">
+          <span className="label-text-alt text-base-content">
             {description.length}/500
           </span>
         </div>
@@ -253,12 +251,12 @@ const ChangeEmailControl = memo(function ChangeEmailControl({
     <>
       <fieldset className="fieldset w-full shrink-0">
         <div className="label w-full justify-between items-center">
-          <span className="label-text text-neutral-content text-lg">
+          <span className="label-text text-base-content text-lg">
             Primary email
           </span>
         </div>
         <div className="label">
-          <span className="label-text text-neutral-content/80 whitespace-normal w-min min-w-full">
+          <span className="label-text text-base-content/80 whitespace-normal w-min min-w-full">
             You can create multiple Logic Pad accounts, but each account must
             have a unique primary email. Add a new sign-in method below to use a
             different email.
@@ -321,7 +319,7 @@ const SecuritySettings = memo(function SecuritySettings() {
       ) : (
         <>
           <div className="label w-full justify-between items-center">
-            <span className="label-text text-neutral-content text-lg">
+            <span className="label-text text-base-content text-lg">
               Linked accounts
             </span>
           </div>

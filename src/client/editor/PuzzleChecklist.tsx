@@ -1,4 +1,5 @@
 import React, {
+  ReactNode,
   Suspense,
   lazy,
   memo,
@@ -268,10 +269,18 @@ interface TiedToGrid<T> {
 
 export interface PuzzleChecklistProps {
   onTabSwitch?: () => void;
+  /**
+   * Whether the checklist can be collapsed. Defaults to true. The Info tab
+   * renders the checklist non-collapsible since publishing depends on it.
+   */
+  collapsible?: boolean;
+  interactive?: boolean;
 }
 
 export default memo(function PuzzleChecklist({
   onTabSwitch,
+  collapsible = true,
+  interactive = true,
 }: PuzzleChecklistProps) {
   const features = useAtomValue(embedFeaturesAtom);
   const grid = useAtomValue(getGridAtom);
@@ -326,232 +335,254 @@ export default memo(function PuzzleChecklist({
 
   if (!features.checklist) return null;
 
-  return (
-    <Accordion
-      title={
+  const title = (
+    <>
+      <span>Checklist</span>
+      {checklistComplete ? (
+        <div className="badge badge-success ml-2">Complete</div>
+      ) : (
+        <div className="badge badge-error ml-2">Incomplete</div>
+      )}
+    </>
+  );
+
+  const checklistContent: ReactNode[] = [
+    checklist.items.map(item =>
+      checklistItemMap[item.id as keyof typeof checklistItemMap]?.(item)
+    ),
+  ];
+  if (interactive) {
+    if (solution !== null) {
+      checklistContent.push(
         <>
-          <span>Checklist</span>
-          {checklistComplete ? (
-            <div className="badge badge-success ml-2">Complete</div>
-          ) : (
-            <div className="badge badge-error ml-2">Incomplete</div>
-          )}
-        </>
-      }
-      className="tour-puzzle-checklist"
-    >
-      <div className="flex flex-col gap-2 text-sm">
-        {checklist.items.map(item =>
-          checklistItemMap[item.id as keyof typeof checklistItemMap]?.(item)
-        )}
-        {solution !== null && (
-          <>
+          <ChecklistItem
+            key="solution"
+            type={
+              solution.value !== null && solution.value !== 'empty'
+                ? 'success'
+                : 'error'
+            }
+            tooltip={
+              solution.value === 'empty'
+                ? 'None of the tiles can be filled'
+                : solution.value !== null
+                  ? 'Solution found. Click to view'
+                  : 'This puzzle has no solution'
+            }
+          >
+            <span className="flex-1 text-start">
+              {solution.value === 'empty'
+                ? 'No deducible tiles'
+                : solution.value !== null
+                  ? 'Solution found'
+                  : 'No solution'}
+            </span>
+            {!!solution?.value && solution.value !== 'empty' && (
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => {
+                  setGrid(solution.value as GridData);
+                  setSolution({
+                    grid: solution.value as GridData,
+                    value: solution.value,
+                  });
+                  if (alternate && alternate.value !== 'empty') {
+                    setAlternate({
+                      grid: solution.value as GridData,
+                      value: alternate.value,
+                    });
+                  }
+                }}
+              >
+                View
+              </button>
+            )}
+          </ChecklistItem>
+          {(alternate !== null || !solveRef) && (
             <ChecklistItem
-              key="solution"
+              key="alternate"
               type={
-                solution.value !== null && solution.value !== 'empty'
-                  ? 'success'
-                  : 'error'
+                alternate !== null
+                  ? alternate.value !== null
+                    ? 'info'
+                    : 'success'
+                  : 'none'
               }
               tooltip={
-                solution.value === 'empty'
-                  ? 'None of the tiles can be filled'
-                  : solution.value !== null
-                    ? 'Solution found. Click to view'
-                    : 'This puzzle has no solution'
+                alternate !== null
+                  ? alternate.value === 'empty'
+                    ? 'None of the tiles can be filled'
+                    : alternate.value !== null
+                      ? 'Click to view alternate solution'
+                      : 'The solution is unique'
+                  : 'Alternate solution not reported by solver'
               }
             >
               <span className="flex-1 text-start">
-                {solution.value === 'empty'
-                  ? 'No deducible tiles'
-                  : solution.value !== null
-                    ? 'Solution found'
-                    : 'No solution'}
+                {alternate !== null
+                  ? alternate.value === 'empty'
+                    ? 'No deducible tiles'
+                    : alternate.value !== null
+                      ? 'Solution not unique'
+                      : 'Unique solution'
+                  : 'Alternate unavailable'}
               </span>
-              {!!solution?.value && solution.value !== 'empty' && (
+              {!!alternate?.value && alternate.value !== 'empty' && (
                 <button
                   type="button"
                   className="btn btn-sm"
                   onClick={() => {
-                    setGrid(solution.value as GridData);
-                    setSolution({
-                      grid: solution.value as GridData,
-                      value: solution.value,
-                    });
-                    if (alternate && alternate.value !== 'empty') {
-                      setAlternate({
-                        grid: solution.value as GridData,
-                        value: alternate.value,
+                    setGrid(alternate.value as GridData);
+                    if (solution)
+                      setSolution({
+                        grid: alternate.value as GridData,
+                        value: solution.value,
                       });
-                    }
+                    setAlternate({
+                      grid: alternate.value as GridData,
+                      value: alternate.value,
+                    });
                   }}
                 >
                   View
                 </button>
               )}
             </ChecklistItem>
-            {(alternate !== null || !solveRef) && (
-              <ChecklistItem
-                key="alternate"
-                type={
-                  alternate !== null
-                    ? alternate.value !== null
-                      ? 'info'
-                      : 'success'
-                    : 'none'
-                }
-                tooltip={
-                  alternate !== null
-                    ? alternate.value === 'empty'
-                      ? 'None of the tiles can be filled'
-                      : alternate.value !== null
-                        ? 'Click to view alternate solution'
-                        : 'The solution is unique'
-                    : 'Alternate solution not reported by solver'
-                }
-              >
-                <span className="flex-1 text-start">
-                  {alternate !== null
-                    ? alternate.value === 'empty'
-                      ? 'No deducible tiles'
-                      : alternate.value !== null
-                        ? 'Solution not unique'
-                        : 'Unique solution'
-                    : 'Alternate unavailable'}
-                </span>
-                {!!alternate?.value && alternate.value !== 'empty' && (
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    onClick={() => {
-                      setGrid(alternate.value as GridData);
-                      if (solution)
-                        setSolution({
-                          grid: alternate.value as GridData,
-                          value: solution.value,
-                        });
-                      setAlternate({
-                        grid: alternate.value as GridData,
-                        value: alternate.value,
-                      });
-                    }}
-                  >
-                    View
-                  </button>
-                )}
-              </ChecklistItem>
-            )}
-            {!solveRef && (
-              <button
-                type="button"
-                className="btn btn-sm"
-                onClick={() => {
-                  setSolution(null);
-                  setAlternate(null);
-                }}
-              >
-                Reset solver
-              </button>
-            )}
-          </>
-        )}
-        {solveRef && (
+          )}
+          {!solveRef && (
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => {
+                setSolution(null);
+                setAlternate(null);
+              }}
+            >
+              Reset solver
+            </button>
+          )}
+        </>
+      );
+    }
+    if (solveRef) {
+      checklistContent.push(
+        <ChecklistItem
+          key="solving"
+          type="info"
+          tooltip={
+            solution === null
+              ? 'Solving...'
+              : 'Looking for alternate solutions...'
+          }
+        >
+          <span className="flex-1 text-start">
+            {solution === null ? 'Solving...' : 'Verifying...'}
+          </span>
+          {solver?.supportsCancellation && (
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => {
+                solveRef.abort();
+                setSolveRef(null);
+              }}
+            >
+              Cancel
+            </button>
+          )}
+        </ChecklistItem>
+      );
+    }
+    if (!solveRef && solution === null) {
+      checklistContent.push(
+        <>
           <ChecklistItem
-            key="solving"
-            type="info"
+            key="autoSolvable"
+            type={autoSolvable ? 'success' : 'info'}
             tooltip={
-              solution === null
-                ? 'Solving...'
-                : 'Looking for alternate solutions...'
+              autoSolvable
+                ? 'Can be solved automatically by the solver'
+                : 'Cannot be solved automatically'
             }
           >
-            <span className="flex-1 text-start">
-              {solution === null ? 'Solving...' : 'Verifying...'}
-            </span>
-            {solver?.supportsCancellation && (
-              <button
-                type="button"
-                className="btn btn-sm"
-                onClick={() => {
-                  solveRef.abort();
-                  setSolveRef(null);
-                }}
-              >
-                Cancel
-              </button>
-            )}
+            {autoSolvable ? 'Auto solvable' : 'Not auto solvable'}
           </ChecklistItem>
-        )}
-        {!solveRef && solution === null && (
-          <>
-            <ChecklistItem
-              key="autoSolvable"
-              type={autoSolvable ? 'success' : 'info'}
-              tooltip={
-                autoSolvable
-                  ? 'Can be solved automatically by the solver'
-                  : 'Cannot be solved automatically'
-              }
-            >
-              {autoSolvable ? 'Auto solvable' : 'Not auto solvable'}
-            </ChecklistItem>
-            <Suspense fallback={<Loading />}>
-              <SolverSelector
-                onSolve={async solver => {
-                  const requestId = ++solverRequest.current;
-                  const abortController = new AbortController();
-                  setSolveRef(abortController);
-                  setSolution(null);
-                  setAlternate(null);
-                  try {
-                    let isAlternate = false;
-                    for await (const solution of solver.solve(
-                      grid,
-                      abortController.signal
-                    )) {
-                      if (!isAlternate) {
-                        if (requestId !== solverRequest.current) break;
-                        setSolution({
-                          grid,
-                          value: solution?.resetTiles().colorEquals(solution)
-                            ? 'empty'
-                            : solution,
-                        });
-                        isAlternate = true;
-                      } else {
-                        if (requestId !== solverRequest.current) break;
-                        setAlternate({
-                          grid,
-                          value: solution?.resetTiles().colorEquals(solution)
-                            ? 'empty'
-                            : solution,
-                        });
-                        break;
-                      }
+          <Suspense fallback={<Loading />}>
+            <SolverSelector
+              onSolve={async solver => {
+                const requestId = ++solverRequest.current;
+                const abortController = new AbortController();
+                setSolveRef(abortController);
+                setSolution(null);
+                setAlternate(null);
+                try {
+                  let isAlternate = false;
+                  for await (const solution of solver.solve(
+                    grid,
+                    abortController.signal
+                  )) {
+                    if (!isAlternate) {
+                      if (requestId !== solverRequest.current) break;
+                      setSolution({
+                        grid,
+                        value: solution?.resetTiles().colorEquals(solution)
+                          ? 'empty'
+                          : solution,
+                      });
+                      isAlternate = true;
+                    } else {
+                      if (requestId !== solverRequest.current) break;
+                      setAlternate({
+                        grid,
+                        value: solution?.resetTiles().colorEquals(solution)
+                          ? 'empty'
+                          : solution,
+                      });
+                      break;
                     }
-                  } catch (ex) {
-                    console.error(ex);
-                  } finally {
-                    abortController.abort();
-                    setSolveRef(null);
                   }
-                }}
-              />
-            </Suspense>
-          </>
-        )}
-        <ChecklistHelp
-          checklist={checklist}
-          checklistComplete={checklistComplete}
-        />
-        {checklistComplete && !isLoading && !!id && !!data && (
-          <button className="btn btn-primary" onClick={onTabSwitch}>
-            {data?.status === ResourceStatus.Private
-              ? 'Publish puzzle'
-              : 'Puzzle statistics'}
-          </button>
-        )}
+                } catch (ex) {
+                  console.error(ex);
+                } finally {
+                  abortController.abort();
+                  setSolveRef(null);
+                }
+              }}
+            />
+          </Suspense>
+        </>
+      );
+    }
+    checklistContent.push(
+      <ChecklistHelp
+        checklist={checklist}
+        checklistComplete={checklistComplete}
+      />
+    );
+    if (checklistComplete && !isLoading && !!id && !!data) {
+      checklistContent.push(
+        <button className="btn btn-primary" onClick={onTabSwitch}>
+          {data?.status === ResourceStatus.Private
+            ? 'Publish puzzle'
+            : 'Puzzle statistics'}
+        </button>
+      );
+    }
+  }
+
+  if (!collapsible) {
+    return (
+      <div className="tour-puzzle-checklist bg-base-200 text-base-content rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
+        <div className="font-medium flex items-center">{title}</div>
+        <div className="flex flex-col gap-2 text-sm">{checklistContent}</div>
       </div>
+    );
+  }
+
+  return (
+    <Accordion title={title} className="tour-puzzle-checklist">
+      <div className="flex flex-col gap-2 text-sm">{checklistContent}</div>
     </Accordion>
   );
 });

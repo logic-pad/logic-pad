@@ -53,11 +53,11 @@ export const Route = createFileRoute('/auth')({
     return (
       <div className="flex items-center justify-center w-full h-full min-h-screen">
         <PWAPrompt />
-        <div className="card bg-base-100 card-lg shadow-xs overflow-hidden max-w-full w-[500px] m-4">
-          <div className="bg-base-200 p-4">
+        <div className="card bg-base-100 card-lg overflow-hidden max-w-full w-[500px] m-4 shadow-xl">
+          <div className="bg-base-300 p-4">
             <Link
               to="/"
-              className="text-xl text-neutral-content flex items-center gap-2 font-serif"
+              className="text-xl text-base-content flex items-center gap-2 font-serif"
             >
               <img
                 src="/logo.svg"
@@ -67,7 +67,7 @@ export const Route = createFileRoute('/auth')({
               Logic Pad
             </Link>
           </div>
-          <div className="card-body gap-8">
+          <div className="card-body bg-base-200 gap-8">
             <div>
               <h2 className="card-title font-thin text-3xl">
                 Continue with an account

@@ -1,4 +1,4 @@
-import { memo, useId, useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import {
@@ -14,13 +14,14 @@ import { useOnline } from '../state/online.ts';
 import toast from 'react-hot-toast';
 import CommentEntry from './CommentEntry';
 import CommentTextarea, { CommentTextareaRef } from './CommentTextarea';
-import { IoSend } from 'react-icons/io5';
+import { IoArrowBack, IoSend } from 'react-icons/io5';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import { tip } from '../components/Tooltip.tsx';
+import { cn } from '../uiHelper.ts';
 
-export interface CommentSidebarProps {
-  open: boolean;
-  onClose?: () => void;
+export interface CommentPanelProps {
+  onBack?: () => void;
+  className?: string;
 }
 
 export const commentListQueryOptions = (puzzleId: string) =>
@@ -33,16 +34,19 @@ export const commentListQueryOptions = (puzzleId: string) =>
     ),
   });
 
-export default memo(function CommentSidebar({
-  open,
-  onClose,
-}: CommentSidebarProps) {
-  const drawerId = useId();
+/**
+ * Generic comment list for a puzzle. Designed to fill its parent container,
+ * e.g. the left sidebar of the solve screen or a column in the editor.
+ */
+export default memo(function CommentPanel({
+  onBack,
+  className,
+}: CommentPanelProps) {
   const { me } = useOnline();
   const id = useAtomValue(onlinePuzzleIdAtom);
   const commentList = useInfiniteQuery({
     ...commentListQueryOptions(id!),
-    enabled: !!id && !!me && open,
+    enabled: !!id && !!me,
   });
   const addComment = useMutation({
     mutationKey: ['puzzle', id, 'comments', 'add'],
@@ -153,70 +157,63 @@ export default memo(function CommentSidebar({
   if (!id || !me) return null;
 
   return (
-    <div className="drawer drawer-end h-0 w-0">
-      <input
-        id={`comment-sidebar-${drawerId}`}
-        type="checkbox"
-        className="drawer-toggle"
-        checked={open}
-        readOnly
-      />
-      <div className="drawer-side overflow-x-visible! overflow-y-visible! z-50 h-full w-full">
-        <label
-          htmlFor={`comment-sidebar-${drawerId}`}
-          aria-label="Close sidebar"
-          className="drawer-overlay"
-          onClick={onClose}
-        ></label>
-        <div className="h-full w-full pointer-events-none flex justify-end">
-          {open && (
-            <div className="h-full w-[360px] max-w-full shrink-0 grow-0 flex flex-col items-center pt-4 pb-2 gap-4 bg-neutral text-neutral-content self-stretch pointer-events-auto">
-              <div className="text-accent text-sm uppercase self-start mx-4 shrink-0">
-                Comments
-              </div>
-              {commentList.isPending ? (
-                <Loading />
-              ) : (
-                <div className="self-stretch overflow-y-auto overflow-x-hidden flex-1 ms-4 pr-2 flex flex-col-reverse scrollbar-thin *:shrink-0">
-                  {commentList.data?.pages.flatMap(page =>
-                    page.results.map(comment => (
-                      <CommentEntry
-                        key={comment.id}
-                        comment={comment}
-                        onReply={(name, id) => {
-                          inputRef.current?.prependMention(name, id);
-                          inputRef.current?.focus();
-                        }}
-                      />
-                    ))
-                  )}
-                  {commentList.isFetchingNextPage ? (
-                    <Loading className="h-4 p-4 self-center" />
-                  ) : commentList.hasNextPage ? (
-                    <InfiniteScrollTrigger
-                      onLoadMore={async () => await commentList.fetchNextPage()}
-                      direction="up"
-                      className="btn-sm btn-neutral w-fit self-center"
-                    />
-                  ) : null}
-                </div>
-              )}
-              <div className="relative flex gap-2 items-center self-stretch mx-2 shrink-0">
-                <CommentTextarea
-                  ref={inputRef}
-                  onPostComment={text => addComment.mutate([id, text])}
-                />
-                <div className="shrink-0" {...tip('Send (enter)', 'left')}>
-                  <button
-                    className="btn btn-ghost btn-square btn-sm"
-                    onClick={() => inputRef.current?.sendComment()}
-                  >
-                    <IoSend />
-                  </button>
-                </div>
-              </div>
-            </div>
+    <div
+      className={cn(
+        'h-full w-full flex flex-col items-center gap-4 bg-base-100 text-base-content',
+        className
+      )}
+    >
+      <div className="flex items-center gap-2 self-stretch shrink-0">
+        {onBack && (
+          <button
+            className="btn btn-ghost btn-sm btn-square"
+            onClick={onBack}
+            aria-label="Back"
+          >
+            <IoArrowBack size={20} />
+          </button>
+        )}
+        <div className="text-accent text-sm uppercase">Comments</div>
+      </div>
+      {commentList.isPending ? (
+        <Loading />
+      ) : (
+        <div className="self-stretch overflow-y-auto overflow-x-hidden flex-1 pr-2 flex flex-col-reverse scrollbar-thin *:shrink-0">
+          {commentList.data?.pages.flatMap(page =>
+            page.results.map(comment => (
+              <CommentEntry
+                key={comment.id}
+                comment={comment}
+                onReply={(name, id) => {
+                  inputRef.current?.prependMention(name, id);
+                  inputRef.current?.focus();
+                }}
+              />
+            ))
           )}
+          {commentList.isFetchingNextPage ? (
+            <Loading className="h-4 p-4 self-center" />
+          ) : commentList.hasNextPage ? (
+            <InfiniteScrollTrigger
+              onLoadMore={async () => await commentList.fetchNextPage()}
+              direction="up"
+              className="btn-sm w-fit self-center"
+            />
+          ) : null}
+        </div>
+      )}
+      <div className="relative flex gap-2 items-center self-stretch shrink-0">
+        <CommentTextarea
+          ref={inputRef}
+          onPostComment={text => addComment.mutate([id, text])}
+        />
+        <div className="shrink-0" {...tip('Send (enter)', 'left')}>
+          <button
+            className="btn btn-ghost btn-square btn-sm"
+            onClick={() => inputRef.current?.sendComment()}
+          >
+            <IoSend />
+          </button>
         </div>
       </div>
     </div>

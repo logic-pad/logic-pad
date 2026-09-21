@@ -6,7 +6,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import useOnlineLinkLoader from '../router/onlineLinkLoader';
 import { puzzleSolveQueryOptions } from './_layout.solve.$puzzleId';
 import { useRouteProtection } from '../router/useRouteProtection';
-import CollectionSidebar from '../online/CollectionSidebar';
+import CollectionSidebar from '../online/CollectionButton';
 import { PuzzleScope } from '../state/scopes/PuzzleScope';
 
 export const Route = createLazyFileRoute('/_layout/solve/$puzzleId')({

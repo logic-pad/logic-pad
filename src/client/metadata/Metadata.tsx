@@ -23,7 +23,7 @@ export default memo(function Metadata({
   const puzzle = useAtomValue(onlinePuzzleAtom);
 
   return (
-    <section className="flex flex-col gap-4 text-neutral-content">
+    <section className="flex flex-col gap-4">
       <div
         className="w-fit"
         {...tip(
