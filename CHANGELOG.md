@@ -1,3 +1,19 @@
+# 24/9/2026
+
+**PREVIEW BRANCH**
+
+- Fixed several spacing and z-order issues
+- Preset tools are now shown in collapsed toolbar
+- The editor toolbar is now sticky on scroll
+- Moved toolbar collapse button to the left
+
+# 21/9/2026
+
+**PREVIEW BRANCH**
+
+- Reworked solve and edit UI
+- Internal UI optimizations
+
 # 21/3/2026
 
 - Fixed hollow letters not working with the lying symbols rule
