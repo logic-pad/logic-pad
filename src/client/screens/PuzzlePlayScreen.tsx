@@ -23,7 +23,7 @@ import CommentPanel from '../online/CommentPanel';
 import CollectionPanel from '../online/CollectionPanel';
 import { onlinePuzzleAtom } from '../state/onlinePuzzle.ts';
 import Difficulty from '../metadata/Difficulty';
-import { FaChevronUp, FaTimes } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronUp, FaTimes } from 'react-icons/fa';
 import { cn } from '../uiHelper.ts';
 
 const SharePuzzleImage = lazy(
@@ -102,6 +102,28 @@ const MobileTopBar = memo(function MobileTopBar({
   );
 });
 
+const CollapsedSidebarContent = memo(function CollapsedSidebarContent() {
+  const metadata = useAtomValue(metadataAtom);
+  const puzzle = useAtomValue(onlinePuzzleAtom);
+  return (
+    <div className="hidden lg:flex flex-col items-center gap-4 flex-1 min-h-0 w-full overflow-hidden py-2">
+      <span className="[writing-mode:vertical-rl] min-h-0 truncate text-lg font-medium shrink-0">
+        {metadata.title.length === 0 ? 'Untitled Puzzle' : metadata.title}
+      </span>
+      <span className="[writing-mode:vertical-rl] min-h-0 truncate text-sm opacity-70 shrink-0">
+        {puzzle?.creator.name ?? metadata.author}
+      </span>
+      <span className="h-24 w-[21px] relative">
+        <Difficulty
+          value={metadata.difficulty}
+          size="sm"
+          className="absolute w-fit h-fit bottom-full left-0 origin-bottom-left rotate-90"
+        />
+      </span>
+    </div>
+  );
+});
+
 /**
  * Layout shared by all puzzle-playing screens: a generic left sidebar
  * (metadata, solve controls, comments, collection) next to a raised
@@ -109,7 +131,9 @@ const MobileTopBar = memo(function MobileTopBar({
  *
  * Responsiveness is handled with CSS only: the sidebar is a static column on
  * large screens and a full-screen overlay toggled from the top bar on narrow
- * screens, while the puzzle surface stacks vertically.
+ * screens, while the puzzle surface stacks vertically. On large screens the
+ * sidebar can additionally collapse into a narrow vertical strip (collapsed
+ * by default on `lg`, expanded by default on `xl` and up).
  */
 export default memo(function PuzzlePlayScreen({
   controls,
@@ -121,12 +145,20 @@ export default memo(function PuzzlePlayScreen({
   const grid = useAtomValue(getGridAtom);
   const [panel, setPanel] = useState<SolveSidebarPanel>('main');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      !window.matchMedia('(min-width: 1280px)').matches
+  );
   const contextValue = useMemo<SolveScreenContextValue>(
     () => ({
       panel,
       setPanel: p => {
         setPanel(p);
-        if (p !== 'main') setMobileOpen(true);
+        if (p !== 'main') {
+          setMobileOpen(true);
+          setCollapsed(false);
+        }
       },
     }),
     [panel]
@@ -139,10 +171,21 @@ export default memo(function PuzzlePlayScreen({
         <aside
           className={cn(
             'bg-base-100 text-base-content flex-col gap-4 overflow-y-auto',
-            'lg:static lg:flex lg:w-[360px] lg:shrink-0 lg:p-4',
+            collapsed
+              ? 'lg:static lg:flex lg:w-16 lg:shrink-0 lg:p-2 lg:items-center'
+              : 'lg:static lg:flex lg:w-[360px] lg:shrink-0 lg:p-4',
             mobileOpen ? 'fixed inset-0 z-50 flex p-4' : 'hidden'
           )}
         >
+          <button
+            className="btn btn-sm btn-ghost btn-square hidden lg:flex"
+            onClick={() => setCollapsed(c => !c)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <FaChevronLeft
+              className={cn('transition-transform', collapsed && 'rotate-180')}
+            />
+          </button>
           <button
             className="btn btn-ghost self-end lg:hidden"
             onClick={() => setMobileOpen(false)}
@@ -150,9 +193,17 @@ export default memo(function PuzzlePlayScreen({
           >
             <FaTimes size={20} />
           </button>
-          <SidebarContent quickActions={quickActions} topLeft={topLeft}>
-            {children}
-          </SidebarContent>
+          {collapsed && <CollapsedSidebarContent />}
+          <div
+            className={cn(
+              'flex-1 min-h-0 w-full flex flex-col',
+              collapsed && 'lg:hidden'
+            )}
+          >
+            <SidebarContent quickActions={quickActions} topLeft={topLeft}>
+              {children}
+            </SidebarContent>
+          </div>
           <ModeVariantLoader mode={mode} />
         </aside>
         <div className="flex-1 min-w-0 p-2 lg:p-4 lg:pl-0 flex">

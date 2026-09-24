@@ -6,6 +6,7 @@
 - Preset tools are now shown in collapsed toolbar
 - The editor toolbar is now sticky on scroll
 - Moved toolbar collapse button to the left
+- Add collapsible sidebar to solve screen
 
 # 21/9/2026
 
