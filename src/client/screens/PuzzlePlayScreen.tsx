@@ -85,7 +85,7 @@ const MobileTopBar = memo(function MobileTopBar({
   const puzzle = useAtomValue(onlinePuzzleAtom);
   return (
     <button
-      className="lg:hidden sticky top-0 z-30 flex items-center gap-3 bg-base-100 text-base-content shadow-md px-4 py-2 self-stretch"
+      className="lg:hidden sticky top-0 z-30 flex items-center gap-3 bg-base-200 text-base-content shadow-md rounded-xl mx-2 px-4 py-2 self-stretch"
       onClick={onOpen}
     >
       <div className="flex flex-col items-start min-w-0 flex-1">

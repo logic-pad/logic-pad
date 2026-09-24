@@ -44,17 +44,17 @@ export default memo(function EditorInfoTab({
           )}
         </div>
         <div className="min-w-0 lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
-          {id && me ? (
-            <div className="h-[600px] bg-base-200 rounded-xl p-4 shadow-sm">
-              <CommentPanel className="bg-base-200" />
-            </div>
-          ) : (
-            <p className="opacity-70">
-              {id
-                ? 'Sign in to view and post comments.'
-                : 'Comments are available once the puzzle is uploaded.'}
-            </p>
-          )}
+          <div className="bg-base-200 rounded-xl p-4 shadow-sm">
+            {id && me ? (
+              <CommentPanel className="xl:max-h-[calc(100vh-14rem)] bg-base-200" />
+            ) : (
+              <p className="opacity-70">
+                {id
+                  ? 'Sign in to view and post comments.'
+                  : 'Comments are available once the puzzle is uploaded.'}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -67,10 +67,13 @@ export default memo(function ToolboxEditor({
     return (
       <div className="flex lg:flex-col items-center gap-2 p-2 bg-base-100 text-base-content rounded-xl m-2 w-fit">
         <CollapseButton collapsed={true} onToggleCollapse={onToggleCollapse!} />
-        <div className="flex lg:flex-col gap-2 items-center overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto tour-tools">
-          {allTools.map((Tool, i) => (
-            <Tool key={i} />
-          ))}
+        <div className="flex lg:flex-col gap-8 items-center overflow-x-auto overflow-y-hidden lg:overflow-x-hidden lg:overflow-y-auto">
+          <div className="flex lg:flex-col gap-2 items-center tour-tools">
+            {allTools.map((Tool, i) => (
+              <Tool key={i} />
+            ))}
+          </div>
+          <PresetsEditor collapsed={true} />
         </div>
       </div>
     );
@@ -80,11 +83,11 @@ export default memo(function ToolboxEditor({
     <div className="flex-1 overflow-y-auto overflow-x-hidden">
       <div className="bg-base-100 text-base-content rounded-xl p-4 flex flex-col gap-2 shadow-sm">
         <div className="flex items-start justify-between gap-2">
-          <GridSizeEditor grid={grid} setGrid={setGrid} />
           <CollapseButton
             collapsed={false}
             onToggleCollapse={onToggleCollapse!}
           />
+          <GridSizeEditor grid={grid} setGrid={setGrid} />
         </div>
         <span className="divider mt-0 mb-0"></span>
         <div className="flex flex-col gap-2">

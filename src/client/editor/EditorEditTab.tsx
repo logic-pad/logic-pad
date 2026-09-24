@@ -37,61 +37,54 @@ export default memo(function EditorEditTab({
   const previewRef = useRef<PreviewRef>(null);
 
   return (
-    <div className="flex-1 min-h-0 p-2 flex">
-      <PuzzleSurface className="flex-1 lg:min-h-0 flex flex-col lg:flex-row min-h-[calc(100dvh-14rem)]">
-        <div
-          className={cn(
-            'shrink-0 order-1',
-            toolboxCollapsed
-              ? 'overflow-x-auto lg:overflow-y-auto'
-              : 'lg:w-[320px] lg:p-2'
-          )}
-        >
-          <ToolboxEditor
-            collapsed={toolboxCollapsed}
-            onToggleCollapse={onToggleToolbox}
-          />
-        </div>
-        <div className="relative flex-1 min-w-0 flex order-2 min-h-[60vh] lg:min-h-0">
-          <div className="grow shrink overflow-auto self-stretch p-4 lg:p-8">
-            <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit">
-              <EditorMainGrid />
-            </div>
+    <PuzzleSurface className="flex-1 m-2 mb-28 lg:mb-2 h-full lg:min-h-0 flex flex-col lg:flex-row min-h-[calc(100dvh-14rem)]">
+      <div
+        className={cn(
+          'shrink-0 order-1',
+          toolboxCollapsed
+            ? 'overflow-x-auto overflow-y-hidden sticky top-0 z-30 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-18'
+            : 'lg:w-[320px] lg:p-2 overflow-y-auto overflow-x-hidden lg:pb-18'
+        )}
+      >
+        <ToolboxEditor
+          collapsed={toolboxCollapsed}
+          onToggleCollapse={onToggleToolbox}
+        />
+      </div>
+      <div className="relative flex-1 min-w-0 flex order-2 min-h-[60vh] lg:min-h-0">
+        <div className="grow shrink overflow-auto self-stretch p-4 lg:p-8">
+          <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit lg:mb-18">
+            <EditorMainGrid />
           </div>
-          <EditorGridControls />
         </div>
-        <div className="lg:w-[352px] shrink-0 flex flex-col gap-4 p-4 lg:pl-2 lg:overflow-y-auto order-3">
-          {features.instructions && (
-            <InstructionSearch className="tour-instruction-search z-10" />
-          )}
-          <div className="lg:flex-1 lg:min-h-0 flex flex-col items-center justify-center gap-4">
-            <InstructionList
-              editable={features.instructions}
-              className="lg:left-0"
-            />
-            <ConfigPopup key="config-popup" />
-          </div>
-          <InstructionPartOutlet
-            grid={grid}
-            placement={PartPlacement.SideBar}
+        <EditorGridControls />
+      </div>
+      <div className="lg:w-[352px] shrink-0 flex flex-col gap-4 p-4 lg:pl-2 lg:overflow-y-auto order-3">
+        {features.instructions && (
+          <InstructionSearch className="tour-instruction-search z-10" />
+        )}
+        <div className="lg:flex-1 lg:min-h-0 flex flex-col items-center justify-center gap-4">
+          <InstructionList
+            editable={features.instructions}
+            className="lg:left-0"
           />
-          {features.preview && (
-            <>
-              <button
-                className="btn rounded-xl tour-preview shrink-0"
-                onClick={() => previewRef.current?.open(grid, metadata)}
-              >
-                <FaEye size={18} />
-                Preview puzzle
-              </button>
-              <PreviewModal ref={previewRef} />
-            </>
-          )}
-          {features.checklist && (
-            <PuzzleChecklist onTabSwitch={onGoToInfoTab} />
-          )}
+          <ConfigPopup key="config-popup" />
         </div>
-      </PuzzleSurface>
-    </div>
+        <InstructionPartOutlet grid={grid} placement={PartPlacement.SideBar} />
+        {features.preview && (
+          <>
+            <button
+              className="btn rounded-xl tour-preview shrink-0"
+              onClick={() => previewRef.current?.open(grid, metadata)}
+            >
+              <FaEye size={18} />
+              Preview puzzle
+            </button>
+            <PreviewModal ref={previewRef} />
+          </>
+        )}
+        {features.checklist && <PuzzleChecklist onTabSwitch={onGoToInfoTab} />}
+      </div>
+    </PuzzleSurface>
   );
 });

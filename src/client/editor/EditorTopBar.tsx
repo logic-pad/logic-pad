@@ -57,9 +57,9 @@ export default memo(function EditorTopBar({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <header className="bg-base-200 text-base-content shrink-0 flex flex-wrap items-center gap-x-4 gap-y-2 ps-4 py-0 mx-2 rounded-xl shadow-sm">
+    <header className="bg-base-200 text-base-content shrink-0 flex flex-wrap items-center gap-x-4 gap-y-2 py-0 mx-2 rounded-xl shadow-sm">
       <button
-        className="btn btn-sm btn-ghost btn-square lg:hidden"
+        className="btn btn-sm btn-ghost btn-square lg:hidden ps-4"
         onClick={() => setExpanded(e => !e)}
         aria-label={expanded ? 'Collapse puzzle bar' : 'Expand puzzle bar'}
       >
@@ -90,7 +90,7 @@ export default memo(function EditorTopBar({
           expanded ? 'flex w-full' : 'hidden'
         )}
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-1 min-w-0 ps-4">
           <span className="text-lg truncate font-medium">
             {metadata.title.length === 0 ? 'Untitled Puzzle' : metadata.title}
           </span>

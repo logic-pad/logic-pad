@@ -55,7 +55,13 @@ const PresetTool = memo(function PresetTool({
   );
 });
 
-export default memo(function PresetsEditor() {
+export interface PresetsEditorProps {
+  collapsed?: boolean;
+}
+
+export default memo(function PresetsEditor({
+  collapsed = false,
+}: PresetsEditorProps) {
   const toolId = useAtomValue(toolIdAtom);
   const [presets, setPresets] = useAtom(presetsAtom);
 
@@ -84,6 +90,37 @@ export default memo(function PresetsEditor() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  if (collapsed) {
+    return presetTools.length > 0 ? (
+      <div className="flex gap-2 lg:flex-col">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={e => {
+            const { active, over } = e;
+
+            if (over && active.id !== over.id) {
+              setPresets(
+                arrayMove(
+                  presets.slice(),
+                  sortablePresets.map(r => r.id).indexOf(active.id as string),
+                  sortablePresets.map(r => r.id).indexOf(over.id as string)
+                )
+              );
+            }
+          }}
+        >
+          <SortableContext
+            items={sortablePresets}
+            strategy={rectSortingStrategy}
+          >
+            {presetTools}
+          </SortableContext>
+        </DndContext>
+      </div>
+    ) : null;
+  }
 
   return (
     <>

@@ -163,7 +163,7 @@ export default memo(function MainGrid({
       height={grid.height}
       allowAnimation={allowAnimation}
       {...bind()}
-      className="tour-grid mb-12"
+      className="tour-grid"
     >
       {allowSounds && (
         <Suspense fallback={null}>

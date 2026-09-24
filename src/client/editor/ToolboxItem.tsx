@@ -113,8 +113,11 @@ export default memo(function ToolboxItem({
   const [keyboardLayout] = useSettings('keyboardLayout');
 
   useEffect(() => {
-    if (defaultSelected)
-      setTool(id, name, description, gridOverlay, onTileClick);
+    if (defaultSelected && toolId === null)
+      setTimeout(
+        () => setTool(id, name, description, gridOverlay, onTileClick),
+        0
+      );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

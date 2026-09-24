@@ -31,7 +31,7 @@ export const Route = createRootRoute({
             },
           }}
         />
-        <div className="flex flex-col items-stretch w-full min-h-full xl:h-full">
+        <div className="flex flex-col items-stretch w-full min-h-full lg:h-full">
           <Outlet />
           <TanStackDevTools />
         </div>

@@ -60,7 +60,7 @@ export default memo(function PuzzleEditorScreen({
 
   return (
     <EditorScope>
-      <div className="flex flex-col flex-1 min-h-0 self-stretch pb-28 lg:pb-0">
+      <div className="flex flex-col flex-1 min-h-0 self-stretch lg:pb-0">
         <EditorTopBar tab={editorTab} onTabChange={switchToTab}>
           {children}
         </EditorTopBar>

@@ -167,7 +167,7 @@ export default memo(function SourceCodeEditor({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-2 p-2">
-      <div className="h-[60vh] lg:h-auto lg:flex-1 lg:min-h-0 rounded-box overflow-hidden">
+      <div className="h-[calc(100vh-14rem)] lg:h-auto lg:flex-1 lg:min-h-0 rounded-box overflow-hidden">
         <Editor
           loading={loading}
           theme={SUPPORTED_THEMES.find(([t]) => t === theme)?.[1]}
