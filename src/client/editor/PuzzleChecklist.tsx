@@ -28,6 +28,7 @@ import { onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
 import { ResourceStatus } from '../online/data.ts';
 import { embedFeaturesAtom } from '../state/embed.ts';
 import { tip } from '../components/Tooltip.tsx';
+import toast from 'react-hot-toast';
 
 const SolverSelector = lazy(() => import('./SolverSelector'));
 
@@ -543,6 +544,7 @@ export default memo(function PuzzleChecklist({
                     }
                   }
                 } catch (ex) {
+                  if (ex instanceof Error) toast.error(ex.message);
                   console.error(ex);
                 } finally {
                   abortController.abort();

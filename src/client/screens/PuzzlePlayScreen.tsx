@@ -30,6 +30,8 @@ const SharePuzzleImage = lazy(
   () => import('../components/quickActions/SharePuzzleImage')
 );
 
+const GridInsight = lazy(() => import('../components/GridInsight'));
+
 export interface PuzzlePlayScreenProps {
   /**
    * Mode-specific grid controls rendered as a floating bar over the grid.
@@ -226,6 +228,9 @@ export default memo(function PuzzlePlayScreen({
               {controls}
             </div>
             <div className="lg:w-[352px] shrink-0 flex flex-col gap-4 p-4 lg:pl-2 lg:overflow-y-auto order-2">
+              <Suspense fallback={null}>
+                <GridInsight />
+              </Suspense>
               <div className="lg:flex-1 lg:min-h-0 flex flex-col items-center justify-center gap-4">
                 <InstructionList className="lg:left-0" />
               </div>

@@ -11,6 +11,7 @@ export const SiteSettingsSchema = z.object({
   enableExitConfirmation: z.boolean().default(true).catch(true),
   flipPrimaryMouseButton: z.boolean().default(false).catch(false),
   visualizeWrapArounds: z.boolean().default(true).catch(true),
+  gridInsight: z.boolean().default(false).catch(false),
   showMoreTools: z.boolean().default(false).catch(false),
   offlineMode: z.boolean().default(false).catch(false),
   sansSerifFont: z.boolean().default(false).catch(false),

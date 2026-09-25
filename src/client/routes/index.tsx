@@ -14,6 +14,7 @@ import NavigationSkip from '../components/NavigationSkip';
 import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
 import PuzzleSurface from '../components/PuzzleSurface.tsx';
+import { DevLinks } from './(local)._layout';
 
 const FrontPageGrid = lazy(async () => {
   const Grid = (await import('../grid/Grid')).default;
@@ -157,6 +158,7 @@ export const Route = createFileRoute('/')({
                       </div>
                     </div>
                   )}
+                  <DevLinks />
                   <ServerNote />
                   <Changelog />
                 </div>

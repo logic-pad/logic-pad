@@ -11,6 +11,7 @@ import ResetEditorTour from './settings/ResetEditorTour';
 import KeyboardLayoutDropdown from './settings/KeyboardLayoutDropdown';
 import SfxVolumeSlider from './settings/SfxVolumeSlider';
 import AppTooltips, { tip } from './Tooltip.tsx';
+import GridInsightToggle from './settings/GridInsightToggle.tsx';
 
 export default memo(function Settings() {
   return (
@@ -54,6 +55,10 @@ export default memo(function Settings() {
                 Online
               </h3>
               <OfflineModeToggle />
+              <h3 className="text-xl opacity-80 font-semibold self-start mt-2">
+                Gameplay
+              </h3>
+              <GridInsightToggle />
               <h3 className="text-xl opacity-80 font-semibold self-start mt-2">
                 Sound
               </h3>
