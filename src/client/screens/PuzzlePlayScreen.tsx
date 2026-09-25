@@ -23,7 +23,7 @@ import CommentPanel from '../online/CommentPanel';
 import CollectionPanel from '../online/CollectionPanel';
 import { onlinePuzzleAtom } from '../state/onlinePuzzle.ts';
 import Difficulty from '../metadata/Difficulty';
-import { FaChevronLeft, FaChevronUp, FaTimes } from 'react-icons/fa';
+import { FaChevronDown, FaChevronLeft, FaTimes } from 'react-icons/fa';
 import { cn } from '../uiHelper.ts';
 
 const SharePuzzleImage = lazy(
@@ -97,23 +97,30 @@ const MobileTopBar = memo(function MobileTopBar({
         </span>
       </div>
       <Difficulty value={metadata.difficulty} size="sm" />
-      <FaChevronUp className="shrink-0" />
+      <FaChevronDown className="shrink-0" />
     </button>
   );
 });
 
-const CollapsedSidebarContent = memo(function CollapsedSidebarContent() {
+const CollapsedSidebarContent = memo(function CollapsedSidebarContent({
+  onClick,
+}: {
+  onClick?: () => void;
+}) {
   const metadata = useAtomValue(metadataAtom);
   const puzzle = useAtomValue(onlinePuzzleAtom);
   return (
-    <div className="hidden lg:flex flex-col items-center gap-4 flex-1 min-h-0 w-full overflow-hidden py-2">
-      <span className="[writing-mode:vertical-rl] min-h-0 truncate text-lg font-medium shrink-0">
+    <div
+      className="hidden lg:flex flex-col items-center gap-4 flex-1 min-h-0 w-full overflow-hidden py-2 cursor-pointer"
+      onClick={onClick}
+    >
+      <span className="[writing-mode:vertical-rl] min-h-0 truncate text-lg font-medium">
         {metadata.title.length === 0 ? 'Untitled Puzzle' : metadata.title}
       </span>
-      <span className="[writing-mode:vertical-rl] min-h-0 truncate text-sm opacity-70 shrink-0">
+      <span className="[writing-mode:vertical-rl] min-h-0 text-sm opacity-70 shrink-0">
         {puzzle?.creator.name ?? metadata.author}
       </span>
-      <span className="h-24 w-[21px] relative">
+      <span className="h-24 w-[21px] relative shrink-0">
         <Difficulty
           value={metadata.difficulty}
           size="sm"
@@ -193,7 +200,9 @@ export default memo(function PuzzlePlayScreen({
           >
             <FaTimes size={20} />
           </button>
-          {collapsed && <CollapsedSidebarContent />}
+          {collapsed && (
+            <CollapsedSidebarContent onClick={() => setCollapsed(c => !c)} />
+          )}
           <div
             className={cn(
               'flex-1 min-h-0 w-full flex flex-col',

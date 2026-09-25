@@ -87,12 +87,10 @@ export const Route = createLazyFileRoute('/(moderator)/mod/profile/$userId')({
                     {role}
                   </span>
                 ))}
-                <div
-                  className="ms-2"
-                  {...tip('Remove user name', 'bottom', 'error')}
-                >
+                <div className="ms-2">
                   <button
                     className="btn btn-xs btn-error"
+                    {...tip('Remove user name', 'bottom', 'error')}
                     onClick={e => {
                       e.stopPropagation();
                       e.preventDefault();

@@ -1,3 +1,11 @@
+# 25/9/2026
+
+**PREVIEW BRANCH**
+
+- Fixed button sizes on front page
+- Use accent color for selected filters
+- Small improvements to solve screen collapsed sidebar
+
 # 24/9/2026
 
 **PREVIEW BRANCH**

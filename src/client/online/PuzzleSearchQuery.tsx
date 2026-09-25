@@ -396,7 +396,9 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
                     key={option.id}
                     className={cn(
                       `btn btn-xs text-[0.75rem]`,
-                      option.isActive(displayParams) ? '' : 'btn-ghost',
+                      option.isActive(displayParams)
+                        ? 'btn-accent'
+                        : 'btn-ghost',
                       !me && 'btn-disabled',
                       promptForSupporter && 'btn-disabled'
                     )}
@@ -429,7 +431,7 @@ export default function PuzzleSearchQuery<Search extends SearchType>({
                 className={cn(
                   `btn btn-sm`,
                   displayParams.sort?.startsWith(`${ordering.id}-`)
-                    ? ''
+                    ? 'btn-accent'
                     : 'btn-ghost',
                   !me && 'btn-disabled'
                 )}

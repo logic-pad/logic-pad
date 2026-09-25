@@ -172,7 +172,7 @@ export default memo(function CollectionSearchQuery({
                   key={option.id}
                   className={cn(
                     `btn btn-sm`,
-                    option.isActive(displayParams) ? '' : 'btn-ghost',
+                    option.isActive(displayParams) ? 'btn-accent' : 'btn-ghost',
                     !me && 'btn-disabled'
                   )}
                   onClick={() =>
@@ -193,7 +193,7 @@ export default memo(function CollectionSearchQuery({
               className={cn(
                 `btn btn-sm`,
                 displayParams.sort?.startsWith(`${ordering.id}-`)
-                  ? ''
+                  ? 'btn-accent'
                   : 'btn-ghost',
                 !me && 'btn-disabled'
               )}
