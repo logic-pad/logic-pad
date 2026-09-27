@@ -258,6 +258,38 @@ puzzle.
 5. Give every emitted proof a meaningful `difficulty` and a `describe()`d
    explanation — these are user-facing (and used for difficulty ratings).
 
+## Evaluating against dev puzzles
+
+`benchmark/insightEval.ts` (run via `bun run insight-eval` from
+`packages/logic-core`) regression-tests the solver against
+`references/dev_puzzles.json` at the repo root (untracked; the same list
+shown on the `/dev/puzzles` page). It:
+
+1. Reads the `{ pid, difficulty, puzzleLink }` entries, keeps rated puzzles
+   (`difficulty > 0`), and sorts them by ascending difficulty (ties by pid).
+2. Decodes each link (`Compressor.decompress` + `Serializer.parsePuzzle`) and
+   runs a complete solve via `InsightSolver.process(...)`.
+3. Compares the result against the solution embedded in the link, printing
+   one status line per puzzle:
+   `[i/N] pid X (difficulty D) ... OK / skipped / FAILED: <reason>`.
+   A failure is either an **incorrect solution** (a filled tile contradicting
+   the embedded solution, or an `InsightError` contradiction) or an
+   **incomplete solve** (the solver ran out of insights before finishing).
+4. Stops at the first failure, prints the puzzle link with a
+   `http://localhost:5173` origin so it opens directly in the dev server, and
+   exits with code 1.
+
+Run it after adding or modifying a lemma: a good change lets the script get
+further (or finish); if it stops earlier than before, the change regressed
+that puzzle.
+
+Solves go through `QuietInsightSolver`, an `InsightSolver` subclass that
+swaps the worker entry for `benchmark/insightWorkerQuiet.ts`, which silences
+the worker's console so lemma/proof logging doesn't flood the output. The
+silencing must not use a top-level `await` in the worker entry: Bun drops
+messages posted by the parent while the worker's module evaluation is
+suspended.
+
 ## Debugging tips
 
 - The worker logs each lemma attempt and the resulting proof trees to the

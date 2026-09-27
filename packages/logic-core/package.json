@@ -50,6 +50,7 @@
     "bench:run": "bun ./benchmark/runBench.ts",
     "bench:prepare:lp": "bun bench:prepare universal -f all_puzzles_logic_pad.json -n lp",
     "bench:run:lp": "bun bench:run universal universal_dev -n lp",
+    "insight-eval": "bun ./benchmark/insightEval.ts",
     "prepublishOnly": "bun run build"
   },
   "engines": {
