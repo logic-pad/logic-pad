@@ -12,6 +12,7 @@ import DisconnectIncompatibleRegionSizes from './disconnectIncompatibleRegionSiz
 import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries.js';
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
+import ForcedRegionExpansion from './forcedRegionExpansion.js';
 
 const allLemmas: readonly InsightLemma[] = [
   new CompleteSubtileSymbol(),
@@ -26,6 +27,7 @@ const allLemmas: readonly InsightLemma[] = [
   new DisconnectIncompatibleSymmetries(),
   new ColorDisconnectedRegions(),
   new SeparateDisconnectedRegions(),
+  new ForcedRegionExpansion(),
   new ConnectThroughBottleneck(),
 ];
 

@@ -107,7 +107,7 @@ contradiction).
   (`onGridUpdate()`), and appends to `tileHistory` if a proof is given
 - `copy()` — deep-copies the context (including store state) so lemmas can
   do speculative/lookahead work without corrupting the real one
-- Lazily-initialized, read-only accessors for the stores: `numberSymbols`,
+- Lazily-initialized, read-only accessors for the stores: `regionSizes`,
   `areas`, `regions` — each is created on first access and kept in sync by
   `setTiles`
 
