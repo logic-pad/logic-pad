@@ -16,22 +16,20 @@ export default class OffByXAreaNumberConstrainedByRegionSize extends InsightLemm
   }
 
   public apply(context: InsightContext): boolean {
-    const numberSymbols = context.numberSymbols;
+    const regionSizes = context.regionSizes;
     const regions = context.regions;
     let progress = false;
-    for (const [idx, symbol] of context.grid.symbols
-      .get(areaNumberInstance.id)
-      ?.entries() ?? []) {
-      const tag = numberSymbols.getTag(areaNumberInstance.id, idx);
-      const possibilities = numberSymbols.getPossibilities(tag);
-      if (possibilities.length <= 1) continue;
+    for (const symbol of context.grid.symbols.get(areaNumberInstance.id) ??
+      []) {
       const position = {
         x: Math.floor(symbol.x),
         y: Math.floor(symbol.y),
       };
-      const proof = this.proof().difficulty(1);
-      const regionMap = regions.get(position)?.getRegionMap(proof).flat();
-      if (!regionMap) continue;
+      const region = regions.get(position);
+      if (!region) continue;
+      const possibilities = regionSizes.getPossibilities(region);
+      if (!possibilities || possibilities.length <= 1) continue;
+      const regionMap = region.getRegionMap().flat();
       const maximum = regionMap.reduce(
         (count, cell) => count + (cell || cell === null ? 1 : 0),
         0
@@ -42,8 +40,10 @@ export default class OffByXAreaNumberConstrainedByRegionSize extends InsightLemm
       );
       for (const possibility of possibilities) {
         if (possibility > maximum || possibility < minimum) {
-          const changed = numberSymbols.eliminatePossibility(
-            tag,
+          const proof = this.proof().difficulty(1);
+          region.getRegionMap(proof);
+          const changed = regionSizes.eliminatePossibility(
+            region,
             possibility,
             proof.describe(
               `Area number at ${cell(position)} cannot be ${possibility} because the region size is between ${minimum} and ${maximum}`

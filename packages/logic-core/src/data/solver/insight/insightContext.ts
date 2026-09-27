@@ -1,6 +1,6 @@
 import GridData from '../../grid.js';
 import Proof from './types/proof.js';
-import NumberSymbolStore from './stores/numberSymbolStore.js';
+import RegionSizeStore from './stores/regionSizeStore.js';
 import RegionStore from './stores/regionStore.js';
 import TileData from '../../tile.js';
 import AreaStore from './stores/areaStore.js';
@@ -39,7 +39,7 @@ export default class InsightContext {
   ): void {
     const oldGrid = this._grid;
     this._grid = this._grid.copyWith({ tiles: newTiles }, false, false);
-    this._numberSymbols?.onGridUpdate();
+    this._regionSizes?.onGridUpdate();
     this._areas?.onGridUpdate();
     this._regions?.onGridUpdate();
     if (proof) {
@@ -50,16 +50,16 @@ export default class InsightContext {
   public copy(): InsightContext {
     const copy = new InsightContext(this._grid);
     copy.tileHistory = [...this.tileHistory];
-    copy._numberSymbols = this._numberSymbols?.copyWithContext(copy);
+    copy._regionSizes = this._regionSizes?.copyWithContext(copy);
     copy._areas = this._areas?.copyWithContext(copy);
     copy._regions = this._regions?.copyWithContext(copy);
     return copy;
   }
 
-  private _numberSymbols?: NumberSymbolStore;
-  public get numberSymbols(): Readonly<NumberSymbolStore> {
-    this._numberSymbols ??= new NumberSymbolStore(this);
-    return this._numberSymbols;
+  private _regionSizes?: RegionSizeStore;
+  public get regionSizes(): Readonly<RegionSizeStore> {
+    this._regionSizes ??= new RegionSizeStore(this);
+    return this._regionSizes;
   }
 
   private _areas?: AreaStore;

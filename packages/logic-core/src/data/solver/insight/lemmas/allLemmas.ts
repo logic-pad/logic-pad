@@ -8,6 +8,7 @@ import ConnectThroughBottleneck from './connectThroughBottleneck.js';
 import ImpossibleAreaNumberColor from './impossibleAreaNumberColor.js';
 import InsightLemma from './insightLemma.js';
 import OffByXAreaNumberConstrainedByRegionSize from './offByXAreaNumberConstrainedByRegionSize.js';
+import DisconnectIncompatibleRegionSizes from './disconnectIncompatibleRegionSizes.js';
 import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries.js';
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
@@ -21,6 +22,7 @@ const allLemmas: readonly InsightLemma[] = [
   new ImpossibleAreaNumberColor(),
   new CompleteAreaNumber(),
   new CompleteGalaxy(),
+  new DisconnectIncompatibleRegionSizes(),
   new DisconnectIncompatibleSymmetries(),
   new ColorDisconnectedRegions(),
   new SeparateDisconnectedRegions(),

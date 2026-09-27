@@ -19,7 +19,7 @@ insight/
   insightContext.ts   InsightContext: central mutable state for one solve
   helper.ts           Tile/color helpers shared by lemmas
   lemmas/             InsightLemma base class + the concrete deduction rules
-  stores/             Derived-state trackers (areas, regions, number symbols, ...)
+  stores/             Derived-state trackers (areas, regions, region sizes, ...)
   types/              Proof/ProofNode and InsightError
 ```
 
@@ -201,11 +201,15 @@ Important semantics:
   that map for connectivity computations — e.g. shortest paths and
   articulation points (bottlenecks).
 
-### NumberSymbolStore
+### RegionSizeStore
 
-Tracks the possible true values of number symbols (e.g. both `n±x`
-possibilities when an off-by-X rule is present) and the proofs that
-eliminated possibilities.
+Tracks the possible **sizes** of regions, derived from the area number
+symbols each region contains (e.g. both `n±x` possibilities when an off-by-X
+rule is present), and the proofs that eliminated specific sizes. Regions
+without area number symbols are unconstrained (`getPossibilities` returns
+`null`). Eliminations are recorded against the region's ID and re-resolved
+through the region store on every query, so they follow the tracked cells
+across region merges and grid updates.
 
 ## Proofs and difficulty
 

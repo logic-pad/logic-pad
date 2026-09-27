@@ -39,5 +39,6 @@ bun run lint
 bunx --bun tsc --noEmit
 ```
 
-If you modified `packages/logic-core`, run `bun build` inside it to
-regenerate its assets.
+Do **not** run `bun build` inside `packages/logic-core`: the build (in
+particular the `typegen` step) takes a very long time, so always skip it.
+Lint and `tsc --noEmit` are sufficient verification for agent changes.

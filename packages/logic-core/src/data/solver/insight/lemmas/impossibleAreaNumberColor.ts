@@ -15,18 +15,15 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    const numberSymbols = context.numberSymbols;
     let progress = false;
-    for (const [idx, symbol] of context.grid.symbols
-      .get(areaNumberInstance.id)
-      ?.entries() ?? []) {
+    for (const symbol of context.grid.symbols.get(areaNumberInstance.id) ??
+      []) {
       const position = {
         x: Math.floor(symbol.x),
         y: Math.floor(symbol.y),
       };
       const originTile = context.grid.getTile(position.x, position.y);
       if (!originTile.exists || originTile.color !== Color.Gray) continue;
-      const tag = numberSymbols.getTag(areaNumberInstance.id, idx);
       for (const color of COLORS) {
         const hypothetical = context.copy();
         hypothetical.setTiles(
@@ -45,11 +42,11 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
           })
         );
 
+        const regionSizes = hypothetical.regionSizes;
         const proof = this.proof().difficulty(2);
-        const regionMap = hypothetical.regions
-          .get(position)
-          ?.getRegionMap(proof);
-        if (!regionMap) continue;
+        const region = hypothetical.regions.get(position);
+        if (!region) continue;
+        const regionMap = region.getRegionMap(proof);
         const flatMap = regionMap.flat();
         const maxComplete = flatMap.reduce(
           (count, cell) => count + (cell || cell === null ? 1 : 0),
@@ -59,7 +56,7 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
           (count, cell) => count + (cell ? 1 : 0),
           0
         );
-        const minPossible = numberSymbols.minPossible(tag, proof);
+        const minPossible = regionSizes.minPossible(region, proof);
         const fillOpposite = () => {
           return modifyTiles(
             context.grid,
@@ -88,7 +85,7 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
           progress = true;
           break;
         }
-        const maxPossible = numberSymbols.maxPossible(tag, proof);
+        const maxPossible = regionSizes.maxPossible(region, proof);
         if (maxPossible < minComplete) {
           context.setTiles(
             fillOpposite(),
