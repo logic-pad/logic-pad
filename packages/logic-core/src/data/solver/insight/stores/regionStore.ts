@@ -17,6 +17,11 @@ export type RegionPair = `${RegionId},${RegionId}`;
 
 export type RegionMap = (boolean | null)[][];
 
+/**
+ * Chebyshev distance within which a disconnected region is considered relevant to a proof's scope.
+ */
+const PROOF_SCOPE_RADIUS = 2;
+
 export class Region {
   public constructor(
     protected readonly context: InsightContext,
@@ -74,14 +79,12 @@ export class Region {
   /**
    * Get a map of cells that are in the same region as the given cell (`true`), in a different region (`false`), or unknown
    * but possible (`null`). Includes deductions from lemmas.
+   *
+   * Use {@link RegionStore.explainRegion} to attribute the proofs backing this region to a proof.
    */
-  public getRegionMap(proof?: Proof): RegionMap {
+  public getRegionMap(): RegionMap {
     if (!this._regionMap) {
       this._regionMap = this.buildRegionMap();
-    }
-    if (proof) {
-      this.connectionProofs.forEach(p => proof.add(p));
-      this.disconnectionProofs.forEach(p => proof.add(p));
     }
     return this._regionMap;
   }
@@ -132,14 +135,12 @@ export class Region {
   private _regionGraph?: RegionGraph;
   /**
    * Get a graph representation of the region map for related computations.
+   *
+   * Use {@link RegionStore.explainRegion} to attribute the proofs backing this region to a proof.
    */
-  public getRegionGraph(proof?: Proof): RegionGraph {
+  public getRegionGraph(): RegionGraph {
     if (!this._regionGraph) {
       this._regionGraph = this.buildRegionGraph();
-    }
-    if (proof) {
-      this.connectionProofs.forEach(p => proof.add(p));
-      this.disconnectionProofs.forEach(p => proof.add(p));
     }
     return this._regionGraph;
   }
@@ -362,6 +363,42 @@ export default class RegionStore extends InsightStore {
   }
 
   /**
+   * Adds the proofs backing the given region to the proof: all connection proofs, plus disconnection proofs.
+   * Pass `scope` to limit disconnection proofs to those whose other region has cells near the given positions.
+   * Proofs are human-readable, so proximity is used as a heuristic for relevance instead of exact
+   * dependency tracking. Callers should pass the positions their deduction actually reasoned about
+   * (e.g. the path and chokepoints for a bottleneck lemma, or the region's own cells).
+   */
+  public explainRegion(
+    region: Region,
+    proof: Proof,
+    scope?: readonly Position[]
+  ): void {
+    region.connectionProofs.forEach(p => proof.add(p));
+    if (!scope) {
+      region.disconnectionProofs.forEach(p => proof.add(p));
+      return;
+    }
+    const current = this.get(region.positions[0]);
+    if (!current) return;
+    for (const [key, deduction] of this.disconnectionProofs.entries()) {
+      const [rawA, rawB] = this.fromRegionPair(key);
+      if (rawA !== current.id && rawB !== current.id) continue;
+      const otherId = rawA === current.id ? rawB : rawA;
+      const other = this._regions.get(otherId);
+      if (!other) continue;
+      const isNearby = other.positions.some(pos =>
+        scope.some(
+          s =>
+            Math.abs(s.x - pos.x) <= PROOF_SCOPE_RADIUS &&
+            Math.abs(s.y - pos.y) <= PROOF_SCOPE_RADIUS
+        )
+      );
+      if (isNearby) proof.add(deduction);
+    }
+  }
+
+  /**
    * Records a logical connection between two regions. Returns true if the connection was successfully recorded.
    */
   public addConnected(cellA: Position, cellB: Position, proof: Proof): boolean {
@@ -531,8 +568,8 @@ export default class RegionStore extends InsightStore {
       const [repA, repB] = this.fromRegionPair(key);
       const regionA = this._regions.get(repA);
       const regionB = this._regions.get(repB);
-      regionA!.connectionProofs.add(proof);
-      regionB!.connectionProofs.add(proof);
+      regionA!.disconnectionProofs.add(proof);
+      regionB!.disconnectionProofs.add(proof);
     }
 
     this.physicalDisconnections = this.buildPhysicalDisconnections();

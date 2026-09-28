@@ -114,6 +114,16 @@ for (const [index, entry] of entries.entries()) {
 
   if (failure !== null) {
     console.log(`FAILED: ${failure}`);
+    console.log();
+
+    // rerun solve to display logs
+    const loggingSolver = new InsightSolver();
+    await loggingSolver.process(puzzle.grid.resetTiles(), {
+      completeSolve: true,
+      reportProof: true,
+    });
+    console.log();
+
     console.log(toLocalLink(entry.puzzleLink));
     process.exit(1);
   }

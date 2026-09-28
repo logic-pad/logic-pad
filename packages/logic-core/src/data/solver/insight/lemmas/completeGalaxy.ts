@@ -32,7 +32,8 @@ export default class CompleteGalaxy extends InsightLemma {
       }
       if (!galaxy) continue;
       const proof = this.proof().difficulty(1);
-      const map = region.getRegionMap(proof);
+      const map = region.getRegionMap();
+      context.regions.explainRegion(region, proof);
       let symmetricColor: Color | null = null;
       for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) {

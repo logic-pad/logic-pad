@@ -58,9 +58,8 @@ export default class DisconnectIncompatibleSymmetries extends InsightLemma {
             );
     }
     if (galaxyA && !galaxyB) {
-      const proof = this.proof().difficulty(3);
-      const regionMapA = regionA.getRegionMap(proof);
-      const regionMapB = regionB.getRegionMap(proof);
+      const regionMapA = regionA.getRegionMap();
+      const regionMapB = regionB.getRegionMap();
       for (let y = 0; y < regionMapB.length; y++) {
         for (let x = 0; x < regionMapB[y].length; x++) {
           if (regionMapB[y][x] !== true) continue;

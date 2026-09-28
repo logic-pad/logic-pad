@@ -41,7 +41,7 @@ export default class OffByXAreaNumberConstrainedByRegionSize extends InsightLemm
       for (const possibility of possibilities) {
         if (possibility > maximum || possibility < minimum) {
           const proof = this.proof().difficulty(1);
-          region.getRegionMap(proof);
+          regions.explainRegion(region, proof);
           const changed = regionSizes.eliminatePossibility(
             region,
             possibility,

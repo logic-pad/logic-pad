@@ -27,7 +27,8 @@ export default class CompleteAreaNumber extends InsightLemma {
       const region = regions.get(position);
       if (!region) continue;
       const proof = this.proof().difficulty(1);
-      const regionMap = region.getRegionMap(proof);
+      const regionMap = region.getRegionMap();
+      regions.explainRegion(region, proof, region.positions);
       const flatMap = regionMap.flat();
       const maxComplete = flatMap.reduce(
         (count, cell) => count + (cell || cell === null ? 1 : 0),

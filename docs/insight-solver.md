@@ -200,6 +200,16 @@ Important semantics:
 - `Region.getRegionGraph()` builds a graph (`stores/regionGraph.ts`) over
   that map for connectivity computations — e.g. shortest paths and
   articulation points (bottlenecks).
+- Both are pure queries. To attribute the proofs backing a region, call
+  `RegionStore.explainRegion(region, proof, scope?)`. Without `scope` it
+  attaches every connection/disconnection proof of the region, which gets
+  very noisy once many regions are known to be separate; with `scope`
+  (positions the deduction actually reasoned about, e.g. the path and
+  chokepoints for a bottleneck lemma, or the region's own cells),
+  disconnection proofs are limited to those whose other region has cells
+  within Chebyshev distance 2 of the scope. Proofs are human-readable, so
+  proximity is used as a relevance heuristic instead of exact dependency
+  tracking.
 
 ### RegionSizeStore
 
@@ -227,13 +237,16 @@ interface ProofNode {
 - Lemmas start a proof with `this.proof().difficulty(n).describe(text)`.
 - Whenever a deduction relies on earlier deductions (e.g. a region
   connection established by another lemma), the store methods
-  (`addConnected`, `isConnected`, `getRegionMap`, ...) `add()` the earlier
+  (`addConnected`, `isConnected`, `explainRegion`, ...) `add()` the earlier
   proofs as children of the new proof, forming a **dependency tree**.
 - `context.setTiles(newTiles, proof)` commits a deduction to
   `tileHistory`; the worker maps history entries to `proof.root` when
   `reportProof` is set.
 - `Proof#toString()` renders an indented tree (also printed to the worker's
-  console after each successful lemma for debugging).
+  console after each successful lemma for debugging). Proofs form a DAG —
+  the same sub-proof can be referenced by several parents — so the worker
+  logs `Proof#dedupe().toString()`, which keeps each unique sub-proof at its
+  first occurrence. The proofs sent to the UI (`reportProof`) are also deduped.
 - `difficulty` is a per-technique estimate assigned by each lemma; the UI
   shows it next to every proof node, giving users (and potential rating
   features) a sense of how hard the required deductions were.

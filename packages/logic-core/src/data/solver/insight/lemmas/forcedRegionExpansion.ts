@@ -28,10 +28,9 @@ export default class ForcedRegionExpansion extends InsightLemma {
     let progress = false;
     for (const region of context.regions.regions.values()) {
       if (regionSizes.getPossibilities(region) === null) continue;
-      const proof = this.proof().difficulty(3);
-      const minPossible = regionSizes.minPossible(region, proof);
+      const minPossible = regionSizes.minPossible(region);
       const regionMap = region.getRegionMap();
-      const graph = region.getRegionGraph(proof);
+      const graph = region.getRegionGraph();
       const articulationPoints = graph.articulationPoints;
       if (articulationPoints.size === 0) continue;
 
@@ -92,14 +91,18 @@ export default class ForcedRegionExpansion extends InsightLemma {
         );
         if (!target) continue;
         if (context.regions.isConnected(target, region.positions[0])) continue;
+        const proof = this.proof().difficulty(3);
+        regionSizes.minPossible(region, proof);
+        context.regions.explainRegion(region, proof, [
+          ...patch.flatMap(node => graph.getPositions(node)),
+          ...bottleneckPositions,
+        ]);
         const modified = context.regions.addConnected(
           target,
           region.positions[0],
-          proof
-            .copy()
-            .describe(
-              `Region at ${area(region.positions[0])} must expand into the bottleneck at ${cell(bottleneckPositions)} because it needs at least ${minPossible} cells but only ${availableCells} are available behind the bottleneck`
-            )
+          proof.describe(
+            `Region at ${area(region.positions[0])} must expand into the bottleneck at ${cell(bottleneckPositions)} because it needs at least ${minPossible} cells but only ${availableCells} are available behind the bottleneck`
+          )
         );
         progress ||= modified;
       }

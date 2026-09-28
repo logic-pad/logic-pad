@@ -46,7 +46,8 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
         const proof = this.proof().difficulty(2);
         const region = hypothetical.regions.get(position);
         if (!region) continue;
-        const regionMap = region.getRegionMap(proof);
+        const regionMap = region.getRegionMap();
+        hypothetical.regions.explainRegion(region, proof);
         const flatMap = regionMap.flat();
         const maxComplete = flatMap.reduce(
           (count, cell) => count + (cell || cell === null ? 1 : 0),

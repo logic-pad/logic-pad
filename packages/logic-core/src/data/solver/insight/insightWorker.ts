@@ -84,7 +84,7 @@ onmessage = e => {
           console.log(`%c${lemma.id}:\n  successful`, 'color: darkgray');
           context.tileHistory
             .slice(lastHistoryLength)
-            .forEach(history => console.log(history.proof.toString()));
+            .forEach(history => console.log(history.proof.dedupe().toString()));
           lastHistoryLength = context.tileHistory.length;
 
           restart = true;
@@ -128,7 +128,7 @@ onmessage = e => {
         type: 'solve',
         data: Serializer.stringifyGrid(context.tileHistory[0].newGrid),
         proofs: request.reportProof
-          ? [context.tileHistory[0].proof.root]
+          ? [context.tileHistory[0].proof.dedupe().root]
           : undefined,
       } satisfies Response);
     }

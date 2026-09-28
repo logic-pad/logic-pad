@@ -18,8 +18,7 @@ export default class ConnectThroughBottleneck extends InsightLemma {
       if (regionInfo.color === Color.Gray) continue;
       if (regionInfo.connectedAreas.size <= 1) continue;
 
-      const proof = this.proof().difficulty(3);
-      const graph = regionInfo.getRegionGraph(proof);
+      const graph = regionInfo.getRegionGraph();
       const areas = [...regionInfo.connectedAreas];
       const area1 = regions.toPosition(areas[0]);
       const node1 = graph.getId(area1.x, area1.y);
@@ -44,13 +43,17 @@ export default class ConnectThroughBottleneck extends InsightLemma {
           }
         }
         if (modified.length === 0) continue;
+        const proof = this.proof().difficulty(3);
+        regions.explainRegion(
+          regionInfo,
+          proof,
+          path.flatMap(id => graph.getPositions(id))
+        );
         context.setTiles(
           newTiles,
-          proof
-            .copy()
-            .describe(
-              `Cells at ${cell(modified)} are bottlenecks connecting ${area([area1, area2])}, so they must be filled in`
-            )
+          proof.describe(
+            `Cells at ${cell(modified)} are bottlenecks connecting ${area([area1, area2])}, so they must be filled in`
+          )
         );
         progress = true;
       }
