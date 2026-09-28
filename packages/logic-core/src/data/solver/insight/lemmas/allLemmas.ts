@@ -1,5 +1,6 @@
 import BreakBannedPattern from './breakBannedPattern.js';
 import CompleteAreaNumber from './completeAreaNumber.js';
+import CompleteDart from './completeDart.js';
 import CompleteGalaxy from './completeGalaxy.js';
 import CompleteSubtileSymbol from './completeSubtileSymbol.js';
 import CompleteViewpoint from './completeViewpoint.js';
@@ -29,6 +30,7 @@ const allLemmas: readonly InsightLemma[] = [
   new ConnectThroughBottleneck(),
   new SeparateDisconnectedRegions(),
   new CompleteViewpoint(),
+  new CompleteDart(),
   new CompleteAreaNumber(),
   new ForcedRegionExpansion(),
 ];
