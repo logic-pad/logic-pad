@@ -3,7 +3,11 @@ import { Color, Position } from '../../primitives.js';
 import TileData from '../../tile.js';
 
 export function cell(cell: Position | Position[]): string {
-  const positions = Array.isArray(cell) ? cell : [cell];
+  let positions = Array.isArray(cell) ? cell : [cell];
+  positions = positions.filter(
+    (pos, index) =>
+      positions.findIndex(p => p.x === pos.x && p.y === pos.y) === index
+  );
   for (let i = positions.length - 1; i >= 0; i--) {
     const pos = positions[i];
     if (pos.x % 1 !== 0 && pos.y % 1 !== 0) {
