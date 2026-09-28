@@ -27,7 +27,7 @@ export default memo(function TileTool() {
           }}
           onTileClick={(x, y, from, to) => {
             if (from === Color.Dark || to === Color.Dark) {
-              setGrid(
+              setGrid(grid =>
                 grid.copyWith({
                   tiles: grid.setTile(x, y, t =>
                     t.withFixed(to === Color.Dark)
@@ -35,7 +35,7 @@ export default memo(function TileTool() {
                 })
               );
             } else if (from === Color.Light || to === Color.Light) {
-              setGrid(
+              setGrid(grid =>
                 grid.copyWith({
                   tiles: grid.setTile(x, y, t =>
                     t.withExists(to !== Color.Light)

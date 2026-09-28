@@ -35,15 +35,15 @@ export function ResizeToolOverlay({ direction }: ResizeToolOverlayProps) {
           if (action) {
             if (action.type === 'insert') {
               if (action.direction === 'row') {
-                setGrid(grid.insertRow(action.index));
+                setGrid(grid => grid.insertRow(action.index));
               } else {
-                setGrid(grid.insertColumn(action.index));
+                setGrid(grid => grid.insertColumn(action.index));
               }
             } else if (action.type === 'remove') {
               if (action.direction === 'row') {
-                setGrid(grid.removeRow(action.index));
+                setGrid(grid => grid.removeRow(action.index));
               } else {
-                setGrid(grid.removeColumn(action.index));
+                setGrid(grid => grid.removeColumn(action.index));
               }
             }
             setAction(null);

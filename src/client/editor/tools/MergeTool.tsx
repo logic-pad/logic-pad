@@ -47,11 +47,13 @@ function MergeToolOverlay() {
         const newEdge = { x1: tx, y1: ty, x2: cx, y2: cy };
         if (from === Color.Dark || to === Color.Dark) {
           if (!grid.connections.hasEdge(newEdge)) {
-            setGrid(grid.withConnections(con => con.addEdge(newEdge)));
+            setGrid(grid => grid.withConnections(con => con.addEdge(newEdge)));
           }
         } else if (from === Color.Light || to === Color.Light) {
           if (grid.connections.hasEdge(newEdge)) {
-            setGrid(grid.withConnections(con => con.removeEdge(newEdge)));
+            setGrid(grid =>
+              grid.withConnections(con => con.removeEdge(newEdge))
+            );
           }
         }
       }}

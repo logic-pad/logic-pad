@@ -109,9 +109,9 @@ export default memo(function ConfigPopup() {
 
   const deleteSymbol = () => {
     if (configurable instanceof Rule) {
-      setGrid(grid.removeRule(configurable));
+      setGrid(grid => grid.removeRule(configurable));
     } else if (configurable instanceof Symbol) {
-      setGrid(grid.removeSymbol(configurable));
+      setGrid(grid => grid.removeSymbol(configurable));
     } else if (configurable instanceof ControlLine) {
       const musicGrid = grid.musicGrid.value;
       if (!musicGrid) return;
@@ -121,7 +121,7 @@ export default memo(function ConfigPopup() {
         checkpoint: false,
       });
       if (newLine.isEmpty) {
-        setGrid(
+        setGrid(grid =>
           grid.replaceRule(
             musicGrid,
             musicGrid.copyWith({
@@ -132,7 +132,7 @@ export default memo(function ConfigPopup() {
           )
         );
       } else {
-        setGrid(
+        setGrid(grid =>
           grid.replaceRule(
             musicGrid,
             musicGrid.copyWith({
@@ -157,7 +157,7 @@ export default memo(function ConfigPopup() {
         ),
       });
       if (newLine.isEmpty) {
-        setGrid(
+        setGrid(grid =>
           grid.replaceRule(
             musicGrid,
             musicGrid.copyWith({
@@ -168,7 +168,7 @@ export default memo(function ConfigPopup() {
           )
         );
       } else {
-        setGrid(
+        setGrid(grid =>
           grid.replaceRule(
             musicGrid,
             musicGrid.copyWith({
@@ -279,19 +279,21 @@ export default memo(function ConfigPopup() {
                 const newInstruction = configurable.copyWith({
                   [field]: value,
                 });
-                setGrid(grid.replaceRule(configurable, newInstruction));
+                setGrid(grid => grid.replaceRule(configurable, newInstruction));
               } else if (configurable instanceof Symbol) {
                 const newInstruction = configurable.copyWith({
                   [field]: value,
                 });
-                setGrid(grid.replaceSymbol(configurable, newInstruction));
+                setGrid(grid =>
+                  grid.replaceSymbol(configurable, newInstruction)
+                );
               } else if (configurable instanceof ControlLine) {
                 const newControlLine = configurable.copyWith({
                   [field]: value,
                 });
                 const musicGrid = grid.musicGrid.value;
                 if (!musicGrid) return;
-                setGrid(
+                setGrid(grid =>
                   grid.replaceRule(
                     musicGrid,
                     musicGrid.setControlLine(newControlLine)
@@ -308,7 +310,7 @@ export default memo(function ConfigPopup() {
                   line => line.column === location.column
                 );
                 if (!line) return;
-                setGrid(
+                setGrid(grid =>
                   grid.replaceRule(
                     musicGrid,
                     musicGrid.setControlLine(

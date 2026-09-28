@@ -51,7 +51,7 @@ const NoteOverlay = memo(function NoteOverlay() {
           } else {
             const line = musicGrid.controlLines.find(line => line.column === x);
             if (!line) {
-              setGrid(
+              setGrid(grid =>
                 grid.replaceRule(
                   musicGrid,
                   musicGrid.setControlLine(
@@ -77,7 +77,7 @@ const NoteOverlay = memo(function NoteOverlay() {
                 )
               );
             } else {
-              setGrid(
+              setGrid(grid =>
                 grid.replaceRule(
                   musicGrid,
                   musicGrid.setControlLine(

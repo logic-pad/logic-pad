@@ -179,7 +179,7 @@ export default memo(function InstructionList({
         const { active, over } = e;
 
         if (over && active.id !== over.id) {
-          setGrid(
+          setGrid(grid =>
             grid.withRules(
               arrayMove(
                 grid.rules.slice(),

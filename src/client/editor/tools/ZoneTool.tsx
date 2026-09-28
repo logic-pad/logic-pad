@@ -39,11 +39,11 @@ function ZoneToolOverlay() {
         const newEdge = { x1: tx, y1: ty, x2: cx, y2: cy };
         if (from === Color.Dark || to === Color.Dark) {
           if (!grid.zones.hasEdge(newEdge)) {
-            setGrid(grid.withZones(z => z.addEdge(newEdge)));
+            setGrid(grid => grid.withZones(z => z.addEdge(newEdge)));
           }
         } else if (from === Color.Light || to === Color.Light) {
           if (grid.zones.hasEdge(newEdge)) {
-            setGrid(grid.withZones(z => z.removeEdge(newEdge)));
+            setGrid(grid => grid.withZones(z => z.removeEdge(newEdge)));
           }
         }
       }}

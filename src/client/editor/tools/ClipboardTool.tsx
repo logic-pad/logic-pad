@@ -138,7 +138,7 @@ export function ClipboardToolOverlay() {
     setFirstPosition(null);
     setCurrentPosition(null);
     if (!clipboardData) return;
-    setGrid(grid.pasteTiles(position, clipboardData));
+    setGrid(grid => grid.pasteTiles(position, clipboardData));
   };
 
   useHotkeys('ctrl+v, cmd+v', async () => {

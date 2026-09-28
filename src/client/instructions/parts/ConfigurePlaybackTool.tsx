@@ -52,7 +52,7 @@ const PlaybackOverlay = memo(function PlaybackOverlay() {
               current: (controlLineOverlayRef.current?.get(x) ?? undefined)!,
             });
           } else {
-            setGrid(
+            setGrid(grid =>
               grid.replaceRule(
                 musicGrid,
                 musicGrid.setControlLine(

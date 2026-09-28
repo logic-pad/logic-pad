@@ -100,7 +100,7 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
       }}
       onTileClick={(x, y, from, to) => {
         if (to === Color.Light) {
-          setGrid(
+          setGrid(grid =>
             grid.removeSymbolIf(
               sym => sym.id === sample.id && eq(sym.x, x) && eq(sym.y, y)
             )
@@ -126,11 +126,11 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
           );
         } else if (to === Color.Dark) {
           if (onNewSymbol) {
-            setGrid(
+            setGrid(grid =>
               grid.addSymbol(onNewSymbol(sample.copyWith({ x, y }), grid))
             );
           } else {
-            setGrid(grid.addSymbol(sample.copyWith({ x, y })));
+            setGrid(grid => grid.addSymbol(sample.copyWith({ x, y })));
           }
         }
       }}
@@ -143,7 +143,7 @@ const SymbolToolOverlay = memo(function SymbolToolOverlay({
         if (!symbol) return false;
         if (!eq(symbol.x, x) || !eq(symbol.y, y)) return false;
         if (!(symbol instanceof NumberSymbol)) return false;
-        setGrid(
+        setGrid(grid =>
           grid.replaceSymbol(
             symbol,
             symbol.withNumber(symbol.number + (delta > 0 ? -1 : 1))

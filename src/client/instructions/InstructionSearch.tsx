@@ -3,8 +3,8 @@ import { allRules } from '@logic-pad/core/data/rules/index';
 import Rule from '@logic-pad/core/data/rules/rule';
 import Autocomplete from '../components/Autocomplete';
 import { cn } from '../uiHelper.ts';
-import { getGridAtom, setGridAtom } from '../state/grid.ts';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { setGridAtom } from '../state/grid.ts';
+import { useSetAtom } from 'jotai';
 
 const ruleList = [...allRules.values()].flatMap(rule => rule.searchVariants);
 const descriptionList = ruleList.map(x => x.description);
@@ -17,13 +17,12 @@ export interface InstructionSearchProps {
 export default memo(function InstructionSearch({
   className,
 }: InstructionSearchProps) {
-  const grid = useAtomValue(getGridAtom);
   const setGrid = useSetAtom(setGridAtom);
   const [search, setSearch] = useState('');
 
   const addRule = (rule: Rule) => {
     setSearch('');
-    setGrid(grid.addRule(rule.copyWith({})));
+    setGrid(grid => grid.addRule(rule.copyWith({})));
   };
 
   return (

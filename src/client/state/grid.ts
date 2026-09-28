@@ -31,9 +31,17 @@ export const metadataAtom = atom<PuzzleMetadata>(defaultMetadata);
  */
 export const setGridRawAtom = atom(
   null,
-  (get, set, newGrid: GridData, sol?: GridData | null) => {
+  (
+    get,
+    set,
+    newGrid: GridData | ((original: GridData) => GridData),
+    sol?: GridData | null
+  ) => {
     const grid = get(gridAtomPrivate);
     const solution = get(solutionAtom);
+    if (typeof newGrid === 'function') {
+      newGrid = newGrid(grid);
+    }
     newGrid = invokeSetGrid(grid, newGrid, sol === undefined ? solution : sol);
     set(gridAtomPrivate, newGrid);
     if (sol !== undefined) set(solutionAtom, sol);
@@ -47,7 +55,15 @@ export const setGridRawAtom = atom(
  */
 export const setGridAtom = atom(
   null,
-  (_get, set, newGrid: GridData, sol?: GridData | null) => {
+  (
+    get,
+    set,
+    newGrid: GridData | ((original: GridData) => GridData),
+    sol?: GridData | null
+  ) => {
+    if (typeof newGrid === 'function') {
+      newGrid = newGrid(get(gridAtomPrivate));
+    }
     const applied = set(setGridRawAtom, newGrid, sol);
     set(recordEditAtom, applied);
   }
