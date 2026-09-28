@@ -89,9 +89,7 @@ onmessage = e => {
       },
       onLemmaSuccess: (lemma, newHistory) => {
         console.log(`%c${lemma.id}:\n  successful`, 'color: darkgray');
-        newHistory.forEach(history =>
-          console.log(history.proof.dedupe().toString())
-        );
+        newHistory.forEach(history => console.log(history.proof.toString()));
         if (!request.completeSolve && context.tileHistory.length > 0) {
           return false;
         }
@@ -131,7 +129,7 @@ onmessage = e => {
         type: 'solve',
         data: Serializer.stringifyGrid(context.tileHistory[0].newGrid),
         proofs: request.reportProof
-          ? [context.tileHistory[0].proof.dedupe().root]
+          ? [context.tileHistory[0].proof.root]
           : undefined,
       } satisfies Response);
     }
