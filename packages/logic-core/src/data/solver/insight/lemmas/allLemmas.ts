@@ -2,6 +2,7 @@ import BreakBannedPattern from './breakBannedPattern.js';
 import CompleteAreaNumber from './completeAreaNumber.js';
 import CompleteGalaxy from './completeGalaxy.js';
 import CompleteSubtileSymbol from './completeSubtileSymbol.js';
+import CompleteViewpoint from './completeViewpoint.js';
 import ConnectAllCells from './connectAllCells.js';
 import ConnectAllRemovesDisconnectedRegions from './connectAllRemovesDisconnectedRegions.js';
 import ConnectThroughBottleneck from './connectThroughBottleneck.js';
@@ -27,6 +28,7 @@ const allLemmas: readonly InsightLemma[] = [
   new ColorDisconnectedRegions(),
   new ConnectThroughBottleneck(),
   new SeparateDisconnectedRegions(),
+  new CompleteViewpoint(),
   new CompleteAreaNumber(),
   new ForcedRegionExpansion(),
 ];
