@@ -21,14 +21,14 @@ const allLemmas: readonly InsightLemma[] = [
   new ConnectAllCells(),
   new ConnectAllRemovesDisconnectedRegions(),
   new ImpossibleAreaNumberColor(),
-  new CompleteAreaNumber(),
   new CompleteGalaxy(),
   new DisconnectIncompatibleRegionSizes(),
   new DisconnectIncompatibleSymmetries(),
   new ColorDisconnectedRegions(),
-  new SeparateDisconnectedRegions(),
-  new ForcedRegionExpansion(),
   new ConnectThroughBottleneck(),
+  new SeparateDisconnectedRegions(),
+  new CompleteAreaNumber(),
+  new ForcedRegionExpansion(),
 ];
 
 export default allLemmas;
