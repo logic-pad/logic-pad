@@ -4,7 +4,7 @@ import validateGrid from '../../validate.js';
 import InsightContext from './insightContext.js';
 import InsightError from './types/insightError.js';
 import allLemmas from './lemmas/allLemmas.js';
-import { ProofNode } from './types/proof.js';
+import Proof, { ProofNode } from './types/proof.js';
 
 export interface SolveRequest {
   data: string;
@@ -48,7 +48,14 @@ onmessage = e => {
   if (initialValidation.final === State.Satisfied) {
     postMessage({
       type: 'solve',
-      data: undefined,
+      data: Serializer.stringifyGrid(context.grid),
+      proofs: request.reportProof
+        ? [
+            Proof.create('insight-solver')
+              .difficulty(0)
+              .describe('Grid is already solved').root,
+          ]
+        : undefined,
     } satisfies Response);
     return;
   }
@@ -71,7 +78,7 @@ onmessage = e => {
         } satisfies Response);
       }
 
-      for (const [index, lemma] of lemmas.entries()) {
+      lemmaLoop: for (const [index, lemma] of lemmas.entries()) {
         if (request.reportProgress && !request.completeSolve) {
           postMessage({
             type: 'progress',
@@ -91,7 +98,7 @@ onmessage = e => {
           if (!request.completeSolve && context.tileHistory.length > 0) {
             break mainLoop;
           } else {
-            break;
+            break lemmaLoop;
           }
         } else {
           console.log(`%c${lemma.id}:\n  no changes`, 'color: darkgray');
@@ -107,6 +114,7 @@ onmessage = e => {
       } satisfies Response);
       return;
     } else {
+      console.log(error);
       // Unexpected error, rethrow
       throw error;
     }
