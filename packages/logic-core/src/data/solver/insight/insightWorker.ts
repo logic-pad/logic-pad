@@ -5,6 +5,7 @@ import InsightContext from './insightContext.js';
 import InsightError from './types/insightError.js';
 import allLemmas from './lemmas/allLemmas.js';
 import Proof, { ProofNode } from './types/proof.js';
+import { runLemmaLoop } from './lemmaLoop.js';
 
 export interface SolveRequest {
   data: string;
@@ -62,23 +63,22 @@ onmessage = e => {
 
   const lemmas = allLemmas.filter(lemma => lemma.isApplicable(context.grid));
 
-  let lastHistoryLength = 0;
   const total = request.completeSolve
     ? context.grid.getTileCount(true, false, Color.Gray)
     : lemmas.length;
   try {
-    let restart = true;
-    mainLoop: while (restart) {
-      restart = false;
-      if (request.reportProgress && request.completeSolve) {
-        postMessage({
-          type: 'progress',
-          progress: total - context.grid.getTileCount(true, false, Color.Gray),
-          total,
-        } satisfies Response);
-      }
-
-      lemmaLoop: for (const [index, lemma] of lemmas.entries()) {
+    runLemmaLoop(context, lemmas, {
+      onPassStart: () => {
+        if (request.reportProgress && request.completeSolve) {
+          postMessage({
+            type: 'progress',
+            progress:
+              total - context.grid.getTileCount(true, false, Color.Gray),
+            total,
+          } satisfies Response);
+        }
+      },
+      onLemmaStart: index => {
         if (request.reportProgress && !request.completeSolve) {
           postMessage({
             type: 'progress',
@@ -86,25 +86,20 @@ onmessage = e => {
             total,
           } satisfies Response);
         }
-        const changed = lemma.apply(context);
-        if (changed) {
-          console.log(`%c${lemma.id}:\n  successful`, 'color: darkgray');
-          context.tileHistory
-            .slice(lastHistoryLength)
-            .forEach(history => console.log(history.proof.dedupe().toString()));
-          lastHistoryLength = context.tileHistory.length;
-
-          restart = true;
-          if (!request.completeSolve && context.tileHistory.length > 0) {
-            break mainLoop;
-          } else {
-            break lemmaLoop;
-          }
-        } else {
-          console.log(`%c${lemma.id}:\n  no changes`, 'color: darkgray');
+      },
+      onLemmaSuccess: (lemma, newHistory) => {
+        console.log(`%c${lemma.id}:\n  successful`, 'color: darkgray');
+        newHistory.forEach(history =>
+          console.log(history.proof.dedupe().toString())
+        );
+        if (!request.completeSolve && context.tileHistory.length > 0) {
+          return false;
         }
-      }
-    }
+      },
+      onLemmaNoChange: lemma => {
+        console.log(`%c${lemma.id}:\n  no changes`, 'color: darkgray');
+      },
+    });
   } catch (error) {
     if (error instanceof InsightError) {
       console.error(`Error in ${error.source}: ${error.message}`);

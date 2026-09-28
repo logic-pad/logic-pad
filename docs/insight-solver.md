@@ -16,6 +16,8 @@ Worker so long solves never block the UI.
 insight/
   insightSolver.ts    Solver subclass: public API, spawns and talks to the worker
   insightWorker.ts    Worker entry point: message protocol + main solve loop
+  lemmaLoop.ts        runLemmaLoop: the lemma iteration loop shared by the worker
+                      and speculative lemmas
   insightContext.ts   InsightContext: central mutable state for one solve
   helper.ts           Tile/color helpers shared by lemmas
   lemmas/             InsightLemma base class + the concrete deduction rules
@@ -77,15 +79,18 @@ Grids cross the worker boundary only as **serialized strings**
 Main loop behavior:
 
 1. Parse the grid and validate it. Grids already in an error state return
-   `data: null`; already-satisfied grids return `data: undefined`
-   immediately.
+   `data: null`; already-satisfied grids return the grid itself with an
+   "already solved" proof immediately.
 2. Filter the registered lemmas down to those `isApplicable(grid)` for this
    puzzle.
-3. Loop: iterate the lemmas in registration order and call
-   `lemma.apply(context)`. As soon as one returns `true` (it changed
-   something), **restart from the first lemma** — cheap deductions are
-   always re-attempted before expensive ones. The loop ends after a full
-   pass with no changes.
+3. Loop: `runLemmaLoop` (`lemmaLoop.ts`) iterates the lemmas in registration
+   order and calls `lemma.apply(context)`. As soon as one returns `true` (it
+   changed something), **restart from the first lemma** — cheap deductions
+   are always re-attempted before expensive ones. The loop ends after a full
+   pass with no changes. The worker drives it through hooks (progress
+   reporting, proof logging, and stopping after the first change in
+   step-by-step mode); speculative lemmas drive it on copied contexts with
+   no hooks.
    - In non-`completeSolve` mode, the loop stops after the first change and
      reports only the first history entry, so the UI can present one hint at
      a time without overwhelming the user.

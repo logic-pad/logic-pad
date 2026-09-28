@@ -15,6 +15,7 @@ import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
 import ForcedRegionExpansion from './forcedRegionExpansion.js';
+import SpeculativeSolve from './speculativeSolve.js';
 
 const allLemmas: readonly InsightLemma[] = [
   new CompleteSubtileSymbol(),
@@ -33,6 +34,7 @@ const allLemmas: readonly InsightLemma[] = [
   new CompleteDart(),
   new CompleteAreaNumber(),
   new ForcedRegionExpansion(),
+  new SpeculativeSolve(),
 ];
 
 export default allLemmas;
