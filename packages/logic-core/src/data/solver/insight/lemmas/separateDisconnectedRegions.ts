@@ -89,7 +89,7 @@ export default class SeparateDisconnectedRegions extends InsightLemma {
       context.setTiles(
         newTiles,
         disconnection.proof.describe(
-          `Cells at ${cell(disconnection.positions)} must be ${color} to separate ${area(regionA.positions[0])} and ${area(regionB.positions[0])}`
+          `Cells at ${cell(disconnection.positions)} must be ${color === Color.Dark ? Color.Light : Color.Dark} to separate ${area(regionA.positions[0])} and ${area(regionB.positions[0])}`
         )
       );
       progress = true;

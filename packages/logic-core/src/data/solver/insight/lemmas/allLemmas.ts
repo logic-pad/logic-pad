@@ -14,6 +14,9 @@ import DisconnectIncompatibleRegionSizes from './disconnectIncompatibleRegionSiz
 import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries.js';
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
+import ColorConnectedRegions from './colorConnectedRegions.js';
+import ConnectSameLetters from './connectSameLetters.js';
+import DisconnectDifferentLetters from './disconnectDifferentLetters.js';
 import ForcedRegionExpansion from './forcedRegionExpansion.js';
 import SpeculativeSolve from './speculativeSolve.js';
 
@@ -27,6 +30,9 @@ const allLemmas: readonly InsightLemma[] = [
   new CompleteGalaxy(),
   new DisconnectIncompatibleRegionSizes(),
   new DisconnectIncompatibleSymmetries(),
+  new ConnectSameLetters(),
+  new DisconnectDifferentLetters(),
+  new ColorConnectedRegions(),
   new ColorDisconnectedRegions(),
   new ConnectThroughBottleneck(),
   new SeparateDisconnectedRegions(),
