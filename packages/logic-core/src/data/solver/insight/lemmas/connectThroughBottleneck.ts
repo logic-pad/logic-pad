@@ -38,6 +38,31 @@ export default class ConnectThroughBottleneck extends InsightLemma {
         const pos = regions.toPosition(areaId);
         nodeToArea.set(graph.getId(pos.x, pos.y), areaId);
       }
+      // Sanity check: the region's areas must be able to connect through the region
+      // graph. If they cannot, the deductions that formed this region are invalid in
+      // the current state (this can happen inside speculative solves, where a
+      // hypothesis invalidates earlier progress).
+      {
+        const reachable = new Set<NodeId>();
+        const queue: NodeId[] = [nodeToArea.keys().next().value!];
+        reachable.add(queue[0]);
+        while (queue.length > 0) {
+          const node = queue.pop()!;
+          for (const neighbor of graph.adjacency.get(node)!) {
+            if (!reachable.has(neighbor)) {
+              reachable.add(neighbor);
+              queue.push(neighbor);
+            }
+          }
+        }
+        for (const node of nodeToArea.keys()) {
+          if (!reachable.has(node)) {
+            throw this.error(
+              `Region at ${area(regionInfo.positions[0])} cannot be connected: its areas are physically separated`
+            );
+          }
+        }
+      }
       for (const articulationPoint of graph.articulationPoints) {
         // Split the graph by removing the articulation point, and collect the region
         // areas contained in each resulting component. The articulation point's own node
