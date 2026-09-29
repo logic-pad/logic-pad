@@ -11,10 +11,25 @@ import { cell, modifyTiles, setColor, setOppositeColor } from '../helper.js';
 
 const COLORS = [Color.Dark, Color.Light] as const;
 
+interface Contradiction {
+  x: number;
+  y: number;
+  color: Color;
+  /** Number of successful lemma applications needed to reach the contradiction. */
+  lemmaCount: number;
+  cellsFilled: number;
+  proof: Proof;
+}
+
 /**
  * Speculatively fills a gray cell with each color and tries to solve the rest of the puzzle
  * with all other lemmas. If a hypothesis leads to a contradiction (an insight error, or a grid
  * left in an invalid state), the cell must be the opposite color.
+ *
+ * When several hypotheses lead to contradictions, the one with the shortest path to
+ * contradiction (fewest successful lemma applications) is reported. A speculation is
+ * terminated early once its lemma count exceeds the current best, since it can no longer
+ * improve it.
  *
  * The emitted proof includes the proofs of the speculative pass as children, ending with the
  * contradiction itself when one was detected by a lemma or store.
@@ -36,7 +51,8 @@ export default class SpeculativeSolve extends InsightLemma {
     const lemmas = allLemmas.filter(
       lemma => lemma.id !== this.id && lemma.isApplicable(grid)
     );
-    for (let y = 0; y < grid.height; y++) {
+    let best: Contradiction | null = null;
+    speculationLoop: for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const tile = grid.getTile(x, y);
         if (!tile.exists || tile.fixed || tile.color !== Color.Gray) continue;
@@ -51,9 +67,18 @@ export default class SpeculativeSolve extends InsightLemma {
             false,
             Color.Gray
           );
+          let lemmaCount = 0;
           let contradiction: Proof | null = null;
           try {
-            runLemmaLoop(hypothetical, lemmas);
+            runLemmaLoop(hypothetical, lemmas, {
+              onLemmaSuccess: (_, newHistory) => {
+                lemmaCount += newHistory.length;
+                if (validateGrid(hypothetical.grid, null).final === State.Error)
+                  throw this.error('Grid is left in an invalid state');
+                // This speculation can no longer beat the best one found so far.
+                if (best !== null && lemmaCount > best.lemmaCount) return false;
+              },
+            });
           } catch (error) {
             if (error instanceof InsightError) {
               contradiction = Proof.create(error.source).describe(
@@ -64,11 +89,11 @@ export default class SpeculativeSolve extends InsightLemma {
               throw error;
             }
           }
-          if (
-            !contradiction &&
-            validateGrid(hypothetical.grid, null).final !== State.Error
-          )
-            continue;
+          if (!contradiction) {
+            if (validateGrid(hypothetical.grid, null).final !== State.Error)
+              continue;
+          }
+          if (best !== null && lemmaCount >= best.lemmaCount) continue;
           const cellsFilled =
             grayBefore -
             hypothetical.grid.getTileCount(true, false, Color.Gray);
@@ -85,21 +110,26 @@ export default class SpeculativeSolve extends InsightLemma {
             proof.add(
               this.proof().describe('Grid is left in an invalid state')
             );
-          const newTiles = modifyTiles(grid);
-          setOppositeColor(grid, newTiles, x, y, color);
-          context.setTiles(
-            newTiles,
-            this.proof()
-              .difficulty(4)
-              .describe(
-                `Cell at ${cell({ x, y })} cannot be ${color} because it leads to a contradiction after filling ${cellsFilled} more cells, so it must be ${color === Color.Dark ? Color.Light : Color.Dark}`
-              )
-              .add(proof)
-          );
-          return true;
+          best = { x, y, color, lemmaCount, cellsFilled, proof };
+          // A contradiction without any deduction cannot be beaten.
+          if (best.lemmaCount === 0) break speculationLoop;
         }
       }
     }
-    return false;
+    if (!best) return false;
+    const newTiles = modifyTiles(grid);
+    setOppositeColor(grid, newTiles, best.x, best.y, best.color);
+    context.setTiles(
+      newTiles,
+      this.proof()
+        .difficulty(4)
+        .describe(
+          best.lemmaCount === 0
+            ? `Cell at ${cell({ x: best.x, y: best.y })} cannot be ${best.color} because it leads to a contradiction immediately, so it must be ${best.color === Color.Dark ? Color.Light : Color.Dark}`
+            : `Cell at ${cell({ x: best.x, y: best.y })} cannot be ${best.color} because it leads to a contradiction after ${best.lemmaCount} deduction${best.lemmaCount === 1 ? '' : 's'} filling ${best.cellsFilled} more cells, so it must be ${best.color === Color.Dark ? Color.Light : Color.Dark}`
+        )
+        .add(best.proof)
+    );
+    return true;
   }
 }
