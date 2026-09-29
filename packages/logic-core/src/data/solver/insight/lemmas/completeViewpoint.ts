@@ -36,7 +36,6 @@ export default class CompleteViewpoint extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const symbol of context.grid.symbols.get(viewpointInstance.id) ?? []) {
       if (
         Math.floor(symbol.x) !== symbol.x ||
@@ -80,8 +79,7 @@ export default class CompleteViewpoint extends InsightLemma {
               `Viewpoint number at ${cell(position)} is complete, so cells at ${cell(toCap)} must block its view`
             )
         );
-        progress = true;
-        continue;
+        return true;
       }
 
       if (possible === number) {
@@ -102,8 +100,7 @@ export default class CompleteViewpoint extends InsightLemma {
               `Viewpoint number at ${cell(position)} needs all available space to see ${number} cells, so cells at ${cell(toFill)} must be ${color}`
             )
         );
-        progress = true;
-        continue;
+        return true;
       }
 
       const growable = directions.filter(info => info.grayCells.length > 0);
@@ -132,10 +129,10 @@ export default class CompleteViewpoint extends InsightLemma {
               `Viewpoint number at ${cell(position)} can only grow ${info.direction} to see ${number} cells, so cells at ${cell(toFill)} must be ${color}`
             )
         );
-        progress = true;
+        return true;
       }
     }
-    return progress;
+    return false;
   }
 
   private analyzeDirection(

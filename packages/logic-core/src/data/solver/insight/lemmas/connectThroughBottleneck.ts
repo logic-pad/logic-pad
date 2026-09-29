@@ -26,7 +26,6 @@ export default class ConnectThroughBottleneck extends InsightLemma {
 
   public apply(context: InsightContext): boolean {
     const regions = context.regions;
-    let progress = false;
     for (const regionInfo of regions.regions.values()) {
       if (regionInfo.color === Color.Gray) continue;
       if (regionInfo.connectedAreas.size <= 1) continue;
@@ -122,9 +121,9 @@ export default class ConnectThroughBottleneck extends InsightLemma {
             `Cells at ${cell(modified)} are bottlenecks connecting ${area([area1, area2])}, so they must be filled in`
           )
         );
-        progress = true;
+        return true;
       }
     }
-    return progress;
+    return false;
   }
 }

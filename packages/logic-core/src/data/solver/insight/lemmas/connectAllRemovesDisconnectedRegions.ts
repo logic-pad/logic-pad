@@ -19,7 +19,6 @@ export default class ConnectAllRemovesDisconnectedRegions extends InsightLemma {
     const rules = context.grid.rules.filter(
       (rule): rule is ConnectAllRule => rule.id === connectAllInstance.id
     );
-    const progress = false;
     for (const rule of rules) {
       const color = rule.color;
       const seed = context.grid.find(t => t.color === color);
@@ -55,8 +54,9 @@ export default class ConnectAllRemovesDisconnectedRegions extends InsightLemma {
             `Cells at ${cell(modified)} cannot be ${color} because they are disconnected from the rest of the ${color} cells`
           )
         );
+        return true;
       }
     }
-    return progress;
+    return false;
   }
 }

@@ -24,7 +24,6 @@ export default class CompleteDart extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const symbol of context.grid.symbols.get(dartInstance.id) ?? []) {
       if (
         Math.floor(symbol.x) !== symbol.x ||
@@ -63,7 +62,7 @@ export default class CompleteDart extends InsightLemma {
               `Dart at ${cell(position)} already sees ${dart.number} opposite-colored cells, so cells at ${cell(grayCells)} must be ${color}`
             )
         );
-        progress = true;
+        return true;
       } else if (opposite + grayCells.length === dart.number) {
         const oppositeColor = color === Color.Dark ? Color.Light : Color.Dark;
         const newTiles = modifyTiles(context.grid);
@@ -80,9 +79,9 @@ export default class CompleteDart extends InsightLemma {
               `Dart at ${cell(position)} needs all remaining cells to see ${dart.number} opposite-colored cells, so cells at ${cell(grayCells)} must be ${oppositeColor}`
             )
         );
-        progress = true;
+        return true;
       }
     }
-    return progress;
+    return false;
   }
 }

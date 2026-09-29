@@ -15,7 +15,6 @@ export default class CompleteAreaNumber extends InsightLemma {
   public apply(context: InsightContext): boolean {
     const regionSizes = context.regionSizes;
     const regions = context.regions;
-    let progress = false;
     for (const symbol of context.grid.symbols.get(areaNumberInstance.id) ??
       []) {
       const position = {
@@ -61,8 +60,7 @@ export default class CompleteAreaNumber extends InsightLemma {
             `Area number at ${cell(position)} must be completed with ${minPossible} cells, so all cells in the region must be filled in`
           )
         );
-        progress = true;
-        continue;
+        return true;
       }
       const maxPossible = regionSizes.maxPossible(region, proof);
       if (maxPossible < minComplete) {
@@ -101,9 +99,9 @@ export default class CompleteAreaNumber extends InsightLemma {
             `Area number at ${cell(position)} is complete and must be surrounded`
           )
         );
-        progress = true;
+        return true;
       }
     }
-    return progress;
+    return false;
   }
 }

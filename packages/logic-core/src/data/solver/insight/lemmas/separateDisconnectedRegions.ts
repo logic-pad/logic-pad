@@ -74,7 +74,6 @@ export default class SeparateDisconnectedRegions extends InsightLemma {
         }
       }
     }
-    let progress = false;
     for (const [pair, disconnection] of map.entries()) {
       if (!disconnection) continue;
       const [rawA, rawB] = context.regions.fromRegionPair(pair);
@@ -92,8 +91,8 @@ export default class SeparateDisconnectedRegions extends InsightLemma {
           `Cells at ${cell(disconnection.positions)} must be ${color === Color.Dark ? Color.Light : Color.Dark} to separate ${area(regionA.positions[0])} and ${area(regionB.positions[0])}`
         )
       );
-      progress = true;
+      return true;
     }
-    return progress;
+    return false;
   }
 }

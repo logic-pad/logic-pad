@@ -19,7 +19,6 @@ export default class BreakBannedPattern extends InsightLemma {
     const rules = context.grid.rules.filter(
       (rule): rule is BanPatternRule => rule.id === banPatternInstance.id
     );
-    let progress = false;
 
     for (const rule of rules) {
       for (const shape of rule.cache) {
@@ -68,12 +67,12 @@ export default class BreakBannedPattern extends InsightLemma {
                     `Banned pattern must be broken at ${cell({ x: mismatch.x + dx, y: mismatch.y + dy })}`
                   )
               );
-              progress = true;
+              return true;
             }
           }
         }
       }
     }
-    return progress;
+    return false;
   }
 }

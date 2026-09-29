@@ -27,7 +27,6 @@ export default class CompleteSubtileSymbol extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const symbolType of SUBTILE_SYMBOLS) {
       for (const [_, symbol] of context.grid.symbols
         .get(symbolType)
@@ -75,10 +74,10 @@ export default class CompleteSubtileSymbol extends InsightLemma {
                 `Symbol at (${symbol.x}, ${symbol.y}) touches ${color} tiles, so all adjacent gray tiles must be filled in`
               )
           );
-          progress = true;
+          return true;
         }
       }
     }
-    return progress;
+    return false;
   }
 }

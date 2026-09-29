@@ -18,7 +18,6 @@ export default class ColorConnectedRegions extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const region of context.regions.regions.values()) {
       if (region.color === Color.Gray) continue;
       const grayAreas: Position[][] = [];
@@ -52,8 +51,8 @@ export default class ColorConnectedRegions extends InsightLemma {
           `Cells at ${cell(modified)} must be ${region.color} because they are connected to ${area(anchor)}`
         )
       );
-      progress = true;
+      return true;
     }
-    return progress;
+    return false;
   }
 }

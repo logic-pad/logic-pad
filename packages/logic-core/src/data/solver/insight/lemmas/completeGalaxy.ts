@@ -15,7 +15,6 @@ export default class CompleteGalaxy extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const region of context.regions.regions.values()) {
       let galaxy: GalaxySymbol | null = null;
       for (const symbol of region.symbols) {
@@ -92,7 +91,7 @@ export default class CompleteGalaxy extends InsightLemma {
               .copy()
               .describe(`Galaxy symbol must be completed at ${cell(modified)}`)
           );
-          progress = true;
+          return true;
         }
       }
       {
@@ -138,10 +137,10 @@ export default class CompleteGalaxy extends InsightLemma {
                 `Cells at ${cell(modified)} must not belong to the galaxy symbol at ${cell(galaxy)} because their opposite cells are not part of the galaxy`
               )
           );
-          progress = true;
+          return true;
         }
       }
     }
-    return progress;
+    return false;
   }
 }

@@ -12,30 +12,29 @@ export default class ColorDisconnectedRegions extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (let y = 0; y < context.grid.height; y++) {
       for (let x = 0; x < context.grid.width; x++) {
         const tile = context.grid.getTile(x, y);
         if (!tile.exists || tile.fixed || tile.color !== Color.Gray) continue;
         if (x > 0) {
           const modified = this.applyToRegion(context, x, y, x - 1, y);
-          progress ||= modified;
+          if (modified) return true;
         }
         if (y > 0) {
           const modified = this.applyToRegion(context, x, y, x, y - 1);
-          progress ||= modified;
+          if (modified) return true;
         }
         if (x < context.grid.width - 1) {
           const modified = this.applyToRegion(context, x, y, x + 1, y);
-          progress ||= modified;
+          if (modified) return true;
         }
         if (y < context.grid.height - 1) {
           const modified = this.applyToRegion(context, x, y, x, y + 1);
-          progress ||= modified;
+          if (modified) return true;
         }
       }
     }
-    return progress;
+    return false;
   }
 
   private applyToRegion(

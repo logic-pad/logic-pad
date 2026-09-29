@@ -15,7 +15,6 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    let progress = false;
     for (const symbol of context.grid.symbols.get(areaNumberInstance.id) ??
       []) {
       const position = {
@@ -83,8 +82,7 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
               `Area number at ${cell(position)} cannot be ${color} because it must be completed with ${minPossible} cells but there are at most ${maxComplete} ${color} cells in the region`
             )
           );
-          progress = true;
-          break;
+          return true;
         }
         const maxPossible = regionSizes.maxPossible(region, proof);
         if (maxPossible < minComplete) {
@@ -94,11 +92,10 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
               `Area number at ${cell(position)} cannot be ${color} because it must be completed with ${maxPossible} cells but there are at least ${minComplete} ${color} cells in the region`
             )
           );
-          progress = true;
-          break;
+          return true;
         }
       }
     }
-    return progress;
+    return false;
   }
 }
