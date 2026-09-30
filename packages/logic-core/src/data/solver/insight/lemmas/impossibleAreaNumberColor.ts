@@ -1,7 +1,9 @@
 import GridData from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
-import { instance as areaNumberInstance } from '../../../symbols/areaNumberSymbol.js';
+import AreaNumberSymbol, {
+  instance as areaNumberInstance,
+} from '../../../symbols/areaNumberSymbol.js';
 import { cell, modifyTiles } from '../helper.js';
 import { Color } from '../../../primitives.js';
 
@@ -45,18 +47,6 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
         const proof = this.proof().difficulty(2);
         const region = hypothetical.regions.get(position);
         if (!region) continue;
-        const regionMap = region.getRegionMap();
-        hypothetical.regions.explainRegion(region, proof);
-        const flatMap = regionMap.flat();
-        const maxComplete = flatMap.reduce(
-          (count, cell) => count + (cell || cell === null ? 1 : 0),
-          0
-        );
-        const minComplete = flatMap.reduce(
-          (count, cell) => count + (cell ? 1 : 0),
-          0
-        );
-        const minPossible = regionSizes.minPossible(region, proof);
         const fillOpposite = () => {
           return modifyTiles(
             context.grid,
@@ -75,6 +65,41 @@ export default class ImpossibleAreaNumberColor extends InsightLemma {
             }
           );
         };
+        const regionMap = region.getRegionMap();
+        hypothetical.regions.explainRegion(region, proof);
+        const flatMap = regionMap.flat();
+        const maxComplete = flatMap.reduce(
+          (count, cell) => count + (cell || cell === null ? 1 : 0),
+          0
+        );
+        const minComplete = flatMap.reduce(
+          (count, cell) => count + (cell ? 1 : 0),
+          0
+        );
+        const possibilities = regionSizes.getPossibilities(region, proof);
+        if (possibilities && possibilities.length === 0) {
+          const numbers = [
+            ...new Set(
+              [...region.symbols]
+                .filter(
+                  (symbol): symbol is AreaNumberSymbol =>
+                    symbol instanceof AreaNumberSymbol
+                )
+                .map(symbol => symbol.number)
+            ),
+          ];
+          context.setTiles(
+            fillOpposite(),
+            proof.describe(
+              numbers.length > 1
+                ? `Area number at ${cell(position)} cannot be ${color} because it would merge area numbers ${numbers.join(' and ')} into one region, which cannot all be satisfied`
+                : `Area number at ${cell(position)} cannot be ${color} because that region has no possible size left`
+            )
+          );
+          return true;
+        }
+        if (!possibilities) continue;
+        const minPossible = regionSizes.minPossible(region, proof);
         if (minPossible > maxComplete) {
           context.setTiles(
             fillOpposite(),
