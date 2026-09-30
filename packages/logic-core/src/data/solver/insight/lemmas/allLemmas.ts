@@ -2,6 +2,7 @@ import BreakBannedPattern from './breakBannedPattern.js';
 import CompleteAreaNumber from './completeAreaNumber.js';
 import CompleteDart from './completeDart.js';
 import CompleteGalaxy from './completeGalaxy.js';
+import CompleteLotus from './completeLotus.js';
 import CompleteSubtileSymbol from './completeSubtileSymbol.js';
 import CompleteViewpoint from './completeViewpoint.js';
 import ConnectAllCells from './connectAllCells.js';
@@ -28,6 +29,7 @@ const allLemmas: readonly InsightLemma[] = [
   new ConnectAllRemovesDisconnectedRegions(),
   new ImpossibleAreaNumberColor(),
   new CompleteGalaxy(),
+  new CompleteLotus(),
   new DisconnectIncompatibleRegionSizes(),
   new DisconnectIncompatibleSymmetries(),
   new ConnectSameLetters(),
