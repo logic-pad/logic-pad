@@ -40,18 +40,50 @@ export default class DisconnectIncompatibleRegionSizes extends InsightLemma {
         )
           continue;
         const sizesB = new Set(possibilitiesB);
-        if (possibilitiesA.some(value => sizesB.has(value))) continue;
-        const proof = this.proof().difficulty(2);
-        regionSizes.getPossibilities(regionA, proof);
-        regionSizes.getPossibilities(regionB, proof);
-        const modified = context.regions.addDisconnected(
-          regionA.positions[0],
-          regionB.positions[0],
-          proof.describe(
-            `${area(regionA.positions[0])} and ${area(regionB.positions[0])} must be separate because they must have different sizes`
-          )
+        if (possibilitiesA.every(value => !sizesB.has(value))) {
+          const proof = this.proof().difficulty(2);
+          regionSizes.getPossibilities(regionA, proof);
+          regionSizes.getPossibilities(regionB, proof);
+          const modified = context.regions.addDisconnected(
+            regionA.positions[0],
+            regionB.positions[0],
+            proof.describe(
+              `${area(regionA.positions[0])} and ${area(regionB.positions[0])} must be separate because they must have different sizes`
+            )
+          );
+          progress ||= modified;
+        }
+      }
+      for (const regionB of context.regions.regions.values()) {
+        const { region: regionA, possibilities: possibilitiesA } =
+          constrained[i];
+        if (regionA === regionB) continue;
+        if (regionB.color !== regionA.color) continue;
+        const countA = regionA
+          .getRegionMap()
+          .flat()
+          .reduce((prev, curr) => prev + (curr ? 1 : 0), 0);
+        const countB = regionB
+          .getRegionMap()
+          .flat()
+          .reduce((prev, curr) => prev + (curr ? 1 : 0), 0);
+        const maxA = possibilitiesA.reduce(
+          (prev, curr) => Math.max(prev, curr),
+          0
         );
-        progress ||= modified;
+        if (countA + countB + 1 > maxA) {
+          // we at least need 1 more tile to connect two originally separate regions
+          const proof = this.proof().difficulty(2);
+          regionSizes.getPossibilities(regionA, proof);
+          const modified = context.regions.addDisconnected(
+            regionA.positions[0],
+            regionB.positions[0],
+            proof.describe(
+              `${area(regionA.positions[0])} and ${area(regionB.positions[0])} must be separate because they cannot satisfy region size constraints when combined`
+            )
+          );
+          progress ||= modified;
+        }
       }
     }
     return progress;
