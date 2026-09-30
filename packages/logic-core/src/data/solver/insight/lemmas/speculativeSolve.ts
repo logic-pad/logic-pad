@@ -117,6 +117,7 @@ export default class SpeculativeSolve extends InsightLemma {
       }
     }
     if (!best) return false;
+    if (best.lemmaCount === 0) return false; // todo: we do not want to cover 0-step speculations because new lemmas should be developed for this
     const newTiles = modifyTiles(grid);
     setOppositeColor(grid, newTiles, best.x, best.y, best.color);
     context.setTiles(
