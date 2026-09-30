@@ -71,8 +71,9 @@ export default class DisconnectIncompatibleRegionSizes extends InsightLemma {
           (prev, curr) => Math.max(prev, curr),
           0
         );
-        if (countA + countB + 1 > maxA) {
-          // we at least need 1 more tile to connect two originally separate regions
+        // Connecting two regions that are not touching yet costs at least one extra cell.
+        const extra = this.areAdjacent(regionA, regionB) ? 0 : 1;
+        if (countA + countB + extra > maxA) {
           const proof = this.proof().difficulty(2);
           regionSizes.getPossibilities(regionA, proof);
           const modified = context.regions.addDisconnected(
@@ -87,5 +88,17 @@ export default class DisconnectIncompatibleRegionSizes extends InsightLemma {
       }
     }
     return progress;
+  }
+
+  /** True when a cell of one region is orthogonally adjacent to a cell of the other. */
+  private areAdjacent(regionA: Region, regionB: Region): boolean {
+    const cellsB = new Set(regionB.positions.map(pos => `${pos.x},${pos.y}`));
+    return regionA.positions.some(
+      pos =>
+        cellsB.has(`${pos.x + 1},${pos.y}`) ||
+        cellsB.has(`${pos.x - 1},${pos.y}`) ||
+        cellsB.has(`${pos.x},${pos.y + 1}`) ||
+        cellsB.has(`${pos.x},${pos.y - 1}`)
+    );
   }
 }

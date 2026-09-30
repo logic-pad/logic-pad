@@ -350,6 +350,9 @@ export default class RegionStore extends InsightStore {
       const [rawA, rawB] = this.fromRegionPair(key);
       if (rawA !== region.id && rawB !== region.id) continue;
       const otherRegionId = rawA === region.id ? rawB : rawA;
+      // Two regions that were disconnected can later be merged transitively, which leaves a
+      // proof that refers to the region itself; such a proof carries no information.
+      if (otherRegionId === region.id) continue;
       proof?.add(deduction);
       disconnected.add(otherRegionId);
     }
@@ -357,6 +360,7 @@ export default class RegionStore extends InsightStore {
       const [rawA, rawB] = this.fromRegionPair(key);
       if (rawA !== region.id && rawB !== region.id) continue;
       const otherRegionId = rawA === region.id ? rawB : rawA;
+      if (otherRegionId === region.id) continue;
       disconnected.add(otherRegionId);
     }
     return disconnected;
@@ -541,10 +545,12 @@ export default class RegionStore extends InsightStore {
     }
     this.disconnectionProofs = this.rekeyDisconnectionProofs();
 
+    const seenAreas = new Set<AreaId>();
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const area = this.context.areas.get(this.toPositionValue(x, y));
-        if (!area) continue;
+        if (!area || seenAreas.has(area.id)) continue;
+        seenAreas.add(area.id);
         const rep = this.disjointSet.find(area.id);
         let region = this._regions.get(rep);
         if (!region) {

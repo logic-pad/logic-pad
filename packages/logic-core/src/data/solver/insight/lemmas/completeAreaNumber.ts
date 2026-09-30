@@ -40,7 +40,7 @@ export default class CompleteAreaNumber extends InsightLemma {
       const minPossible = regionSizes.minPossible(region, proof);
       if (minPossible > maxComplete) {
         throw this.error(
-          `Area number at ${cell(position)} cannot be completed because the minimum possible value is ${minPossible} but there are at least ${maxComplete} cells in the region`
+          `Area number at ${cell(position)} cannot be completed because the minimum possible value is ${minPossible} but there are at most ${maxComplete} cells in the region`
         );
       }
       if (minPossible === maxComplete && maxComplete > minComplete) {
