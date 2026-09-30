@@ -531,10 +531,15 @@ export default class RegionStore extends InsightStore {
     this.disjointSet = new DisjointSet(size);
     this._regions.clear();
 
+    // Areas are renumbered whenever the grid changes, so the recorded proofs must be rekeyed
+    // against the current areas before they are replayed into the disjoint set.
+    this.connectionProofs = this.rekeyConnectionProofs();
+
     for (const [key] of this.connectionProofs.entries()) {
       const [rawA, rawB] = this.fromAreaPair(key);
       this.disjointSet.union(rawA, rawB);
     }
+    this.disconnectionProofs = this.rekeyDisconnectionProofs();
 
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
@@ -554,9 +559,6 @@ export default class RegionStore extends InsightStore {
         area.symbols.forEach(symbol => region.symbols.add(symbol));
       }
     }
-
-    this.connectionProofs = this.rekeyConnectionProofs();
-    this.disconnectionProofs = this.rekeyDisconnectionProofs();
 
     for (const [key, proof] of this.connectionProofs.entries()) {
       const [rawA] = this.fromAreaPair(key);
