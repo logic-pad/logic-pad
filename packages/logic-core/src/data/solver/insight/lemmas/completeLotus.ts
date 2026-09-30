@@ -6,17 +6,18 @@ import LotusSymbol, {
 } from '../../../symbols/lotusSymbol.js';
 import { Region } from '../stores/regionStore.js';
 import { area, cell, modifyTiles } from '../helper.js';
-import { Color, Orientation, Position } from '../../../primitives.js';
-
-type AxisFamily = 'vertical' | 'horizontal' | 'up-right' | 'down-right';
+import { Color, Position } from '../../../primitives.js';
+import {
+  apply,
+  linearKey,
+  symmetryKey,
+  symmetriesOf,
+  Symmetry,
+} from '../types/symmetry.js';
 
 interface Axis {
-  family: AxisFamily;
-  /**
-   * The position of the axis, expressed as `x` for vertical axes, `y` for horizontal ones,
-   * `x + y` for up-right ones, and `x - y` for down-right ones.
-   */
-  offset: number;
+  lotus: LotusSymbol;
+  symmetry: Symmetry;
 }
 
 /**
@@ -43,40 +44,45 @@ export default class CompleteLotus extends InsightLemma {
 
   public apply(context: InsightContext): boolean {
     for (const region of context.regions.regions.values()) {
-      for (const lotus of this.distinctAxes(region)) {
-        if (this.completeForLotus(context, region, lotus)) return true;
+      for (const axis of this.distinctAxes(region)) {
+        if (this.completeForAxis(context, region, axis)) return true;
       }
     }
     return false;
   }
 
   /**
-   * Returns one lotus per axis of symmetry of the region, throwing when two lotuses describe
-   * distinct parallel axes, which no finite region could be symmetrical across.
+   * Returns one axis per reflection of the region, throwing when two lotuses describe distinct
+   * parallel axes, which no finite region could be symmetrical across.
    */
-  private distinctAxes(region: Region): LotusSymbol[] {
-    const axes = new Map<AxisFamily, { lotus: LotusSymbol; axis: Axis }>();
+  private distinctAxes(region: Region): Axis[] {
+    const axes = new Map<string, Axis>();
+    const seen = new Set<LotusSymbol>();
     for (const symbol of region.symbols) {
-      if (symbol.id !== lotusInstance.id) continue;
-      const lotus = symbol as LotusSymbol;
-      const axis = CompleteLotus.axisOf(lotus);
-      if (!axis) continue;
-      const existing = axes.get(axis.family);
-      if (!existing) {
-        axes.set(axis.family, { lotus, axis });
-      } else if (existing.axis.offset !== axis.offset) {
-        throw this.error(
-          `Region ${area(region.positions[0])} cannot be completed because the lotus symbols at ${cell(existing.lotus)} and ${cell(lotus)} have distinct parallel ${axis.family} axes of symmetry`
-        );
+      if (symbol.id !== lotusInstance.id || seen.has(symbol as LotusSymbol))
+        continue;
+      seen.add(symbol as LotusSymbol);
+      for (const symmetry of symmetriesOf(symbol)) {
+        const existing = axes.get(linearKey(symmetry));
+        if (!existing) {
+          axes.set(linearKey(symmetry), {
+            lotus: symbol as LotusSymbol,
+            symmetry,
+          });
+        } else if (symmetryKey(existing.symmetry) !== symmetryKey(symmetry)) {
+          throw this.error(
+            `Region ${area(region.positions[0])} cannot be completed because the lotus symbols at ${cell(existing.lotus)} and ${cell(symbol)} have distinct parallel axes of symmetry`
+          );
+        }
       }
     }
-    return [...axes.values()].map(entry => entry.lotus);
+    return [...axes.values()];
   }
 
-  private completeForLotus(
+  private completeForAxis(
     context: InsightContext,
     region: Region,
-    lotus: LotusSymbol
+    axis: Axis
   ): boolean {
     const grid = context.grid;
     const map = region.getRegionMap();
@@ -85,8 +91,8 @@ export default class CompleteLotus extends InsightLemma {
       return map[y][x];
     };
     const regionName = `Region ${area(region.positions[0])}`;
-    const mirrorOf = (pos: Position) =>
-      CompleteLotus.mirrorOf(lotus, pos.x, pos.y);
+    const mirrorOf = (pos: Position) => apply(axis.symmetry, pos.x, pos.y);
+    const lotusName = cell(axis.lotus);
 
     for (let y = 0; y < map.length; y++) {
       for (let x = 0; x < map[y].length; x++) {
@@ -95,11 +101,11 @@ export default class CompleteLotus extends InsightLemma {
         const tile = grid.getTile(target.x, target.y);
         if (!tile.exists)
           throw this.error(
-            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${cell(lotus)} does not exist`
+            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${lotusName} does not exist`
           );
         if (inRegion(target.x, target.y) === false)
           throw this.error(
-            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${cell(lotus)} is outside the region`
+            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${lotusName} is outside the region`
           );
         if (
           region.color !== Color.Gray &&
@@ -107,7 +113,7 @@ export default class CompleteLotus extends InsightLemma {
           tile.color !== region.color
         )
           throw this.error(
-            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${cell(lotus)} is ${tile.color} instead of ${region.color}`
+            `${regionName} cannot be completed because the cell mirrored from ${cell({ x, y })} across the lotus at ${lotusName} is ${tile.color} instead of ${region.color}`
           );
       }
     }
@@ -136,7 +142,7 @@ export default class CompleteLotus extends InsightLemma {
           proof
             .copy()
             .describe(
-              `Cells at ${cell(modified)} must match the cells mirrored from them across the lotus at ${cell(lotus)}`
+              `Cells at ${cell(modified)} must match the cells mirrored from them across the lotus at ${lotusName}`
             )
         );
         return true;
@@ -166,7 +172,7 @@ export default class CompleteLotus extends InsightLemma {
             .copy()
             .difficulty(2)
             .describe(
-              `Cells at ${cell(modified)} must join the region because their mirrors across the lotus at ${cell(lotus)} belong to it`
+              `Cells at ${cell(modified)} must join the region because their mirrors across the lotus at ${lotusName} belong to it`
             )
         );
         return true;
@@ -206,48 +212,5 @@ export default class CompleteLotus extends InsightLemma {
     }
 
     return false;
-  }
-
-  /**
-   * The mirror of a cell across the axis of the given lotus.
-   */
-  private static mirrorOf(lotus: LotusSymbol, x: number, y: number): Position {
-    switch (lotus.orientation) {
-      case Orientation.Up:
-      case Orientation.Down:
-        return { x: 2 * lotus.x - x, y };
-      case Orientation.Right:
-      case Orientation.Left:
-        return { x, y: 2 * lotus.y - y };
-      case Orientation.UpRight:
-      case Orientation.DownLeft:
-        return { x: lotus.x + lotus.y - y, y: lotus.x + lotus.y - x };
-      case Orientation.DownRight:
-      case Orientation.UpLeft:
-        return { x: lotus.x - lotus.y + y, y: lotus.y - lotus.x + x };
-    }
-  }
-
-  /**
-   * The axis of symmetry described by the given lotus, or null when it is placed so that the axis
-   * does not map cell centers onto cell centers.
-   */
-  private static axisOf(lotus: LotusSymbol): Axis | null {
-    const mirror = CompleteLotus.mirrorOf(lotus, 0, 0);
-    if (mirror.x % 1 !== 0 || mirror.y % 1 !== 0) return null;
-    switch (lotus.orientation) {
-      case Orientation.Up:
-      case Orientation.Down:
-        return { family: 'vertical', offset: lotus.x };
-      case Orientation.Right:
-      case Orientation.Left:
-        return { family: 'horizontal', offset: lotus.y };
-      case Orientation.UpRight:
-      case Orientation.DownLeft:
-        return { family: 'up-right', offset: lotus.x + lotus.y };
-      case Orientation.DownRight:
-      case Orientation.UpLeft:
-        return { family: 'down-right', offset: lotus.x - lotus.y };
-    }
   }
 }
