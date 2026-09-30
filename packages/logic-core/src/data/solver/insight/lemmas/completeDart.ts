@@ -59,8 +59,13 @@ function pickSelection(
  *    number of opposite-colored cells that it already sees.
  * 2. The gray cells that the dart sees are grouped by merged tile, so each group contributes
  *    either its full size or nothing to the remaining count.
- * 3. If exactly one selection of groups adds up to the remaining count, the cells of those
- *    groups must be opposite-colored, and every other gray cell seen must share the dart's
+ * 3. A group larger than the remaining count can never contribute to it, so it must share the
+ *    dart's color even when the remaining groups admit several combinations. This is applied
+ *    first, and the remaining combinations are left to a later step.
+ * 4. A group that leaves inadequate space to satisfy the remaining count must be part of the
+ *    remaining count itself.
+ * 4. Otherwise, if exactly one selection of groups adds up to the remaining count, the cells of
+ *    those groups must be opposite-colored, and every other gray cell seen must share the dart's
  *    color.
  *
  * Grids that wrap around are ignored because the cells seen by a dart cannot be enumerated
@@ -127,27 +132,82 @@ export default class CompleteDart extends InsightLemma {
 
       const groups = this.groupByMergedTile(context.grid, grayCells);
       const sizes = groups.map(group => group.length);
-      const available = sizes.reduce((sum, size) => sum + size, 0);
+      const oversizedTarget: number[] = [];
+      const candidates: number[] = [];
+      for (let i = 0; i < sizes.length; i++) {
+        if (sizes[i] > target) oversizedTarget.push(i);
+        else candidates.push(i);
+      }
+      const available = candidates.reduce((sum, i) => sum + sizes[i], 0);
       if (target > available)
         throw this.error(
-          `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} but only sees ${available} gray cell${plural(available)}`
+          `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} but its merged gray tiles [${sizes.join(',')}] can only provide ${available}`
         );
 
-      const table = selectionTable(sizes, target);
-      if (table[0][target] === 0)
-        throw this.error(
-          `Dart at ${cell(position)} cannot see exactly ${dart.number} opposite-colored cell${plural(dart.number)} because no combination of its merged gray cells [${sizes.join(',')}] adds up to ${target}`
-        );
-      if (table[0][target] > 1) continue;
-
-      const selection = new Set(pickSelection(table, sizes, target));
       const oppositeColor = color === Color.Dark ? Color.Light : Color.Dark;
       const newTiles = modifyTiles(context.grid);
       const oppositeCells: Position[] = [];
       const sameCells: Position[] = [];
-      for (let i = 0; i < groups.length; i++) {
+
+      if (oversizedTarget.length > 0) {
+        // An oversized group can never contribute to the target, regardless of how the other
+        // groups combine, so it must share the dart's color. Finding the combinations that
+        // remain is left to a later step.
+        for (const i of oversizedTarget) {
+          for (const pos of groups[i]) {
+            setColor(context.grid, newTiles, pos.x, pos.y, color);
+            sameCells.push(pos);
+          }
+        }
+        context.setTiles(
+          newTiles,
+          this.proof()
+            .difficulty(target === 0 ? 1 : 2)
+            .describe(
+              target === 0
+                ? `Dart at ${cell(position)} already sees ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(sameCells)} must be ${color}`
+                : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)}, so merged gray tiles bigger than ${target} at ${cell(sameCells)} must be ${color}`
+            )
+        );
+        return true;
+      }
+
+      const oversizedNontarget: number[] = [];
+      for (let i = 0; i < sizes.length; i++) {
+        if (sizes[i] > available - target) oversizedNontarget.push(i);
+      }
+      if (oversizedNontarget.length > 0) {
+        // An oversized group that leaves too few fells to fulfil the target can never be the same color as the dart
+        for (const i of oversizedNontarget) {
+          for (const pos of groups[i]) {
+            setOppositeColor(context.grid, newTiles, pos.x, pos.y, color);
+            oppositeCells.push(pos);
+          }
+        }
+        context.setTiles(
+          newTiles,
+          this.proof()
+            .difficulty(target === 0 ? 1 : 2)
+            .describe(
+              available === target
+                ? `Dart at ${cell(position)} needs all remaining cells to see ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(oppositeCells)} must be ${oppositeColor}`
+                : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)}, so merged gray tiles at ${cell(oppositeCells)} must be ${oppositeColor} to satisfy the count`
+            )
+        );
+        return true;
+      }
+
+      const table = selectionTable(sizes, target);
+      if (table[0][target] === 0)
+        throw this.error(
+          `Dart at ${cell(position)} cannot see exactly ${dart.number} opposite-colored cell${plural(dart.number)} because no combination of gray cells [${sizes.join(',')}] adds up to ${target}`
+        );
+      if (table[0][target] > 1) continue;
+
+      const selected = new Set(pickSelection(table, sizes, target));
+      for (const i of candidates) {
         for (const pos of groups[i]) {
-          if (selection.has(i)) {
+          if (selected.has(i)) {
             setOppositeColor(context.grid, newTiles, pos.x, pos.y, color);
             oppositeCells.push(pos);
           } else {
@@ -157,20 +217,13 @@ export default class CompleteDart extends InsightLemma {
         }
       }
 
-      const description =
-        oppositeCells.length === 0
-          ? `Dart at ${cell(position)} already sees ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(sameCells)} must be ${color}`
-          : sameCells.length === 0
-            ? `Dart at ${cell(position)} needs all remaining cells to see ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(oppositeCells)} must be ${oppositeColor}`
-            : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} and [${sizes.join(',')}] has only one combination that adds up to ${target}, so cells at ${cell(oppositeCells)} must be ${oppositeColor} and cells at ${cell(sameCells)} must be ${color}`;
-
       context.setTiles(
         newTiles,
         this.proof()
-          .difficulty(
-            oppositeCells.length === 0 || sameCells.length === 0 ? 1 : 3
+          .difficulty(sameCells.length === 0 ? 1 : 3)
+          .describe(
+            `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} and [${sizes.join(',')}] has only one combination that adds up to ${target}, so cells at ${cell(oppositeCells)} must be ${oppositeColor} and cells at ${cell(sameCells)} must be ${color}`
           )
-          .describe(description)
       );
       return true;
     }
