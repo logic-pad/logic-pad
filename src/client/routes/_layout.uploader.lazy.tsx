@@ -4,7 +4,6 @@ import { useRouteProtection } from '../router/useRouteProtection';
 import ResponsiveLayout from '../components/ResponsiveLayout';
 import { FaExternalLinkAlt, FaTrash, FaUpload } from 'react-icons/fa';
 import PQueue from 'p-queue';
-import { r } from 'readable-regexp';
 import Loading from '../components/Loading';
 import Difficulty from '../metadata/Difficulty';
 import PuzzleEditorModal, {
@@ -15,7 +14,7 @@ import {
   PuzzleMetadata,
   validatePuzzleChecklist,
 } from '@logic-pad/core/data/puzzle';
-import { cn } from '../uiHelper';
+import { cn, offlineLinkRegex } from '../uiHelper';
 import toast from 'react-hot-toast';
 import { useOnline } from '../state/online.ts';
 import { api } from '../online/api';
@@ -99,19 +98,6 @@ function getErrorMessage(checklistItem: string) {
       return 'Unknown error';
   }
 }
-
-const linkRegex = r
-  .match(
-    r.exactly`http`.maybe`s`.exactly`://`,
-    r.oneOrMore.charIn('-.', r.word),
-    r.exactly`/`,
-    r.oneOrMore.word,
-    r.exactly`?`,
-    r.zeroOrMore.charIn('=&', r.word),
-    r.exactly`d=`,
-    r.capture.oneOrMore.charIn('_%-', r.word)
-  )
-  .toRegExp('gm');
 
 class UploadManager {
   private uploads: readonly UploadEntry[] = [];
@@ -437,7 +423,7 @@ class UploadManager {
   };
 
   public extractFromText = (text: string) => {
-    const links = text.matchAll(linkRegex);
+    const links = text.matchAll(offlineLinkRegex);
     for (const match of links) {
       if (match[1]) {
         this.add(match[1]);

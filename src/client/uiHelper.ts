@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx';
 import toast from 'react-hot-toast';
 import { extendTailwindMerge } from 'tailwind-merge';
 import { HighlightColor } from './online/data';
+import { r } from 'readable-regexp';
 
 const twMerge = extendTailwindMerge({
   extend: {
@@ -153,3 +154,27 @@ export const safeClipboard = {
     }
   },
 };
+
+export const offlineLinkRegex = r
+  .match(
+    r.exactly`http`.maybe`s`.exactly`://`,
+    r.oneOrMore.charIn('-.:', r.word),
+    r.exactly`/`,
+    r.oneOrMore.word,
+    r.exactly`?`,
+    r.zeroOrMore.charIn('=&', r.word),
+    r.exactly`d=`,
+    r.capture.oneOrMore.charIn('_%-', r.word)
+  )
+  .toRegExp('gm');
+
+export const onlineLinkRegex = r
+  .match(
+    r.exactly`http`.maybe`s`.exactly`://`,
+    r.oneOrMore.charIn('-.:', r.word),
+    r.exactly`/`,
+    r.oneOrMore.word,
+    r.exactly`/`,
+    r.capture.oneOrMore.word
+  )
+  .toRegExp('gm');

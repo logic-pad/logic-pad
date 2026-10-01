@@ -66,6 +66,27 @@ const UserMention = memo(function UserMention({
   );
 });
 
+const PuzzleMention = memo(function PuzzleMention({
+  href,
+  children,
+}: {
+  href: string;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={cn(
+        'bg-primary/10 border-b border-primary rounded-lg no-underline!'
+      )}
+    >
+      {children}
+    </a>
+  );
+});
+
 const MarkdownAsync = lazy(async () => {
   const { default: Markdown } = await import('react-markdown');
 
@@ -108,6 +129,9 @@ const MarkdownAsync = lazy(async () => {
     a: function Link({ href, children }: { href?: string; children: any }) {
       if (href?.startsWith('/profile/') && String(children).startsWith('@')) {
         return <UserMention href={href}>{children}</UserMention>;
+      }
+      if (href?.startsWith('/solve') && String(children).startsWith('#')) {
+        return <PuzzleMention href={href}>{children}</PuzzleMention>;
       }
       return (
         <a href={href} target="_blank" rel="noreferrer">

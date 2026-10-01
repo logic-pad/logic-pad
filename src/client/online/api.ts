@@ -24,6 +24,7 @@ import {
   ModComment,
   ReceivedModeration,
   GivenModeration,
+  PuzzleAutocomplete,
 } from './data';
 import {
   DataTag,
@@ -526,6 +527,14 @@ export const api = {
     return await axios
       .get<ListResponse<CollectionBrief>>(`/collection/search/all`, {
         params: { ...query, cursorBefore, cursorAfter },
+      })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  puzzleAutocomplete: async (q: string) => {
+    return await axios
+      .get<PuzzleAutocomplete[]>(`/puzzle/autocomplete`, {
+        params: { q },
       })
       .then(res => res.data)
       .catch(rethrowError);

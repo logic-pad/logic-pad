@@ -111,6 +111,11 @@ export interface CollectionFollow {
   followed: boolean;
 }
 
+export interface PuzzleAutocomplete {
+  id: string;
+  title: string;
+}
+
 export interface UserAutocomplete {
   id: string;
   name: string;
