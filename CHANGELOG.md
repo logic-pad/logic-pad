@@ -1,3 +1,10 @@
+# 30/9/2026
+
+**PREVIEW BRANCH**
+
+- The Insight Solver is now available with numerous enhancements
+  - Enable Grid Insights in site settings to access the solver
+
 # 25/9/2026
 
 **PREVIEW BRANCH**
