@@ -5,6 +5,7 @@ import CompleteGalaxy from './completeGalaxy.js';
 import CompleteLotus from './completeLotus.js';
 import CompleteSubtileSymbol from './completeSubtileSymbol.js';
 import CompleteViewpoint from './completeViewpoint.js';
+import ColorViewpointSight from './colorViewpointSight.js';
 import ConnectAllCells from './connectAllCells.js';
 import ConnectAllRemovesDisconnectedRegions from './connectAllRemovesDisconnectedRegions.js';
 import ConnectThroughBottleneck from './connectThroughBottleneck.js';
@@ -39,6 +40,7 @@ const allLemmas: readonly InsightLemma[] = [
   new ConnectThroughBottleneck(),
   new SeparateDisconnectedRegions(),
   new CompleteViewpoint(),
+  new ColorViewpointSight(),
   new CompleteDart(),
   new CompleteAreaNumber(),
   new ForcedRegionExpansion(),
