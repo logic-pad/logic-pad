@@ -112,22 +112,28 @@ export default memo(function CommentTextarea({
       anchorMode="left"
       suggestionsPlacement="above"
       suggestionsPortalHost={null}
+      autoResize
       placeholder={'Add a comment...\nUse ||double pipes|| for spoilers'}
       maxLength={5000}
-      className="grow bg-base-200 text-base-content text-sm rounded-md"
+      className="grow bg-base-200 focus-within:bg-base-300 text-base-content text-sm rounded-md"
       classNames={{
         control: 'border-0 bg-transparent rounded-md',
         highlighter: 'p-2',
         input:
-          'p-2 h-20 overflow-y-auto! text-base-content outline-none focus:outline-none placeholder:text-base-content/40',
+          'p-2 min-h-12 max-h-30 overflow-y-auto! text-base-content outline-none focus:outline-none placeholder:text-base-content/40',
         suggestions:
-          'z-[100] min-w-0 overflow-hidden rounded-md border border-base-300 bg-base-200 shadow-lg top-auto! bottom-full! left-0! w-full! mb-2',
+          'z-[100] min-w-0 overflow-hidden rounded-md border border-base-300 bg-base-200 text-base-content shadow-lg backdrop-blur-none top-auto! bottom-full! left-0! w-full! mb-2',
         suggestionsList:
           'm-0 max-h-64 list-none divide-y divide-base-300 overflow-y-auto scroll-py-1 p-0 focus:outline-none',
         suggestionItem:
           'cursor-pointer select-none px-3 py-1.5 text-sm text-base-content transition-colors hover:bg-base-300 data-[focused=true]:bg-primary data-[focused=true]:text-primary-content',
+        suggestionHighlight: 'font-semibold text-inherit',
         suggestionsStatus:
           'px-4 py-2.5 text-left text-sm leading-relaxed text-base-content/60',
+        loadingIndicator: 'flex justify-center py-3',
+        loadingSpinner:
+          'loading loading-bars inline-block bg-current text-base-content',
+        loadingSpinnerElement: 'hidden',
       }}
       onKeyDown={e => {
         if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
