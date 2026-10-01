@@ -1,3 +1,4 @@
+import { NEIGHBOR_OFFSETS } from '../../../grid.js';
 import { Color, Position } from '../../../primitives.js';
 import Proof from '../types/proof.js';
 import DisjointSet from './disjointSet.js';
@@ -7,6 +8,7 @@ import { cell, area } from '../helper.js';
 import { RegionGraph } from './regionGraph.js';
 import { array } from '../../../dataHelper.js';
 import Symbol from '../../../symbols/symbol.js';
+import TileData from '../../../tile.js';
 import { AreaId, PositionValue } from './areaStore.js';
 
 declare const regionSymbol: unique symbol;
@@ -76,15 +78,18 @@ export class Region {
   }
 
   private _regionMap?: RegionMap;
+  private mapVersion = -1;
   /**
-   * Get a map of cells that are in the same region as the given cell (`true`), in a different region (`false`), or unknown
-   * but possible (`null`). Includes deductions from lemmas.
+   * Get a map of cells that are in the same region as the given cell (`true`), in a different
+   * region (`false`), or unknown but possible (`null`). Includes deductions from lemmas.
    *
    * Use {@link RegionStore.explainRegion} to attribute the proofs backing this region to a proof.
    */
   public getRegionMap(): RegionMap {
-    if (!this._regionMap) {
+    const version = this.context.regions.version;
+    if (!this._regionMap || this.mapVersion !== version) {
       this._regionMap = this.buildRegionMap();
+      this.mapVersion = version;
     }
     return this._regionMap;
   }
@@ -92,55 +97,79 @@ export class Region {
   private buildRegionMap(): RegionMap {
     const grid = this.context.grid;
     const map: RegionMap = array(grid.width, grid.height, () => false);
+    const disconnections = this.context.regions.getDisconnectedRegions(
+      this.positions[0]
+    );
+    const others = [...disconnections]
+      .map(id => this.context.regions.regions.get(id))
+      .filter((region): region is Region => !!region);
+    const own = new Set(this.positions.map(pos => `${pos.x},${pos.y}`));
+    // Cells that provably belong to another region are barriers, and so are the cells beside a
+    // barrier of the same determined color: two regions that cannot merge still need a cell of
+    // the opposite color between them. The region cannot grow through any of them, so it cannot
+    // grow into the cells that are only reachable past them either.
+    const blocked: boolean[][] = array(grid.width, grid.height, () => false);
+    for (const pos of others.flatMap(region => region.positions)) {
+      if (own.has(`${pos.x},${pos.y}`)) continue;
+      blocked[pos.y][pos.x] = true;
+    }
     if (this.color !== Color.Gray) {
-      grid.iterateArea(
-        this.positions[0],
-        t => t.color === this.color || t.color === Color.Gray,
-        (_, x, y) => {
-          map[y][x] = null;
+      for (const other of others) {
+        if (other.color !== this.color) continue;
+        for (const pos of other.positions) {
+          for (const offset of NEIGHBOR_OFFSETS) {
+            const next = { x: pos.x + offset.x, y: pos.y + offset.y };
+            if (
+              next.x < 0 ||
+              next.y < 0 ||
+              next.x >= grid.width ||
+              next.y >= grid.height
+            )
+              continue;
+            if (own.has(`${next.x},${next.y}`)) continue;
+            blocked[next.y][next.x] = true;
+          }
         }
-      );
+      }
+    }
+    const walkable = (color: Color) => (t: TileData, x: number, y: number) =>
+      (t.color === color || t.color === Color.Gray) && !blocked[y][x];
+    if (this.color !== Color.Gray) {
+      grid.iterateArea(this.positions[0], walkable(this.color), (_, x, y) => {
+        map[y][x] = null;
+      });
     } else {
-      grid.iterateArea(
-        this.positions[0],
-        t => t.color === Color.Light || t.color === Color.Gray,
-        (_, x, y) => {
-          map[y][x] = null;
-        }
-      );
-      grid.iterateArea(
-        this.positions[0],
-        t => t.color === Color.Dark || t.color === Color.Gray,
-        (_, x, y) => {
-          map[y][x] = null;
-        }
-      );
+      grid.iterateArea(this.positions[0], walkable(Color.Light), (_, x, y) => {
+        map[y][x] = null;
+      });
+      grid.iterateArea(this.positions[0], walkable(Color.Dark), (_, x, y) => {
+        map[y][x] = null;
+      });
     }
     this.positions.forEach(pos => {
       map[pos.y][pos.x] = true;
     });
-    const disconnections = this.context.regions.getDisconnectedRegions(
-      this.positions[0]
-    );
-    disconnections.forEach(regionId => {
-      const otherRegion = this.context.regions.regions.get(regionId);
-      if (!otherRegion) return;
-      otherRegion.positions.forEach(pos => {
-        map[pos.y][pos.x] = false;
-      });
-    });
+    for (let y = 0; y < grid.height; y++) {
+      for (let x = 0; x < grid.width; x++) {
+        if (!blocked[y][x] || map[y][x] === true) continue;
+        map[y][x] = false;
+      }
+    }
     return map;
   }
 
   private _regionGraph?: RegionGraph;
+  private graphVersion = -1;
   /**
    * Get a graph representation of the region map for related computations.
    *
    * Use {@link RegionStore.explainRegion} to attribute the proofs backing this region to a proof.
    */
   public getRegionGraph(): RegionGraph {
-    if (!this._regionGraph) {
+    const version = this.context.regions.version;
+    if (!this._regionGraph || this.graphVersion !== version) {
       this._regionGraph = this.buildRegionGraph();
+      this.graphVersion = version;
     }
     return this._regionGraph;
   }
@@ -215,6 +244,12 @@ export default class RegionStore extends InsightStore {
 
   public readonly id = 'region';
 
+  /**
+   * Bumped whenever the connectivity of the store changes, so that the derived maps and graphs
+   * cached on the {@link Region} objects can be invalidated.
+   */
+  public version = 0;
+
   public constructor(context: InsightContext, initialize = true) {
     super(context);
     if (initialize) {
@@ -257,6 +292,7 @@ export default class RegionStore extends InsightStore {
     copy.disconnectionProofs = new Map(this.disconnectionProofs);
     copy.physicalDisconnections = new Set(this.physicalDisconnections);
     copy._regions = new Map(this._regions);
+    copy.version = this.version;
     return copy;
   }
 
@@ -460,6 +496,7 @@ export default class RegionStore extends InsightStore {
       // The regions were already transitively connected, so we just need to add the proof to the region proofs.
       const region = this._regions.get(regionRepA);
       region!.connectionProofs.add(proof);
+      this.version++;
       return true;
     }
 
@@ -469,6 +506,7 @@ export default class RegionStore extends InsightStore {
     this._regions.delete(regionRepA);
     this._regions.delete(regionRepB);
     this._regions.set(newRep, newRegion);
+    this.version++;
     return true;
   }
 
@@ -526,6 +564,7 @@ export default class RegionStore extends InsightStore {
     this.disconnectionProofs.set(regionKey, proof);
     regionA.disconnectionProofs.add(proof);
     regionB.disconnectionProofs.add(proof);
+    this.version++;
     return true;
   }
 
@@ -581,6 +620,7 @@ export default class RegionStore extends InsightStore {
     }
 
     this.physicalDisconnections = this.buildPhysicalDisconnections();
+    this.version++;
   }
 
   private rekeyConnectionProofs(): Map<AreaPair, Proof> {
