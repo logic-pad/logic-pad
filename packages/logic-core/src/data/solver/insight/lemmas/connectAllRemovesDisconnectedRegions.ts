@@ -21,7 +21,7 @@ export default class ConnectAllRemovesDisconnectedRegions extends InsightLemma {
     );
     for (const rule of rules) {
       const color = rule.color;
-      const seed = context.grid.find(t => t.color === color);
+      const seed = context.grid.find(t => t.exists && t.color === color);
       if (!seed) continue;
       const proof = this.proof().difficulty(1);
       const disconnected = context.regions.getDisconnectedRegions(seed, proof);
