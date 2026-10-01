@@ -681,7 +681,8 @@ export default class RegionStore extends InsightStore {
           visited[y][x] = true;
         }
       );
-      for (let j = i + 1; j < regions.length; j++) {
+      for (let j = 0; j < regions.length; j++) {
+        if (i === j) continue;
         const other = regions[j];
         if (other.color !== Color.Gray && other.color !== region.color)
           continue;
