@@ -4,7 +4,6 @@ import BanPatternRule, {
   instance as banPatternInstance,
 } from '../../../rules/banPatternRule.js';
 import InsightContext from '../insightContext.js';
-import { ShapeElement } from '../../../shapes.js';
 import { Color } from '../../../primitives.js';
 import { cell, modifyTiles, setOppositeColor } from '../helper.js';
 
@@ -24,9 +23,12 @@ export default class BreakBannedPattern extends InsightLemma {
       for (const shape of rule.cache) {
         for (let dy = 0; dy <= context.grid.height - shape.height; dy++) {
           for (let dx = 0; dx <= context.grid.width - shape.width; dx++) {
-            let mismatch: ShapeElement | null = null;
+            let mismatch: { x: number; y: number; color: Color } | null = null;
+            let mismatchTile: string | null = null;
             for (const tile of shape.elements) {
-              const t = context.grid.getTile(dx + tile.x, dy + tile.y);
+              const x = dx + tile.x;
+              const y = dy + tile.y;
+              const t = context.grid.getTile(x, y);
               if (
                 !t.exists ||
                 ((t.fixed || t.color !== Color.Gray) && t.color !== tile.color)
@@ -37,17 +39,18 @@ export default class BreakBannedPattern extends InsightLemma {
               if (t.color === tile.color) {
                 continue;
               }
-              if (
-                !t.fixed &&
-                t.color === Color.Gray &&
-                t.color !== tile.color
+              // The cell is gray and disagrees with the pattern: the pattern can only
+              // be broken by flipping its entire merged tile.
+              const key = this.tileKey(context.grid, x, y);
+              if (!mismatch) {
+                mismatch = { x, y, color: tile.color };
+                mismatchTile = key;
+              } else if (
+                mismatchTile !== key ||
+                mismatch.color !== tile.color
               ) {
-                if (mismatch) {
-                  mismatch = null;
-                  break;
-                } else {
-                  mismatch = tile;
-                }
+                mismatch = null;
+                break;
               }
             }
             if (mismatch) {
@@ -55,16 +58,22 @@ export default class BreakBannedPattern extends InsightLemma {
               setOppositeColor(
                 context.grid,
                 newTiles,
-                mismatch.x + dx,
-                mismatch.y + dy,
+                mismatch.x,
+                mismatch.y,
                 mismatch.color
               );
+              const modified = context.grid.connections
+                .getConnectedTiles({ x: mismatch.x, y: mismatch.y })
+                .filter(pos => {
+                  const t = context.grid.getTile(pos.x, pos.y);
+                  return t.exists && !t.fixed && t.color === Color.Gray;
+                });
               context.setTiles(
                 newTiles,
                 this.proof()
                   .difficulty(2)
                   .describe(
-                    `Banned pattern must be broken at ${cell({ x: mismatch.x + dx, y: mismatch.y + dy })}`
+                    `Banned pattern must be broken at ${cell(modified)}`
                   )
               );
               return true;
@@ -74,5 +83,15 @@ export default class BreakBannedPattern extends InsightLemma {
       }
     }
     return false;
+  }
+
+  /** Canonical key of the merged tile containing the given cell. */
+  private tileKey(grid: GridData, x: number, y: number): string {
+    const connected = grid.connections.getConnectedTiles({ x, y });
+    let best = connected[0];
+    for (const pos of connected) {
+      if (pos.y < best.y || (pos.y === best.y && pos.x < best.x)) best = pos;
+    }
+    return `${best.x},${best.y}`;
   }
 }
