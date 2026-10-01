@@ -1,7 +1,11 @@
 import OffByXRule, {
   instance as offByXInstance,
 } from '../../../rules/offByXRule.js';
+import RegionAreaRule, {
+  instance as regionAreaInstance,
+} from '../../../rules/regionAreaRule.js';
 import AreaNumberSymbol from '../../../symbols/areaNumberSymbol.js';
+import { Color } from '../../../primitives.js';
 import { area } from '../helper.js';
 import Proof from '../types/proof.js';
 import InsightStore from './insightStore.js';
@@ -9,18 +13,21 @@ import type InsightContext from '../insightContext.js';
 import { Region, RegionId } from './regionStore.js';
 
 /**
- * Tracks the possible sizes of regions based on the area number symbols they contain, along with
- * the proofs that eliminated specific sizes.
+ * Tracks the possible sizes of regions based on the area number symbols they contain and the
+ * region area size rules that apply to their color, along with the proofs that eliminated specific
+ * sizes.
  *
- * Base possibilities are derived on demand from the area number symbols currently in each region
- * (including both `n±x` values when an off-by-X rule is present), so they automatically follow
- * region merges and grid updates. Eliminations are recorded against the region's ID at the time
- * of the deduction and are re-resolved through the region store on every query, so they propagate
- * to any region that later absorbs the tracked cells.
+ * Base possibilities are derived on demand from the current region (its area number symbols,
+ * including both `n±x` values when an off-by-X rule is present, intersected with the size of any
+ * region area size rule matching the region's color), so they automatically follow region merges
+ * and grid updates. Eliminations are recorded against the region's ID at the time of the deduction
+ * and are re-resolved through the region store on every query, so they propagate to any region
+ * that later absorbs the tracked cells.
  */
 export default class RegionSizeStore extends InsightStore {
   private eliminations = new Map<RegionId, Map<number, Proof>>();
   private offByX: OffByXRule | undefined;
+  private regionArea: RegionAreaRule[];
 
   public readonly id = 'region-size';
 
@@ -28,6 +35,9 @@ export default class RegionSizeStore extends InsightStore {
     super(context);
     this.offByX = this.context.grid.rules.find(
       (rule): rule is OffByXRule => rule.id === offByXInstance.id
+    );
+    this.regionArea = this.context.grid.rules.filter(
+      (rule): rule is RegionAreaRule => rule.id === regionAreaInstance.id
     );
   }
 
@@ -140,13 +150,19 @@ export default class RegionSizeStore extends InsightStore {
   }
 
   /**
-   * Computes the base possible sizes of a region from the area number symbols it contains, or
-   * null if the region contains no area number symbol.
+   * Computes the base possible sizes of a region from the area number symbols it contains and the
+   * region area size rules that apply to its color, or null if the region has no size constraint.
    */
   private basePossibilities(region: Region): number[] | null {
     const grid = this.context.grid;
     const size = grid.width * grid.height;
     let possibilities: number[] | null = null;
+    const constrain = (values: number[]) => {
+      possibilities =
+        possibilities === null
+          ? values
+          : possibilities.filter(value => values.includes(value));
+    };
     for (const symbol of region.symbols) {
       if (!(symbol instanceof AreaNumberSymbol)) continue;
       const symbolPossibilities: number[] = [];
@@ -160,10 +176,13 @@ export default class RegionSizeStore extends InsightStore {
           symbolPossibilities.push(symbol.number + this.offByX.number);
         }
       }
-      possibilities =
-        possibilities === null
-          ? symbolPossibilities
-          : possibilities.filter(value => symbolPossibilities.includes(value));
+      constrain(symbolPossibilities);
+    }
+    if (region.color !== Color.Gray) {
+      for (const rule of this.regionArea) {
+        if (rule.color !== region.color) continue;
+        constrain([rule.size]);
+      }
     }
     return possibilities;
   }

@@ -1,5 +1,5 @@
 import BreakBannedPattern from './breakBannedPattern.js';
-import CompleteAreaNumber from './completeAreaNumber.js';
+import CompleteRegionSize from './completeRegionSize.js';
 import CompleteDart from './completeDart.js';
 import CompleteGalaxy from './completeGalaxy.js';
 import CompleteLotus from './completeLotus.js';
@@ -42,7 +42,7 @@ const allLemmas: readonly InsightLemma[] = [
   new CompleteViewpoint(),
   new ColorViewpointSight(),
   new CompleteDart(),
-  new CompleteAreaNumber(),
+  new CompleteRegionSize(),
   new ForcedRegionExpansion(),
   new SpeculativeSolve(),
 ];

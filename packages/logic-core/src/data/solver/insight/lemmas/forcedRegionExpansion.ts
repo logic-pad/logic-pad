@@ -2,6 +2,7 @@ import GridData from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 import { instance as areaNumberInstance } from '../../../symbols/areaNumberSymbol.js';
+import { instance as regionAreaInstance } from '../../../rules/regionAreaRule.js';
 import { area, cell } from '../helper.js';
 import { NodeId } from '../stores/regionGraph.js';
 
@@ -20,7 +21,10 @@ export default class ForcedRegionExpansion extends InsightLemma {
   public readonly id = 'forced-region-expansion';
 
   public isApplicable(grid: GridData): boolean {
-    return !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id);
+    return (
+      !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id) ||
+      !!grid.findRule(rule => rule.id === regionAreaInstance.id)
+    );
   }
 
   public apply(context: InsightContext): boolean {

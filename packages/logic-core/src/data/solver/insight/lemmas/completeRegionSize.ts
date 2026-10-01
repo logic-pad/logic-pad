@@ -2,29 +2,35 @@ import GridData from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 import { instance as areaNumberInstance } from '../../../symbols/areaNumberSymbol.js';
-import { cell, modifyTiles } from '../helper.js';
+import { instance as regionAreaInstance } from '../../../rules/regionAreaRule.js';
+import { area, modifyTiles } from '../helper.js';
 import { Color } from '../../../primitives.js';
 
-export default class CompleteAreaNumber extends InsightLemma {
-  public readonly id = 'complete-area-number';
+/**
+ * Completes regions whose size is constrained, whether by an area number symbol or by a region
+ * area size rule, using the region size store to obtain the possible sizes.
+ *
+ * If the region needs at least as many cells as are available, every available cell must belong to
+ * it. If the region can hold at most as many cells as it already has, it is complete and must be
+ * surrounded by the opposite color.
+ */
+export default class CompleteRegionSize extends InsightLemma {
+  public readonly id = 'complete-region-size';
 
   public isApplicable(grid: GridData): boolean {
-    return !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id);
+    return (
+      !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id) ||
+      !!grid.findRule(rule => rule.id === regionAreaInstance.id)
+    );
   }
 
   public apply(context: InsightContext): boolean {
     const regionSizes = context.regionSizes;
     const regions = context.regions;
-    for (const symbol of context.grid.symbols.get(areaNumberInstance.id) ??
-      []) {
-      const position = {
-        x: Math.floor(symbol.x),
-        y: Math.floor(symbol.y),
-      };
-      const originTile = context.grid.getTile(position.x, position.y);
-      if (!originTile.exists || originTile.color === Color.Gray) continue;
-      const region = regions.get(position);
-      if (!region) continue;
+    for (const region of regions.regions.values()) {
+      if (region.color === Color.Gray) continue;
+      if (!regionSizes.getPossibilities(region)) continue;
+      const position = region.positions[0];
       const proof = this.proof().difficulty(1);
       const regionMap = region.getRegionMap();
       regions.explainRegion(region, proof, region.positions);
@@ -40,7 +46,7 @@ export default class CompleteAreaNumber extends InsightLemma {
       const minPossible = regionSizes.minPossible(region, proof);
       if (minPossible > maxComplete) {
         throw this.error(
-          `Area number at ${cell(position)} cannot be completed because the minimum possible value is ${minPossible} but there are at most ${maxComplete} cells in the region`
+          `Region at ${area(position)} cannot be completed because the minimum possible size is ${minPossible} but there are at most ${maxComplete} cells in the region`
         );
       }
       if (minPossible === maxComplete && maxComplete > minComplete) {
@@ -49,7 +55,7 @@ export default class CompleteAreaNumber extends InsightLemma {
           (x, y, { get, setColor }) => {
             const tile = get(x, y);
             if (regionMap[y][x] !== false && tile.exists && !tile.fixed) {
-              setColor(x, y, originTile.color);
+              setColor(x, y, region.color);
             }
             return tile;
           }
@@ -57,7 +63,7 @@ export default class CompleteAreaNumber extends InsightLemma {
         context.setTiles(
           newTiles,
           proof.describe(
-            `Area number at ${cell(position)} must be completed with ${minPossible} cells, so all cells in the region must be filled in`
+            `Region at ${area(position)} must be completed with ${minPossible} cells, so all cells in the region must be filled in`
           )
         );
         return true;
@@ -65,7 +71,7 @@ export default class CompleteAreaNumber extends InsightLemma {
       const maxPossible = regionSizes.maxPossible(region, proof);
       if (maxPossible < minComplete) {
         throw this.error(
-          `Area number at ${cell(position)} cannot be completed because the maximum possible value is ${maxPossible} but there are at least ${minComplete} completed cells in the region`
+          `Region at ${area(position)} cannot be completed because the maximum possible size is ${maxPossible} but there are at least ${minComplete} completed cells in the region`
         );
       }
       if (maxPossible === minComplete && maxComplete > minComplete) {
@@ -87,7 +93,7 @@ export default class CompleteAreaNumber extends InsightLemma {
               isNeighboring ||=
                 x < context.grid.width - 1 && !!regionMap[y][x + 1];
               if (isNeighboring) {
-                setOppositeColor(x, y, originTile.color);
+                setOppositeColor(x, y, region.color);
               }
             }
             return tile;
@@ -96,7 +102,7 @@ export default class CompleteAreaNumber extends InsightLemma {
         context.setTiles(
           newTiles,
           proof.describe(
-            `Area number at ${cell(position)} is complete and must be surrounded`
+            `Region at ${area(position)} is complete and must be surrounded`
           )
         );
         return true;
