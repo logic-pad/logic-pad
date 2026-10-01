@@ -4,6 +4,7 @@
 
 - Reworked comment input
   - You can now also mention puzzles
+- Responsive design improvements for grid controls bar
 
 # 30/9/2026
 
