@@ -9,10 +9,11 @@ import ColorViewpointSight from './colorViewpointSight.js';
 import ConnectAllCells from './connectAllCells.js';
 import ConnectAllRemovesDisconnectedRegions from './connectAllRemovesDisconnectedRegions.js';
 import ConnectThroughBottleneck from './connectThroughBottleneck.js';
-import ImpossibleAreaNumberColor from './impossibleAreaNumberColor.js';
+import ImpossibleRegionColor from './impossibleRegionColor.js';
 import InsightLemma from './insightLemma.js';
 import OffByXAreaNumberConstrainedByRegionSize from './offByXAreaNumberConstrainedByRegionSize.js';
 import DisconnectIncompatibleRegionSizes from './disconnectIncompatibleRegionSizes.js';
+import DisconnectIncompatibleSymbolCounts from './disconnectIncompatibleSymbolCounts.js';
 import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries.js';
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
@@ -28,10 +29,11 @@ const allLemmas: readonly InsightLemma[] = [
   new BreakBannedPattern(),
   new ConnectAllCells(),
   new ConnectAllRemovesDisconnectedRegions(),
-  new ImpossibleAreaNumberColor(),
+  new ImpossibleRegionColor(),
   new CompleteGalaxy(),
   new CompleteLotus(),
   new DisconnectIncompatibleRegionSizes(),
+  new DisconnectIncompatibleSymbolCounts(),
   new DisconnectIncompatibleSymmetries(),
   new ConnectSameLetters(),
   new DisconnectDifferentLetters(),

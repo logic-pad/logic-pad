@@ -2,19 +2,24 @@ import GridData from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 import { instance as areaNumberInstance } from '../../../symbols/areaNumberSymbol.js';
+import { instance as regionAreaInstance } from '../../../rules/regionAreaRule.js';
 import { area } from '../helper.js';
 import { Region } from '../stores/regionStore.js';
 import { Color } from '../../../primitives.js';
 
 /**
  * Disconnects regions whose possible sizes do not overlap: two regions cannot merge if they
- * cannot have the same region size.
+ * cannot have the same region size. The possibilities come from the region size store, so both
+ * area number symbols and region area size rules are covered.
  */
 export default class DisconnectIncompatibleRegionSizes extends InsightLemma {
   public readonly id = 'disconnect-incompatible-region-sizes';
 
   public isApplicable(grid: GridData): boolean {
-    return !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id);
+    return (
+      !!grid.findSymbol(symbol => symbol.id === areaNumberInstance.id) ||
+      !!grid.findRule(rule => rule.id === regionAreaInstance.id)
+    );
   }
 
   public apply(context: InsightContext): boolean {
