@@ -57,11 +57,11 @@ export function computeTileSize(
         : windowWidth < 1280
           ? Math.min(
               (windowWidth - 140 - 320) / (grid.width + extraMargin),
-              (windowHeight - 290) / (grid.height + extraMargin)
+              (windowHeight - 390) / (grid.height + extraMargin)
             )
           : Math.min(
               (windowWidth - 130 - 640) / (grid.width + extraMargin),
-              (windowHeight - 170) / (grid.height + extraMargin)
+              (windowHeight - 270) / (grid.height + extraMargin)
             );
   return Math.floor(
     Math.max(25, Math.min(100 + Math.max(grid.width, grid.height) * 2, newSize))
@@ -163,7 +163,7 @@ export default memo(function MainGrid({
       height={grid.height}
       allowAnimation={allowAnimation}
       {...bind()}
-      className="tour-grid"
+      className="tour-grid lg:mb-18"
     >
       {allowSounds && (
         <Suspense fallback={null}>

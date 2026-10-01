@@ -4,6 +4,8 @@ import {
   FiCornerUpLeft,
   FiCornerUpRight,
   FiRefreshCcw,
+  FiZoomIn,
+  FiZoomOut,
 } from 'react-icons/fi';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { getGridAtom, setGridAtom, setGridRawAtom } from '../state/grid.ts';
@@ -43,19 +45,23 @@ const ValidatorStatus = memo(function ValidatorStatus() {
   );
   return (
     <div
-      className="h-10 w-12 px-2 flex items-center justify-center"
+      className="h-10 w-8 flex items-center justify-center shrink-0"
       {...tip(isLoading ? 'Validating...' : 'Validated')}
     >
       {isLoading ? (
         <Loading className="px-1 rounded-box" aria-hidden="true" />
       ) : (
-        <FiCheck size={20} className="rounded-box" aria-hidden="true" />
+        <FiCheck size={16} className="rounded-box" aria-hidden="true" />
       )}
     </div>
   );
 });
 
-const FloodFillToggle = memo(function FloodFillToggle() {
+const FloodFillToggle = memo(function FloodFillToggle({
+  className,
+}: {
+  className?: string;
+}) {
   const [modifierInverted, setModifierInverted] = useState(
     mouseContext.modifierInverted
   );
@@ -67,7 +73,7 @@ const FloodFillToggle = memo(function FloodFillToggle() {
     });
   };
   return (
-    <div className="h-10" {...tip('Enable flood fill')}>
+    <div className={cn('h-10', className)} {...tip('Enable flood fill')}>
       <button
         className={cn(
           'btn h-10 aspect-square px-2 rounded-box',
@@ -75,7 +81,7 @@ const FloodFillToggle = memo(function FloodFillToggle() {
         )}
         onClick={onSwitch}
       >
-        <IoMdColorFill size={20} />
+        <IoMdColorFill size={16} />
       </button>
     </div>
   );
@@ -93,10 +99,41 @@ const ScaleSlider = memo(function ScaleSlider() {
         step={0.2}
         value={Math.log2(scale)}
         onChange={e => setScale(2 ** Number(e.currentTarget.value))}
-        className="range w-full m-2"
+        className="range range-sm w-full m-2"
         aria-label="Resize grid"
       />
     </div>
+  );
+});
+
+const SCALE_MIN = -2;
+const SCALE_MAX = 2;
+const SCALE_STEP = 0.2;
+
+const ScaleButtons = memo(function ScaleButtons() {
+  const scale = useAtomValue(scaleAtom);
+  const setScale = useSetAtom(scaleAtom);
+  const exponent = Math.round(Math.log2(scale) / SCALE_STEP) * SCALE_STEP;
+  const step = (delta: number) => {
+    const next = Math.min(SCALE_MAX, Math.max(SCALE_MIN, exponent + delta));
+    setScale(2 ** Number(next.toFixed(4)));
+  };
+  return (
+    <ul
+      className="menu menu-horizontal shrink-0 flex-nowrap gap-0 px-0"
+      {...tip('Resize grid')}
+    >
+      <li className={cn(exponent <= SCALE_MIN && 'disabled')}>
+        <a role="button" onClick={() => step(-SCALE_STEP)}>
+          <FiZoomOut />
+        </a>
+      </li>
+      <li className={cn(exponent >= SCALE_MAX && 'disabled')}>
+        <a role="button" onClick={() => step(SCALE_STEP)}>
+          <FiZoomIn />
+        </a>
+      </li>
+    </ul>
   );
 });
 
@@ -126,7 +163,7 @@ const ColorSwap = memo(function ColorSwap({
         <div
           className={cn(
             'swap-on bg-white text-black text-center flex justify-center items-center rounded-box',
-            large ? 'w-24 h-24 p-2 px-4' : 'px-4 h-10'
+            large ? 'w-20 h-20 p-2 px-4' : 'px-4 h-10'
           )}
         >
           W
@@ -134,7 +171,7 @@ const ColorSwap = memo(function ColorSwap({
         <div
           className={cn(
             'swap-off bg-black text-white text-center flex justify-center items-center rounded-box',
-            large ? 'w-24 h-24' : 'px-4 h-10'
+            large ? 'w-20 h-20' : 'px-4 h-10'
           )}
         >
           B
@@ -144,22 +181,18 @@ const ColorSwap = memo(function ColorSwap({
   );
 });
 
-/**
- * Combined edit and touch controls rendered as one floating bar,
- * horizontally centered to the puzzle grid. On narrow screens it falls back
- * to a two-row stacked design with a large color switch button. The layout is
- * switched with CSS only so that interactive elements are only mounted once.
- */
-const GridControlsBar = memo(function GridControlsBar({
+const EditButtons = memo(function EditButtons({
   onReset,
-}: GridControlsBarProps) {
+}: {
+  onReset?: () => void;
+}) {
   const grid = useAtomValue(getGridAtom);
   const setGridRaw = useSetAtom(setGridRawAtom);
+  const embedChildren = useAtomValue(embedChildrenAtom);
   const undoStack = useAtomValue(undoStackAtom);
   const redoStack = useAtomValue(redoStackAtom);
   const undoEdit = useSetAtom(undoAtom);
   const redoEdit = useSetAtom(redoAtom);
-  const embedChildren = useAtomValue(embedChildrenAtom);
 
   const undo = () => {
     const result = undoEdit(grid);
@@ -191,6 +224,36 @@ const GridControlsBar = memo(function GridControlsBar({
     useKey: true,
   });
 
+  return (
+    <ul className="menu menu-horizontal shrink-0 justify-center flex-1 lg:flex-initial gap-0 px-0">
+      <li className={cn(undoStack.length === 0 && 'disabled')}>
+        <a role="button" {...tip('Undo (Z)')} onClick={undo}>
+          <FiCornerUpLeft />
+        </a>
+      </li>
+      <li>
+        <a role="button" {...tip('Restart (R)')} onClick={restart}>
+          <FiRefreshCcw />
+        </a>
+      </li>
+      <li className={cn(redoStack.length === 0 && 'disabled')}>
+        <a role="button" {...tip('Redo (Y)')} onClick={redo}>
+          <FiCornerUpRight />
+        </a>
+      </li>
+    </ul>
+  );
+});
+
+/**
+ * Combined edit and touch controls rendered as one floating bar,
+ * horizontally centered to the puzzle grid. On narrow screens it falls back
+ * to a two-row stacked design with a large color switch button. The layout is
+ * switched with CSS only so that interactive elements are only mounted once.
+ */
+const GridControlsBar = memo(function GridControlsBar({
+  onReset,
+}: GridControlsBarProps) {
   const [inverted, setInverted] = useState(
     getSetting('flipPrimaryMouseButton')
   );
@@ -203,37 +266,22 @@ const GridControlsBar = memo(function GridControlsBar({
   };
 
   return (
-    <div className="fixed bottom-2 left-2 right-2 z-40 flex items-stretch justify-center gap-2 lg:absolute lg:bottom-4 lg:left-1/2 lg:right-auto lg:-translate-x-1/2">
+    <div className="fixed bottom-2 left-2 right-2 z-40 flex items-stretch justify-center gap-2 lg:absolute lg:bottom-2 lg:-left-10 lg:-right-10">
       <div className="flex-1 lg:flex-initial flex flex-col lg:flex-row lg:items-center bg-base-100 shadow-xl text-base-content rounded-box">
-        <div className="flex lg:hidden">
-          <ScaleSlider />
-        </div>
-        <div className="flex shrink-0 items-center">
+        <div className="flex shrink-0 items-center gap-2 order-2">
           <ValidatorStatus />
-          <ul className="menu menu-horizontal shrink-0 justify-center flex-1 lg:flex-initial gap-2">
-            <li className={cn(undoStack.length === 0 && 'disabled')}>
-              <a role="button" {...tip('Undo (Z)')} onClick={undo}>
-                <FiCornerUpLeft />
-              </a>
-            </li>
-            <li>
-              <a role="button" {...tip('Restart (R)')} onClick={restart}>
-                <FiRefreshCcw />
-              </a>
-            </li>
-            <li className={cn(redoStack.length === 0 && 'disabled')}>
-              <a role="button" {...tip('Redo (Y)')} onClick={redo}>
-                <FiCornerUpRight />
-              </a>
-            </li>
-          </ul>
-          <FloodFillToggle />
+          <EditButtons onReset={onReset} />
+          <FloodFillToggle className="block lg:hidden" />
         </div>
-        <div className="hidden lg:flex w-72">
+        <div className="hidden lg:flex xl:hidden w-fit shrink-0 order-3">
+          <ScaleButtons />
+        </div>
+        <div className="flex lg:hidden xl:flex xl:w-52 order-1 xl:order-10">
           <ScaleSlider />
         </div>
       </div>
       <div className="shrink-0 flex items-center bg-base-100 shadow-xl text-base-content rounded-box">
+        <FloodFillToggle className="hidden lg:block" />
         <div className="lg:hidden">
           <ColorSwap large inverted={inverted} onSwitch={onColorSwitch} />
         </div>

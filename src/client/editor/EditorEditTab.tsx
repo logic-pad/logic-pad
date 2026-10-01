@@ -37,13 +37,13 @@ export default memo(function EditorEditTab({
   const previewRef = useRef<PreviewRef>(null);
 
   return (
-    <PuzzleSurface className="flex-1 m-2 mb-28 lg:mb-2 h-full lg:min-h-0 flex flex-col lg:flex-row min-h-[calc(100dvh-14rem)]">
+    <PuzzleSurface className="flex-1 m-2 mb-24 lg:mb-2 h-full lg:min-h-0 flex flex-col lg:flex-row min-h-[calc(100dvh-14rem)]">
       <div
         className={cn(
           'shrink-0 order-1',
           toolboxCollapsed
-            ? 'overflow-x-auto overflow-y-hidden sticky top-0 z-30 lg:overflow-x-hidden lg:overflow-y-auto lg:pb-18'
-            : 'lg:w-[320px] lg:p-2 overflow-y-auto overflow-x-hidden lg:pb-18'
+            ? 'overflow-x-auto overflow-y-hidden sticky top-0 z-30 lg:overflow-x-hidden lg:overflow-y-auto'
+            : 'lg:w-[320px] lg:p-2 overflow-y-auto overflow-x-hidden'
         )}
       >
         <ToolboxEditor
@@ -53,7 +53,7 @@ export default memo(function EditorEditTab({
       </div>
       <div className="relative flex-1 min-w-0 flex order-2 min-h-[60vh] lg:min-h-0">
         <div className="grow shrink overflow-auto self-stretch p-4 lg:p-8">
-          <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit lg:mb-18">
+          <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit">
             <EditorMainGrid />
           </div>
         </div>

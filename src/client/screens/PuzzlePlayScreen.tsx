@@ -175,7 +175,7 @@ export default memo(function PuzzlePlayScreen({
 
   return (
     <SolveScreenContext.Provider value={contextValue}>
-      <main className="flex flex-1 min-h-0 self-stretch flex-col lg:flex-row pb-32 lg:pb-0">
+      <main className="flex flex-1 min-h-0 self-stretch flex-col lg:flex-row pb-24 lg:pb-0">
         <MobileTopBar onOpen={() => setMobileOpen(true)} />
         <aside
           className={cn(
@@ -221,7 +221,7 @@ export default memo(function PuzzlePlayScreen({
           <PuzzleSurface className="flex-1 lg:min-h-0 flex flex-col lg:flex-row min-h-[calc(100dvh-12rem)]">
             <div className="relative flex-1 min-w-0 flex order-1">
               <div className="grow shrink overflow-auto self-stretch p-4 lg:p-8">
-                <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit lg:mb-18">
+                <div className="flex items-center justify-center m-0 p-0 min-h-full min-w-full h-fit w-fit">
                   <MainGrid useToolboxClick={false} />
                 </div>
               </div>
