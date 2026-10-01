@@ -24,6 +24,11 @@ Detailed guides live in `docs/`:
 - [`docs/insight-solver.md`](docs/insight-solver.md) — architecture of the
   Insight Solver (`packages/logic-core/src/data/solver/insight/`): the
   worker protocol, solve loop, lemmas, stores, and proof system.
+- [`docs/agents/insight-solver-dev.md`](docs/agents/insight-solver-dev.md) —
+  hands-on workflow for developing Insight Solver lemmas: scratch-script
+  reproduction, store introspection, the dual-mode verification rule,
+  codebase invariants that are easy to violate, proof/difficulty conventions,
+  and a regression corpus of puzzle links.
 
 ## Quick start
 
