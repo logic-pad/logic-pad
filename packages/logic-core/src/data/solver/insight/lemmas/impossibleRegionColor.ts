@@ -1,4 +1,4 @@
-import GridData from '../../../grid.js';
+import GridData, { NEIGHBOR_OFFSETS } from '../../../grid.js';
 import InsightContext from '../insightContext.js';
 import InsightLemma from './insightLemma.js';
 import AreaNumberSymbol, {
@@ -25,8 +25,8 @@ interface Check {
  * and region area size rules are covered:
  *
  * - Every gray cell holding an area number symbol is tested in both colors.
- * - Every other gray cell (as a representative of its merged tile) is tested in the colors that
- *   a region area size rule constrains.
+ * - Every other gray merged tile is tested in each color that could matter: a color bounded by a
+ *   region area size rule, or a color that would merge the tile into a size-constrained region.
  */
 export default class ImpossibleRegionColor extends InsightLemma {
   public readonly id = 'impossible-region-color';
@@ -39,7 +39,7 @@ export default class ImpossibleRegionColor extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
-    for (const check of this.checks(context.grid)) {
+    for (const check of this.checks(context)) {
       for (const color of check.colors) {
         if (this.impossibleColor(context, check, color)) return true;
       }
@@ -47,7 +47,8 @@ export default class ImpossibleRegionColor extends InsightLemma {
     return false;
   }
 
-  private checks(grid: GridData): Check[] {
+  private checks(context: InsightContext): Check[] {
+    const grid = context.grid;
     const checks: Check[] = [];
     const covered = new Set<string>();
     for (const symbol of grid.symbols.get(areaNumberInstance.id) ?? []) {
@@ -75,16 +76,13 @@ export default class ImpossibleRegionColor extends InsightLemma {
         subject: `Area number at ${cell(position)}`,
       });
     }
-    const ruleColors = [
-      ...new Set(
-        grid.rules
-          .filter(
-            (rule): rule is RegionAreaRule => rule instanceof RegionAreaRule
-          )
-          .map(rule => rule.color)
-      ),
-    ];
-    if (ruleColors.length === 0) return checks;
+    const ruleColors = new Set(
+      grid.rules
+        .filter(
+          (rule): rule is RegionAreaRule => rule instanceof RegionAreaRule
+        )
+        .map(rule => rule.color)
+    );
     const grouped = new Set<string>();
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
@@ -95,15 +93,45 @@ export default class ImpossibleRegionColor extends InsightLemma {
         const connected = grid.connections.getConnectedTiles({ x, y });
         for (const pos of connected) grouped.add(`${pos.x},${pos.y}`);
         if (connected.some(pos => grid.getTile(pos.x, pos.y).fixed)) continue;
+        const colors = COLORS.filter(color =>
+          this.colorMatters(context, connected, color, ruleColors)
+        );
+        if (colors.length === 0) continue;
         checks.push({
           position: { x, y },
           targets: [...connected],
-          colors: ruleColors,
+          colors,
           subject: `Cell at ${cell({ x, y })}`,
         });
       }
     }
     return checks;
+  }
+
+  /**
+   * Whether hypothesizing the given tiles as `color` could produce a size contradiction: the
+   * color must be bounded by a region area size rule, or the tiles must touch a region that
+   * already has size possibilities and could absorb them.
+   */
+  private colorMatters(
+    context: InsightContext,
+    tiles: readonly Position[],
+    color: Color,
+    ruleColors: ReadonlySet<Color>
+  ): boolean {
+    if (ruleColors.has(color)) return true;
+    for (const pos of tiles) {
+      for (const offset of NEIGHBOR_OFFSETS) {
+        const next = { x: pos.x + offset.x, y: pos.y + offset.y };
+        if (!context.grid.isPositionValid(next.x, next.y)) continue;
+        const region = context.regions.get(next);
+        if (!region) continue;
+        if (region.color !== color && region.color !== Color.Gray) continue;
+        if (context.regionSizes.getPossibilities(region) === null) continue;
+        return true;
+      }
+    }
+    return false;
   }
 
   private impossibleColor(
