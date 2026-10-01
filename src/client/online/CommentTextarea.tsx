@@ -157,7 +157,7 @@ export default memo(function CommentTextarea({
         autoResize
         placeholder="Add a comment..."
         maxLength={5000}
-        className="w-full bg-base-200 text-base-content text-sm rounded-md"
+        className="w-full bg-base-200 focus-within:bg-base-300 text-base-content text-sm rounded-md"
         classNames={{
           control: 'border-0 bg-transparent rounded-md',
           highlighter: 'p-2',
