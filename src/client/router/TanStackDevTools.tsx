@@ -10,5 +10,9 @@ const TanStackRouterDevtools = import.meta.env.PROD
     );
 
 export default memo(function TanStackDevTools() {
-  return <Suspense>{/* <TanStackRouterDevtools /> */}</Suspense>;
+  return (
+    <Suspense>
+      <TanStackRouterDevtools />
+    </Suspense>
+  );
 });
