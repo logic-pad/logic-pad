@@ -10,7 +10,7 @@ import UserCard from '../metadata/UserCard';
 import { toRelativeDate } from '../uiHelper';
 import { api, queryClient } from './api';
 import { Comment, ListResponse } from './data';
-import CommentTextarea, { CommentTextareaRef } from './CommentTextarea';
+import CommentTextarea, { CommentTextareaRef } from './CommentTextarea.tsx';
 
 export interface CommentEntryProps {
   comment: Comment;
@@ -184,7 +184,7 @@ export default memo(function CommentEntry({
             className="btn btn-ghost btn-sm shrink-0 px-2"
             onClick={() => {
               if (editing) {
-                inputRef.current?.sendComment();
+                inputRef.current?.submit();
               } else {
                 setEditing(!editing);
               }
@@ -208,7 +208,8 @@ export default memo(function CommentEntry({
             <CommentTextarea
               ref={inputRef}
               defaultValue={comment.content}
-              onPostComment={content => {
+              placeholder="Edit existing comment..."
+              onSubmit={content => {
                 if (editing && content !== comment.content) {
                   updateComment.mutate([comment.id, content]);
                 }

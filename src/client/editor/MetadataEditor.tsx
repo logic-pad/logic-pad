@@ -11,6 +11,7 @@ import {
 } from '../state/onlinePuzzle.ts';
 import UserCard from '../metadata/UserCard.tsx';
 import { Link } from '@tanstack/react-router';
+import MarkdownTextarea from '../online/MarkdownTextarea.tsx';
 
 // million-ignore
 export default memo(function MetadataEditor() {
@@ -104,15 +105,13 @@ export default memo(function MetadataEditor() {
             {metadata.description.length}/500
           </span>
         </div>
-        <textarea
-          className="textarea h-60 w-full resize-none"
-          placeholder="Optional text"
+        <MarkdownTextarea
+          className="h-60 w-full"
+          placeholder="Optional description"
           maxLength={500}
           value={metadata.description}
-          onChange={e =>
-            setMetadata({ ...metadata, description: e.target.value })
-          }
-        ></textarea>
+          onChange={value => setMetadata({ ...metadata, description: value })}
+        />
       </fieldset>
     </div>
   );

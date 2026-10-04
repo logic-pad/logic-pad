@@ -13,11 +13,11 @@ import { Comment, ListResponse } from './data';
 import { useOnline } from '../state/online.ts';
 import toast from 'react-hot-toast';
 import CommentEntry from './CommentEntry';
-import CommentTextarea, { CommentTextareaRef } from './CommentTextarea';
 import { IoArrowBack, IoSend } from 'react-icons/io5';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import { tip } from '../components/Tooltip.tsx';
 import { cn } from '../uiHelper.ts';
+import CommentTextarea, { CommentTextareaRef } from './CommentTextarea.tsx';
 
 export interface CommentPanelProps {
   onBack?: () => void;
@@ -205,12 +205,13 @@ export default memo(function CommentPanel({
       <div className="relative flex gap-2 items-center self-stretch shrink-0">
         <CommentTextarea
           ref={inputRef}
-          onPostComment={text => addComment.mutate([id, text])}
+          placeholder="Add a comment..."
+          onSubmit={text => addComment.mutate([id, text])}
         />
         <div className="shrink-0" {...tip('Send (enter)', 'left')}>
           <button
             className="btn btn-ghost btn-square btn-sm"
-            onClick={() => inputRef.current?.sendComment()}
+            onClick={() => inputRef.current?.submit()}
           >
             <IoSend />
           </button>
