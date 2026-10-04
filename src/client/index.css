@@ -964,7 +964,7 @@ summary::marker {
 }
 
 .prose .spoiler {
-  @apply rounded-md;
+  @apply rounded-selector;
 }
 
 .prose .spoiler.spoiler-reveal {
@@ -976,5 +976,5 @@ summary::marker {
 }
 
 .prose .spoiler:not(.spoiler-reveal) * {
-  @apply bg-base-300! text-transparent! select-none! border-0! rounded-md!;
+  @apply bg-base-300! text-transparent! select-none! border-0! rounded-selector!;
 }

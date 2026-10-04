@@ -55,7 +55,7 @@ const UserMention = memo(function UserMention({
       target="_blank"
       rel="noreferrer"
       className={cn(
-        'bg-accent/10 border-b border-accent rounded-lg no-underline!',
+        'bg-accent/10 border-b border-accent rounded-selector no-underline!',
         isMe
           ? 'bg-accent text-accent-content'
           : 'bg-accent/10 text-base-content'
@@ -79,7 +79,7 @@ const PuzzleMention = memo(function PuzzleMention({
       target="_blank"
       rel="noreferrer"
       className={cn(
-        'bg-primary/10 border-b border-primary rounded-lg no-underline!'
+        'bg-primary/10 border-b border-primary rounded-selector no-underline!'
       )}
     >
       {children}

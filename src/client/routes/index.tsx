@@ -172,7 +172,7 @@ export const Route = createFileRoute('/')({
                 <PersonalFrontPageLists />
               ) : (
                 !isPending && (
-                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200 rounded-lg">
+                  <div className="w-fit self-center flex flex-col items-center gap-4 p-8 bg-base-200 rounded-box">
                     <span className="text-center text-lg">
                       Sign in to track your progress and upload your own puzzles
                     </span>

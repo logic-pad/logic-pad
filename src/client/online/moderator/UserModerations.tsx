@@ -30,7 +30,7 @@ const UserModeration = memo(function UserModeration({
         {moderation.description}
       </pre>
       {moderation.message !== null && (
-        <div className="text-sm bg-base-300 rounded-sm w-full py-1 px-2 whitespace-normal wrap-break-words">
+        <div className="text-sm bg-base-300 w-full py-1 px-2 whitespace-normal wrap-break-words">
           {moderation.message}
         </div>
       )}

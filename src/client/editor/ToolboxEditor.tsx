@@ -65,7 +65,7 @@ export default memo(function ToolboxEditor({
 
   if (collapsed) {
     return (
-      <div className="flex lg:flex-col items-center gap-2 p-2 bg-base-100 text-base-content rounded-xl m-2 w-fit">
+      <div className="flex lg:flex-col items-center gap-2 p-2 bg-base-100 text-base-content rounded-box m-2 w-fit">
         <CollapseButton collapsed={true} onToggleCollapse={onToggleCollapse!} />
         <div className="flex lg:flex-col gap-8 items-center overflow-x-auto overflow-y-hidden lg:overflow-x-hidden lg:overflow-y-auto">
           <div className="flex lg:flex-col gap-2 items-center tour-tools">
@@ -81,7 +81,7 @@ export default memo(function ToolboxEditor({
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden">
-      <div className="bg-base-100 text-base-content rounded-xl p-4 flex flex-col gap-2 shadow-sm">
+      <div className="bg-base-100 text-base-content rounded-box p-4 flex flex-col gap-2 shadow-sm">
         <div className="flex items-start justify-between gap-2">
           <CollapseButton
             collapsed={false}

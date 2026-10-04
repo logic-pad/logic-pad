@@ -207,7 +207,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                     </p>
                   </div>
                   <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
-                    <div className="flex w-72 p-2 ps-4 rounded-xl shadow-md bg-base-100 text-base-content text-sm items-center justify-between">
+                    <div className="flex w-72 p-2 ps-4 rounded-box shadow-md bg-base-100 text-base-content text-sm items-center justify-between">
                       <span className="flex-auto">
                         Last saved 10 seconds ago
                       </span>
@@ -307,7 +307,7 @@ export const Route = createLazyFileRoute('/_layout/support')({
                     </p>
                   </div>
                   <div className="md:w-84 h-28 rounded-box border-2 border-dashed border-base-content/20 bg-base-200/50 flex items-center justify-center text-sm text-base-content/60 pointer-events-none">
-                    <div className="relative w-76 h-20 flex gap-4 items-center px-4 py-2 rounded-xl shadow-md text-base-content bg-base-300/50">
+                    <div className="relative w-76 h-20 flex gap-4 items-center px-4 py-2 rounded-box shadow-md text-base-content bg-base-300/50">
                       <TbLayoutGrid size={36} className="shrink-0" />
                       <div className="flex flex-col gap-1" aria-hidden="true">
                         <div className="skeleton animate-none w-36 h-4" />

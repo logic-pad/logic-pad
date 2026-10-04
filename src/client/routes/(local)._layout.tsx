@@ -4,7 +4,7 @@ import { memo } from 'react';
 export const DevLinks = memo(function DevLinks() {
   if (import.meta.env.DEV) {
     return (
-      <div className="flex flex-wrap gap-4 items-center bg-secondary/5 border border-secondary rounded-lg p-2">
+      <div className="flex flex-wrap gap-4 items-center bg-secondary/5 border border-secondary rounded-box p-2">
         <span>Dev mode:</span>
         <Link
           type="button"

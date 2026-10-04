@@ -84,12 +84,12 @@ const syntaxChips = [
 ] as const;
 
 const classNames: MentionsInputClassNames = {
-  control: 'border-0 bg-transparent rounded-md h-full',
+  control: 'border-0 bg-transparent rounded-field h-full',
   highlighter: 'p-2',
   input:
     'p-2 overflow-y-auto! text-base-content outline-none focus:outline-none placeholder:text-base-content/40',
   suggestions:
-    'z-[100] min-w-0 overflow-hidden rounded-md border border-base-300 bg-base-200 text-base-content shadow-lg backdrop-blur-none top-auto! bottom-full! left-0! w-full! mb-2',
+    'z-[100] min-w-0 overflow-hidden rounded-field border border-base-300 bg-base-200 text-base-content shadow-lg backdrop-blur-none top-auto! bottom-full! left-0! w-full! mb-2',
   suggestionsList:
     'm-0 max-h-64 list-none divide-y divide-base-300 overflow-y-auto scroll-py-1 p-0 focus:outline-none',
   suggestionItem:
@@ -183,7 +183,7 @@ export default memo(function MarkdownTextarea({
         autoResize={autoResize}
         placeholder={placeholder}
         maxLength={maxLength}
-        className="flex-1 w-full bg-base-200 focus-within:bg-base-300 text-base-content text-sm rounded-md"
+        className="flex-1 w-full bg-base-200 focus-within:bg-base-300 text-base-content text-sm rounded-field"
         classNames={mergedClassNames}
         onKeyDown={onKeyDown}
       >
@@ -193,7 +193,7 @@ export default memo(function MarkdownTextarea({
                 key="user"
                 trigger="@"
                 displayTransform={(_id, display) => `@${display}`}
-                className="bg-accent/10 text-transparent border-b border-accent rounded-lg"
+                className="bg-accent/10 text-transparent border-b border-accent rounded-selector"
                 data={async query => {
                   if (query.length === 0) {
                     return [];
@@ -212,7 +212,7 @@ export default memo(function MarkdownTextarea({
                 key="puzzle"
                 trigger="#"
                 displayTransform={(_id, display) => `#${display}`}
-                className="bg-primary/10 text-transparent border-b border-primary rounded-lg"
+                className="bg-primary/10 text-transparent border-b border-primary rounded-selector"
                 data={async query => {
                   if (query.length === 0) {
                     return [];

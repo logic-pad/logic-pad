@@ -44,7 +44,7 @@ export default memo(function EditorInfoTab({
           )}
         </div>
         <div className="min-w-0 lg:col-span-2 xl:col-span-1 flex flex-col gap-4">
-          <div className="bg-base-200 rounded-xl p-4 shadow-sm">
+          <div className="bg-base-200 rounded-box p-4 shadow-sm">
             {id && me ? (
               <CommentPanel className="xl:max-h-[calc(100vh-14rem)] bg-base-200" />
             ) : (

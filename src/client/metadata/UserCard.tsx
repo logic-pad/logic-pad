@@ -33,7 +33,7 @@ export default memo(function UserCard({
       <Link
         to={user ? '/profile/' + user.id : undefined}
         className={cn(
-          'badge badge-secondary rounded-lg shrink-0',
+          'badge badge-secondary rounded-selector shrink-0',
           responsive ? 'lg:badge-lg' : 'badge-lg',
           className
         )}
@@ -55,7 +55,7 @@ export default memo(function UserCard({
           }}
           noArrow
         >
-          <div className="w-80 h-fit flex flex-col gap-4 bg-base-300 text-base-content shadow-lg rounded-xl p-4 select-none">
+          <div className="w-80 h-fit flex flex-col gap-4 bg-base-300 text-base-content shadow-lg rounded-box p-4 select-none">
             <div className="flex gap-4">
               <Avatar
                 userId={user.id}

@@ -179,7 +179,7 @@ export default memo(function CommentEntry({
         </button>
       </div>
       {editable && (
-        <div className="absolute right-2 top-0 bg-base-100 shadow-md rounded-md flex gap-1 [.comment-entry:hover_&]:opacity-100 opacity-0 transition-opacity">
+        <div className="absolute right-2 top-0 bg-base-100 shadow-md rounded-field flex gap-1 [.comment-entry:hover_&]:opacity-100 opacity-0 transition-opacity">
           <button
             className="btn btn-ghost btn-sm shrink-0 px-2"
             onClick={() => {

@@ -34,7 +34,7 @@ export default memo(function MetadataEditor() {
   }, [isOnline, id, me, metadata, setMetadata, setLastSaved, lastSaved]);
 
   return (
-    <div className="bg-base-200 text-base-content rounded-xl p-4 flex flex-col gap-2 shadow-sm tour-metadata-editor">
+    <div className="bg-base-200 text-base-content rounded-box p-4 flex flex-col gap-2 shadow-sm tour-metadata-editor">
       <fieldset className="fieldset">
         <div className="label justify-between">
           <span className="label-text">Title</span>
