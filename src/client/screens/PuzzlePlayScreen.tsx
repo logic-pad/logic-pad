@@ -56,7 +56,7 @@ const SidebarContent = memo(function SidebarContent({
     return <CollectionPanel onBack={() => setPanel('main')} />;
   }
   return (
-    <div className="h-full flex flex-col justify-between">
+    <div className="h-full flex flex-col justify-between gap-8 *:shrink-0">
       <div>{topLeft}</div>
       <div className="flex flex-col gap-2 justify-self-stretch justify-center">
         <Metadata />
