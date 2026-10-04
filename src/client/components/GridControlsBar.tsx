@@ -248,8 +248,7 @@ const EditButtons = memo(function EditButtons({
 /**
  * Combined edit and touch controls rendered as one floating bar,
  * horizontally centered to the puzzle grid. On narrow screens it falls back
- * to a two-row stacked design with a large color switch button. The layout is
- * switched with CSS only so that interactive elements are only mounted once.
+ * to a two-row stacked design with a large color switch button.
  */
 const GridControlsBar = memo(function GridControlsBar({
   onReset,
@@ -266,21 +265,21 @@ const GridControlsBar = memo(function GridControlsBar({
   };
 
   return (
-    <div className="fixed bottom-2 left-2 right-2 z-40 flex items-stretch justify-center gap-2 lg:absolute lg:bottom-2 lg:-left-10 lg:-right-10">
-      <div className="flex-1 lg:flex-initial flex flex-col lg:flex-row lg:items-center bg-base-100 shadow-xl text-base-content rounded-box">
-        <div className="flex shrink-0 items-center gap-2 order-2">
+    <div className="fixed bottom-2 left-2 right-2 z-40 flex items-end justify-end lg:justify-center gap-2 lg:absolute lg:bottom-2 lg:-left-10 lg:-right-10">
+      <div className="flex-1 md:flex-initial flex flex-col md:flex-row md:h-10 lg:items-center bg-base-200 shadow-xl text-base-content rounded-box">
+        <div className="flex shrink-0 items-center gap-2">
           <ValidatorStatus />
           <EditButtons onReset={onReset} />
           <FloodFillToggle className="block lg:hidden" />
         </div>
-        <div className="hidden lg:flex xl:hidden w-fit shrink-0 order-3">
+        <div className="hidden lg:flex xl:hidden w-fit shrink-0">
           <ScaleButtons />
         </div>
-        <div className="flex lg:hidden xl:flex xl:w-52 order-1 xl:order-10">
+        <div className="flex lg:hidden xl:flex xl:w-52">
           <ScaleSlider />
         </div>
       </div>
-      <div className="shrink-0 flex items-center bg-base-100 shadow-xl text-base-content rounded-box">
+      <div className="shrink-0 flex items-center bg-base-200 shadow-xl text-base-content rounded-box">
         <FloodFillToggle className="hidden lg:block" />
         <div className="lg:hidden">
           <ColorSwap large inverted={inverted} onSwitch={onColorSwitch} />
