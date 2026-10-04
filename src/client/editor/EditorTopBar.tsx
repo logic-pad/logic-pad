@@ -76,7 +76,10 @@ export default memo(function EditorTopBar({
             <a
               key={name}
               role="tab"
-              className={cn('tab', tab === name && 'tab-active bg-primary')}
+              className={cn(
+                'tab',
+                tab === name && 'tab-active bg-primary text-primary-content'
+              )}
               onClick={() => onTabChange(name)}
             >
               {name}
