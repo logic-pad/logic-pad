@@ -955,6 +955,10 @@ summary::marker {
       transparent 50%
     );
 }
+@utility fade-in-xfast {
+  opacity: 0;
+  animation: fade-in 0.25s ease-out 0s 1 forwards;
+}
 
 .x-text-outline {
   -webkit-text-stroke: thin currentColor;

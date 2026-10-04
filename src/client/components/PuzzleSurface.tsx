@@ -18,7 +18,7 @@ export default memo(function PuzzleSurface({
   return (
     <div
       className={cn(
-        'bg-neutral text-neutral-content rounded-box shadow-xl',
+        'bg-neutral text-neutral-content rounded-box shadow-xl fade-in-xfast',
         className
       )}
     >

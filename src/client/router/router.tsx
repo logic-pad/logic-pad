@@ -14,6 +14,7 @@ export const router = createRouter({
   defaultPreloadStaleTime: 1000 * 60 * 5,
   defaultPendingMs: 500,
   defaultPendingMinMs: 0,
+  defaultViewTransition: true,
 });
 
 declare module '@tanstack/react-router' {
