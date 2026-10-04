@@ -5,6 +5,7 @@
 - Fixed overflowing sidebar in play screens
 - Further improvements to insight solver
 - Improved grid controls bar to save space in smaller screens
+- Enhanced editor for puzzle description
 
 # 1/10/2026
 
