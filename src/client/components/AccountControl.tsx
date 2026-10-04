@@ -127,6 +127,15 @@ export default memo(function AccountControl() {
         </li>
         <li role="presentation">
           <Link
+            to="/my-follows"
+            role="menuitem"
+            onClick={() => (detailsRef.current!.open = false)}
+          >
+            My follows
+          </Link>
+        </li>
+        <li role="presentation">
+          <Link
             to="/settings"
             role="menuitem"
             onClick={() => (detailsRef.current!.open = false)}
@@ -134,6 +143,7 @@ export default memo(function AccountControl() {
             Settings
           </Link>
         </li>
+        <li className="divider-horizontal"></li>
         <li role="presentation">
           <a
             role="menuitem"
