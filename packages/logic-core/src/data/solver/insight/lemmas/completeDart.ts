@@ -8,16 +8,18 @@ import { cell, modifyTiles, setColor, setOppositeColor } from '../helper.js';
 import { Color, Position, Wrapping } from '../../../primitives.js';
 import { move } from '../../../dataHelper.js';
 
-/** Number of selections that are tracked for each sum: 0, 1, or "more than one". */
+/** Selection counts are only tested against zero, so "one" vs "more" is enough. */
 const CAP = 2;
 
 const plural = (count: number) => (count === 1 ? '' : 's');
 
-/**
- * `table[i][sum]` is the number of ways to pick from `sizes[i..]` so that the picked sizes add
- * up to `sum`, capped at {@link CAP}.
- */
-function selectionTable(sizes: number[], target: number): number[][] {
+const list = (values: number[]) =>
+  values.length === 1
+    ? `${values[0]}`
+    : `${values.slice(0, -1).join(', ')} and ${values[values.length - 1]}`;
+
+/** `table[i][sum]` is the number of ways to pick from `sizes[i..]` summing to `sum`. */
+function suffixTable(sizes: number[], target: number): number[][] {
   const table: number[][] = Array.from({ length: sizes.length + 1 }, () =>
     new Array<number>(target + 1).fill(0)
   );
@@ -32,23 +34,42 @@ function selectionTable(sizes: number[], target: number): number[][] {
   return table;
 }
 
-/** Recovers the only selection of `sizes` that adds up to `target`, assuming there is one. */
-function pickSelection(
-  table: number[][],
-  sizes: number[],
-  target: number
-): number[] {
-  const selection: number[] = [];
-  let sum = target;
+/** `table[i][sum]` is the number of ways to pick from `sizes[..i - 1]` summing to `sum`. */
+function prefixTable(sizes: number[], target: number): number[][] {
+  const table: number[][] = Array.from({ length: sizes.length + 1 }, () =>
+    new Array<number>(target + 1).fill(0)
+  );
+  table[0][0] = 1;
   for (let i = 0; i < sizes.length; i++) {
-    const withItem = sum >= sizes[i] ? table[i + 1][sum - sizes[i]] : 0;
-    const withoutItem = table[i + 1][sum];
-    if (withItem === 1 && withoutItem === 0) {
-      selection.push(i);
-      sum -= sizes[i];
+    for (let sum = 0; sum <= target; sum++) {
+      let count = table[i][sum];
+      if (sum >= sizes[i]) count += table[i][sum - sizes[i]];
+      table[i + 1][sum] = Math.min(CAP, count);
     }
   }
-  return selection;
+  return table;
+}
+
+/**
+ * How many selections of `sizes` add up to `target` and either include or exclude the group at
+ * `index`.
+ */
+function selectionCount(
+  prefix: number[][],
+  suffix: number[][],
+  sizes: number[],
+  index: number,
+  target: number,
+  included: boolean
+): number {
+  let total = 0;
+  for (let sum = 0; sum <= target; sum++) {
+    if (prefix[index][sum] === 0) continue;
+    const rest = target - sum - (included ? sizes[index] : 0);
+    if (rest < 0) continue;
+    total += prefix[index][sum] * suffix[index + 1][rest];
+  }
+  return total;
 }
 
 /**
@@ -59,14 +80,15 @@ function pickSelection(
  *    number of opposite-colored cells that it already sees.
  * 2. The gray cells that the dart sees are grouped by merged tile, so each group contributes
  *    either its full size or nothing to the remaining count.
- * 3. A group larger than the remaining count can never contribute to it, so it must share the
- *    dart's color even when the remaining groups admit several combinations. This is applied
- *    first, and the remaining combinations are left to a later step.
- * 4. A group that leaves inadequate space to satisfy the remaining count must be part of the
- *    remaining count itself.
- * 4. Otherwise, if exactly one selection of groups adds up to the remaining count, the cells of
- *    those groups must be opposite-colored, and every other gray cell seen must share the dart's
- *    color.
+ * 3. Every group is then classified by the combinations that add up to the remaining count: one
+ *    that appears in no combination must share the dart's color, and one that appears in every
+ *    combination must be opposite-colored. Groups that appear in some but not all combinations are
+ *    left for a later step, once the other groups have narrowed the count down.
+ *
+ * Classifying by combination membership covers the direct cases as well: a group bigger than the
+ * remaining count is in no combination, a group large enough that the rest cannot reach the count
+ * without it is in every combination, and when the combinations collapse to a single one every
+ * group is decided at once.
  *
  * Grids that wrap around are ignored because the cells seen by a dart cannot be enumerated
  * reliably there.
@@ -132,98 +154,78 @@ export default class CompleteDart extends InsightLemma {
 
       const groups = this.groupByMergedTile(context.grid, grayCells);
       const sizes = groups.map(group => group.length);
-      const oversizedTarget: number[] = [];
-      const candidates: number[] = [];
-      for (let i = 0; i < sizes.length; i++) {
-        if (sizes[i] > target) oversizedTarget.push(i);
-        else candidates.push(i);
-      }
-      const available = candidates.reduce((sum, i) => sum + sizes[i], 0);
+      const available = sizes
+        .filter(size => size <= target)
+        .reduce((sum, size) => sum + size, 0);
       if (target > available)
         throw this.error(
-          `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} but its merged gray tiles [${sizes.join(',')}] can only provide ${available}`
+          `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} but its merged gray tiles, of sizes ${list(sizes)}, can only provide ${available}`
+        );
+
+      const prefix = prefixTable(sizes, target);
+      const suffix = suffixTable(sizes, target);
+      if (suffix[0][target] === 0)
+        throw this.error(
+          `Dart at ${cell(position)} cannot see exactly ${dart.number} opposite-colored cell${plural(dart.number)} because no combination of its merged gray tiles, of sizes ${list(sizes)}, adds up to ${target}`
         );
 
       const oppositeColor = color === Color.Dark ? Color.Light : Color.Dark;
       const newTiles = modifyTiles(context.grid);
       const oppositeCells: Position[] = [];
       const sameCells: Position[] = [];
-
-      if (oversizedTarget.length > 0) {
-        // An oversized group can never contribute to the target, regardless of how the other
-        // groups combine, so it must share the dart's color. Finding the combinations that
-        // remain is left to a later step.
-        for (const i of oversizedTarget) {
-          for (const pos of groups[i]) {
-            setColor(context.grid, newTiles, pos.x, pos.y, color);
-            sameCells.push(pos);
-          }
-        }
-        context.setTiles(
-          newTiles,
-          this.proof()
-            .difficulty(target === 0 ? 1 : 2)
-            .describe(
-              target === 0
-                ? `Dart at ${cell(position)} already sees ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(sameCells)} must be ${color}`
-                : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)}, so merged gray tiles bigger than ${target} at ${cell(sameCells)} must be ${color}`
-            )
-        );
-        return true;
-      }
-
-      const oversizedNontarget: number[] = [];
+      let forced = 0;
       for (let i = 0; i < sizes.length; i++) {
-        if (sizes[i] > available - target) oversizedNontarget.push(i);
-      }
-      if (oversizedNontarget.length > 0) {
-        // An oversized group that leaves too few fells to fulfil the target can never be the same color as the dart
-        for (const i of oversizedNontarget) {
-          for (const pos of groups[i]) {
-            setOppositeColor(context.grid, newTiles, pos.x, pos.y, color);
-            oppositeCells.push(pos);
-          }
-        }
-        context.setTiles(
-          newTiles,
-          this.proof()
-            .difficulty(target === 0 ? 1 : 2)
-            .describe(
-              available === target
-                ? `Dart at ${cell(position)} needs all remaining cells to see ${dart.number} opposite-colored cell${plural(dart.number)}, so cells at ${cell(oppositeCells)} must be ${oppositeColor}`
-                : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)}, so merged gray tiles at ${cell(oppositeCells)} must be ${oppositeColor} to satisfy the count`
-            )
-        );
-        return true;
-      }
-
-      const table = selectionTable(sizes, target);
-      if (table[0][target] === 0)
-        throw this.error(
-          `Dart at ${cell(position)} cannot see exactly ${dart.number} opposite-colored cell${plural(dart.number)} because no combination of gray cells [${sizes.join(',')}] adds up to ${target}`
-        );
-      if (table[0][target] > 1) continue;
-
-      const selected = new Set(pickSelection(table, sizes, target));
-      for (const i of candidates) {
+        const inSome = selectionCount(prefix, suffix, sizes, i, target, true);
+        const without = selectionCount(prefix, suffix, sizes, i, target, false);
+        const decided = inSome === 0 || without === 0;
+        if (decided) forced++;
         for (const pos of groups[i]) {
-          if (selected.has(i)) {
-            setOppositeColor(context.grid, newTiles, pos.x, pos.y, color);
-            oppositeCells.push(pos);
-          } else {
+          if (inSome === 0) {
             setColor(context.grid, newTiles, pos.x, pos.y, color);
             sameCells.push(pos);
+          } else if (without === 0) {
+            setOppositeColor(context.grid, newTiles, pos.x, pos.y, color);
+            oppositeCells.push(pos);
           }
         }
       }
+      if (forced === 0) continue;
+
+      const complete = forced === sizes.length;
+      const clauses: string[] = [];
+      if (oppositeCells.length > 0)
+        clauses.push(
+          complete
+            ? `cells at ${cell(oppositeCells)} must be ${oppositeColor}`
+            : `the cells at ${cell(oppositeCells)} belong to all of them and must be ${oppositeColor}`
+        );
+      if (sameCells.length > 0)
+        clauses.push(
+          complete
+            ? `cells at ${cell(sameCells)} must be ${color}`
+            : `the cells at ${cell(sameCells)} belong to none of them and must be ${color}`
+        );
+
+      const prefixText =
+        complete && sameCells.length === 0
+          ? `Dart at ${cell(position)} needs all remaining cells to see ${dart.number} opposite-colored cell${plural(dart.number)}, so `
+          : complete && oppositeCells.length === 0
+            ? `Dart at ${cell(position)} already sees ${dart.number} opposite-colored cell${plural(dart.number)}, so `
+            : complete
+              ? `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} and only one combination of its merged gray tiles, of sizes ${list(sizes)}, adds up to ${target}, so `
+              : `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} and out of all possible combinations of gray tiles, `;
 
       context.setTiles(
         newTiles,
         this.proof()
-          .difficulty(sameCells.length === 0 ? 1 : 3)
-          .describe(
-            `Dart at ${cell(position)} needs ${target} more opposite-colored cell${plural(target)} and [${sizes.join(',')}] has only one combination that adds up to ${target}, so cells at ${cell(oppositeCells)} must be ${oppositeColor} and cells at ${cell(sameCells)} must be ${color}`
+          .difficulty(
+            complete && (sameCells.length === 0 || oppositeCells.length === 0)
+              ? 1
+              : complete
+                ? 3
+                : 2
           )
+          .describe(`${prefixText}${clauses.join(' and ')}`)
       );
       return true;
     }

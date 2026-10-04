@@ -210,7 +210,7 @@ room.
 **Merged tiles are atomic.** Coloring any cell must go through
 `setColor`/`setOppositeColor` from `helper.ts` (they fan out via
 `connections.getConnectedTiles`). Deductions that count cells must group gray
-cells by merged tile (see `completeDart`'s subset-sum over `[3,1,1]`,
+cells by merged tile (see `completeDart`'s subset-sum over merged tiles,
 `breakBannedPattern`'s `tileKey`, `colorViewpointSight`'s `visibleCount`), and
 must skip a tile containing any fixed cell — you cannot recolor it.
 
@@ -257,7 +257,10 @@ coordinates print `` `(${symbol.x},${symbol.y})` `` manually. Pluralize
 ("1 cell" / "2 cells") — `completeDart.ts` has a `plural()` helper for this.
 Name the deduction's *subject* in the sentence so it reads correctly when the
 lemma generalizes (`Area number at …` vs `Cell at …` vs `Region at …`,
-depending on whether the constraint came from a symbol or a rule).
+depending on whether the constraint came from a symbol or a rule). Never print
+a bare bracketed number list such as `[2,2]`: sitting next to `cell()` output
+it reads as a coordinate for an unrelated tile. Spell it out — `of sizes 2 and
+2` — with a `list()` helper.
 
 **Errors** (`throw this.error(...)`) mean "this grid is in an invalid state",
 which marks the puzzle unsolvable — reserve them for genuine contradictions
@@ -295,10 +298,13 @@ from galaxy-only to a unified check that rejects a merge when the generated
 group contains a translation, or when a cell's image is off-grid, non-existent,
 or outside both regions.
 
-Reworked: `complete-dart` now treats merged tiles as subset-sum units
-(target = number − opposite-colored; oversized groups forced to the dart's
-color as an early exit before the DP; unique selection ⇒ exact partition;
-wrap-around grids skipped).
+Reworked: `complete-dart` treats merged tiles as subset-sum units
+(target = number − opposite-colored) and classifies **every** group by its
+membership in the combinations that reach the target: in none → the dart's
+color, in all → opposite-colored, in some → deferred to a later step. Prefix
+and suffix DP tables answer the two zero-tests, so one mechanism replaces the
+earlier cascade (oversized early-exit, "leaves too few cells" early-exit,
+unique-selection). Wrap-around grids are skipped.
 
 Bugs fixed, with root causes:
 
@@ -318,12 +324,14 @@ Bugs fixed, with root causes:
 
 ## Appendix: regression corpus
 
-Fifteen puzzles, each verified to solve completely with `validateGrid(...).final
+Sixteen puzzles, each verified to solve completely with `validateGrid(...).final
 === 'satisfied'` in **both** modes. The label notes the primary technique each
 one exercises; several were the repro for a bug above.
 
 ```ts
 const puzzles: [string, string][] = [
+  // complete-dart: a merged tile in no valid combination (no speculation needed)
+  ['dart combos 1550', 'dfl_jdJda8IwFAbgv3I416HWKiqBXrQbG4IwmUJhCJJ-aMNiOtITY13330eLAxkr7L15SXjOuTr-_hNJkiqQ4_JlCWt7vaoCJv4sQIZHI3PkuLjM2-2Ce17Sx7sl8VLnXOoSL-3iEs-lLnX927m-u3Ltw5x7A4miqK84iruO47h9aze5MMQuYcCa0GfantLChFNWGVloEiQrHeaV0_zGJvdsMsTC2T0Lhlg4v2f-EAt91oTB39uMPJZ076b_dLMfN_7tSmpfkWEuDweZWUUN8jFDJfU7ckSGwlJZGeS4slqYrIQN2VxWdTdT1JmRH90m5LghQbbmoOS52OmdXtZwFloqJTiQsf3fWlDJIamMymEEkSV70vAklKphBI9CquZ2JSNYVUeZPRuZ77uL6Ya3RkgFaUNFzcFn4OPXNw=='],
   // upper-bound line-of-sight (color-viewpoint-sight forceBlocked)
   ['viewpoint cap 1500', 'dfl_dZLRasIwFIZfJZzrgK1alUCuJgxBmKxCYAjStFEPy1JJE2Nd9-6jZQUn9iJwko8v_PycaP8NDp1WwGD1tiIbf7tpRcaLRQIUjhYLYDC_zpvtnIkghJRCShmCCFIEKYUIMnSnu7VzkDK0g5CieYlZ89GkF1ThXKJx9MojWvOIGv8lleVTdo8m9yj5h2ZD1pUntObxcyumNR_3aPxo9cjyyWMMPnmO2g-nQzF6pCyPHy2ePE_YtjEbamMIdW30iI-bd6BQ4OGAudeuBhZT0Gg-gQFQyLw7lRYYrL3JbH4iqfMFllXrqCq3eHZYGmCQusz5ihGNF7UzO7OqyCUzqHXGiLO-e9tk7sSIKK0uyIikyiqjyFJpf1RkRJYZ6vpvgUZkXR4xf7VY7Ntlau2tzVATWTtVMRJREsHPLw=='],
   // forced-region-expansion (single-bottleneck corridors)
