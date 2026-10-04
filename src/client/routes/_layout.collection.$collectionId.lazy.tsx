@@ -236,16 +236,16 @@ const CollectionControls = memo(function CollectionControls({
   return (
     <div
       className={cn(
-        'menu menu-horizontal w-full bg-base-100 rounded-box gap-4',
+        'menu menu-horizontal w-full bg-base-200 rounded-box gap-4',
         (isPendingUpdate || isPendingDelete) &&
           'pointer-events-none opacity-70 transition-opacity'
       )}
     >
-      <line>
+      <span className="flex gap-2 items-center">
         <span className="mx-2">Access:</span>
         <select
           defaultValue={collectionBrief.status}
-          className="select select-sm capitalize w-30 inline"
+          className="select select-sm capitalize w-32"
           onChange={async e => {
             await updateCollection([
               collectionBrief.id,
@@ -261,7 +261,7 @@ const CollectionControls = memo(function CollectionControls({
             </option>
           ))}
         </select>
-      </line>
+      </span>
       {collectionBrief.autoPopulate === null && (
         <li>
           <a
