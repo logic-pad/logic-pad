@@ -1,4 +1,4 @@
-import GridData from '../../../grid.js';
+import GridData, { NEIGHBOR_OFFSETS } from '../../../grid.js';
 import { Color, Position } from '../../../primitives.js';
 import { area, cell, modifyTiles, setOppositeColor } from '../helper.js';
 import InsightContext from '../insightContext.js';
@@ -19,27 +19,30 @@ export default class SeparateDisconnectedRegions extends InsightLemma {
   }
 
   public apply(context: InsightContext): boolean {
+    const grid = context.grid;
     const map = new Map<RegionPair, Disconnection | null>();
-    for (let y = 0; y < context.grid.height; y++) {
-      for (let x = 0; x < context.grid.width; x++) {
-        const tile = context.grid.getTile(x, y);
+    const processed = new Set<string>();
+    for (let y = 0; y < grid.height; y++) {
+      for (let x = 0; x < grid.width; x++) {
+        const tile = grid.getTile(x, y);
         if (!tile.exists || tile.fixed || tile.color !== Color.Gray) continue;
+        // A merged tile is one cell for coloring purposes, so the regions it separates are the
+        // neighbors of all of its cells: two cells of the same tile can touch two regions that
+        // no single cell of it touches.
+        const cells = grid.connections.getConnectedTiles({ x, y });
+        if (cells.some(pos => processed.has(`${pos.x},${pos.y}`))) continue;
+        for (const pos of cells) processed.add(`${pos.x},${pos.y}`);
+        if (cells.some(pos => grid.getTile(pos.x, pos.y).fixed)) continue;
+        const own = context.regions.get({ x, y });
         const neighbors = new Set<Region>();
-        if (x > 0) {
-          const leftRegion = context.regions.get({ x: x - 1, y });
-          if (leftRegion) neighbors.add(leftRegion);
-        }
-        if (y > 0) {
-          const upRegion = context.regions.get({ x, y: y - 1 });
-          if (upRegion) neighbors.add(upRegion);
-        }
-        if (x < context.grid.width - 1) {
-          const rightRegion = context.regions.get({ x: x + 1, y });
-          if (rightRegion) neighbors.add(rightRegion);
-        }
-        if (y < context.grid.height - 1) {
-          const downRegion = context.regions.get({ x, y: y + 1 });
-          if (downRegion) neighbors.add(downRegion);
+        for (const pos of cells) {
+          for (const offset of NEIGHBOR_OFFSETS) {
+            const next = { x: pos.x + offset.x, y: pos.y + offset.y };
+            if (!grid.isPositionValid(next.x, next.y)) continue;
+            const region = context.regions.get(next);
+            if (!region || region.id === own?.id) continue;
+            neighbors.add(region);
+          }
         }
         if (neighbors.size < 2) continue;
         const regions = [...neighbors];
@@ -61,14 +64,14 @@ export default class SeparateDisconnectedRegions extends InsightLemma {
                   proof
                 )
               ) {
-                existing = { positions: [{ x, y }], proof };
+                existing = { positions: [], proof };
                 map.set(pair, existing);
               } else {
                 map.set(pair, null);
               }
             }
             if (existing) {
-              existing.positions.push({ x, y });
+              existing.positions.push(...cells);
             }
           }
         }

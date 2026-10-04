@@ -209,10 +209,14 @@ room.
 
 **Merged tiles are atomic.** Coloring any cell must go through
 `setColor`/`setOppositeColor` from `helper.ts` (they fan out via
-`connections.getConnectedTiles`). Deductions that count cells must group gray
-cells by merged tile (see `completeDart`'s subset-sum over merged tiles,
-`breakBannedPattern`'s `tileKey`, `colorViewpointSight`'s `visibleCount`), and
-must skip a tile containing any fixed cell — you cannot recolor it.
+`connections.getConnectedTiles`). Any lemma that inspects a cell's
+**neighborhood** must likewise inspect the whole merged tile: a tile can touch
+two regions via different cells while no single cell of it touches both, which
+is exactly the case `separate-disconnected-regions` needs to force the tile
+dark. Skip a tile containing any fixed cell — you cannot recolor it.
+Deductions that count cells must group gray cells by merged tile (see
+`completeDart`'s subset-sum over merged tiles, `breakBannedPattern`'s
+`tileKey`, `colorViewpointSight`'s `visibleCount`).
 
 **`isApplicable` gates on symbols *and* rules.** Several lemmas are driven by
 `RegionSizeStore`, whose possibilities now come from both area number symbols
@@ -324,12 +328,14 @@ Bugs fixed, with root causes:
 
 ## Appendix: regression corpus
 
-Sixteen puzzles, each verified to solve completely with `validateGrid(...).final
+Seventeen puzzles, each verified to solve completely with `validateGrid(...).final
 === 'satisfied'` in **both** modes. The label notes the primary technique each
 one exercises; several were the repro for a bug above.
 
 ```ts
 const puzzles: [string, string][] = [
+  // separate-disconnected-regions across a merged tile straddling two letter regions
+  ['letters merged 1600', 'dfl_XZBta8IwEMe_ynGvQ-wUBwb6IulgCMJkCoUhSNpGDQvtSC_Wuu67j6iFsePuz93vHl5csv9GsuQMCly-LWEdrldnYDZPpsjw6G2FAheX-bBdiLzriiLvot6kiFF0XV5Ev-ejdUO2EFxKpTjnXCqZZVxKLhWXseZcZTGJ7ew2o4aPYeMMkfHskiasTxN2L1MpRp7O_3I18kv6zPp0-n_-cWc2cjW8I8PKHg62DI56FE8Mna0_USAy1IFOjUeBq1BrX55gQ6GyTRt3TFt6-0W2qVHghjSFVoCzZ7Ord_WyhbOurXNaAPlwY2tNJwF5410FE1iF0tQEuSbjW5jAi7auf7x6AqvmaMtXb6t9fHvc3nptHRQ9mVZAwiDBn18='],
   // complete-dart: a merged tile in no valid combination (no speculation needed)
   ['dart combos 1550', 'dfl_jdJda8IwFAbgv3I416HWKiqBXrQbG4IwmUJhCJJ-aMNiOtITY13330eLAxkr7L15SXjOuTr-_hNJkiqQ4_JlCWt7vaoCJv4sQIZHI3PkuLjM2-2Ce17Sx7sl8VLnXOoSL-3iEs-lLnX927m-u3Ltw5x7A4miqK84iruO47h9aze5MMQuYcCa0GfantLChFNWGVloEiQrHeaV0_zGJvdsMsTC2T0Lhlg4v2f-EAt91oTB39uMPJZ076b_dLMfN_7tSmpfkWEuDweZWUUN8jFDJfU7ckSGwlJZGeS4slqYrIQN2VxWdTdT1JmRH90m5LghQbbmoOS52OmdXtZwFloqJTiQsf3fWlDJIamMymEEkSV70vAklKphBI9CquZ2JSNYVUeZPRuZ77uL6Ya3RkgFaUNFzcFn4OPXNw=='],
   // upper-bound line-of-sight (color-viewpoint-sight forceBlocked)
