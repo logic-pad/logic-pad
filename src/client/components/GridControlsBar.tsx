@@ -1,4 +1,4 @@
-import { memo, useState, useSyncExternalStore } from 'react';
+import { memo, useEffect, useState, useSyncExternalStore } from 'react';
 import {
   FiCheck,
   FiCornerUpLeft,
@@ -138,14 +138,14 @@ const ScaleButtons = memo(function ScaleButtons() {
 });
 
 export interface ColorSwapProps {
-  inverted: boolean;
   large?: boolean;
+  inverted: boolean;
   onSwitch: () => void;
 }
 
 const ColorSwap = memo(function ColorSwap({
-  inverted,
   large,
+  inverted,
   onSwitch,
 }: ColorSwapProps) {
   return (
@@ -178,6 +178,31 @@ const ColorSwap = memo(function ColorSwap({
         </div>
       </label>
     </div>
+  );
+});
+
+const ResponsiveColorSwap = memo(function ResponsiveColorSwap() {
+  const [inverted, setInverted] = useState(
+    getSetting('flipPrimaryMouseButton')
+  );
+
+  useEffect(() => {
+    mouseContext.setInverted(inverted);
+  });
+
+  return (
+    <>
+      <div className="lg:hidden">
+        <ColorSwap
+          large
+          inverted={inverted}
+          onSwitch={() => setInverted(i => !i)}
+        />
+      </div>
+      <div className="hidden lg:flex h-full">
+        <ColorSwap inverted={inverted} onSwitch={() => setInverted(i => !i)} />
+      </div>
+    </>
   );
 });
 
@@ -253,17 +278,6 @@ const EditButtons = memo(function EditButtons({
 const GridControlsBar = memo(function GridControlsBar({
   onReset,
 }: GridControlsBarProps) {
-  const [inverted, setInverted] = useState(
-    getSetting('flipPrimaryMouseButton')
-  );
-  const onColorSwitch = () => {
-    setInverted(i => {
-      const newValue = !i;
-      mouseContext.setInverted(newValue);
-      return newValue;
-    });
-  };
-
   return (
     <div className="fixed bottom-2 left-2 right-2 z-40 flex items-end justify-end lg:justify-center gap-2 lg:absolute lg:bottom-2 lg:-left-10 lg:-right-10">
       <div className="flex-1 md:flex-initial flex flex-col md:flex-row md:h-10 lg:items-center bg-base-200 shadow-xl text-base-content rounded-box">
@@ -281,12 +295,7 @@ const GridControlsBar = memo(function GridControlsBar({
       </div>
       <div className="shrink-0 flex items-center bg-base-200 shadow-xl text-base-content rounded-box">
         <FloodFillToggle className="hidden lg:block" />
-        <div className="lg:hidden">
-          <ColorSwap large inverted={inverted} onSwitch={onColorSwitch} />
-        </div>
-        <div className="hidden lg:flex h-full">
-          <ColorSwap inverted={inverted} onSwitch={onColorSwitch} />
-        </div>
+        <ResponsiveColorSwap />
       </div>
     </div>
   );
