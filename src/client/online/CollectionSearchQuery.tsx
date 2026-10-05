@@ -135,9 +135,16 @@ export default memo(function CollectionSearchQuery({
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.value = displayParams.q ?? '';
+      const ref = inputRef.current;
+      ref.readOnly = true;
+      ref.focus();
+      ref.value = displayParams.q ?? '';
+      const handle = setTimeout(() => {
+        ref.readOnly = false;
+      }, 50);
+      return () => clearTimeout(handle);
     }
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
