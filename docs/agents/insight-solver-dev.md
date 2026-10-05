@@ -8,12 +8,34 @@ loop**, the invariants that are easy to violate, and what was recently built.
 
 ## Contents
 
+- [Where things stand](#where-things-stand)
 - [Dev workflow](#dev-workflow)
 - [Verification: the dual-mode rule](#verification-the-dual-mode-rule)
 - [Codebase invariants and gotchas](#codebase-invariants-and-gotchas)
 - [Conventions](#conventions)
-- [Session summary](#session-summary)
+- [Work log](#work-log)
 - [Appendix: regression corpus](#appendix-regression-corpus)
+
+## Where things stand
+
+As of commit `2940238` (*Add lemmas for symbols per region rule*).
+
+- **The official harness works in this checkout.** `references/dev_puzzles.json`
+  is present (untracked; 3640 entries, 3025 rated). `bun run insight-eval` from
+  `packages/logic-core` is the fastest regression signal and currently reaches
+  **476/3025** before stopping.
+- **Current stopper: pid 15010** — `complete-dart` has no off-by-X support, so a
+  dart that can only reach its number under an off-by-X reading is misread as a
+  contradiction ("Dart at (1,4) sees only 0 opposite-colored cells…"). Known
+  limitation, not a regression; teaching `complete-dart` about off-by-X is the
+  obvious next task.
+- **`speculative-solve` deliberately refuses 0-step speculations**
+  (`speculativeSolve.ts:120`). When a hypothesis contradicts with *no* deduction
+  in between, it logs `0-step speculative solve at (x,y)` and returns `false`,
+  because such a case is always reachable by a real lemma. **Treat that log line
+  as a missing-lemma report, not a bug.**
+- Newest lemmas: `symbol-count-bounds` and `impossible-symbol-area-color`, both
+  covering the `symbols_per_region` rule. Details in the [work log](#work-log).
 
 ## Dev workflow
 
@@ -108,8 +130,9 @@ Then call `new MyLemma().apply(context)` directly on a fresh
 
 Cover, for every lemma: the happy path, each early-return/skip branch, each
 `throw this.error(...)` path, and the **merged-tile** variant (a deduction
-that colors one cell must color the whole tile, and must skip tiles
-containing a fixed cell).
+that colors one cell must color the whole tile, and must skip tiles containing
+a fixed cell **or any already-colored cell** — a mixed tile's color is already
+determined, so recoloring it contradicts the cell it already has).
 
 Watch out: a 1-row grid with `GridConnections.create(['aaa'])` is degenerate —
 merged tiles spanning rows are the interesting case.
@@ -124,7 +147,8 @@ Delete every `scratch-*.ts`, then run `bun run lint` and
 Timing is worth printing (`performance.now()` around each full solve) when a
 change adds per-cell or per-pair work: the lemma loop restarts from scratch
 after every deduction, so an O(cells²) lemma inside another O(cells²) lemma
-gets expensive fast. The current corpus' worst case is ~370 ms.
+gets expensive fast. The 18-puzzle corpus verifies in **both** modes in ~3.6 s
+total (~60 ms for the largest single solve).
 
 ## Verification: the dual-mode rule
 
@@ -146,9 +170,9 @@ for (;;) {
 }
 ```
 
-This is not busywork: **two separate bugs in this session were only visible
-as a divergence between the modes**, and both had the same root cause — state
-that accumulates within one long-lived context but is absent from a fresh one:
+This is not busywork: **two separate bugs were only visible as a divergence
+between the modes**, and both had the same root cause — state that accumulates
+within one long-lived context but is absent from a fresh one:
 
 1. `RegionStore.recompute()` replayed `connectionProofs` into the disjoint set
    *before* rekeying them to the current area ids, so after the first tile
@@ -164,15 +188,16 @@ derived state does this invalidate?" Also, when a full solve *throws* but
 step-by-step succeeds, suspect an unsound deduction whose evidence only
 survives in accumulated proofs.
 
-`bun run insight-eval` (from `packages/logic-core`) is the official
-regression harness, but it needs `references/dev_puzzles.json` at the repo
-root, which is untracked and **absent in this checkout** — so use the corpus
-in the appendix instead. Prefer the harness when the puzzle list is
-available; fold these links in as permanent fixtures if it ever is.
+`bun run insight-eval` (from `packages/logic-core`) is the official regression
+harness and **works in this checkout** — `references/dev_puzzles.json` is
+present. It stops at the first failure, so it is the quickest way to see whether
+a change advanced or regressed the frontier. Keep using the appendix corpus for
+*targeted* technique fixtures: the harness reports only pass/fail, never which
+technique a puzzle exercises.
 
 ## Codebase invariants and gotchas
 
-Facts that cost real debugging time this session.
+Facts that cost real debugging time across sessions.
 
 **Area ids are positional and renumber on every grid change.** `AreaStore`
 assigns `AreaId = y * width + x` of the seed cell, so filling one tile shifts
@@ -230,17 +255,45 @@ and `RegionAreaRule`. Any lemma reading `regionSizes` must accept either:
 Four lemmas (`complete-region-size`, `forced-region-expansion`,
 `disconnect-incompatible-region-sizes`, `impossible-region-color`) were
 sequentially blind to rule-only puzzles this way. When adding a size-aware
-lemma, copy that pair. Conversely, `symbols_per_region` only bounds from
-above, so `Comparison.AtLeast` must be filtered out.
+lemma, copy that pair.
+
+**`symbols_per_region` bounds in *both* directions — filter by comparison.**
+Unlike `region_area`, it has all three comparisons, and which one can produce a
+contradiction depends on the reasoning:
+
+- "too many symbols" (merging, capping): only `Equal`/`AtMost` bound from
+  above, so filter out `AtLeast` — `disconnect-incompatible-symbol-counts`.
+- "too few symbols" (forcing membership, coloring): only `Equal`/`AtLeast`
+  bound from below, so filter out `AtMost` — `symbol-count-bounds`' lower
+  branch and `impossible-symbol-area-color`.
+
+A new symbol-count lemma must pick the filter matching its direction; getting
+this backwards makes the lemma silently fire on rules it cannot justify.
+
+**A `symbols_per_region` rule with `color: Gray` is not a wildcard.** It
+constrains the *current* undecided blob (its own `validateGrid` floods gray
+together with the seeded color), so it says nothing about which final color a
+cell may take. Color-deducing and membership-forcing lemmas must skip gray
+rules; `disconnect-incompatible-symbol-counts` and `impossible-symbol-area-color`
+both do.
+
+**Count symbols through `symbolCorners()` in `helper.ts`.** A symbol at a
+half-integer coordinate touches up to four cells, and the rule counts it once
+per area it touches, so membership must OR over `floor`/`ceil` of both axes
+rather than reading a single cell. Both symbol-count lemmas share this helper —
+don't re-derive the corner set.
 
 **Speculation is a crutch, not a fix.** `speculative-solve` is registered last
 and will brute-force past gaps. When it fires on a puzzle that "should" be
 solvable by insight, the missing lemma is the real bug — but confirm the
-deduction is genuinely human-visible before adding one. On the last puzzle of
-this session the claim was "the final two cells are ambiguous"; the truth was
+deduction is genuinely human-visible before adding one. One earlier session hit
+a puzzle reported as "the final two cells are ambiguous"; the truth was
 a missing upper-bound check in `color-viewpoint-sight`. Push back with
 evidence, and verify by checking whether a deduction the reporter describes
-is expressible in the current lemma set.
+is expressible in the current lemma set. The lemma also refuses 0-step
+speculations outright (see [Where things stand](#where-things-stand)), so a
+puzzle that needs one stalls instead of being brute-forced — that stall *is*
+the signal.
 
 ## Conventions
 
@@ -274,7 +327,7 @@ cannot be connected), never for "my lemma has nothing to say".
 **Renames.** When a lemma outgrows its name, rename the file, class, and `id`,
 and update `allLemmas.ts`; grep for the old id first (nothing outside
 `allLemmas.ts` references lemma ids, and `docs/insight-solver.md` mentions
-them only generically). Done this session: `complete-area-number` →
+them only generically). Done so far: `complete-area-number` →
 `complete-region-size`, `impossible-area-number-color` →
 `impossible-region-color`.
 
@@ -283,7 +336,35 @@ scripts: `@'...'@` blocks mangle `$`, backticks, and `?` (the ternary
 `cond ? 'a' : 'b'` was corrupted twice). Use `$(...)` subexpressions and
 `-LiteralPath` throughout.
 
-## Session summary
+## Work log
+
+### Latest session — symbols per area (`2940238`)
+
+New lemmas:
+
+| Id | File | Technique |
+| --- | --- | --- |
+| `symbol-count-bounds` | `symbolCountBounds.ts` | Both directions of a `symbols_per_region` bound, expressed as region membership. Lower (`Equal`/`AtLeast`): when a region's *reachable* symbol count equals the requirement, every reachable symbol must join → `addConnected`. Upper (`Equal`/`AtMost`): when the region already holds its allowance, remaining reachable symbols stay out → `addDisconnected`. Membership is read off `region.getRegionMap()`: `true` = inside, `!== false` = reachable. Purely relational, so it never appears in `tileHistory`. |
+| `impossible-symbol-area-color` | `impossibleSymbolAreaColor.ts` | The dual of the lower branch, expressed as a color. Flood the area a gray cell *would* form if colored C (merged tiles atomic) and count symbols optimistically, assuming every gray cell on the flood takes C. Fewer than the minimum ⇒ C impossible ⇒ opposite color. Both colors impossible ⇒ `throw this.error(...)`. |
+
+Shared infrastructure: `symbolCorners()` in `helper.ts`, extracted from a
+duplicated inline copy and now used by both lemmas.
+
+Gotchas hit while building these, roughly in order of what they cost:
+
+| Symptom | Cause | Resolution |
+| --- | --- | --- |
+| `ReferenceError: cell is not defined` mid-scratch-run | An import edit dropped `cell` from `symbolCountBounds` while a description still used it | Re-add the import; run lint/`tsc` *before* executing a lemma for the first time |
+| Lemma concluded "cannot be light → must be dark" on a tile that was already partly light | Merged-tile guard skipped only **fixed** members, not already-colored ones | Skip any tile with a fixed **or** non-gray member (see §4) |
+| Test asserted a gray cell beside the symbol was unfillable | Bad premise: the flood legitimately reaches the symbol through the adjacent same-color cell | A walled-off premise needs opposite-color neighbors on *both* sides (this is what the report puzzle's `(3,0)` looks like) |
+| `GridConnections.create(['ab'])` merged nothing | Different letters mean *separate* tiles; merging requires the **same** letter | Use `['aa']`; confirm with `connections.getConnectedTiles` before trusting a fixture |
+| Hand-rolled dual-mode driver reported `agree=false` on every puzzle | Its step hook returned `false` (halt) for relational-only successes, which the real worker treats as "continue to the next lemma" | Mirror `insightWorker.ts` exactly: halt only when `newHistory.length > 0` |
+
+That last one generalises: **a hand-rolled step driver must replicate the
+worker's `onLemmaSuccess` semantics**, or it manufactures divergence that does
+not exist in the product.
+
+### Previous session — lotus, symbol counts, viewpoint sight
 
 New lemmas:
 
@@ -328,9 +409,11 @@ Bugs fixed, with root causes:
 
 ## Appendix: regression corpus
 
-Seventeen puzzles, each verified to solve completely with `validateGrid(...).final
+Eighteen puzzles, each verified to solve completely with `validateGrid(...).final
 === 'satisfied'` in **both** modes. The label notes the primary technique each
-one exercises; several were the repro for a bug above.
+one exercises; several were the repro for a bug above. Numbered labels carry the
+puzzle's `pid` from `dev_puzzles.json`; the unnumbered ones were supplied
+directly as report links.
 
 ```ts
 const puzzles: [string, string][] = [
@@ -364,6 +447,8 @@ const puzzles: [string, string][] = [
   ['area numbers 798', 'dfl_hdLRasIwFAbgVwnnOmBrFTWQqw2GIExWQRhCSdvYHoyJSxPbuu7dh87CKoxBSMjH-f_cJEg-waFTEhgsX5dk7S8XJclsMQcKhcUcGEybabeZsjSt-1Vv6_p23vbuKWTdexdrf0ylpQ0f05YH9OfKQ9Y7j3571HvDA9ry8HH-3tM7nwx93Pts2BP1Ph7OR4899_nJ47u04eEfPh5491a1x9SoKjlJm1hZoNE0M147HtLMKGN5LuyBZuZ4EhYro7n8YP9luMKidMMQUMhxv8fMK9cCCyko1AdgABSEd6WxwGDltbBZSWLnczTVNSOrzOLJodHAIHbC-YoRhWe50zu9rMhZaFRKMOKsv9lauJKRrbEqJyMSlyJvyRZVXhtzhWeBqr3_kBFZmQKzF4t5MlvMr-mNFahI2jpZMRLA1zc='],
   // letters + bottleneck (stale-proof self-disconnection regression)
   ['letters 557', 'dfl_bdBNa8MwDAbgvyJ0NiTZYgqGHPoBIxBYWQqBUShe4jYC4wxHLk2X_ffRLts6qNBFD690ULz7QCa2BhXmzzmsw_lsDUg5Q4EHTw0qlCc5bqSqnHOLa081DdW4TNT4OpbWMBsvTlkshiwW32M2V7-e3vrizx_EkCU_vvzvj3fyl_vpnXx66_PxBQU2tN9THSwPqBKBOnDbeVRYBKd93ULJoaGuvyRNX3t6Z-ocKixZc-gVWDqardu6vIejdmStVsA-XG2tuVVQdd42EEERauMYKs3G9xDBSpMdpndGUHQHqp88NTspZ5fljddk4W1g0yuI8fML'],
+  // symbols_per_region (eq, both colors) — symbol-count-bounds + impossible-symbol-area-color
+  ['symbols per area', 'dfl_hZDNasJAFEZfZbjrARONm4FZaEuLIFSqIBQhTJIxuXgzY-fHGJu-e1FbaFeFb3MOnM2X5B8QMJAGAYuXBVvFy4U0S7PpeAocaocVCMjO2bDJRLHtuqLouuvm3bwYHlIxvA1rE9tCO36WCe_lhN9RTsWPl-PffiJIh3DzKe9lwu8oZ8Or79vCks-P2uVO12gNL200Qaa8tGSdrJQ78NK2R-XQWyP1u_ivkYR1E_5GwKHC_R7LSKEHkXIgNAcQABxUDI11IGAZjXJlw9YhVmj9tdG-dHgMaA0IWAcVoheM8KR3ZmcWnp2UQSIlWHDx5lYqNIJtraOKjdgshtga9qSIPBuxR4XUfx8-YktbY_nssMpv51_rjVNIrOiD9oIlnCXw-QU='],
   // single lotus, vertical axis
   ['lotus daily', 'dfl_NY9Ra8IwFIX_yuU-h9rKFAz4YDcYgjBZhcAQJG2qvSwkkt4Y67r_Pjq283I4H5wDJz99IRPbFiVu37awj4-HbWFV5CjwEsigxOV9MR6WUqWkVCpTWataJaVUmrxMKU1pfH6S2b-yzWb8GCvrOfbivp5nCzGs58IHah1rJu_W8Tq-o0BD5zM10fKAshBoyX2iRBSoI3c-oMRddDo0HVQcDfl-6rR9E-g6zaDEijXHXoKlW3t0R7ft4aYdWaslcIi_bK-5k6B8sAZmUHXaDKDImuT9BF402eHv-Qx2_kLNayBzWhX51D4ETRbqgdteQi6gwO8f'],
   // two lotuses with non-parallel axes (symmetry group)
