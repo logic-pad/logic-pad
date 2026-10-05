@@ -1,6 +1,21 @@
 import GridData from '../../grid.js';
 import { Color, Position } from '../../primitives.js';
 import TileData from '../../tile.js';
+import Symbol from '../../symbols/symbol.js';
+
+/** The distinct cells a symbol touches (one for integer positions, up to four for subtiles). */
+export function symbolCorners(symbol: Symbol): Position[] {
+  const xs = [Math.floor(symbol.x), Math.ceil(symbol.x)];
+  const ys = [Math.floor(symbol.y), Math.ceil(symbol.y)];
+  const corners: Position[] = [];
+  for (const y of ys) {
+    for (const x of xs) {
+      const last = corners[corners.length - 1];
+      if (!last || last.x !== x || last.y !== y) corners.push({ x, y });
+    }
+  }
+  return corners;
+}
 
 export function cell(cell: Position | Position[]): string {
   let positions = Array.isArray(cell) ? cell : [cell];

@@ -14,6 +14,8 @@ import InsightLemma from './insightLemma.js';
 import OffByXAreaNumberConstrainedByRegionSize from './offByXAreaNumberConstrainedByRegionSize.js';
 import DisconnectIncompatibleRegionSizes from './disconnectIncompatibleRegionSizes.js';
 import DisconnectIncompatibleSymbolCounts from './disconnectIncompatibleSymbolCounts.js';
+import SymbolCountBounds from './symbolCountBounds.js';
+import ImpossibleSymbolAreaColor from './impossibleSymbolAreaColor.js';
 import DisconnectIncompatibleSymmetries from './disconnectIncompatibleSymmetries.js';
 import SeparateDisconnectedRegions from './separateDisconnectedRegions.js';
 import ColorDisconnectedRegions from './colorDisconnectedRegions.js';
@@ -34,6 +36,8 @@ const allLemmas: readonly InsightLemma[] = [
   new CompleteLotus(),
   new DisconnectIncompatibleRegionSizes(),
   new DisconnectIncompatibleSymbolCounts(),
+  new SymbolCountBounds(),
+  new ImpossibleSymbolAreaColor(),
   new DisconnectIncompatibleSymmetries(),
   new ConnectSameLetters(),
   new DisconnectDifferentLetters(),
