@@ -4,7 +4,13 @@ import InsightLemma from './insightLemma.js';
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../../symbols/viewpointSymbol.js';
-import { cell, modifyTiles, setColor, setOppositeColor } from '../helper.js';
+import {
+  cell,
+  modifyTiles,
+  orList,
+  setColor,
+  setOppositeColor,
+} from '../helper.js';
 import { Color, Direction, DIRECTIONS, Position } from '../../../primitives.js';
 import { move } from '../../../dataHelper.js';
 
@@ -31,6 +37,10 @@ interface DirectionInfo {
  *    resulting count exceeds the viewpoint's number, the cell must be the opposite color.
  *
  * Both deductions act on the whole merged tile that holds the cell.
+ *
+ * Under an off-by-X rule the viewpoint admits several values, so each rule is applied at the
+ * extreme where it holds for **every** surviving value: losing a cell is intolerable if it breaks
+ * even the smallest value, and a coloring is excessive only if it exceeds the largest one.
  */
 export default class ColorViewpointSight extends InsightLemma {
   public readonly id = 'color-viewpoint-sight';
@@ -41,58 +51,111 @@ export default class ColorViewpointSight extends InsightLemma {
 
   public apply(context: InsightContext): boolean {
     for (const symbol of context.grid.symbols.get(viewpointInstance.id) ?? []) {
-      if (
-        Math.floor(symbol.x) !== symbol.x ||
-        Math.floor(symbol.y) !== symbol.y
-      )
-        continue;
-      const position = { x: symbol.x, y: symbol.y };
-      const originTile = context.grid.getTile(position.x, position.y);
-      if (!originTile.exists || originTile.color === Color.Gray) continue;
-      const color = originTile.color;
-      const number = (symbol as ViewpointSymbol).number;
-      const directions = DIRECTIONS.map(direction =>
-        this.analyzeDirection(context.grid, position, direction, color)
-      );
-      const possible =
-        1 + directions.reduce((count, info) => count + info.possible.length, 0);
-      const completed =
-        1 + directions.reduce((count, info) => count + info.run, 0);
-      if (completed > number)
-        throw this.error(
-          `Viewpoint number at ${cell(position)} already sees ${completed} cells, which is more than its number ${number}`
-        );
-      if (possible < number)
-        throw this.error(
-          `Viewpoint number at ${cell(position)} can see at most ${possible} cells, which is fewer than its number ${number}`
-        );
+      if (this.applyToSymbol(context, symbol as ViewpointSymbol)) return true;
+    }
+    return false;
+  }
 
+  private applyToSymbol(
+    context: InsightContext,
+    viewpoint: ViewpointSymbol
+  ): boolean {
+    if (
+      Math.floor(viewpoint.x) !== viewpoint.x ||
+      Math.floor(viewpoint.y) !== viewpoint.y
+    )
+      return false;
+    const position = { x: viewpoint.x, y: viewpoint.y };
+    const originTile = context.grid.getTile(position.x, position.y);
+    if (!originTile.exists || originTile.color === Color.Gray) return false;
+    const color = originTile.color;
+    const directions = DIRECTIONS.map(direction =>
+      this.analyzeDirection(context.grid, position, direction, color)
+    );
+    const possible =
+      1 + directions.reduce((count, info) => count + info.possible.length, 0);
+    const completed =
+      1 + directions.reduce((count, info) => count + info.run, 0);
+
+    const values = context.numbers.getPossibilities(viewpoint);
+    if (!values) return false;
+    let progressed = false;
+    for (const value of values) {
+      if (value >= completed && value <= possible) continue;
+      if (values.length === 1) {
+        throw this.error(
+          value < completed
+            ? `Viewpoint number at ${cell(position)} already sees ${completed} cells, which is more than its number ${value}`
+            : `Viewpoint number at ${cell(position)} can see at most ${possible} cells, which is fewer than its number ${value}`
+        );
+      }
       if (
-        this.forceVisible(
-          context,
-          position,
-          color,
-          number,
-          possible - number,
-          directions
+        context.numbers.eliminatePossibility(
+          viewpoint,
+          value,
+          this.proof()
+            .difficulty(1)
+            .describe(
+              value < completed
+                ? `Viewpoint number at ${cell(position)} cannot be ${value} because it already sees ${completed} cells`
+                : `Viewpoint number at ${cell(position)} cannot be ${value} because it can see at most ${possible} cells`
+            )
         )
       )
-        return true;
-      if (this.forceBlocked(context, position, color, number, directions))
-        return true;
+        progressed = true;
     }
+    const remaining = context.numbers.getPossibilities(viewpoint);
+    if (!remaining || remaining.length === 0)
+      throw this.error(
+        `Viewpoint number at ${cell(position)} has no possible value left: it sees ${completed} cells and can reach ${possible}`
+      );
+    if (progressed) return true;
+    const minimum = Math.min(...remaining);
+    const maximum = Math.max(...remaining);
+    const seeText =
+      remaining.length === 1
+        ? `its ${remaining[0]} cells`
+        : `the ${orList(remaining)} cells it could see`;
+    const numberText =
+      remaining.length === 1
+        ? `its number ${remaining[0]}`
+        : `the ${orList(remaining)} cells it could see`;
+
+    if (
+      this.forceVisible(
+        context,
+        position,
+        color,
+        seeText,
+        possible - minimum,
+        directions
+      )
+    )
+      return true;
+    if (
+      this.forceBlocked(
+        context,
+        position,
+        color,
+        maximum,
+        numberText,
+        directions
+      )
+    )
+      return true;
     return false;
   }
 
   /**
    * Colors the gray cells that the viewpoint cannot afford to lose, because the cells they would
-   * hide are more than the slack between what is visible at most and the number.
+   * hide are more than the slack between what is visible at most and the smallest value the
+   * viewpoint could hold.
    */
   private forceVisible(
     context: InsightContext,
     position: Position,
     color: Color,
-    number: number,
+    seeText: string,
     slack: number,
     directions: DirectionInfo[]
   ): boolean {
@@ -130,21 +193,22 @@ export default class ColorViewpointSight extends InsightLemma {
       this.proof()
         .difficulty(2)
         .describe(
-          `Cells at ${cell(modified)} must be ${color} because otherwise the viewpoint at ${cell(position)} could not see its ${number} cells`
+          `Cells at ${cell(modified)} must be ${color} because otherwise the viewpoint at ${cell(position)} could not see ${seeText}`
         )
     );
     return true;
   }
 
   /**
-   * Colors the gray cells that would make the viewpoint see more cells than its number if they
-   * took its color.
+   * Colors the gray cells that would make the viewpoint see more cells than any value it could
+   * hold if they took its color.
    */
   private forceBlocked(
     context: InsightContext,
     position: Position,
     color: Color,
-    number: number,
+    maximum: number,
+    numberText: string,
     directions: DirectionInfo[]
   ): boolean {
     const grid = context.grid;
@@ -166,7 +230,7 @@ export default class ColorViewpointSight extends InsightLemma {
         color,
         new Set(merged.map(p => `${p.x},${p.y}`))
       );
-      if (revealed <= number) continue;
+      if (revealed <= maximum) continue;
 
       const newTiles = modifyTiles(grid);
       const modified: Position[] = [];
@@ -181,7 +245,7 @@ export default class ColorViewpointSight extends InsightLemma {
           .describe(
             `Cells at ${cell(modified)} must be ${
               color === Color.Dark ? Color.Light : Color.Dark
-            } because the viewpoint at ${cell(position)} would see ${revealed} cells if they were ${color}, more than its number ${number}`
+            } because the viewpoint at ${cell(position)} would see ${revealed} cells if they were ${color}, more than ${numberText}`
           )
       );
       return true;

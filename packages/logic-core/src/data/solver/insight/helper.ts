@@ -60,6 +60,13 @@ export function area(representative: Position | Position[]): string {
   return `[${Math.floor(representative.x)},${Math.floor(representative.y)}]`;
 }
 
+/** Renders a candidate list as `3` or `1 or 3`, for proofs that admit several values. */
+export function orList(values: readonly number[]): string {
+  return values.length === 1
+    ? `${values[0]}`
+    : values.map(value => `${value}`).join(' or ');
+}
+
 export function setOneColor(
   tiles: TileData[][],
   x: number,

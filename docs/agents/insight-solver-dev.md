@@ -18,17 +18,25 @@ loop**, the invariants that are easy to violate, and what was recently built.
 
 ## Where things stand
 
-As of commit `2940238` (*Add lemmas for symbols per region rule*).
+Latest work: **off-by-X support for every number symbol**, through a new
+`NumberSymbolStore` (details in the [work log](#work-log)). Previous session
+landed as `47b0c52` (*Update agent handover*).
 
 - **The official harness works in this checkout.** `references/dev_puzzles.json`
   is present (untracked; 3640 entries, 3025 rated). `bun run insight-eval` from
   `packages/logic-core` is the fastest regression signal and currently reaches
-  **476/3025** before stopping.
-- **Current stopper: pid 15010** — `complete-dart` has no off-by-X support, so a
-  dart that can only reach its number under an off-by-X reading is misread as a
-  contradiction ("Dart at (1,4) sees only 0 opposite-colored cells…"). Known
-  limitation, not a regression; teaching `complete-dart` about off-by-X is the
-  obvious next task.
+  **510/3025** before stopping.
+- **The previous stopper, pid 15010, is solved.** It was a dart puzzle under
+  "all numbers are off by 1": `complete-dart` read `dart.number` directly and so
+  reported a false contradiction ("Dart at (1,4) sees only 0 opposite-colored
+  cells…"). Darts now reason over both candidate values.
+- **Current stopper: pid 15114** — a 4×10 grid with five viewpoints and *no*
+  rules. The solver stalls with `(6,0)` and `(7,0)`/`(6,1)`/`(7,1)` left gray;
+  `speculative-solve` reports it as a **0-step speculation**, so by the rule
+  below this is a missing lemma rather than a brute-force gap. All four cells
+  must be light, and the only nearby constraint is the viewpoint at `(8,3)`
+  (number 3) whose slack reasoning has already been exhausted — a candidate for
+  a cross-viewpoint or "remaining space" technique.
 - **`speculative-solve` deliberately refuses 0-step speculations**
   (`speculativeSolve.ts:120`). When a hypothesis contradicts with *no* deduction
   in between, it logs `0-step speculative solve at (x,y)` and returns `false`,
@@ -257,6 +265,27 @@ Four lemmas (`complete-region-size`, `forced-region-expansion`,
 sequentially blind to rule-only puzzles this way. When adding a size-aware
 lemma, copy that pair.
 
+**Never read `.number` in a lemma.** Every symbol whose count an off-by-X rule
+affects derives from `NumberSymbol` (dart, viewpoint, area number, house,
+minesweeper, focus), and its printed number is only a *candidate*: under an
+off-by-X rule it admits `n - x` and `n + x`. Read values through
+`context.numbers` (`getPossibilities` / `minPossible` / `maxPossible`) and rule
+candidates out with `eliminatePossibility`. `RegionSizeStore` keeps its own
+area-number handling because it intersects several symbols into one region size;
+`NumberSymbolStore` is strictly per-symbol.
+
+**Who owns feasibility.** `NumberSymbolStore` deliberately does *not* call
+`countTiles`: it expands the printed number into candidates and tracks
+eliminations, nothing more. The lemmas own the counting rules, so each compares
+candidates against what it can actually see and eliminates the rest. That split
+is what keeps contradiction messages precise (`already sees 2 cells, which is
+more than its number 1`) instead of a generic `no possible values remain`.
+Consequently a lemma must handle the empty-candidate case itself, and when it
+gates on an exact value it has to check that only one survives
+(`minPossible() === maxPossible()`). Gates that hold across a range use the
+extremes: completion against `maxPossible`, exhaustion against `minPossible`,
+tolerable loss against `possible - minPossible`, excess against `maxPossible`.
+
 **`symbols_per_region` bounds in *both* directions — filter by comparison.**
 Unlike `region_area`, it has all three comparisons, and which one can produce a
 contradiction depends on the reasoning:
@@ -338,7 +367,49 @@ scripts: `@'...'@` blocks mangle `$`, backticks, and `?` (the ternary
 
 ## Work log
 
-### Latest session — symbols per area (`2940238`)
+### Latest session — off-by-X for every number symbol
+
+New shared infrastructure:
+
+| Piece | File | Role |
+| --- | --- | --- |
+| `NumberSymbolStore` | `stores/numberSymbolStore.ts` | Per-symbol counterpart of `RegionSizeStore`: expands a printed number into the candidates an off-by-X rule allows (`n` alone, or `n - x` / `n + x` clamped to `[0, existing cells]`), tracks eliminations with their proofs, and exposes `getPossibilities` / `minPossible` / `maxPossible` / `eliminatePossibility`. Keyed by **symbol object identity**, which is stable across a solve because only tiles are replaced (`grid.copyWith({ tiles }, false, false)` leaves the symbol array alone). Wired into `InsightContext` as `context.numbers`, with `copy()` and `setTiles()` handling like the other stores. |
+
+Reworked lemmas — all three previously read `.number` directly:
+
+- **`complete-dart`** now runs its merged-tile subset-sum **once per candidate
+  value**. A candidate with no satisfying combination is eliminated through the
+  store; a group is colored only when every surviving candidate agrees on it
+  (in none of the combinations → the dart's color, in all of them → opposite).
+  Eliminations count as progress and return `true` on their own, so the loop
+  restarts and the next pass classifies against the narrowed candidate set.
+  With a single candidate this reproduces the old behavior and its exact proof
+  wording.
+- **`complete-viewpoint`** eliminates candidates outside `[completed, possible]`
+  first, then gates: the capping rule needs `completed === maxPossible`, the
+  fill-everything rule needs `possible === minPossible`, and the single-direction
+  expansion rule requires `minPossible === maxPossible` because it computes an
+  exact run length.
+- **`color-viewpoint-sight`** uses the extremes for the same reason: losing a
+  cell is intolerable when it breaks even the smallest candidate
+  (`slack = possible - minPossible`), and a coloring is excessive only when it
+  exceeds the largest (`revealed > maxPossible`).
+
+Gotchas hit while building these:
+
+| Symptom | Cause | Resolution |
+| --- | --- | --- |
+| Harness stopped at pid 15010 with `Dart at (1,4) sees only 0 opposite-colored cells…` | `complete-dart` treated the printed number as the only value, so a dart whose true count was `number - 1` looked contradictory | per-candidate subset-sum + eliminations |
+| Verification script flagged `letters 557` as a regression | that corpus entry carries **no embedded solution**, and `correct` defaulted to `false` | a missing solution means nothing to compare; only assert `colorEquals` when `puzzle.solution` exists |
+| A fixture expected candidates `3` and `5` but only `3` survived | the store clamps `n + x` to the count of existing tiles, so the single-candidate legacy path threw instead | size the fixture above the clamp, or assert the clamped candidate list |
+| Expected an "already sees more than its number" throw and got none | with `opposite === number` the target is `0`, which is a perfectly feasible combination | the contradiction needs `opposite > number` |
+
+The durable lesson: relational progress (an elimination) is still progress — a
+lemma that only narrows candidate values must return `true` without touching
+tiles, and the loop's restart-from-the-top behavior is what lets the next pass
+draw conclusions from the narrowed set.
+
+### Previous session — symbols per area (`2940238`)
 
 New lemmas:
 
@@ -364,7 +435,7 @@ That last one generalises: **a hand-rolled step driver must replicate the
 worker's `onLemmaSuccess` semantics**, or it manufactures divergence that does
 not exist in the product.
 
-### Previous session — lotus, symbol counts, viewpoint sight
+### Earlier session — lotus, symbol counts, viewpoint sight
 
 New lemmas:
 
@@ -409,14 +480,17 @@ Bugs fixed, with root causes:
 
 ## Appendix: regression corpus
 
-Eighteen puzzles, each verified to solve completely with `validateGrid(...).final
+Nineteen puzzles, each verified to solve completely with `validateGrid(...).final
 === 'satisfied'` in **both** modes. The label notes the primary technique each
 one exercises; several were the repro for a bug above. Numbered labels carry the
 puzzle's `pid` from `dev_puzzles.json`; the unnumbered ones were supplied
-directly as report links.
+directly as report links. Note that not every entry carries an embedded
+solution, so "correct" can only be asserted where one exists.
 
 ```ts
 const puzzles: [string, string][] = [
+  // off_by_x + darts — complete-dart reasons over both candidate values
+  ['dart off-by-x 15010', 'dfl_ddJRa8IwEAfwrxLuOWBr9SWQh7GxIQiTKRSGUJI21WBMJL0Y67rvPioTulFfj9___hxcUnwBajQKGCzeF2QVrlejSDpP0gQo7LyugMH8Mu82cxbzPI95jDLGKGWeSynjbdY9p6z77NaV8EgvPKUtT6gNR6k8T6jzWlkUqJ3llYuW_bLpkKWPGM-GbPqI8YS2PB0v9Xq3x7ub0ZZPx1uNqnG4Lhtv_bOuv3U27sJpeOkd8ewByoZo9g91H6WzVpVYCGNo6YzzvBL-wFxdF7ItLvdgChQqXde6DAZbYCkFo-0BGAAFEXDvPDBYBit8uSdrDJV2TZ9RTen1qa8DBmsUGBpGjD6rrd3aRUPOwmpjBCPow222ErhnJHfeVGRCngKGoyWvwpiGTMiL0Kb9faYJWbqdLt-8rorbY_XpjRfaENmiahhJKEng-wc='],
   // separate-disconnected-regions across a merged tile straddling two letter regions
   ['letters merged 1600', 'dfl_XZBta8IwEMe_ynGvQ-wUBwb6IulgCMJkCoUhSNpGDQvtSC_Wuu67j6iFsePuz93vHl5csv9GsuQMCly-LWEdrldnYDZPpsjw6G2FAheX-bBdiLzriiLvot6kiFF0XV5Ev-ejdUO2EFxKpTjnXCqZZVxKLhWXseZcZTGJ7ew2o4aPYeMMkfHskiasTxN2L1MpRp7O_3I18kv6zPp0-n_-cWc2cjW8I8PKHg62DI56FE8Mna0_USAy1IFOjUeBq1BrX55gQ6GyTRt3TFt6-0W2qVHghjSFVoCzZ7Ord_WyhbOurXNaAPlwY2tNJwF5410FE1iF0tQEuSbjW5jAi7auf7x6AqvmaMtXb6t9fHvc3nptHRQ9mVZAwiDBn18='],
   // complete-dart: a merged tile in no valid combination (no speculation needed)
