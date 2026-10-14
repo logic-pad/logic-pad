@@ -18,32 +18,29 @@ loop**, the invariants that are easy to violate, and what was recently built.
 
 ## Where things stand
 
-Latest work: **off-by-X support for every number symbol**, through a new
-`NumberSymbolStore` (details in the [work log](#work-log)). Previous session
-landed as `47b0c52` (*Update agent handover*).
+Latest work: **cross-direction merged-tile accounting in `color-viewpoint-sight`**
+(details in the [work log](#work-log)). Previous session landed off-by-X support
+for every number symbol via `NumberSymbolStore`.
 
 - **The official harness works in this checkout.** `references/dev_puzzles.json`
   is present (untracked; 3640 entries, 3025 rated). `bun run insight-eval` from
   `packages/logic-core` is the fastest regression signal and currently reaches
-  **510/3025** before stopping.
-- **The previous stopper, pid 15010, is solved.** It was a dart puzzle under
-  "all numbers are off by 1": `complete-dart` read `dart.number` directly and so
-  reported a false contradiction ("Dart at (1,4) sees only 0 opposite-colored
-  cells…"). Darts now reason over both candidate values.
-- **Current stopper: pid 15114** — a 4×10 grid with five viewpoints and *no*
-  rules. The solver stalls with `(6,0)` and `(7,0)`/`(6,1)`/`(7,1)` left gray;
-  `speculative-solve` reports it as a **0-step speculation**, so by the rule
-  below this is a missing lemma rather than a brute-force gap. All four cells
-  must be light, and the only nearby constraint is the viewpoint at `(8,3)`
-  (number 3) whose slack reasoning has already been exhausted — a candidate for
-  a cross-viewpoint or "remaining space" technique.
+  **569/3025** before stopping.
+- **The previous stopper, pid 15114, is solved.** Five viewpoints, no rules: a
+  merged tile sat in two of a viewpoint's runs at once, and `forceVisible`
+  counted each direction in isolation, so the tile never looked expensive
+  enough to force. `forceBlocked` had no such flaw because `visibleCount`
+  already fans out over the whole tile.
+- **Current stopper: pid 624** — a 6×7 grid with two `ban_pattern` rules and
+  `exactly 1 symbol per dark/light area`, and **no number symbols at all**. It
+  makes zero deductions and stalls immediately (`0-step speculative solve at
+  (0,1)`). This is a fresh technique area — the ban-pattern and symbol-count
+  lemmas never engage on it — rather than a tweak of an existing lemma.
 - **`speculative-solve` deliberately refuses 0-step speculations**
   (`speculativeSolve.ts:120`). When a hypothesis contradicts with *no* deduction
   in between, it logs `0-step speculative solve at (x,y)` and returns `false`,
   because such a case is always reachable by a real lemma. **Treat that log line
   as a missing-lemma report, not a bug.**
-- Newest lemmas: `symbol-count-bounds` and `impossible-symbol-area-color`, both
-  covering the `symbols_per_region` rule. Details in the [work log](#work-log).
 
 ## Dev workflow
 
@@ -246,10 +243,24 @@ room.
 **neighborhood** must likewise inspect the whole merged tile: a tile can touch
 two regions via different cells while no single cell of it touches both, which
 is exactly the case `separate-disconnected-regions` needs to force the tile
-dark. Skip a tile containing any fixed cell — you cannot recolor it.
+dark. Skip a tile containing any fixed cell — you cannot recolor it (a fixed
+member already *matching* the target color is fine, which is what
+`colorViewpointSight`'s `canColor` encodes).
 Deductions that count cells must group gray cells by merged tile (see
 `completeDart`'s subset-sum over merged tiles, `breakBannedPattern`'s
 `tileKey`, `colorViewpointSight`'s `visibleCount`).
+
+**Aggregate a merged tile's effect per tile, not per direction.** A line of
+sight lemma that walks each ray independently and thresholds a per-cell number
+will silently miss tiles that straddle two rays: each contribution looks cheap
+alone, and only the sum is decisive. Group by tile key, sum over every direction
+the tile touches, and compare the total against the threshold — within one
+direction only the tile's *nearest* cell matters, since that is where the run
+stops. This was the whole content of the pid 15114 fix, and it is easy to get
+into a false-feedback loop: the mirrored rule (`forceBlocked`) already looked
+correct because it computed visibility over the whole tile, so the bug read as
+"this deduction is missing" when it was really "this deduction is summed
+wrong".
 
 **`isApplicable` gates on symbols *and* rules.** Several lemmas are driven by
 `RegionSizeStore`, whose possibilities now come from both area number symbols
@@ -367,7 +378,35 @@ scripts: `@'...'@` blocks mangle `$`, backticks, and `?` (the ternary
 
 ## Work log
 
-### Latest session — off-by-X for every number symbol
+### Latest session — cross-direction merged-tile accounting
+
+Fixed `color-viewpoint-sight.forceVisible`, the only line-of-sight rule that
+evaluated each direction independently. It now groups the gray cells of every
+run by **merged tile**, sums how many cells each tile would hide across all
+directions it touches, and forces the tile when that total exceeds the slack.
+Within a direction only the tile's nearest cell is counted (that is where the
+run stops), tracked with a per-direction `counted` set.
+
+The early-exit in the old loop condition (`index < length && length - index >
+slack`) had to go: it is valid per-cell but hides exactly the aggregation being
+introduced, since a far cell can be cheap alone and decisive as part of a tile.
+The scan is now the full run and the threshold is applied to the totals.
+
+This is monotone — every tile the old rule forced is still forced, because a
+tile's summed total is never smaller than any single term — so no existing
+deduction was lost. Confirmed by the corpus and by the harness advancing 510 →
+569.
+
+Gotchas hit while building this:
+
+| Symptom | Cause | Resolution |
+| --- | --- | --- |
+| Reporter described the *overflow* case (viewpoint `(1,1)` forcing tile `(0,0)` dark) as missing | that deduction already worked — `forceBlocked` computes `visibleCount` over the whole tile, so it crosses directions for free | the real gap was the mirrored `forceVisible` rule; verify which side of a symmetric pair is broken before writing a new lemma |
+| Synthetic negative control "failed" twice in a row | both were bad fixtures: one asserted a cell was gray after writing `'b'` there, the other merged the **viewpoint's own cell** into the tile under test (its connection letter overlapped the symbol) | dump `getConnectedTiles` per cell and the per-direction runs before asserting on a fixture |
+| A probe script reported wrong `possible`/`slack` numbers | a hand-rolled ray walk broke at the first gray cell, while the lemma's continues through gray | reuse the lemma's own `analyzeDirection` shape when instrumenting |
+| `readonly Position[]` from `getConnectedTiles` would not assign to a mutable map value | store-side variance | type the map as `{ cells: readonly Position[]; count: number }` |
+
+### Previous session — off-by-X for every number symbol
 
 New shared infrastructure:
 
@@ -409,7 +448,7 @@ lemma that only narrows candidate values must return `true` without touching
 tiles, and the loop's restart-from-the-top behavior is what lets the next pass
 draw conclusions from the narrowed set.
 
-### Previous session — symbols per area (`2940238`)
+### Earlier session — symbols per area (`2940238`)
 
 New lemmas:
 
@@ -435,7 +474,7 @@ That last one generalises: **a hand-rolled step driver must replicate the
 worker's `onLemmaSuccess` semantics**, or it manufactures divergence that does
 not exist in the product.
 
-### Earlier session — lotus, symbol counts, viewpoint sight
+### Older session — lotus, symbol counts, viewpoint sight
 
 New lemmas:
 
@@ -480,7 +519,7 @@ Bugs fixed, with root causes:
 
 ## Appendix: regression corpus
 
-Nineteen puzzles, each verified to solve completely with `validateGrid(...).final
+Twenty puzzles, each verified to solve completely with `validateGrid(...).final
 === 'satisfied'` in **both** modes. The label notes the primary technique each
 one exercises; several were the repro for a bug above. Numbered labels carry the
 puzzle's `pid` from `dev_puzzles.json`; the unnumbered ones were supplied
@@ -489,6 +528,8 @@ solution, so "correct" can only be asserted where one exists.
 
 ```ts
 const puzzles: [string, string][] = [
+  // color-viewpoint-sight: a merged tile spanning two runs hides the sum of both tails
+  ['viewpoint cross-tile 15114', 'dfl_XZFRa8IwFIX_SrjPITZa2Qj0od1gCMJkCoUhSNJWe1nWSpoY67r_PtJN0N2He885H-fpRrsvsGh1BQIWrwuycpeLrgifcx4DhYPBEgTw6BwPGx4JNY7PlVK5V155P_pggs69D0nuhyceiTTNsjTNGEtTxjL267Kgw81Y2Cxl2fA-rE9Y-WOLjaXn5IH2SUQb96kqk8zELeK0T_gVTe9QTPtkekXx_1Yyu6L5HXq8RbPhDSiUuN9j4bTtQXAKGpsPEAAUpLN1a0DA0jXSFDVZW1di24VO1RUGjxbbBgSsrbSuE0Tjqdo222bRkZNsUGspiDVuzFbS1oLkrdElmZB1Lcue5KhL37YheJao-79nTMiyPWDxYrDcjY8J_Y2RqInqbdUJElESwfcP'],
   // off_by_x + darts — complete-dart reasons over both candidate values
   ['dart off-by-x 15010', 'dfl_ddJRa8IwEAfwrxLuOWBr9SWQh7GxIQiTKRSGUJI21WBMJL0Y67rvPioTulFfj9___hxcUnwBajQKGCzeF2QVrlejSDpP0gQo7LyugMH8Mu82cxbzPI95jDLGKGWeSynjbdY9p6z77NaV8EgvPKUtT6gNR6k8T6jzWlkUqJ3llYuW_bLpkKWPGM-GbPqI8YS2PB0v9Xq3x7ub0ZZPx1uNqnG4Lhtv_bOuv3U27sJpeOkd8ewByoZo9g91H6WzVpVYCGNo6YzzvBL-wFxdF7ItLvdgChQqXde6DAZbYCkFo-0BGAAFEXDvPDBYBit8uSdrDJV2TZ9RTen1qa8DBmsUGBpGjD6rrd3aRUPOwmpjBCPow222ErhnJHfeVGRCngKGoyWvwpiGTMiL0Kb9faYJWbqdLt-8rorbY_XpjRfaENmiahhJKEng-wc='],
   // separate-disconnected-regions across a merged tile straddling two letter regions

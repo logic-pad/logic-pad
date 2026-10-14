@@ -150,6 +150,11 @@ export default class ColorViewpointSight extends InsightLemma {
    * Colors the gray cells that the viewpoint cannot afford to lose, because the cells they would
    * hide are more than the slack between what is visible at most and the smallest value the
    * viewpoint could hold.
+   *
+   * Hiding is counted per **merged tile**, summed over every direction it touches. A tile can sit
+   * in two runs at once, and coloring it opposite stops both, so it hides the union of the two
+   * tails even though each tail on its own would fit inside the slack. Within one direction only
+   * the nearest cell of the tile matters, because that is where the run stops.
    */
   private forceVisible(
     context: InsightContext,
@@ -160,16 +165,32 @@ export default class ColorViewpointSight extends InsightLemma {
     directions: DirectionInfo[]
   ): boolean {
     const grid = context.grid;
-    const forced: Position[] = [];
+    const hidden = new Map<
+      string,
+      { cells: readonly Position[]; count: number }
+    >();
     for (const info of directions) {
       const length = info.possible.length;
-      for (let index = 0; index < length && length - index > slack; index++) {
+      const counted = new Set<string>();
+      for (let index = 0; index < length; index++) {
         const pos = info.possible[index];
         const tile = grid.getTile(pos.x, pos.y);
         if (!tile.exists || tile.fixed || tile.color !== Color.Gray) continue;
-        if (!this.canColor(grid, pos, color)) continue;
-        forced.push(pos);
+        const merged = grid.connections.getConnectedTiles(pos);
+        const key = this.tileKey(merged);
+        if (counted.has(key)) continue;
+        counted.add(key);
+        const entry = hidden.get(key);
+        if (entry) entry.count += length - index;
+        else hidden.set(key, { cells: merged, count: length - index });
       }
+    }
+
+    const forced: Position[] = [];
+    for (const entry of hidden.values()) {
+      if (entry.count <= slack) continue;
+      if (!this.canColor(grid, entry.cells[0], color)) continue;
+      forced.push(...entry.cells);
     }
     if (forced.length === 0) return false;
 
@@ -277,6 +298,14 @@ export default class ColorViewpointSight extends InsightLemma {
       }
     }
     return total;
+  }
+
+  /** A canonical key identifying a merged tile by its cells. */
+  private tileKey(cells: readonly Position[]): string {
+    return cells
+      .map(pos => `${pos.x},${pos.y}`)
+      .sort()
+      .join(';');
   }
 
   /** Whether the merged tile holding the given cell can be recolored to `color`. */
