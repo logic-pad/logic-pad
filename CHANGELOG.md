@@ -1,3 +1,10 @@
+# 16/10/2026
+
+**PREVIEW BRANCH**
+
+- Forked cspuz-solver to add support for dual color symmetries and other edge cases
+- Further improvements to the insight solver
+
 # 4/10/2026
 
 **PREVIEW BRANCH**
