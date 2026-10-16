@@ -43,7 +43,8 @@
     }
   },
   "scripts": {
-    "build": "rimraf dist/ && bun run codegen && bunx --bun tsc && bun run typegen",
+    "build": "rimraf dist/ && bun run codegen && bunx --bun tsc -p tsconfig.json && bun run typegen",
+    "typecheck": "bunx --bun tsc -p tsconfig.json --noEmit",
     "codegen": "bun ./scripts/genImports.ts && bun ./scripts/genEntry.ts",
     "typegen": "bun ./scripts/genTypes.ts",
     "bench:prepare": "bun ./benchmark/prepareBench.ts",
@@ -65,10 +66,10 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.59.4",
     "@types/bun": "^1.2.20",
     "@types/glob": "^9.0.0",
     "@types/lodash": "^4.17.20",
-    "dts-bundle-generator": "^9.5.1",
     "fast-glob": "^3.3.3",
     "p-queue": "^9.0.1",
     "prettier": "^3.6.2",

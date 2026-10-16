@@ -1,4 +1,5 @@
 tests/benchmark/data/*
+scripts/temp
 dist
 node_modules
 !.gitkeep

@@ -13,7 +13,10 @@
     "strict": true
   },
   "include": [
-    "scripts",
-    "assets",
+    "scripts"
   ],
+  "exclude": [
+    "scripts/temp",
+    "**/*.global.d.ts"
+  ]
 }

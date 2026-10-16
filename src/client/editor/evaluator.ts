@@ -15,7 +15,7 @@ export const examples = [
   '.addSymbol(new LetterSymbol(1, 1, "A"))',
   '.addSymbol(new AreaNumberSymbol(1, 1, 3))',
   '.addSymbol(new ViewpointSymbol(1, 1, 3))',
-  '.addSymbol(new DartSymbol(1, 1, 2, Direction.Up))',
+  '.addSymbol(new DartSymbol(1, 1, 2, Orientation.Up))',
   '.addSymbol(new LotusSymbol(1, 1, Orientation.Up))',
   '.addSymbol(new GalaxySymbol(1, 1))',
   `.addSymbol(new CustomTextSymbol(\n  'Description',\n  GridData.create([]),\n  1, 1,\n  'X', 0\n))`,
@@ -32,7 +32,22 @@ export const examples = [
   'Orientation.Up\nOrientation.UpRight\nOrientation.Right\nOrientation.DownRight\nOrientation.Down\nOrientation.DownLeft\nOrientation.Left\nOrientation.UpLeft',
 ];
 
-const blacklist = ['Symbol', 'Object'];
+/**
+ * Names that must not shadow JavaScript built-ins. The generated type library
+ * (`@logic-pad/core/assets/logic-core.global.d.ts`) prefixes these with `_`
+ * too, so keep the two lists in sync.
+ */
+const blacklist = [
+  'Array',
+  'Boolean',
+  'Function',
+  'Map',
+  'Number',
+  'Object',
+  'Set',
+  'String',
+  'Symbol',
+];
 
 Object.entries(enclosure).forEach(([name, value]) => {
   if (blacklist.includes(name)) name = `_${name}`;
