@@ -1,5 +1,5 @@
 import { parseArgs } from 'util';
-import { allSolvers } from '../src/data/solver/allSolvers.js';
+import { allSolvers } from '../../src/data/solver/allSolvers.js';
 import {
   BenchmarkEntry,
   parseLink,

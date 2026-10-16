@@ -86,6 +86,47 @@ import ViewpointBTModule from './data/solver/backtrack/symbols/viewpoint.js';
 import CspuzSolver from './data/solver/cspuz/cspuzSolver.js';
 import { gridToJson } from './data/solver/cspuz/jsonify.js';
 import EventIteratingSolver from './data/solver/eventIteratingSolver.js';
+import { area, cell, modifyTiles, orList, setColor, setOneColor, setOneOppositeColor, setOppositeColor, symbolCorners } from './data/solver/insight/helper.js';
+import InsightContext from './data/solver/insight/insightContext.js';
+import InsightSolver from './data/solver/insight/insightSolver.js';
+import { runLemmaLoop } from './data/solver/insight/lemmaLoop.js';
+import Array from './data/solver/insight/lemmas/allLemmas.js';
+import BreakBannedPattern from './data/solver/insight/lemmas/breakBannedPattern.js';
+import ColorConnectedRegions from './data/solver/insight/lemmas/colorConnectedRegions.js';
+import ColorDisconnectedRegions from './data/solver/insight/lemmas/colorDisconnectedRegions.js';
+import ColorViewpointSight from './data/solver/insight/lemmas/colorViewpointSight.js';
+import CompleteDart from './data/solver/insight/lemmas/completeDart.js';
+import CompleteGalaxy from './data/solver/insight/lemmas/completeGalaxy.js';
+import CompleteLotus from './data/solver/insight/lemmas/completeLotus.js';
+import CompleteRegionSize from './data/solver/insight/lemmas/completeRegionSize.js';
+import CompleteSubtileSymbol from './data/solver/insight/lemmas/completeSubtileSymbol.js';
+import CompleteViewpoint from './data/solver/insight/lemmas/completeViewpoint.js';
+import ConnectAllCells from './data/solver/insight/lemmas/connectAllCells.js';
+import ConnectAllRemovesDisconnectedRegions from './data/solver/insight/lemmas/connectAllRemovesDisconnectedRegions.js';
+import ConnectSameLetters from './data/solver/insight/lemmas/connectSameLetters.js';
+import ConnectThroughBottleneck from './data/solver/insight/lemmas/connectThroughBottleneck.js';
+import DisconnectDifferentLetters from './data/solver/insight/lemmas/disconnectDifferentLetters.js';
+import DisconnectIncompatibleRegionSizes from './data/solver/insight/lemmas/disconnectIncompatibleRegionSizes.js';
+import DisconnectIncompatibleSymbolCounts from './data/solver/insight/lemmas/disconnectIncompatibleSymbolCounts.js';
+import DisconnectIncompatibleSymmetries from './data/solver/insight/lemmas/disconnectIncompatibleSymmetries.js';
+import ForcedRegionExpansion from './data/solver/insight/lemmas/forcedRegionExpansion.js';
+import ImpossibleRegionColor from './data/solver/insight/lemmas/impossibleRegionColor.js';
+import ImpossibleSymbolAreaColor from './data/solver/insight/lemmas/impossibleSymbolAreaColor.js';
+import InsightLemma from './data/solver/insight/lemmas/insightLemma.js';
+import OffByXAreaNumberConstrainedByRegionSize from './data/solver/insight/lemmas/offByXAreaNumberConstrainedByRegionSize.js';
+import SeparateDisconnectedRegions from './data/solver/insight/lemmas/separateDisconnectedRegions.js';
+import SpeculativeSolve from './data/solver/insight/lemmas/speculativeSolve.js';
+import SymbolCountBounds from './data/solver/insight/lemmas/symbolCountBounds.js';
+import AreaStore, { Area } from './data/solver/insight/stores/areaStore.js';
+import DisjointSet from './data/solver/insight/stores/disjointSet.js';
+import InsightStore from './data/solver/insight/stores/insightStore.js';
+import NumberSymbolStore from './data/solver/insight/stores/numberSymbolStore.js';
+import { RegionGraph } from './data/solver/insight/stores/regionGraph.js';
+import RegionSizeStore from './data/solver/insight/stores/regionSizeStore.js';
+import RegionStore, { Region } from './data/solver/insight/stores/regionStore.js';
+import InsightError from './data/solver/insight/types/insightError.js';
+import Proof from './data/solver/insight/types/proof.js';
+import { IDENTITY, apply, compose, generateGroup, isCellPreserving, isTranslation, linearKey, symmetriesOf, symmetryKey } from './data/solver/insight/types/symmetry.js';
 import Solver from './data/solver/solver.js';
 import UniversalSolver from './data/solver/universal/universalSolver.js';
 import AreaNumberSymbol from './data/symbols/areaNumberSymbol.js';
@@ -248,6 +289,65 @@ export {
   CspuzSolver,
   gridToJson,
   EventIteratingSolver,
+  area,
+  cell,
+  modifyTiles,
+  orList,
+  setColor,
+  setOneColor,
+  setOneOppositeColor,
+  setOppositeColor,
+  symbolCorners,
+  InsightContext,
+  InsightSolver,
+  runLemmaLoop,
+  Array,
+  BreakBannedPattern,
+  ColorConnectedRegions,
+  ColorDisconnectedRegions,
+  ColorViewpointSight,
+  CompleteDart,
+  CompleteGalaxy,
+  CompleteLotus,
+  CompleteRegionSize,
+  CompleteSubtileSymbol,
+  CompleteViewpoint,
+  ConnectAllCells,
+  ConnectAllRemovesDisconnectedRegions,
+  ConnectSameLetters,
+  ConnectThroughBottleneck,
+  DisconnectDifferentLetters,
+  DisconnectIncompatibleRegionSizes,
+  DisconnectIncompatibleSymbolCounts,
+  DisconnectIncompatibleSymmetries,
+  ForcedRegionExpansion,
+  ImpossibleRegionColor,
+  ImpossibleSymbolAreaColor,
+  InsightLemma,
+  OffByXAreaNumberConstrainedByRegionSize,
+  SeparateDisconnectedRegions,
+  SpeculativeSolve,
+  SymbolCountBounds,
+  AreaStore,
+  Area,
+  DisjointSet,
+  InsightStore,
+  NumberSymbolStore,
+  RegionGraph,
+  RegionSizeStore,
+  RegionStore,
+  Region,
+  InsightError,
+  Proof,
+  IDENTITY,
+  apply,
+  compose,
+  generateGroup,
+  isCellPreserving,
+  isTranslation,
+  linearKey,
+  symmetriesOf,
+  symmetryKey,
   Solver,
   UniversalSolver,
   AreaNumberSymbol,

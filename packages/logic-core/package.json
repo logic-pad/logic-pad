@@ -73,7 +73,7 @@
     "p-queue": "^9.0.1",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
-    "typescript": "^5.9.2",
+    "typescript": "^7.0.2",
     "uint8-to-base64": "^0.2.1"
   },
   "trustedDependencies": [

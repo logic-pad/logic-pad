@@ -1,4 +1,4 @@
-benchmark/data/*
+tests/benchmark/data/*
 dist
 node_modules
 !.gitkeep

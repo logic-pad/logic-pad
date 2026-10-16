@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "declaration": true,
+    /* Compile mode */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": [
+      "bun"
+    ]
+  },
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "**/*.global.d.ts"
+  ]
+}

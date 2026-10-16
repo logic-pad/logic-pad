@@ -1,7 +1,7 @@
-import { Puzzle } from '../src/data/puzzle.js';
-import { Serializer } from '../src/data/serializer/allSerializers.js';
+import { Puzzle } from '../../src/data/puzzle.js';
+import { Serializer } from '../../src/data/serializer/allSerializers.js';
 import { encode, decode } from 'uint8-to-base64';
-import CompressorBase from '../src/data/serializer/compressor/compressorBase.js';
+import CompressorBase from '../../src/data/serializer/compressor/compressorBase.js';
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();

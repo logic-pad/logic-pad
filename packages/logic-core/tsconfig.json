@@ -9,6 +9,7 @@
     ],
     "module": "NodeNext",
     "skipLibCheck": true,
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     /* Compile mode */
@@ -24,8 +25,7 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src",
-    "benchmark"
+    "src"
   ],
   "exclude": [
     "**/*.global.d.ts"
@@ -33,6 +33,9 @@
   "references": [
     {
       "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.test.json"
     }
   ]
 }
