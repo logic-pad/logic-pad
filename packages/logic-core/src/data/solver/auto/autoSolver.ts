@@ -3,8 +3,6 @@ import { Color, State } from '../../primitives.js';
 import { instance as lyingSymbolInstance } from '../../rules/lyingSymbolRule.js';
 import { instance as offByXInstance } from '../../rules/offByXRule.js';
 import { instance as wrapAroundInstance } from '../../rules/wrapAroundRule.js';
-import { instance as areaNumberInstance } from '../../symbols/areaNumberSymbol.js';
-import { instance as letterInstance } from '../../symbols/letterSymbol.js';
 import { allSolvers } from '../allSolvers.js';
 import Solver from '../solver.js';
 import UndercluedRule from '../../rules/undercluedRule.js';
@@ -150,13 +148,6 @@ export default class AutoSolver extends Solver {
                 symbols.set(
                   id,
                   symbolList.map(symbol => {
-                    // special handling: do not delete area number and letter symbols as they can be solved
-                    // underclued even if the solver doesn't fully support them
-                    if (
-                      symbol.id === areaNumberInstance.id ||
-                      symbol.id === letterInstance.id
-                    )
-                      return symbol;
                     if (solver.isInstructionSupported(progressGrid, symbol))
                       return symbol;
                     return new UnsupportedSymbol(symbol.x, symbol.y);

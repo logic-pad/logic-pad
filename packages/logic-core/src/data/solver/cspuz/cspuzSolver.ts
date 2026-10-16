@@ -6,19 +6,11 @@ import { instance as symbolsPerRegionInstance } from '../../rules/symbolsPerRegi
 import { instance as undercluedInstance } from '../../rules/undercluedRule.js';
 import { instance as uniqueShapeInstance } from '../../rules/uniqueShapeRule.js';
 import { instance as offByXInstance } from '../../rules/offByXRule.js';
-import AreaNumberSymbol, {
-  instance as areaNumberInstance,
-} from '../../symbols/areaNumberSymbol.js';
+import { instance as areaNumberInstance } from '../../symbols/areaNumberSymbol.js';
 import { instance as dartInstance } from '../../symbols/dartSymbol.js';
-import GalaxySymbol, {
-  instance as galaxyInstance,
-} from '../../symbols/galaxySymbol.js';
-import LetterSymbol, {
-  instance as letterInstance,
-} from '../../symbols/letterSymbol.js';
-import LotusSymbol, {
-  instance as lotusInstance,
-} from '../../symbols/lotusSymbol.js';
+import { instance as galaxyInstance } from '../../symbols/galaxySymbol.js';
+import { instance as letterInstance } from '../../symbols/letterSymbol.js';
+import { instance as lotusInstance } from '../../symbols/lotusSymbol.js';
 import { instance as minesweeperInstance } from '../../symbols/minesweeperSymbol.js';
 import { instance as viewpointInstance } from '../../symbols/viewpointSymbol.js';
 import { instance as connectAllInstance } from '../../rules/connectAllRule.js';
@@ -75,70 +67,13 @@ export default class CspuzSolver extends EventIteratingSolver {
       return false;
     }
 
-    // the solver doesn't count symbols correctly if some symbols are unsupported
-    if (
-      grid.findSymbol(symbol => symbol.id === unsupportedInstance.id) &&
-      grid.findRule(rule => rule.id === symbolsPerRegionInstance.id)
-    ) {
-      return false;
-    }
-
     return true;
   }
 
   public isInstructionSupported(
-    grid: GridData,
+    _grid: GridData,
     instruction: Instruction
   ): boolean {
-    if (
-      instruction instanceof LotusSymbol ||
-      instruction instanceof GalaxySymbol
-    ) {
-      if (instruction.x % 1 !== 0 && instruction.y % 1 !== 0) {
-        return false;
-      }
-    }
-    if (
-      instruction instanceof LotusSymbol ||
-      instruction instanceof GalaxySymbol ||
-      instruction instanceof AreaNumberSymbol ||
-      instruction instanceof LetterSymbol
-    ) {
-      if (instruction.x % 1 !== 0 || instruction.y % 1 !== 0) {
-        const minX = Math.floor(instruction.x);
-        const minY = Math.floor(instruction.y);
-        const maxX = Math.ceil(instruction.x);
-        const maxY = Math.ceil(instruction.y);
-        const connectedTiles = grid.connections.getConnectedTiles({
-          x: minX,
-          y: minY,
-        });
-        if (
-          connectedTiles.some(tile => tile.x === minX && tile.y === maxY) &&
-          connectedTiles.some(tile => tile.x === maxX && tile.y === minY) &&
-          connectedTiles.some(tile => tile.x === maxX && tile.y === maxY)
-        ) {
-          return true;
-        }
-        let color = Color.Gray;
-        for (let i = 0; i < 4; i++) {
-          const x = i % 2 === 0 ? minX : maxX;
-          const y = i < 2 ? minY : maxY;
-          const tile = grid.getTile(x, y);
-          if (!tile.fixed || !tile.exists) {
-            return false;
-          }
-          if (tile.color !== Color.Gray) {
-            if (color === Color.Gray) {
-              color = tile.color;
-            } else if (color !== tile.color) {
-              return false;
-            }
-          }
-        }
-        return true;
-      }
-    }
     return CspuzSolver.supportedInstrs.includes(instruction.id);
   }
 
