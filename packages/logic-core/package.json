@@ -1,6 +1,6 @@
 {
   "name": "@logic-pad/core",
-  "version": "0.27.2",
+  "version": "0.28.0",
   "type": "module",
   "files": [
     "dist",
@@ -59,10 +59,10 @@
     "node": ">=23.11.0"
   },
   "dependencies": {
+    "@logic-pad/cspuz-solver": "^0.2.1",
     "compression-streams-polyfill": "^0.1.7",
     "event-iterator": "^2.0.0",
     "lodash": "^4.17.21",
-    "logic-pad-solver-core": "^0.1.2",
     "zod": "^4.0.17"
   },
   "devDependencies": {

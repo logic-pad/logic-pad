@@ -1,0 +1,27 @@
+name: Publish @logic-pad/core
+
+on: workflow_dispatch
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Build
+        run: |
+          cd logic-pad/packages/logic-core
+          bun i
+          bun run build
+      - name: Publish
+        run: |
+          cd logic-pad/packages/logic-core
+          npm stage publish --provenance --access public

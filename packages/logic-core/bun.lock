@@ -5,10 +5,10 @@
     "": {
       "name": "@logic-pad/core",
       "dependencies": {
+        "@logic-pad/cspuz-solver": "^0.2.1",
         "compression-streams-polyfill": "^0.1.7",
         "event-iterator": "^2.0.0",
         "lodash": "^4.17.21",
-        "logic-pad-solver-core": "^0.1.2",
         "zod": "^4.0.17",
       },
       "devDependencies": {
@@ -31,6 +31,8 @@
     "@isaacs/brace-expansion": ["@isaacs/brace-expansion@5.0.0", "", { "dependencies": { "@isaacs/balanced-match": "^4.0.1" } }, "sha512-ZT55BDLV0yv0RBm2czMiZ+SqCGO7AvmOM3G/w2xhVPH+te0aKgFjmBvGlL1dH+ql2tgGO3MVrbb3jCKyvpgnxA=="],
 
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
+
+    "@logic-pad/cspuz-solver": ["@logic-pad/cspuz-solver@0.2.1", "", {}, "sha512-PBUAaEDVW4TsSdKQkReNysRfAZjwMdhaXxl9E70UMstz0T6pm7YkvJ/sb2qrZqpX5N3zpJIKvkiJn5WINS4tZw=="],
 
     "@microsoft/api-extractor": ["@microsoft/api-extractor@7.59.4", "", { "dependencies": { "@microsoft/api-extractor-model": "7.33.15", "@microsoft/tsdoc": "~0.17.0", "@microsoft/tsdoc-config": "~0.18.2", "@rushstack/node-core-library": "5.25.1", "@rushstack/rig-package": "0.7.4", "@rushstack/terminal": "0.24.7", "@rushstack/ts-command-line": "5.3.17", "diff": "~8.0.2", "minimatch": "10.2.3", "resolve": "~1.22.1", "semver": "~7.7.4", "source-map": "~0.6.1", "typescript": "5.9.3" }, "bin": { "api-extractor": "bin/api-extractor" } }, "sha512-XqseDKIw736qlhQwS9SOpbY4veOiP2Nc7YiWmgXXBmeA3kY9qGXw+Tu7DFpU9FvXywE1z8SvLJKUVxFpcX0kig=="],
 
@@ -201,8 +203,6 @@
     "jsonfile": ["jsonfile@6.2.1", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q=="],
 
     "lodash": ["lodash@4.17.21", "", {}, "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="],
-
-    "logic-pad-solver-core": ["logic-pad-solver-core@0.1.2", "", {}, "sha512-Gp90UL7UJ3Sw1CXETQIpktCjmXVy+sebXRhoF7LQZBVsSHfdQ5BhKpxOjVfxoAhKseLtP0DRte5+LnN+hVh4IA=="],
 
     "lru-cache": ["lru-cache@11.1.0", "", {}, "sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A=="],
 

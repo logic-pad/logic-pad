@@ -1,4 +1,4 @@
-import { PuzzleData, Rule } from 'logic-pad-solver-core';
+import { PuzzleData, Rule } from '@logic-pad/cspuz-solver';
 import { Color, Comparison } from '../../primitives.js';
 import BanPatternRule from '../../rules/banPatternRule.js';
 import CellCountRule from '../../rules/cellCountRule.js';
@@ -30,7 +30,9 @@ import MinesweeperSymbol, {
 import ViewpointSymbol, {
   instance as viewpointInstance,
 } from '../../symbols/viewpointSymbol.js';
-import { instance as unsupportedInstance } from '../../symbols/unsupportedSymbol.js';
+import UnsupportedSymbol, {
+  instance as unsupportedInstance,
+} from '../../symbols/unsupportedSymbol.js';
 import TileData from '../../tile.js';
 import GridData from '../../grid.js';
 
@@ -131,8 +133,8 @@ export function gridToJson(grid: GridData): PuzzleData {
       rules.push({
         type: 'number',
         tiles: (symbols as AreaNumberSymbol[]).map(s => ({
-          x: Math.floor(s.x),
-          y: Math.floor(s.y),
+          x: Math.round(s.x * 2),
+          y: Math.round(s.y * 2),
           number: s.number,
         })),
       });
@@ -140,8 +142,8 @@ export function gridToJson(grid: GridData): PuzzleData {
       rules.push({
         type: 'letter',
         tiles: (symbols as LetterSymbol[]).map(s => ({
-          x: Math.floor(s.x),
-          y: Math.floor(s.y),
+          x: Math.round(s.x * 2),
+          y: Math.round(s.y * 2),
           letter: s.letter,
         })),
       });
@@ -186,7 +188,13 @@ export function gridToJson(grid: GridData): PuzzleData {
         tiles,
       });
     } else if (rule === unsupportedInstance.id) {
-      continue;
+      rules.push({
+        type: 'unsupported',
+        tiles: (symbols as UnsupportedSymbol[]).map(s => ({
+          x: Math.round(s.x * 2),
+          y: Math.round(s.y * 2),
+        })),
+      });
     } else if (symbols.some(s => s.necessaryForCompletion)) {
       throw new Error(`Unknown symbol type: ${rule}`);
     }

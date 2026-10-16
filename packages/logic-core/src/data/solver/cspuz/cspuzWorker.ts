@@ -1,4 +1,4 @@
-import { SolverResult, solveLogicPad } from 'logic-pad-solver-core';
+import { SolverResult, solveLogicPad } from '@logic-pad/cspuz-solver';
 import { Serializer } from '../../serializer/allSerializers.js';
 import { gridToJson } from './jsonify.js';
 import { instance as undercluedInstance } from '../../rules/undercluedRule.js';
@@ -33,13 +33,13 @@ function postSolution(grid: GridData, solverResult: SolverResult) {
   }
 }
 
-onmessage = e => {
+onmessage = async e => {
   const grid = Serializer.parseGrid(e.data as string);
   const isUnderclued = !!grid.findRule(r => r.id === undercluedInstance.id);
 
   const puzzleData = gridToJson(grid);
 
-  const solverResult = solveLogicPad(puzzleData, isUnderclued);
+  const solverResult = await solveLogicPad(puzzleData, isUnderclued);
 
   postSolution(grid, solverResult);
 
@@ -50,7 +50,7 @@ onmessage = e => {
 
   // Make use of the underclued mode to determine solution uniqueness
   if (solverResult !== null && !('error' in solverResult) && !isUnderclued) {
-    const undercluedResult = solveLogicPad(puzzleData, true);
+    const undercluedResult = await solveLogicPad(puzzleData, true);
 
     if (undercluedResult === null) {
       postMessage(undefined); // Shouldn't happen because underclued grids should always be solvable
@@ -81,7 +81,7 @@ onmessage = e => {
         }
       }
 
-      const secondResult = solveLogicPad(puzzleData, false);
+      const secondResult = await solveLogicPad(puzzleData, false);
       postSolution(grid, secondResult);
     }
   }

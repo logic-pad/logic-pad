@@ -1,3 +1,7 @@
+# 0.28.0
+
+- Changed from logic-pad-solver-core to @logic-pad/cspuz-solver
+
 # 0.27.2
 
 - Fixed every letter symbol not working with lying symbols due to missing instance check
