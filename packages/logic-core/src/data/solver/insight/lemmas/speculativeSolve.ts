@@ -52,10 +52,13 @@ export default class SpeculativeSolve extends InsightLemma {
       lemma => lemma.id !== this.id && lemma.isApplicable(grid)
     );
     let best: Contradiction | null = null;
+    const total = grid.getTileCount(true, false, Color.Gray);
+    let checked = 0;
     speculationLoop: for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const tile = grid.getTile(x, y);
         if (!tile.exists || tile.fixed || tile.color !== Color.Gray) continue;
+        context.onProgress?.(++checked, total);
         for (const color of COLORS) {
           const hypothetical = context.copy();
           const hypothesisTiles = modifyTiles(hypothetical.grid);

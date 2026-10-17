@@ -20,10 +20,19 @@ export interface SolveResponse {
   proofs?: ProofNode[];
 }
 
+/**
+ * `lemmas` reports progress across lemma attempts (or filled tiles in
+ * complete-solve mode); `speculation` reports the tiles inspected by the
+ * speculative-solve lemma, which runs much longer than a single lemma attempt
+ * and is therefore worth showing separately.
+ */
+export type ProgressPhase = 'lemmas' | 'speculation';
+
 export interface ProgressResponse {
   type: 'progress';
   progress: number;
   total: number;
+  phase: ProgressPhase;
 }
 
 export interface ErrorResponse {
@@ -37,6 +46,16 @@ onmessage = e => {
   const request = e.data as SolveRequest;
   const grid = Serializer.parseGrid(request.data);
   const context = new InsightContext(grid);
+  if (request.reportProgress) {
+    context.onProgress = (progress, total) => {
+      postMessage({
+        type: 'progress',
+        progress,
+        total,
+        phase: 'speculation',
+      } satisfies Response);
+    };
+  }
 
   const initialValidation = validateGrid(context.grid, null);
   if (initialValidation.final === State.Error) {
@@ -75,6 +94,7 @@ onmessage = e => {
             progress:
               total - context.grid.getTileCount(true, false, Color.Gray),
             total,
+            phase: 'lemmas',
           } satisfies Response);
         }
       },
@@ -84,6 +104,7 @@ onmessage = e => {
             type: 'progress',
             progress: index,
             total,
+            phase: 'lemmas',
           } satisfies Response);
         }
       },

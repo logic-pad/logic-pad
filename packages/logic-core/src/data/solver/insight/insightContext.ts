@@ -20,6 +20,15 @@ export default class InsightContext {
 
   public tileHistory: TileChange[] = [];
 
+  /**
+   * Optional progress reporter installed by the driver so that expensive lemmas
+   * can report finer-grained progress than "one lemma attempt". It is
+   * deliberately not carried over by {@link copy}, so the speculative
+   * sub-solves that lemmas run on copied contexts stay quiet and only the
+   * outermost attempt reports.
+   */
+  public onProgress?: (progress: number, total: number) => void;
+
   public constructor(grid: GridData) {
     this._grid = grid;
   }

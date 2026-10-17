@@ -1,7 +1,7 @@
 import GridData from '../../grid.js';
 import Solver from '../solver.js';
 import { Serializer } from '../../serializer/allSerializers.js';
-import type { Response, SolveRequest } from './insightWorker.js';
+import type { ProgressPhase, Response, SolveRequest } from './insightWorker.js';
 import type { ProofNode } from './types/proof.js';
 
 export default class InsightSolver extends Solver {
@@ -53,7 +53,11 @@ export default class InsightSolver extends Solver {
     options: {
       completeSolve: boolean;
       reportProof: boolean;
-      onProgress?: (progress: number, total: number) => void;
+      onProgress?: (
+        progress: number,
+        total: number,
+        phase: ProgressPhase
+      ) => void;
       abortSignal?: AbortSignal;
     }
   ): Promise<
@@ -78,7 +82,7 @@ export default class InsightSolver extends Solver {
       worker.addEventListener('message', (e: MessageEvent<Response>) => {
         const data = e.data;
         if (data.type === 'progress') {
-          options.onProgress?.(data.progress, data.total);
+          options.onProgress?.(data.progress, data.total, data.phase);
           return;
         } else if (data.type === 'solve') {
           if (data.data) {

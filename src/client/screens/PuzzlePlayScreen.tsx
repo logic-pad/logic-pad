@@ -30,7 +30,7 @@ const SharePuzzleImage = lazy(
   () => import('../components/quickActions/SharePuzzleImage')
 );
 
-const GridInsight = lazy(() => import('../components/GridInsight'));
+const GridInsight = lazy(() => import('../components/gridInsight'));
 
 export interface PuzzlePlayScreenProps {
   /**
