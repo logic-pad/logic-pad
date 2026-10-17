@@ -17,7 +17,10 @@ export const ssr = new Elysia()
     return new Response(responseValue as BodyInit, {
       headers: {
         'content-type': 'text/html; charset=utf8',
-        'cache-control': 's-maxage=3600, stale-while-revalidate',
+        // Freshness is provided by the in-memory page cache, not by the
+        // browser: a cached document would point at assets that the next
+        // deploy removes.
+        'cache-control': 'no-cache',
         ...SECURITY_HEADERS,
       },
     });
