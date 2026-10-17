@@ -1,3 +1,10 @@
+# 17/10/2026
+
+**PREVIEW BRANCH**
+
+- Fixed site update sometimes not working due to cached files
+- Reworked grid insight UI
+
 # 16/10/2026
 
 **PREVIEW BRANCH**
