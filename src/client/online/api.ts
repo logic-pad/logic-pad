@@ -17,6 +17,7 @@ import {
   UserAutocomplete,
   SupporterPrice,
   MeBrief,
+  UserProgress,
   PaymentHistory,
   SitemapEntry,
   UserAccount,
@@ -35,7 +36,7 @@ import {
   QueryKey,
   UseSuspenseInfiniteQueryOptions,
 } from '@tanstack/react-query';
-import onlineSolveTracker from '../router/onlineSolveTracker';
+import onlineSolveTracker from './solveTracking/onlineSolveTracker';
 import toast from 'react-hot-toast';
 import {
   PrivatePuzzleSearchParams,
@@ -209,6 +210,12 @@ export const api = {
   getUserDetail: async (userId: string) => {
     return await axios
       .get<UserDetail>(`/user/${userId}/detail`)
+      .then(res => res.data)
+      .catch(() => null);
+  },
+  getUserProgress: async () => {
+    return await axios
+      .get<UserProgress>('/user/me/progress')
       .then(res => res.data)
       .catch(() => null);
   },

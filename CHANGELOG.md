@@ -2,8 +2,9 @@
 
 **PREVIEW BRANCH**
 
-- Fixed site update sometimes not working due to cached files
+- All puzzle cards now show seen/solve status
 - Reworked grid insight UI
+- Fixed site update sometimes not working due to cached files
 
 # 16/10/2026
 

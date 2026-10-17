@@ -1,6 +1,7 @@
 import { memo, ReactNode, useMemo } from 'react';
 import { PuzzleBrief, ResourceStatus } from './data';
 import {
+  FaCheck,
   FaCheckSquare,
   FaEyeSlash,
   FaHeart,
@@ -17,6 +18,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Link, LinkComponentProps } from '@tanstack/react-router';
 import SupporterBadge from '../components/SupporterBadge';
+import { useSolveStatus } from './solveTracking/useSolveStatus';
 
 type PuzzleTypeString = `${PuzzleType}`;
 
@@ -150,6 +152,8 @@ export default memo(function PuzzleCard({
     transition,
     isDragging,
   } = useSortable({ id: puzzle.id });
+  const { loaded, seen, solved } = useSolveStatus(puzzle.id);
+  const unseen = loaded && !seen;
   const RootComponent = props.to ? Link : 'a';
   return (
     <div
@@ -179,7 +183,7 @@ export default memo(function PuzzleCard({
           isDragging && 'pointer-events-none'
         )}
         role="button"
-        aria-label={`${puzzle.title} by ${puzzle.creator.name}; Types ${puzzle.types.join(', ')}; Difficulty ${puzzle.designDifficulty};  Size ${puzzle.width} by ${puzzle.height};  ${puzzle.solveCount} solves,  ${puzzle.loveCount} loves`}
+        aria-label={`${puzzle.title} by ${puzzle.creator.name}; Types ${puzzle.types.join(', ')}; Difficulty ${puzzle.designDifficulty};  Size ${puzzle.width} by ${puzzle.height};  ${puzzle.solveCount} solves,  ${puzzle.loveCount} loves${unseen ? '; Unseen' : ''}${solved ? '; Solved' : ''}`}
         {...props}
       >
         <PuzzleIcon
@@ -240,6 +244,23 @@ export default memo(function PuzzleCard({
             )}
           </div>
         </div>
+        {unseen && (
+          <span
+            aria-hidden="true"
+            className="absolute top-2 left-2 size-2.5 rounded-full bg-primary pointer-events-none"
+          />
+        )}
+        {solved && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              'absolute bottom-2 text-base-content opacity-10 -rotate-12 pointer-events-none',
+              children ? 'right-12' : 'right-2'
+            )}
+          >
+            <FaCheck size={44} />
+          </span>
+        )}
         {children}
       </RootComponent>
     </div>

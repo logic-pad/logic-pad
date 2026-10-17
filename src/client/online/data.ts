@@ -51,6 +51,18 @@ export interface MeBrief extends UserBrief {
   email: string;
 }
 
+export interface UserProgress {
+  /**
+   * Puzzles opened but not solved. Disjoint from {@link solved}: every solved
+   * puzzle is also seen, but is omitted here so the payload carries no id
+   * twice. Consumers that need "has the user ever opened this" must union the
+   * two arrays.
+   */
+  seen: string[];
+  /** Puzzles solved. */
+  solved: string[];
+}
+
 export interface PuzzleBrief extends ResourceResponse {
   title: string;
   description: string;

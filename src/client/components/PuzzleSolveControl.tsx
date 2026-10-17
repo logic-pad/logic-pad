@@ -15,7 +15,8 @@ import {
 import storedRedirect from '../router/storedRedirect.ts';
 import { gridStateAtom } from '../state/gridState.ts';
 import { State } from '@logic-pad/core/data/primitives';
-import onlineSolveTracker from '../router/onlineSolveTracker.ts';
+import onlineSolveTracker from '../online/solveTracking/onlineSolveTracker.ts';
+import { useSolveStatus } from '../online/solveTracking/useSolveStatus.ts';
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import { api, ApiError, queryClient } from '../online/api.ts';
 import Loading from './Loading.tsx';
@@ -52,10 +53,7 @@ const SolveTrackerAnonymous = memo(function SolveTracker() {
     }
   }, [isOnline, me, id, state.final]);
 
-  const solved = useMemo(
-    () => (!id ? false : onlineSolveTracker.isSolved(id)),
-    [id]
-  );
+  const { solved } = useSolveStatus(id);
 
   if (!isOnline || !!me || !id) return null;
 
@@ -424,6 +422,9 @@ const SolveTrackerSignedIn = memo(function SolveTracker() {
       solutionSet.current = true;
     }
   }, [data, me]);
+  useEffect(() => {
+    if (data && id) onlineSolveTracker.markSeen(id);
+  }, [data, id]);
 
   const timeHandle = useRef<TimeHandle>(null!);
   if (timeHandle.current === null) {

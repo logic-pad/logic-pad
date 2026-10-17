@@ -141,7 +141,7 @@ export const Route = createLazyFileRoute('/_layout/my-stuff/puzzles')({
                   {selectedPuzzles !== null && (
                     <div
                       className={cn(
-                        'absolute bottom-0 right-0 w-10 h-10 flex justify-center items-center rounded-tl-xl rounded-br-xl',
+                        'absolute bottom-1 right-1 z-10 w-10 h-10 flex justify-center items-center rounded-tl-box rounded-br-box',
                         selectedPuzzles.includes(puzzle.id)
                           ? 'bg-accent text-accent-content'
                           : 'bg-base-100 text-base-content'

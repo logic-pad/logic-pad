@@ -11,7 +11,9 @@ import UserCard from '../metadata/UserCard';
 import Difficulty from '../metadata/Difficulty';
 import { cn } from '../uiHelper';
 import { useOnline } from '../state/online.ts';
-import { ResourceStatus } from './data';
+import { PuzzleBrief, ResourceStatus } from './data';
+import { useSolveStatus } from './solveTracking/useSolveStatus.ts';
+import { FaCheck } from 'react-icons/fa';
 import { router } from '../router/router';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import { IoArrowBack } from 'react-icons/io5';
@@ -26,6 +28,74 @@ export function useResolvedCollectionId(collectionId?: string | null) {
   const search = useSearch({ from: undefined, strict: false });
   return collectionId ?? search.collection ?? puzzle?.series?.id ?? null;
 }
+
+const CollectionPuzzleRow = memo(function CollectionPuzzleRow({
+  puzzle,
+  currentId,
+  meId,
+}: {
+  puzzle: PuzzleBrief;
+  currentId: string;
+  meId: string | null;
+}) {
+  const { loaded, seen, solved } = useSolveStatus(puzzle.id);
+  const unseen = loaded && !seen;
+  return (
+    <React.Fragment>
+      <Link
+        className={cn(
+          'btn w-full h-fit flex flex-row flex-nowrap gap-2 py-2 items-center justify-start text-start wrapper relative',
+          puzzle.id === currentId ? '' : 'btn-ghost',
+          puzzle.status === ResourceStatus.Private &&
+            puzzle.creator.id !== meId &&
+            'btn-disabled'
+        )}
+        to={
+          puzzle.status === ResourceStatus.Private && puzzle.creator.id === meId
+            ? '/create/$puzzleId'
+            : '.'
+        }
+        params={{ puzzleId: puzzle.id }}
+        search={{
+          collection: router.state.location.search.collection,
+        }}
+      >
+        <PuzzleIcon
+          types={puzzle.types}
+          size={36}
+          className={cn(
+            'shrink-0',
+            puzzle.id === currentId
+              ? ''
+              : 'bg-base-200! [.wrapper:hover_&]:bg-base-content/0! transition-colors [.wrapper:hover_&]:transition-none'
+          )}
+        />
+        <div className="flex flex-col items-start gap-2">
+          <h2 className="text-lg font-normal">
+            {puzzle.title.length === 0 ? 'Untitled Puzzle' : puzzle.title}
+          </h2>
+          <div className="badge badge-md">{puzzle.creator.name}</div>
+          <Difficulty value={puzzle.designDifficulty} size="sm" />
+        </div>
+        {unseen && (
+          <span
+            aria-hidden="true"
+            className="absolute top-2 left-2 size-2.5 rounded-full bg-primary pointer-events-none"
+          />
+        )}
+        {solved && (
+          <span
+            aria-hidden="true"
+            className="absolute bottom-2 right-2 text-base-content opacity-10 -rotate-12 pointer-events-none"
+          >
+            <FaCheck size={32} />
+          </span>
+        )}
+      </Link>
+      <div className="divider m-0" />
+    </React.Fragment>
+  );
+});
 
 /**
  * Generic puzzle list of a collection. Designed to fill its parent container,
@@ -136,49 +206,12 @@ export default memo(function CollectionPanel({
         ) : null}
         {puzzleList.data?.pages.flatMap(page =>
           page.results.map(puzzle => (
-            <React.Fragment key={puzzle.id}>
-              <Link
-                key={puzzle.id}
-                className={cn(
-                  'btn w-full h-fit flex flex-row flex-nowrap gap-2 py-2 items-center justify-start text-start wrapper',
-                  puzzle.id === id ? '' : 'btn-ghost',
-                  puzzle.status === ResourceStatus.Private &&
-                    puzzle.creator.id !== me?.id &&
-                    'btn-disabled'
-                )}
-                to={
-                  puzzle.status === ResourceStatus.Private &&
-                  puzzle.creator.id === me?.id
-                    ? '/create/$puzzleId'
-                    : '.'
-                }
-                params={{ puzzleId: puzzle.id }}
-                search={{
-                  collection: router.state.location.search.collection,
-                }}
-              >
-                <PuzzleIcon
-                  types={puzzle.types}
-                  size={36}
-                  className={cn(
-                    'shrink-0',
-                    puzzle.id === id
-                      ? ''
-                      : 'bg-base-200! [.wrapper:hover_&]:bg-base-content/0! transition-colors [.wrapper:hover_&]:transition-none'
-                  )}
-                />
-                <div className="flex flex-col items-start gap-2">
-                  <h2 className="text-lg font-normal">
-                    {puzzle.title.length === 0
-                      ? 'Untitled Puzzle'
-                      : puzzle.title}
-                  </h2>
-                  <div className="badge badge-md">{puzzle.creator.name}</div>
-                  <Difficulty value={puzzle.designDifficulty} size="sm" />
-                </div>
-              </Link>
-              <div className="divider m-0" />
-            </React.Fragment>
+            <CollectionPuzzleRow
+              key={puzzle.id}
+              puzzle={puzzle}
+              currentId={id}
+              meId={me?.id ?? null}
+            />
           ))
         )}
         {puzzleList.isFetchingNextPage ? (

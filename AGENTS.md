@@ -29,6 +29,11 @@ Detailed guides live in `docs/`:
   reproduction, store introspection, the dual-mode verification rule,
   codebase invariants that are easy to violate, proof/difficulty conventions,
   and a regression corpus of puzzle links.
+- [`docs/agents/puzzle-status-indicators.md`](docs/agents/puzzle-status-indicators.md)
+  — build spec for the per-card seen/solved indicators: the IndexedDB-backed
+  `onlineSolveTracker` as centralized source of truth, refresh policy,
+  StrictMode/generation invariants, and the `GET /user/me/progress` backend
+  route (spans both repos).
 
 ## Quick start
 
