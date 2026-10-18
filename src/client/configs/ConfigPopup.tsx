@@ -342,7 +342,7 @@ export default memo(function ConfigPopup() {
             <button
               type="button"
               tabIndex={0}
-              className="btn btn-sm btn-outline btn-info"
+              className="btn btn-sm btn-soft btn-primary"
             >
               Add to presets
             </button>
@@ -359,7 +359,7 @@ export default memo(function ConfigPopup() {
               />
               <button
                 type="button"
-                className="btn btn-sm btn-outline btn-info"
+                className="btn btn-sm btn-primary"
                 disabled={
                   !!presets.find(p => p.name === presetName) || !presetName
                 }
@@ -379,7 +379,7 @@ export default memo(function ConfigPopup() {
         <div {...tip('(backspace/del)', undefined, 'error')}>
           <button
             type="button"
-            className="btn btn-sm btn-outline btn-error"
+            className="btn btn-sm btn-soft btn-error"
             onClick={deleteSymbol}
           >
             Delete

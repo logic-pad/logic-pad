@@ -1,6 +1,7 @@
 # 0.28.0
 
 - Changed from logic-pad-solver-core to @logic-pad/cspuz-solver
+- Added new items in puzzle checklist
 
 # 0.27.2
 

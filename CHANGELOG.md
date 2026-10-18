@@ -5,6 +5,7 @@
 - Improve puzzle fetching in collection side bar
 - Grid insight is now enabled by default with a 20s cooldown per use
 - Grid insight is no longer shown in unsupported grids
+- Added new items in the puzzle checklist
 
 # 17/10/2026
 

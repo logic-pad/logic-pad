@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import GridData from './grid.js';
 import { Color, GridState, PuzzleType, State } from './primitives.js';
+import validateGrid from './validate.js';
 
 export type PuzzleMetadata = {
   /**
@@ -152,6 +153,7 @@ export function validatePuzzleChecklist(
       mandatory: true,
     });
   } else {
+    const isComplete = gridWithSolution.isComplete();
     checklist.items.push({
       id: 'autoValidation',
       success: true,
@@ -159,7 +161,7 @@ export function validatePuzzleChecklist(
     });
     checklist.items.push({
       id: 'solutionIsComplete',
-      success: gridWithSolution.isComplete(),
+      success: isComplete,
       mandatory: true,
     });
     checklist.items.push({
@@ -167,6 +169,48 @@ export function validatePuzzleChecklist(
       success: state.final !== State.Error,
       mandatory: true,
     });
+    if (isComplete) {
+      const grid = gridWithSolution.resetTiles();
+      if (
+        grid.colorEquals(gridWithSolution) ||
+        gridWithSolution.getTileCount(true, false, Color.Dark) === 0 ||
+        gridWithSolution.getTileCount(true, false, Color.Light) === 0
+      ) {
+        checklist.items.push({
+          id: 'solutionIsNotTrivial',
+          success: false,
+          mandatory: false,
+        });
+      } else {
+        const checkAlt = (altGrid: GridData) => {
+          const altState = validateGrid(altGrid, gridWithSolution);
+          return State.isSatisfied(altState.final);
+        };
+        if (
+          checkAlt(grid.floodFillAll(Color.Gray, Color.Light, false)) ||
+          checkAlt(grid.floodFillAll(Color.Gray, Color.Dark, false)) ||
+          checkAlt(
+            gridWithSolution.withTiles(tiles =>
+              tiles.map(row =>
+                row.map(t =>
+                  t.exists && !t.fixed && t.color !== Color.Gray
+                    ? t.withColor(
+                        t.color === Color.Light ? Color.Dark : Color.Light
+                      )
+                    : t
+                )
+              )
+            )
+          )
+        ) {
+          checklist.items.push({
+            id: 'noTrivialAlt',
+            success: false,
+            mandatory: false,
+          });
+        }
+      }
+    }
   }
   checklist.isValid = !checklist.items.some(x => !x.success && x.mandatory);
   return checklist;

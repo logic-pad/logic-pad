@@ -11,10 +11,7 @@ interface AuthButtonProps {
 
 function AuthButton({ label, icon: Icon, onClick }: AuthButtonProps) {
   return (
-    <button
-      className="btn btn-outline font-thin text-lg w-full"
-      onClick={onClick}
-    >
+    <button className="btn btn-soft font-thin text-lg w-full" onClick={onClick}>
       {<Icon size={24} />}
       {label}
     </button>

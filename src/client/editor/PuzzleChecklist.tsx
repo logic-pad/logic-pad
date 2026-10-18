@@ -148,23 +148,46 @@ function ChecklistHelp({
           </p>
         </>
       );
-    } else {
+    }
+    const warningItems = checklist.items
+      .filter(i => !i.success && !i.mandatory)
+      .map(i => i.id);
+    if (warningItems.includes('solutionIsNotTrivial')) {
       return (
         <>
-          <p>Generic checklist failure.</p>
+          <p>Your puzzle has a trivial solution.</p>
           <p>
-            Please report this to the developer with a link to the puzzle
-            included.
+            This means your puzzle is solvable with all light tiles, all dark
+            tiles, or no tiles filled in at all.
+          </p>
+          <p>
+            This is not a mandatory fail, but you should double check that this
+            is your intended solution.
+          </p>
+        </>
+      );
+    } else if (warningItems.includes('noTrivialAlt')) {
+      return (
+        <>
+          <p>A trivial alternate solution has been found for your puzzle.</p>
+          <p>
+            This means your puzzle is solvable with all light tiles, all dark
+            tiles, or with your provided solution but with all colors inverted.
+          </p>
+          <p>
+            This is not a mandatory fail, but you may want to eliminate these
+            alternate solutions with rule/symbol changes.
           </p>
         </>
       );
     }
+    return null;
   }, [checklist, checklistComplete]);
-  if (checklistComplete) return null;
+  if (helpMessage === null) return null;
   return (
     <>
       <button
-        className="btn btn-outline"
+        className="btn btn-info btn-soft"
         onClick={() => {
           const dialog = document.getElementById(
             `checklistHelp-${dialogId}`
@@ -172,7 +195,7 @@ function ChecklistHelp({
           dialog.showModal();
         }}
       >
-        Why is my checklist incomplete?
+        Checklist hint available
       </button>
       <dialog id={`checklistHelp-${dialogId}`} className="modal">
         <div className="modal-box flex flex-col gap-4 text-base">
@@ -259,6 +282,26 @@ const checklistItemMap = {
       tooltip="Solution cannot be empty"
     >
       {item.success ? 'Solution not empty' : 'Solution empty'}
+    </ChecklistItem>
+  ),
+  solutionIsNotTrivial: (item: PuzzleChecklistItem) => (
+    <ChecklistItem
+      key="solutionIsNotTrivial"
+      type={item.success ? 'success' : 'info'}
+      tooltip="Solution should not be trivial"
+    >
+      {item.success ? 'Solution not trivial' : 'Solution trivial'}
+    </ChecklistItem>
+  ),
+  noTrivialAlt: (item: PuzzleChecklistItem) => (
+    <ChecklistItem
+      key="noTrivialAlt"
+      type={item.success ? 'success' : 'info'}
+      tooltip="Trivial alt solution found"
+    >
+      {item.success
+        ? 'No trivial alternate solution'
+        : 'Trivial alternate solution'}
     </ChecklistItem>
   ),
 };

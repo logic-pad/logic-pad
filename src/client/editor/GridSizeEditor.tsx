@@ -80,7 +80,7 @@ export default memo(function GridSizeEditor({
       </div>
       <button
         type="button"
-        className={cn('btn btn-outline btn-info', getButtonSize(size))}
+        className={cn('btn btn-soft', getButtonSize(size))}
         onClick={() => {
           if (
             widthRef.current?.reportValidity() &&
