@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import InsightSolver from '@logic-pad/core/data/solver/insight/insightSolver';
 import { ProofNode } from '@logic-pad/core/data/solver/insight/types/proof';
 import { Position } from '@logic-pad/core/data/primitives';
@@ -17,7 +17,7 @@ import {
   useCountdown,
 } from './insightHelper';
 
-const USE_COOLDOWN = 200;
+const USE_COOLDOWN = 20000;
 const REVEAL_COOLDOWN = 5000;
 
 const solver = new InsightSolver();
@@ -28,7 +28,7 @@ interface PendingInsight {
 }
 
 export default memo(function GridInsight() {
-  const [gridInsights] = useSettings('gridInsight');
+  const [enableGridInsight] = useSettings('enableGridInsight');
   const grid = useAtomValue(getGridAtom);
   const setGrid = useSetAtom(setGridAtom);
   const [status, setStatus] = useState<Status>(null);
@@ -51,6 +51,11 @@ export default memo(function GridInsight() {
   const overlayRef = useRef<InsightOverlayHandle>(null);
   const speculating = useRef(false);
   const run = useRef(0);
+
+  const supportedGrid = useMemo(() => solver.isGridSupported(grid), [grid]);
+
+  if (!enableGridInsight) return null;
+  if (!supportedGrid) return null;
 
   const coolingDown = cooldownProgress < 1;
   const panelOpen = status !== null;
@@ -169,8 +174,6 @@ export default memo(function GridInsight() {
     if (coolingDown) return;
     void startSolve();
   };
-
-  if (!gridInsights) return null;
 
   return (
     <div

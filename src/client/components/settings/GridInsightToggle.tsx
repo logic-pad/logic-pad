@@ -3,7 +3,7 @@ import { useSettings } from '../../state/settings.ts';
 import { tip } from '../Tooltip.tsx';
 
 export default memo(function GridInsightToggle() {
-  const [insights, setInsights] = useSettings('gridInsight');
+  const [insights, setInsights] = useSettings('enableGridInsight');
   return (
     <div {...tip('Enable automatic grid insights', 'bottom')}>
       <fieldset className="fieldset">
