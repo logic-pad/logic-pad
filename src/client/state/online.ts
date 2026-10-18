@@ -11,7 +11,7 @@ import storedRedirect from '../router/storedRedirect';
 import { router } from '../router/router';
 
 const defaultOnline = true;
-const apiVersionRange = '20.x';
+const apiVersionRange = '>=20.3.0';
 
 /**
  * Scoped to true inside embedded editors and preview modals,

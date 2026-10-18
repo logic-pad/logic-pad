@@ -181,6 +181,12 @@ export interface ListResponse<T> {
   results: T[];
 }
 
+export interface CollectionPuzzleWindow {
+  total: number;
+  before: PuzzleBrief[];
+  after: PuzzleBrief[];
+}
+
 export interface SupporterPrice {
   priceId: string;
   months: number;

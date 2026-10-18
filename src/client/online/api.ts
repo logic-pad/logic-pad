@@ -9,6 +9,7 @@ import {
   UserBrief,
   CollectionBrief,
   CollectionFollow,
+  CollectionPuzzleWindow,
   ResourceStatus,
   UserDetail,
   FrontPage,
@@ -418,6 +419,19 @@ export const api = {
       .get<ListResponse<PuzzleBrief>>(`/collection/${collectionId}/puzzles`, {
         params: { sort, cursorBefore, cursorAfter },
       })
+      .then(res => res.data)
+      .catch(rethrowError);
+  },
+  listCollectionPuzzlesAround: async (
+    collectionId: string,
+    puzzleId: string,
+    sort?: 'asc' | 'desc'
+  ) => {
+    return await axios
+      .get<CollectionPuzzleWindow>(
+        `/collection/${collectionId}/puzzles/around/${puzzleId}`,
+        { params: { sort } }
+      )
       .then(res => res.data)
       .catch(rethrowError);
   },
@@ -842,6 +856,8 @@ export const api = {
   },
 };
 
+export const PAGE_SIZE = 30;
+
 export const bidirectionalInfiniteQuery = <
   TQueryFnData extends ListResponse<{ id: string }>,
   TError = DefaultError,
@@ -876,7 +892,7 @@ export const bidirectionalInfiniteQuery = <
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage, _allPages, lastPageParams) => {
-      return lastPage.results.length === 30 ||
+      return lastPage.results.length === PAGE_SIZE ||
         (!predictEndOfQuery &&
           !lastPageParams?.cursorAfter &&
           !lastPageParams?.cursorBefore)
@@ -890,7 +906,7 @@ export const bidirectionalInfiniteQuery = <
           : undefined;
     },
     getPreviousPageParam: (firstPage, _allPages, firstPageParams) => {
-      return firstPage.results.length === 30 ||
+      return firstPage.results.length === PAGE_SIZE ||
         (!predictEndOfQuery &&
           !firstPageParams?.cursorAfter &&
           !firstPageParams?.cursorBefore)

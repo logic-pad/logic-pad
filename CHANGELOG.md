@@ -1,3 +1,9 @@
+# 18/10/2026
+
+**PREVIEW BRANCH**
+
+- Improve puzzle fetching in collection side bar
+
 # 17/10/2026
 
 **PREVIEW BRANCH**

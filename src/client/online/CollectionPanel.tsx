@@ -1,8 +1,12 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useLayoutEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import { onlinePuzzleAtom, onlinePuzzleIdAtom } from '../state/onlinePuzzle.ts';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { api, bidirectionalInfiniteQuery } from './api';
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useQuery,
+} from '@tanstack/react-query';
+import { api, PAGE_SIZE } from './api';
 import { collectionQueryOptions } from '../routes/_layout.collection.$collectionId';
 import Loading from '../components/Loading';
 import { PuzzleIcon } from './PuzzleCard';
@@ -17,6 +21,24 @@ import { FaCheck } from 'react-icons/fa';
 import { router } from '../router/router';
 import InfiniteScrollTrigger from '../components/InfiniteScrollTrigger';
 import { IoArrowBack } from 'react-icons/io5';
+import toast from 'react-hot-toast';
+
+/**
+ * One page of the sidebar list. Unlike a plain `ListResponse`, a page knows
+ * whether more puzzles remain on each side, because the initial page is a
+ * window around the current puzzle rather than a contiguous slice.
+ */
+interface SidebarPage {
+  total: number;
+  results: PuzzleBrief[];
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+type SidebarPageParam = { cursorBefore?: string; cursorAfter?: string };
+
+/** Fetching with no cursor means "the window around the current puzzle". */
+const INITIAL_PAGE: SidebarPageParam = {};
 
 export interface CollectionPanelProps {
   collectionId?: string | null;
@@ -40,12 +62,14 @@ const CollectionPuzzleRow = memo(function CollectionPuzzleRow({
 }) {
   const { loaded, seen, solved } = useSolveStatus(puzzle.id);
   const unseen = loaded && !seen;
+  const isCurrent = puzzle.id === currentId;
   return (
     <React.Fragment>
       <Link
+        data-current={isCurrent ? 'true' : undefined}
         className={cn(
           'btn w-full h-fit flex flex-row flex-nowrap gap-2 py-2 items-center justify-start text-start wrapper relative',
-          puzzle.id === currentId ? '' : 'btn-ghost',
+          isCurrent ? '' : 'btn-ghost',
           puzzle.status === ResourceStatus.Private &&
             puzzle.creator.id !== meId &&
             'btn-disabled'
@@ -65,7 +89,7 @@ const CollectionPuzzleRow = memo(function CollectionPuzzleRow({
           size={36}
           className={cn(
             'shrink-0',
-            puzzle.id === currentId
+            isCurrent
               ? ''
               : 'bg-base-200! [.wrapper:hover_&]:bg-base-content/0! transition-colors [.wrapper:hover_&]:transition-none'
           )}
@@ -114,52 +138,100 @@ export default memo(function CollectionPanel({
     ...collectionQueryOptions(collectionId!),
     enabled: !!collectionId,
   });
-  const puzzleList = useInfiniteQuery({
-    ...bidirectionalInfiniteQuery(
-      ['collection', collectionId, 'puzzles', 'sidebar', puzzle?.id],
-      (cursorBefore, cursorAfter) =>
-        api.listCollectionPuzzles(
-          collectionId!,
-          undefined,
-          cursorBefore,
-          cursorAfter
-        ),
-      false
-    ),
-    initialData: {
-      pages: [
-        {
-          total: 1,
-          results: [puzzle!],
-        },
-      ],
-      pageParams: [undefined],
-    },
+  const queryKey = [
+    'collection',
+    collectionId,
+    'puzzles',
+    'sidebar',
+    puzzle?.id,
+  ] as const;
+  const puzzleList = useInfiniteQuery<
+    SidebarPage,
+    Error,
+    InfiniteData<SidebarPage, SidebarPageParam>,
+    typeof queryKey,
+    SidebarPageParam
+  >({
+    queryKey,
+    initialPageParam: INITIAL_PAGE,
     enabled: !!collectionId && !!id,
-  });
-  useEffect(() => {
-    if (!collectionId || !id) return;
-    if (!puzzleList.isFetching && puzzleList.error === null) {
-      if (puzzleList.data?.pages.length === 1) {
-        void (async () => {
-          if (puzzleList.hasNextPage) await puzzleList.fetchNextPage();
-          else if (puzzleList.hasPreviousPage)
-            await puzzleList.fetchPreviousPage();
-        })();
-      } else if (
-        puzzleList.data?.pages.length === 2 &&
-        puzzleList.data.pageParams[0] === undefined
-      ) {
-        if (puzzleList.hasPreviousPage) void puzzleList.fetchPreviousPage();
+    queryFn: async ({ pageParam }): Promise<SidebarPage> => {
+      if (!pageParam.cursorBefore && !pageParam.cursorAfter) {
+        const window = await api.listCollectionPuzzlesAround(
+          collectionId!,
+          id!
+        );
+        return {
+          total: window.total,
+          // The center puzzle is not part of the window response, so splice it
+          // back in at its position.
+          results: [...window.before, puzzle!, ...window.after],
+          hasPrevious: window.before.length === PAGE_SIZE,
+          hasNext: window.after.length === PAGE_SIZE,
+        };
       }
+      const page = await api.listCollectionPuzzles(
+        collectionId!,
+        undefined,
+        pageParam.cursorBefore,
+        pageParam.cursorAfter
+      );
+      return {
+        total: page.total,
+        results: page.results,
+        hasPrevious: page.results.length === PAGE_SIZE,
+        hasNext: page.results.length === PAGE_SIZE,
+      };
+    },
+    getPreviousPageParam: firstPage =>
+      firstPage.hasPrevious && firstPage.results.length > 0
+        ? { cursorBefore: firstPage.results[0].id }
+        : undefined,
+    getNextPageParam: lastPage =>
+      lastPage.hasNext && lastPage.results.length > 0
+        ? { cursorAfter: lastPage.results[lastPage.results.length - 1].id }
+        : undefined,
+    staleTime: 1000 * 60,
+    retry: false,
+    throwOnError(error) {
+      toast.error(error.message);
+      return false;
+    },
+  });
+
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const anchoredTop = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    anchoredTop.current = null;
+  }, [collectionId, id]);
+
+  // Runs after every render: if rows were inserted above the current puzzle
+  // (the window landing, or a "load more" prepend), scroll by the same amount
+  // so the current puzzle keeps its on-screen position.
+  useLayoutEffect(() => {
+    const box = scrollBoxRef.current;
+    const row = box?.querySelector<HTMLElement>('[data-current="true"]');
+    if (!box || !row) return;
+    const top =
+      row.getBoundingClientRect().top -
+      box.getBoundingClientRect().top +
+      box.scrollTop;
+    const previous = anchoredTop.current;
+    if (previous !== null && top !== previous) {
+      box.scrollTop += top - previous;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puzzleList.isFetching]);
+    anchoredTop.current = top;
+  });
 
   if (!id || !puzzle || !collectionId) return null;
 
   if (collection.isPending) return <Loading className="h-8" />;
   if (!collection.data) return null;
+
+  // While the window is in flight, show the current puzzle alone rather than
+  // an empty list, so the row never disappears and reappears.
+  const rows = puzzleList.data?.pages.flatMap(page => page.results) ?? [puzzle];
 
   return (
     <div className="h-full w-full flex flex-col items-center gap-4 bg-base-100 text-base-content">
@@ -193,7 +265,10 @@ export default memo(function CollectionPanel({
         </div>
       </div>
       <div className="divider m-0 shrink-0" />
-      <div className="flex flex-col items-center w-full overflow-y-auto flex-1 *:shrink-0">
+      <div
+        ref={scrollBoxRef}
+        className="flex flex-col items-center w-full overflow-y-auto flex-1 *:shrink-0"
+      >
         {puzzleList.isFetchingPreviousPage ? (
           <Loading className="h-4 m-4 shrink-0" />
         ) : puzzleList.hasPreviousPage ? (
@@ -204,17 +279,15 @@ export default memo(function CollectionPanel({
             className="btn-sm w-fit"
           />
         ) : null}
-        {puzzleList.data?.pages.flatMap(page =>
-          page.results.map(puzzle => (
-            <CollectionPuzzleRow
-              key={puzzle.id}
-              puzzle={puzzle}
-              currentId={id}
-              meId={me?.id ?? null}
-            />
-          ))
-        )}
-        {puzzleList.isFetchingNextPage ? (
+        {rows.map(puzzle => (
+          <CollectionPuzzleRow
+            key={puzzle.id}
+            puzzle={puzzle}
+            currentId={id}
+            meId={me?.id ?? null}
+          />
+        ))}
+        {!puzzleList.data || puzzleList.isFetchingNextPage ? (
           <Loading className="h-4 m-4 shrink-0" />
         ) : puzzleList.hasNextPage ? (
           <InfiniteScrollTrigger
