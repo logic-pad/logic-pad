@@ -364,6 +364,39 @@ the language is a per-request content-negotiation concern
 (`Accept-Language`), not an addressable-resource one; only the two frontend
 repositories' user-facing pages get prefixed URLs.
 
+Because the frontend's language comes from the URL prefix rather than the
+browser's own setting, the two can disagree. `src/client/online/api.ts` therefore
+pins backend strings to the UI by sending `Accept-Language` explicitly, read
+per request from `getActiveLocale()`:
+
+```ts
+function withAcceptLanguage(config: InternalAxiosRequestConfig) {
+  if (typeof window !== 'undefined') {
+    config.headers.set('Accept-Language', getActiveLocale());
+  }
+  return config;
+}
+```
+
+Three properties of this are worth knowing before changing it:
+
+- **A request interceptor, not a default header.** The locale changes without a
+  page reload ([§1.5](#15-locale-prefixed-urls)), so a value baked in at module
+  load would go stale on the first switch.
+- **`Accept-Language` is a CORS-safelisted header**, so it is sent without
+  appearing in `Access-Control-Allow-Headers`. The backend's `cors()` options
+  list only `Content-Type, Authorization` and need no change — verified against a
+  recording stub rather than assumed, since a non-safelisted header here would
+  have been silently dropped by the browser.
+- **The header is left unset when there is no `window`.** This module is imported
+  by `src/ssr`, where the visitor's language is unknown; pinning it to
+  `DEFAULT_LOCALE` would be actively wrong once SSR starts localizing.
+
+Two paths still bypass it, both benign today: `navigator.sendBeacon` in
+`solveSessionSolvingBeacon` (fire-and-forget, response never read) and
+`authClient`, which is better-auth's own fetch-based client. Give `authClient` a
+`fetch` wrapper if auth endpoints ever start returning localized text.
+
 ### 3.1 Catalogs and instances
 
 `packages/api/src/locales/catalogs/{locale}/messages.po` is the Crowdin source;

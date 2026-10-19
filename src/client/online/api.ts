@@ -1,5 +1,8 @@
 import * as rax from 'retry-axios';
-import axiosStatic, { AxiosError } from 'axios';
+import axiosStatic, {
+  AxiosError,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 import {
   SolveSession,
   PuzzleBrief,
@@ -46,6 +49,7 @@ import {
 import { CollectionSearchParams } from './CollectionSearchQuery';
 import { Account, authClient } from './auth';
 import { API_ENDPOINT } from './env';
+import { getActiveLocale } from '../router/localeRewrite';
 
 export interface ApiErrorResponse {
   summary: string;
@@ -98,6 +102,23 @@ retryAxios.defaults.raxConfig = {
   httpMethodsToRetry: ['GET', 'HEAD', 'OPTIONS', 'DELETE', 'PUT', 'POST'],
 };
 rax.attach(retryAxios);
+
+/**
+ * Pin backend strings to the language the UI is showing.
+ *
+ * Left unset when there is no `window`: the SSR server imports this module, and
+ * there the visitor's language is unknown, so pinning it to the default locale
+ * would be worse than saying nothing.
+ */
+function withAcceptLanguage(config: InternalAxiosRequestConfig) {
+  if (typeof window !== 'undefined') {
+    config.headers.set('Accept-Language', getActiveLocale());
+  }
+  return config;
+}
+
+axios.interceptors.request.use(withAcceptLanguage);
+retryAxios.interceptors.request.use(withAcceptLanguage);
 
 const rethrowError = (error: AxiosError<ApiErrorResponse>) => {
   if (error.response) {
