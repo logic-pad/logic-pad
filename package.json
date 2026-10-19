@@ -18,13 +18,15 @@
     "preview": "vite preview --host",
     "check-bundle": "bunx vite-bundle-visualizer",
     "pwa-gen": "npx @vite-pwa/assets-generator --preset minimal-2023 public/logo.svg",
-    "locales:extract": "bun x --bun lingui extract"
+    "locales:extract": "bun x --bun lingui extract",
+    "locales:compile": "bun x --bun lingui compile --typescript"
   },
   "engines": {
     "bun": ">=1.2.2",
     "node": ">=22.0.0"
   },
   "dependencies": {
+    "@chenglou/pretext": "^1.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@elysiajs/static": "^1.4.10",
     "@lingui/core": "^6.10.0",

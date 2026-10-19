@@ -12,13 +12,14 @@ different constraint:
 | Frontend UI | `src/client` | Ordinary React app: use lingui's React + Vite integration |
 | Puzzle logic | `packages/logic-core` | Tree-shakable: consumers that do not want strings must not pay for them |
 | Backend | `logic-pad-api` | Stateless, per-request locale from `Accept-Language` |
+| SSR | `src/ssr` | Crawler-facing HTML and canvas images; locale from the URL prefix, needs a CJK font |
 
 Initial locales are `en` (source of truth) and `ja`. Adding a locale is additive:
 append it to `locales`/`SUPPORTED_LOCALES` in the relevant config and let
 Crowdin fill the catalog.
 
 Every catalog in both repositories is a GetText `.po` file, because Crowdin
-handles `.po` natively. See [§5](#5-extraction-compilation--crowdin) for the
+handles `.po` natively. See [§6](#6-extraction-compilation--crowdin) for the
 tooling that keeps the three in sync.
 
 ---
@@ -31,7 +32,7 @@ tooling that keeps the three in sync.
   `@lingui/vite-plugin` (dev).
 - `@tanstack/react-router` **≥ 1.140**, which is where the `rewrite` option used
   by [§1.5](#15-locale-prefixed-urls) landed. The repo was on 1.131.2 and had to
-  be upgraded; see [§8](#8-tanstack-router-upgrade-1131--1170).
+  be upgraded; see [§9](#9-tanstack-router-upgrade-1131--1170).
 - `lingui.config.ts` (repo root) declares `locales: ['en','ja']` and catalogs at
   `src/client/locales/{locale}/messages`.
 - `vite.config.ts` registers `lingui({ macroTransform: true })`, which both
@@ -208,6 +209,37 @@ Locale prefixes are public URLs, so `src/ssr` had to follow:
   `en`/`ja`/`x-default`, so `/ja/…` pages are discovered as translations rather
   than as unrelated pages.
 
+#### Known limitation: link `href` attributes go stale across an in-app switch
+
+After switching language in the settings modal, `<a href>` attributes already on
+screen keep the prefix (or absence of one) they were rendered with. Fresh loads
+and left-clicks are correct; the exposure is limited to **middle-click, "open in
+new tab" and "copy link address"** on a link that predates the switch.
+
+The cause is inside TanStack Router, not in our rewrite. `useLinkProps` derives
+its href through a per-route "link scope" (`matchContext.js`) that rebuilds only
+when the location object identity changes *and* the route is not departing, and
+`Link` is wired to it via `useSyncExternalStore`. A prefix-only swap changes the
+public href but not the matched route, and the rendered links do not recompute —
+verified by forcing a brand-new location object into `router.stores.location`
+from the console, which still did not refresh them.
+
+Approaches tried and rejected, each confirmed empirically rather than reasoned
+about:
+
+| Approach | Outcome |
+| --- | --- |
+| Clear `router.staticLocations` (private `WeakMap` href memo) | No effect; also reaches into a `private` field |
+| Track locale as module state instead of reading `window.location` | No effect on links; the hrefs are not lagging, they are frozen |
+| `router.invalidate()` (public API) | No effect |
+| Return a new `URL` from `output` instead of mutating | Correct in principle — `buildLocation` reads `href` off the object it passed us *after* calling `output`, so mutation leaks the prefix into the internal href — but no observable symptom changed, and it allocates on every link render. Reverted |
+
+A fix would need either remounting the tree (which discards the unsaved editor
+buffer — the exact thing `history.replace` exists to protect) or threading a
+locale-dependent `key` through every link-bearing component. Neither is
+proportionate to a cosmetic edge case in a rarely-used flow, so it is accepted
+and documented instead.
+
 ---
 
 ## 2. `@logic-pad/core` — tree-shakable optional locale
@@ -317,7 +349,7 @@ separate call emits a "Messages for locale ... not loaded" warning during
 construction.
 
 Catalogs are generated at `src/locale/catalogs/{locale}/messages.ts` (see
-[§5](#5-extraction-compilation--crowdin)). A generated **`.ts`** module is used
+[§6](#6-extraction-compilation--crowdin)). A generated **`.ts`** module is used
 deliberately instead of `.json`: `tsc` does not copy JSON assets to `dist`, so a
 `.json` import would break the published package, whereas a `.ts` module
 compiles into `dist/src/locale/catalogs/...` naturally.
@@ -458,7 +490,146 @@ dropped, `*` resolves to the default, and comparison is case-insensitive.
 
 ---
 
-## 4. Runtime contract for `@logic-pad/core`
+## 4. SSR — `src/ssr`
+
+The static/SSR server renders crawler-facing content, so it is localized too. It
+lives in the frontend repository and is therefore reached by **URL prefix**
+(`/ja/...`), not by `Accept-Language` — the same rule as the pages it serves, so
+a document and its `og:image` can never disagree about language.
+
+### 4.1 Catalog and instances
+
+`src/ssr/locales/catalogs/{locale}/messages.po` is the Crowdin source and
+`messages.ts` beside it is the generated compiled catalog, committed because the
+SSR process runs from source with no bundler to compile on the fly (same
+rationale as [§2.6](#26-locale-bundles-and-packaging)). It is a second catalog
+inside the *same* lingui config as the frontend UI, so one
+`bun run locales:extract` covers both.
+
+Call sites use the `i18n`-named facade for the same reason as core
+([§2.1](#21-the-facade)): lingui's extractor recognises `i18n.t('literal-id')`.
+
+```ts
+const i18n = i18nFor(locale);
+i18n.t('ssr.solve.description', { author: puzzle.creator.name });
+```
+
+### 4.2 Message ids must be literals
+
+`lingui extract` reads ids out of the AST, so a computed id is **silently
+dropped** — no error, no catalog entry, and the string renders as its own id at
+runtime:
+
+```ts
+// WRONG: neither id is extracted
+i18n.t(isSeries ? 'ssr.series.description' : 'ssr.collection.description', { author });
+
+// RIGHT: two literal call sites
+const description = isSeries
+  ? i18n.t('ssr.series.description', { author })
+  : i18n.t('ssr.collection.description', { author });
+```
+
+This bit during development: 13 of 15 ids were extracted and nothing complained.
+After adding a string, confirm it appears in
+`src/ssr/locales/catalogs/en/messages.po`.
+
+### 4.3 Preview images: fonts and line breaking
+
+`src/ssr/routes/image.ts` draws PNG previews with `@napi-rs/canvas`, which has no
+system font access — only what `GlobalFonts.registerFromPath` loads. Two
+independent defects were fixed alongside the string conversion. **Both predated
+localization**: any puzzle with a Japanese title already produced a broken
+preview image in *every* locale.
+
+**Glyph coverage.** `public/NotoSerifCJK-Regular.ttc` is the upstream pan-CJK
+OpenType Collection (OFL 1.1; `NotoSerifCJK-OFL.txt` ships beside it), used
+whole rather than subset. Serif/Mincho was chosen over a Gothic face because
+Palatino is a deliberate stylistic choice and a sans partner clashes with it.
+Regular-only is correct because 400 is the only weight drawn, and the collection
+orders Japanese first, so shared Han ideographs take their JP forms by default.
+It is 25.2 MB, read by the native font engine at startup (registration is lazy,
+~0.7 ms) and never reaches a browser, so it costs no bandwidth; it is also
+absent from the service worker's precache.
+
+Canvas resolves each glyph from the first family in the list that has it, so one
+stack covers every script it can and Latin keeps Palatino's styling:
+
+```ts
+const font = (size: number) => `${size}px Palatino, NotoSerifCJK`;
+```
+
+**Line breaking is delegated to [`@chenglou/pretext`](https://github.com/chenglou/pretext)**
+(MIT, zero dependencies) rather than implemented here. Titles are
+user-generated and may be in any language, and correct breaking depends on
+per-script rules — spaces between Latin words, per-character breaks plus
+kinsoku-shori for CJK, grapheme segmentation for Thai and other
+spaceless Southeast Asian scripts — that no amount of hardcoding covers. An
+earlier hand-rolled splitter hardcoded CJK ranges and a kinsoku punctuation set,
+which is exactly the wrong shape for this problem.
+
+```ts
+const { lines } = layoutWithLines(
+  prepareWithSegments(text, fontString),
+  maxWidth,
+  lineHeight
+);
+```
+
+Two integration details:
+
+- **Pretext needs a Canvas 2D context to measure through.** Outside a browser it
+  looks for a global `OffscreenCanvas`, and throws without one — which is Bun.
+  `src/ssr/pretextShim.ts` supplies one backed by the same native canvas the
+  renderer paints with, so its measurements are the widths the glyphs actually
+  occupy. It is imported for its side effect and **must be evaluated before
+  `@chenglou/pretext`**, hence a separate module rather than inline setup.
+- **`setLocale(locale)` selects the breaking conventions** for the script being
+  laid out, and clears pretext's cache, so it is called only when the locale
+  actually changes (`applyLayoutLocale`), not on every render.
+
+**Remaining gap: coverage is CJK-wide, not world-wide.** Measured against the
+shipped stack:
+
+| Covered | Tofu |
+| --- | --- |
+| Latin (incl. accented), Greek, Cyrillic, Hiragana, Katakana, Han, Hangul, CJK punctuation | Thai, Arabic, Hebrew, Devanagari, **emoji** |
+
+Pretext still breaks those scripts correctly, so they wrap onto multiple lines
+instead of overflowing — but the glyphs render as boxes. This is a font
+availability problem, not a layout one: no single font covers everything, and
+adding per-script faces is a size/licensing decision rather than a plumbing one.
+Emoji are the most likely UGC in a puzzle title and are currently the worst
+served.
+
+Arabic and Hebrew have a second, independent problem even once a font is added:
+pretext does not produce bidi levels or a visual order, and we paint line by line
+with `fillText()`, so each line is ordered as its own paragraph. Per pretext's
+guidance the fix is to render each paragraph as a single element with its
+direction set, which canvas cannot do — so bidi text would need per-line shaping
+before it is worth shipping a font for it.
+
+`applyLayoutLocale` calls pretext's `setLocale` with the **URL** locale, which is
+a proxy for the language of the (user-generated) title. That is the right call
+here: pretext reads the page language from `<html lang>`, which does not exist in
+a server process, and its docs say to pass it explicitly in exactly that
+situation.
+
+### 4.4 Image routes are prefixed, not negotiated
+
+```text
+/api/preview/puzzle/:id       -> English (unchanged, so existing links keep working)
+/api/preview/ja/puzzle/:id    -> Japanese
+```
+
+`previewUrl(locale, kind, id)` in `src/ssr/routes/ssr.ts` builds the `og:image`
+URL, keeping the image language tied to the page that references it. It is local
+to that file because the image routes themselves are declared in `image.ts` and
+do not need a shared helper.
+
+---
+
+## 5. Runtime contract for `@logic-pad/core`
 
 ```ts
 // no locale installed → ids only, no lingui runtime in the bundle
@@ -485,18 +656,24 @@ prototypes registered in `allRules` — resolve through the same locale.
 
 ---
 
-## 5. Extraction, compilation & Crowdin
+## 6. Extraction, compilation & Crowdin
 
 `.po` files are the source of truth and are what Crowdin edits. Compiled output
-is committed for `core` and the backend (they are consumed as packages/by Bun
-from source, with no bundler to compile on the fly); the frontend's `.po` files
-are compiled by the Vite plugin at build time and have no committed artifact.
+is committed for `core`, the backend and SSR (they are consumed as packages, or
+run by Bun from source, with no bundler to compile on the fly); the frontend
+UI's `.po` files are compiled by the Vite plugin at build time.
 
 | Surface | Config | Catalog source | Compile target | Committed? |
 | --- | --- | --- | --- | --- |
 | Frontend UI | `lingui.config.ts` | `src/client/locales/{locale}/messages.po` | in-build | no |
 | `@logic-pad/core` | `packages/logic-core/lingui.config.ts` | `src/locale/catalogs/{locale}/messages.po` | `messages.ts` | yes |
 | Backend | `packages/api/lingui.config.ts` | `src/locales/catalogs/{locale}/messages.po` | `messages.ts` | yes |
+| SSR | `lingui.config.ts` (same config as the UI) | `src/ssr/locales/catalogs/{locale}/messages.po` | `messages.ts` | yes |
+
+The UI and SSR catalogs share one lingui config so that a single
+`locales:extract` covers both. The consequence is that `locales:compile` also
+emits `src/client/locales/{locale}/messages.ts`, which nothing imports — those
+paths are `.gitignore`d so the byproduct never lands in the repo.
 
 Scripts:
 
@@ -527,17 +704,18 @@ paths. Both manifests ship with an empty `project_id`; fill it in (or supply
 Workflow for a new or changed string:
 
 1. Wrap it — `t`…` from `useLingui()` (frontend) or `i18n.t('a.stable.id')`
-   (core/backend).
+   (core/backend/SSR). The id **must be a string literal**; a computed id is
+   silently omitted ([§4.2](#42-message-ids-must-be-literals)).
 2. `locales:extract` to add the id to every locale catalog. Extraction preserves
    existing translations and marks removed ids obsolete.
-3. Author the English `msgstr` in the `en` catalog (core/backend ids arrive with
-   the id as their text — see [§2.2](#22-call-sites-carry-ids-never-english)).
+3. Author the English `msgstr` in the `en` catalog (core/backend/SSR ids arrive
+   with the id as their text — see [§2.2](#22-call-sites-carry-ids-never-english)).
 4. Translate, locally or via Crowdin.
 5. `locales:compile` where the surface has a committed artifact.
 
 ---
 
-## 6. Verification
+## 7. Verification
 
 ```bash
 # logic-pad
@@ -574,7 +752,7 @@ Behavioural checks worth repeating after a change:
 
 ---
 
-## 7. Current coverage and known gaps
+## 8. Current coverage and known gaps
 
 Only a representative slice of strings is converted; the plumbing is the deliverable.
 
@@ -594,6 +772,10 @@ Only a representative slice of strings is converted; the plumbing is the deliver
   fields, `functions.ts` notification text, and the other error strings sketched
   in the original plan are not wired up; the catalog deliberately contains only
   ids that actually appear at a call site, since hand-written entries drift.
+- **SSR: 15 strings converted** — all of the crawler-facing text in `ssr.ts`
+  (page titles/descriptions) and `image.ts` (canvas labels, stats, kind names).
+  User-supplied content (puzzle titles, usernames, profile blurbs) is never
+  translated, only rendered.
 - Symbols (`Symbol.explanation`) and solver/search-variant text outside the two
   converted rules are not localized.
 
@@ -603,10 +785,6 @@ Routing/SEO gaps that are open on purpose:
   Deciding canonicalisation for query-bearing pages (`/search/puzzles?...`) is a
   policy call that should be made deliberately rather than guessed at; a wrong
   canonical can de-index a page.
-- **SSR boilerplate stays English on `/ja` pages.** `src/ssr/routes/ssr.ts`
-  injects strings like "A puzzle by X on Logic Pad." and sets `lang="ja"`, but
-  does not translate the sentence itself. Localizing it means routing those
-  strings through the backend catalog or a small shared one.
 - **No `Accept-Language` auto-redirect** on the frontend. The URL is authoritative
   ([§1.5](#15-locale-prefixed-urls)); the backend negotiates on the header
   because it has no URL prefixes to consult.
@@ -618,7 +796,7 @@ Routing/SEO gaps that are open on purpose:
 
 ---
 
-## 8. TanStack Router upgrade (1.131 → 1.170)
+## 9. TanStack Router upgrade (1.131 → 1.170)
 
 `rewrite` does not exist before 1.140, so the router had to move. Three breaking
 changes surfaced, all small:

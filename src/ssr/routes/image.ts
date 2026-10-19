@@ -8,15 +8,41 @@ import {
   Path2D,
 } from '@napi-rs/canvas';
 import { fileURLToPath } from 'node:url';
+import '../pretextShim';
+import {
+  layoutWithLines,
+  prepareWithSegments,
+  setLocale,
+} from '@chenglou/pretext';
 import { api } from '../../client/online/api';
 import { PuzzleType } from '@logic-pad/core/data/primitives';
 import { SECURITY_HEADERS } from '../config';
+import { type Locale, i18nFor } from '../locales';
 
 const fontPath = fileURLToPath(
   new URL('../../../public/palatino.ttf', import.meta.url)
 );
+const serifCjkPath = fileURLToPath(
+  new URL('../../../public/NotoSerifCJK-Regular.ttc', import.meta.url)
+);
 
 GlobalFonts.registerFromPath(fontPath, 'Palatino');
+GlobalFonts.registerFromPath(serifCjkPath, 'NotoSerifCJK');
+
+const font = (size: number) => `${size}px Palatino, NotoSerifCJK`;
+
+let laidOutLocale: string | undefined;
+/**
+ * Lazily set the locale for pretext. No-op if already set to avoid clearing cache.
+ *
+ * Note that we are using locale from URL prefix to determine layout of UGC content
+ * and they don't necessarily match.
+ */
+function applyLayoutLocale(locale: Locale): void {
+  if (laidOutLocale === locale) return;
+  laidOutLocale = locale;
+  setLocale(locale);
+}
 
 // The logo is served from the same server, so load it from disk once
 // instead of making an HTTP round trip on every preview image.
@@ -26,39 +52,48 @@ const logoPath = fileURLToPath(
 let logoPromise: Promise<Image> | null = null;
 const loadLogo = () => (logoPromise ??= loadImage(logoPath));
 
-function getLines(
+/** Remove the final user-perceived character, including surrogate pairs. */
+function trimGrapheme(text: string): string {
+  const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+  const graphemes = [...segmenter.segment(text)];
+  const last = graphemes[graphemes.length - 1];
+  return last ? text.slice(0, last.index) : text;
+}
+
+/**
+ * Wrap `text` into at most `maxLines` lines no wider than `maxWidth`.
+ */
+function layoutTitle(
   ctx: SKRSContext2D,
   text: string,
+  fontString: string,
   maxWidth: number,
-  maxLines: number = Infinity
-): [string[], number] {
-  const words = text.split(' ');
-  const lines = [];
-  let currentLine = words[0];
+  maxLines: number
+): { lines: string[]; lineHeight: number } {
+  const box = ctx.measureText(text);
+  const lineHeight = box.actualBoundingBoxAscent + box.actualBoundingBoxDescent;
 
-  for (let i = 1; i < words.length; i++) {
-    const word = words[i];
-    const { width } = ctx.measureText(currentLine + ' ' + word);
-    if (width < maxWidth) {
-      currentLine += ' ' + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-  lines.push(currentLine);
+  const { lines } = layoutWithLines(
+    prepareWithSegments(text, fontString),
+    maxWidth,
+    lineHeight
+  );
 
-  if (lines.length > maxLines) {
-    lines.splice(maxLines, lines.length - maxLines);
-    lines[maxLines - 1] =
-      lines[maxLines - 1].substring(0, lines[maxLines - 1].length - 3) + '...';
+  if (lines.length === 0) return { lines: [''], lineHeight };
+  if (lines.length <= maxLines) {
+    return { lines: lines.map(line => line.text), lineHeight };
   }
 
-  const totalBox = ctx.measureText(text);
-  return [
-    lines,
-    totalBox.actualBoundingBoxAscent + totalBox.actualBoundingBoxDescent,
-  ];
+  const kept = lines.slice(0, maxLines).map(line => line.text);
+  // Appending the ellipsis can push the last line past `maxWidth`, so drop
+  // trailing graphemes until the truncated line actually fits.
+  const ellipsis = '…';
+  let last = kept[maxLines - 1];
+  while (last.length > 0 && ctx.measureText(last + ellipsis).width > maxWidth) {
+    last = trimGrapheme(last);
+  }
+  kept[maxLines - 1] = last + ellipsis;
+  return { lines: kept, lineHeight };
 }
 
 interface IconInfo {
@@ -84,7 +119,7 @@ const PUZZLE_ICONS: Record<PuzzleType, IconInfo> = {
   [PuzzleType.Underclued]: {
     size: 24,
     path: new Path2D(
-      'M 3 15 C 3.044 14.519 3.279 13.892 3.586 13.585 C 3.893 13.278 4.52 13.044 5 13 L 9 13 C 9.48 13.044 10.107 13.278 10.414 13.585 C 10.721 13.892 10.956 14.519 11 15 L 11 19 C 10.956 19.48 10.721 20.107 10.414 20.414 C 10.107 20.721 9.48 20.956 9 21 L 5 21 C 4.52 20.956 3.893 20.721 3.586 20.414 C 3.279 20.107 3.044 19.48 3 19 Z M 9 15 L 5 15 L 5 19 L 9 19 Z M 13 17 C 13 16.448 13.448 16 14 16 L 20 16 C 20.552 16 21 16.448 21 17 C 21 17.552 20.552 18 20 18 L 14 18 C 13.448 18 13 17.552 13 17 Z M 13 5 C 13.044 4.519 13.279 3.892 13.586 3.585 C 13.893 3.278 14.52 3.044 15 3 L 19 3 C 19.48 3.044 20.107 3.278 20.414 3.585 C 20.721 3.892 20.956 4.519 21 5 L 21 9 C 20.956 9.48 20.721 10.107 20.414 10.414 C 20.107 10.721 19.48 10.956 19 11 L 15 11 C 14.52 10.956 13.893 10.721 13.586 10.414 C 13.279 10.107 13.044 9.48 13 9 Z M 19 5 L 15 5 L 15 9 L 19 9 Z M 3 5 C 3.044 4.519 3.279 3.892 3.586 3.585 C 3.893 3.278 4.52 3.044 5 3 L 9 3 C 9.48 3.044 10.107 3.278 10.414 3.585 C 10.721 3.892 10.956 4.519 11 5 L 11 9 C 10.956 9.48 10.721 10.107 10.414 10.414 C 10.107 10.721 9.48 10.956 9 11 L 5 11 C 4.52 10.956 3.893 10.721 3.586 10.414 C 3.279 10.107 3.044 9.48 3 9 Z M 9 5 L 5 5 L 5 9 L 9 9 Z'
+      'M 3 15 C 3.044 14.519 3.279 13.892 3.586 13.585 C 3.893 13.278 4.52 13.044 5 13 L 9 13 C 9.48 13.044 10.107 13.278 10.414 13.585 C 10.721 13.892 10.956 14.519 11 15 L 11 19 C 10.956 19.48 10.721 20.107 10.414 20.414 C 10.107 20.721 9.48 20.956 9 21 L 5 21 C 4.52 20.956 3.893 20.721 3.586 20.414 C 3.279 20.107 3.044 19.48 3 19 Z M 9 15 L 5 15 L 5 19 L 9 19 Z M 13 17 C 13 16.448 13.448 16 14 16 L 20 16 C 20.552 16 21 16.448 21 17 C 21 17.552 20.552 18 20 18 L 14 18 C 13.448 18 13 17.552 13 17 Z M 13 5 C 13.044 4.519 13.279 3.892 13.586 3.585 C 13.893 3.278 14.52 3.044 15 3 L 19 3 C 19.48 3.044 20.107 3.278 20.414 3.585 C 20.721 3.892 20.956 4.519 21 5 L 21 9 C 20.956 9.48 20.721 10.107 20.414 10.414 C 20.107 10.721 19.48 10.956 19 11 L 15 11 C 14.52 10.956 13.893 10.721 13.586 10.414 C 13.279 10.107 13.044 9.48 13 9 Z M 19 5 L 15 5 L 15 9 L 19 9 Z M 3 5 C 3.044 4.519 3.279 3.892 3.586 3.585 C 3.893 3.278 4.52 3.044 5 3 L 9 3 C 9.48 3.044 10.108 3.278 10.414 3.585 C 10.721 3.892 10.956 4.519 11 5 L 11 9 C 10.956 9.48 10.721 10.107 10.414 10.414 C 10.107 10.721 9.48 10.956 9 11 L 5 11 C 4.52 10.956 3.893 10.721 3.586 10.414 C 3.279 10.107 3.044 9.48 3 9 Z M 9 5 L 5 5 L 5 9 L 9 9 Z'
     ),
   },
   [PuzzleType.Music]: {
@@ -183,6 +218,342 @@ function drawPuzzleType(
   }
 }
 
+const LOGO_SIZE = 128;
+const MARGIN = 84;
+
+/** Draw the shared "Logic Pad" wordmark in the bottom-left corner. */
+async function drawWordmark(ctx: SKRSContext2D, suffix?: string) {
+  const logo = await loadLogo();
+  ctx.drawImage(logo, MARGIN, 630 - LOGO_SIZE - MARGIN, LOGO_SIZE, LOGO_SIZE);
+  ctx.fillStyle = '#00d3bb';
+  ctx.font = font(48);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(
+    'Logic Pad',
+    MARGIN + LOGO_SIZE + 16,
+    630 - LOGO_SIZE / 2 - MARGIN
+  );
+  if (suffix) {
+    const textWidth = ctx.measureText('Logic Pad').width;
+    ctx.fillStyle = '#e4e4e7';
+    ctx.fillText(
+      suffix,
+      MARGIN + LOGO_SIZE + 16 + textWidth + 16,
+      630 - LOGO_SIZE / 2 - MARGIN
+    );
+  }
+}
+
+async function renderPuzzleImage(locale: Locale, puzzleId: string) {
+  applyLayoutLocale(locale);
+  const i18n = i18nFor(locale);
+  const puzzle = await api.getPuzzleBriefForSolve(puzzleId);
+
+  const canvas = createCanvas(1200, 630);
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#343c47';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  await drawWordmark(ctx, i18n.t('image.puzzle.kind'));
+
+  let flowY = MARGIN;
+
+  // Puzzle title
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(64);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { lines: titleLines, lineHeight } = layoutTitle(
+    ctx,
+    puzzle.title,
+    font(64),
+    canvas.width - MARGIN * 2 - LOGO_SIZE,
+    2
+  );
+  titleLines.forEach((line, index) => {
+    ctx.fillText(line, MARGIN, flowY + index * lineHeight);
+  });
+  flowY += titleLines.length * lineHeight + 36;
+
+  // Puzzle icon
+  drawPuzzleType(
+    puzzle.types,
+    ctx,
+    canvas.width - LOGO_SIZE - MARGIN,
+    MARGIN,
+    LOGO_SIZE
+  );
+
+  // Author name
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(42);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(
+    puzzle.creator.name
+  );
+  const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+  ctx.fillText(puzzle.creator.name, MARGIN, flowY);
+  flowY += authorHeight + 48;
+
+  // Difficulty
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.translate(MARGIN, flowY);
+  const difficultyScale = 0.22;
+  ctx.scale(difficultyScale, difficultyScale);
+  if (puzzle.designDifficulty === 0) {
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#e4e4e7';
+    ctx.font = font(36);
+    ctx.fillText(i18n.t('image.difficulty.unrated'), 0, 0);
+  } else {
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = '#00d3bb';
+    let path: Path2D;
+    if (puzzle.designDifficulty > 5) {
+      path = STAR_200;
+    } else {
+      path = CIRCLE_200;
+    }
+    for (let i = 1; i <= ((puzzle.designDifficulty - 1) % 5) + 1; i++) {
+      ctx.fill(path, 'evenodd');
+      ctx.translate(240, 0);
+    }
+  }
+  ctx.resetTransform();
+
+  // Stats
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(42);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  let statsX = MARGIN + 240 * 5 * difficultyScale + MARGIN;
+  let statsWidth = ctx.measureText(puzzle.solveCount.toString()).width;
+  const statsY = flowY + (200 * difficultyScale) / 2;
+  ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 0.75;
+  ctx.font = font(36);
+  const solves = i18n.t('image.stats.solves', { count: puzzle.solveCount });
+  statsWidth = ctx.measureText(solves).width;
+  ctx.fillText(solves, statsX, statsY);
+  statsX += statsWidth + 48;
+
+  ctx.globalAlpha = 1;
+  ctx.font = font(42);
+  statsWidth = ctx.measureText(puzzle.loveCount.toString()).width;
+  ctx.fillText(puzzle.loveCount.toString(), statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 0.75;
+  ctx.font = font(36);
+  const loves = i18n.t('image.stats.loves', { count: puzzle.loveCount });
+  statsWidth = ctx.measureText(loves).width;
+  ctx.fillText(loves, statsX, statsY);
+
+  return canvas.toBuffer('image/png');
+}
+
+async function renderCollectionImage(locale: Locale, collectionId: string) {
+  applyLayoutLocale(locale);
+  const i18n = i18nFor(locale);
+  const collection = await api.getCollectionBrief(collectionId);
+
+  const canvas = createCanvas(1200, 630);
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#343c47';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  await drawWordmark(ctx, i18n.t('image.collection.kind'));
+
+  let flowY = MARGIN;
+
+  // Collection title
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(64);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { lines: titleLines, lineHeight } = layoutTitle(
+    ctx,
+    collection.title,
+    font(64),
+    canvas.width - MARGIN * 2 - LOGO_SIZE,
+    2
+  );
+  titleLines.forEach((line, index) => {
+    ctx.fillText(line, MARGIN, flowY + index * lineHeight);
+  });
+  flowY += titleLines.length * lineHeight + 36;
+
+  // Collection icon
+  drawIcon(
+    COLLECTION_ICONS[collection.isSeries ? 'series' : 'collection'],
+    ctx,
+    canvas.width - LOGO_SIZE - MARGIN,
+    MARGIN,
+    LOGO_SIZE
+  );
+
+  // Author name
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(42);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(
+    collection.creator.name
+  );
+  const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+  ctx.fillText(collection.creator.name, MARGIN, flowY);
+  flowY += authorHeight + 48;
+
+  // Stats
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(42);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const statsHeight = 200 * 0.22;
+  let statsX = MARGIN;
+  let statsWidth = 0;
+  const statsY = flowY + statsHeight / 2;
+  if (collection.puzzleCount !== null) {
+    statsWidth = ctx.measureText(collection.puzzleCount.toString()).width;
+    ctx.fillText(collection.puzzleCount.toString(), statsX, statsY);
+    statsX += statsWidth + 16;
+    ctx.globalAlpha = 0.75;
+    ctx.font = font(36);
+    const puzzles = i18n.t('image.stats.puzzles', {
+      count: collection.puzzleCount,
+    });
+    statsWidth = ctx.measureText(puzzles).width;
+    ctx.fillText(puzzles, statsX, statsY);
+    statsX += statsWidth + 48;
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.font = font(42);
+  statsWidth = ctx.measureText(collection.followCount.toString()).width;
+  ctx.fillText(collection.followCount.toString(), statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 0.75;
+  ctx.font = font(36);
+  const follows = i18n.t('image.stats.follows', {
+    count: collection.followCount,
+  });
+  statsWidth = ctx.measureText(follows).width;
+  ctx.fillText(follows, statsX, statsY);
+
+  return canvas.toBuffer('image/png');
+}
+
+async function renderUserImage(locale: Locale, userId: string) {
+  applyLayoutLocale(locale);
+  const i18n = i18nFor(locale);
+  const user = await api.getUser(userId);
+
+  if (!user) {
+    return null;
+  }
+
+  const canvas = createCanvas(1200, 630);
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#343c47';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  await drawWordmark(ctx);
+
+  let flowY = MARGIN;
+
+  // User name
+  ctx.fillStyle = '#e4e4e7';
+  ctx.font = font(64);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  const { lines: titleLines, lineHeight } = layoutTitle(
+    ctx,
+    user.name,
+    font(64),
+    canvas.width - MARGIN * 2 - LOGO_SIZE,
+    2
+  );
+  titleLines.forEach((line, index) => {
+    ctx.fillText(line, MARGIN, flowY + index * lineHeight);
+  });
+  flowY += titleLines.length * lineHeight + 36;
+
+  // User icon
+  ctx.save();
+  ctx.translate(canvas.width - LOGO_SIZE - MARGIN, MARGIN);
+  ctx.scale(LOGO_SIZE / 200, LOGO_SIZE / 200);
+  ctx.clip(CIRCLE_200);
+  const avatar = await loadImage(api.getAvatar(user.id));
+  ctx.drawImage(avatar, 0, 0, 200, 200);
+  ctx.restore();
+
+  // Title
+  if (user.title) {
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#e4e4e7';
+    ctx.font = font(42);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } =
+      ctx.measureText(user.title);
+    const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+    ctx.fillText(user.title, MARGIN, flowY);
+    flowY += authorHeight + 48;
+  }
+
+  // Stats
+  ctx.fillStyle = '#e4e4e7';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const statsHeight = 200 * 0.22;
+  let statsX = MARGIN;
+  let statsWidth = 0;
+  const statsY = flowY + statsHeight / 2;
+  ctx.globalAlpha = 0.75;
+  ctx.font = font(36);
+  const solved = i18n.t('image.stats.solved');
+  statsWidth = ctx.measureText(solved).width;
+  ctx.fillText(solved, statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 1;
+  ctx.font = font(42);
+  statsWidth = ctx.measureText(user.solveCount.toString()).width;
+  ctx.fillText(user.solveCount.toString(), statsX, statsY);
+  statsX += statsWidth + 48;
+
+  ctx.globalAlpha = 0.75;
+  ctx.font = font(36);
+  const created = i18n.t('image.stats.created');
+  statsWidth = ctx.measureText(created).width;
+  ctx.fillText(created, statsX, statsY);
+  statsX += statsWidth + 16;
+  ctx.globalAlpha = 1;
+  ctx.font = font(42);
+  ctx.fillText(user.createCount.toString(), statsX, statsY);
+
+  return canvas.toBuffer('image/png');
+}
+
+/**
+ * Preview images are addressed by locale prefix, mirroring how pages are
+ * routed: the default locale is unprefixed, so the long-standing
+ * `/api/preview/puzzle/:id` URLs keep working and `/api/preview/ja/...` is the
+ * Japanese variant. `ssr.ts` emits the variant matching the page's own prefix,
+ * so an og:image never disagrees with the document that references it.
+ */
 export const image = new Elysia()
   .mapResponse(({ responseValue }) => {
     return new Response(responseValue as BodyInit, {
@@ -195,141 +566,7 @@ export const image = new Elysia()
   })
   .get(
     '/api/preview/puzzle/:puzzleId',
-    async ({ params: { puzzleId } }) => {
-      const puzzle = await api.getPuzzleBriefForSolve(puzzleId);
-
-      const canvas = createCanvas(1200, 630);
-      const ctx = canvas.getContext('2d');
-
-      // Background
-      ctx.fillStyle = '#343c47';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Site logo
-      const logo = await loadLogo();
-      const logoSize = 128;
-      const margin = 84;
-      ctx.drawImage(
-        logo,
-        margin,
-        canvas.height - logoSize - margin,
-        logoSize,
-        logoSize
-      );
-      ctx.fillStyle = '#00d3bb';
-      ctx.font = '48px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(
-        'Logic Pad',
-        margin + logoSize + 16,
-        canvas.height - logoSize / 2 - margin
-      );
-      const textWidth = ctx.measureText('Logic Pad').width;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.fillText(
-        'Puzzle',
-        margin + logoSize + 16 + textWidth + 16,
-        canvas.height - logoSize / 2 - margin
-      );
-
-      let flowY = margin;
-
-      // Puzzle title
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '64px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      const [titleLines, lineHeight] = getLines(
-        ctx,
-        puzzle.title,
-        canvas.width - margin * 2 - logoSize,
-        2
-      );
-      titleLines.forEach((line, index) => {
-        ctx.fillText(line, margin, flowY + index * lineHeight);
-      });
-      flowY += titleLines.length * lineHeight + 36;
-
-      // Puzzle icon
-      drawPuzzleType(
-        puzzle.types,
-        ctx,
-        canvas.width - logoSize - margin,
-        margin,
-        logoSize
-      );
-
-      // Author name
-      ctx.globalAlpha = 0.75;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '42px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      const { actualBoundingBoxAscent, actualBoundingBoxDescent } =
-        ctx.measureText(puzzle.creator.name);
-      const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-      ctx.fillText(puzzle.creator.name, margin, flowY);
-      flowY += authorHeight + 48;
-
-      // Difficulty
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      ctx.translate(margin, flowY);
-      const difficultyScale = 0.22;
-      ctx.scale(difficultyScale, difficultyScale);
-      if (puzzle.designDifficulty === 0) {
-        ctx.globalAlpha = 0.75;
-        ctx.fillStyle = '#e4e4e7';
-        ctx.font = '36px Palatino';
-        ctx.fillText('Unrated', 0, 0);
-      } else {
-        ctx.globalAlpha = 1.0;
-        ctx.fillStyle = '#00d3bb';
-        let path: Path2D;
-        if (puzzle.designDifficulty > 5) {
-          path = STAR_200;
-        } else {
-          path = CIRCLE_200;
-        }
-        for (let i = 1; i <= ((puzzle.designDifficulty - 1) % 5) + 1; i++) {
-          ctx.fill(path, 'evenodd');
-          ctx.translate(240, 0);
-        }
-      }
-      ctx.resetTransform();
-
-      // Stats
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '42px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      let statsX = margin + 240 * 5 * difficultyScale + margin;
-      let statsWidth = ctx.measureText(puzzle.solveCount.toString()).width;
-      const statsY = flowY + (200 * difficultyScale) / 2;
-      ctx.fillText(puzzle.solveCount.toString(), statsX, statsY);
-      statsX += statsWidth + 16;
-      ctx.globalAlpha = 0.75;
-      ctx.font = '36px Palatino';
-      const solves = puzzle.solveCount === 1 ? 'Solve' : 'Solves';
-      statsWidth = ctx.measureText(solves).width;
-      ctx.fillText(solves, statsX, statsY);
-      statsX += statsWidth + 48;
-
-      ctx.globalAlpha = 1;
-      ctx.font = '42px Palatino';
-      statsWidth = ctx.measureText(puzzle.loveCount.toString()).width;
-      ctx.fillText(puzzle.loveCount.toString(), statsX, statsY);
-      statsX += statsWidth + 16;
-      ctx.globalAlpha = 0.75;
-      ctx.font = '36px Palatino';
-      const loves = puzzle.loveCount === 1 ? 'Love' : 'Loves';
-      statsWidth = ctx.measureText(loves).width;
-      ctx.fillText(loves, statsX, statsY);
-
-      return canvas.toBuffer('image/png');
-    },
+    async ({ params: { puzzleId } }) => renderPuzzleImage('en', puzzleId),
     {
       params: t.Object({
         puzzleId: t.String({ minLength: 1, maxLength: 36 }),
@@ -338,118 +575,8 @@ export const image = new Elysia()
   )
   .get(
     '/api/preview/collection/:collectionId',
-    async ({ params: { collectionId } }) => {
-      const collection = await api.getCollectionBrief(collectionId);
-
-      const canvas = createCanvas(1200, 630);
-      const ctx = canvas.getContext('2d');
-
-      // Background
-      ctx.fillStyle = '#343c47';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Site logo
-      const logo = await loadLogo();
-      const logoSize = 128;
-      const margin = 84;
-      ctx.drawImage(
-        logo,
-        margin,
-        canvas.height - logoSize - margin,
-        logoSize,
-        logoSize
-      );
-      ctx.fillStyle = '#00d3bb';
-      ctx.font = '48px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(
-        'Logic Pad',
-        margin + logoSize + 16,
-        canvas.height - logoSize / 2 - margin
-      );
-      const textWidth = ctx.measureText('Logic Pad').width;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.fillText(
-        'Collection',
-        margin + logoSize + 16 + textWidth + 16,
-        canvas.height - logoSize / 2 - margin
-      );
-
-      let flowY = margin;
-
-      // Collection title
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '64px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      const [titleLines, lineHeight] = getLines(
-        ctx,
-        collection.title,
-        canvas.width - margin * 2 - logoSize,
-        2
-      );
-      titleLines.forEach((line, index) => {
-        ctx.fillText(line, margin, flowY + index * lineHeight);
-      });
-      flowY += titleLines.length * lineHeight + 36;
-
-      // Collection icon
-      drawIcon(
-        COLLECTION_ICONS[collection.isSeries ? 'series' : 'collection'],
-        ctx,
-        canvas.width - logoSize - margin,
-        margin,
-        logoSize
-      );
-
-      // Author name
-      ctx.globalAlpha = 0.75;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '42px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      const { actualBoundingBoxAscent, actualBoundingBoxDescent } =
-        ctx.measureText(collection.creator.name);
-      const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-      ctx.fillText(collection.creator.name, margin, flowY);
-      flowY += authorHeight + 48;
-
-      // Stats
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '42px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      const statsHeight = 200 * 0.22;
-      let statsX = margin;
-      let statsWidth = 0;
-      const statsY = flowY + statsHeight / 2;
-      if (collection.puzzleCount !== null) {
-        statsWidth = ctx.measureText(collection.puzzleCount.toString()).width;
-        ctx.fillText(collection.puzzleCount.toString(), statsX, statsY);
-        statsX += statsWidth + 16;
-        ctx.globalAlpha = 0.75;
-        ctx.font = '36px Palatino';
-        const puzzles = collection.puzzleCount === 1 ? 'Puzzle' : 'Puzzles';
-        statsWidth = ctx.measureText(puzzles).width;
-        ctx.fillText(puzzles, statsX, statsY);
-        statsX += statsWidth + 48;
-      }
-
-      ctx.globalAlpha = 1;
-      ctx.font = '42px Palatino';
-      statsWidth = ctx.measureText(collection.followCount.toString()).width;
-      ctx.fillText(collection.followCount.toString(), statsX, statsY);
-      statsX += statsWidth + 16;
-      ctx.globalAlpha = 0.75;
-      ctx.font = '36px Palatino';
-      const follows = collection.followCount === 1 ? 'Follow' : 'Follows';
-      statsWidth = ctx.measureText(follows).width;
-      ctx.fillText(follows, statsX, statsY);
-
-      return canvas.toBuffer('image/png');
-    },
+    async ({ params: { collectionId } }) =>
+      renderCollectionImage('en', collectionId),
     {
       params: t.Object({
         collectionId: t.String({ minLength: 1, maxLength: 36 }),
@@ -458,112 +585,37 @@ export const image = new Elysia()
   )
   .get(
     '/api/preview/user/:userId',
-    async ({ params: { userId } }) => {
-      const user = await api.getUser(userId);
-
-      if (!user) {
-        return status('Not Found');
-      }
-
-      const canvas = createCanvas(1200, 630);
-      const ctx = canvas.getContext('2d');
-
-      // Background
-      ctx.fillStyle = '#343c47';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Site logo
-      const logo = await loadLogo();
-      const logoSize = 128;
-      const margin = 84;
-      ctx.drawImage(
-        logo,
-        margin,
-        canvas.height - logoSize - margin,
-        logoSize,
-        logoSize
-      );
-      ctx.fillStyle = '#00d3bb';
-      ctx.font = '48px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(
-        'Logic Pad',
-        margin + logoSize + 16,
-        canvas.height - logoSize / 2 - margin
-      );
-
-      let flowY = margin;
-
-      // User name
-      ctx.fillStyle = '#e4e4e7';
-      ctx.font = '64px Palatino';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'top';
-      const [titleLines, lineHeight] = getLines(
-        ctx,
-        user.name,
-        canvas.width - margin * 2 - logoSize,
-        2
-      );
-      titleLines.forEach((line, index) => {
-        ctx.fillText(line, margin, flowY + index * lineHeight);
-      });
-      flowY += titleLines.length * lineHeight + 36;
-
-      // User icon
-      ctx.save();
-      ctx.translate(canvas.width - logoSize - margin, margin);
-      ctx.scale(logoSize / 200, logoSize / 200);
-      ctx.clip(CIRCLE_200);
-      const avatar = await loadImage(api.getAvatar(user.id));
-      ctx.drawImage(avatar, 0, 0, 200, 200);
-      ctx.restore();
-
-      // Title
-      if (user.title) {
-        ctx.globalAlpha = 0.75;
-        ctx.fillStyle = '#e4e4e7';
-        ctx.font = '42px Palatino';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        const { actualBoundingBoxAscent, actualBoundingBoxDescent } =
-          ctx.measureText(user.title);
-        const authorHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-        ctx.fillText(user.title, margin, flowY);
-        flowY += authorHeight + 48;
-      }
-
-      // Stats
-      ctx.fillStyle = '#e4e4e7';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      const statsHeight = 200 * 0.22;
-      let statsX = margin;
-      let statsWidth = 0;
-      const statsY = flowY + statsHeight / 2;
-      ctx.globalAlpha = 0.75;
-      ctx.font = '36px Palatino';
-      statsWidth = ctx.measureText('Solved').width;
-      ctx.fillText('Solved', statsX, statsY);
-      statsX += statsWidth + 16;
-      ctx.globalAlpha = 1;
-      ctx.font = '42px Palatino';
-      statsWidth = ctx.measureText(user.solveCount.toString()).width;
-      ctx.fillText(user.solveCount.toString(), statsX, statsY);
-      statsX += statsWidth + 48;
-
-      ctx.globalAlpha = 0.75;
-      ctx.font = '36px Palatino';
-      statsWidth = ctx.measureText('Created').width;
-      ctx.fillText('Created', statsX, statsY);
-      statsX += statsWidth + 16;
-      ctx.globalAlpha = 1;
-      ctx.font = '42px Palatino';
-      ctx.fillText(user.createCount.toString(), statsX, statsY);
-
-      return canvas.toBuffer('image/png');
-    },
+    async ({ params: { userId } }) =>
+      (await renderUserImage('en', userId)) ?? status('Not Found'),
+    {
+      params: t.Object({
+        userId: t.String({ minLength: 1, maxLength: 36 }),
+      }),
+    }
+  )
+  .get(
+    '/api/preview/ja/puzzle/:puzzleId',
+    async ({ params: { puzzleId } }) => renderPuzzleImage('ja', puzzleId),
+    {
+      params: t.Object({
+        puzzleId: t.String({ minLength: 1, maxLength: 36 }),
+      }),
+    }
+  )
+  .get(
+    '/api/preview/ja/collection/:collectionId',
+    async ({ params: { collectionId } }) =>
+      renderCollectionImage('ja', collectionId),
+    {
+      params: t.Object({
+        collectionId: t.String({ minLength: 1, maxLength: 36 }),
+      }),
+    }
+  )
+  .get(
+    '/api/preview/ja/user/:userId',
+    async ({ params: { userId } }) =>
+      (await renderUserImage('ja', userId)) ?? status('Not Found'),
     {
       params: t.Object({
         userId: t.String({ minLength: 1, maxLength: 36 }),

@@ -28,4 +28,11 @@ dev-dist
 references
 scripts/temp
 
+# Compiled UI catalogs are build artifacts: the Vite plugin compiles the .po
+# sources during dev/build, so nothing imports these files. `locales:compile`
+# regenerates them alongside the SSR catalogs, which ARE committed (the SSR
+# server runs from source with no bundler).
+/src/client/locales/*/messages.ts
+/src/client/locales/*/messages.js
+
 .env

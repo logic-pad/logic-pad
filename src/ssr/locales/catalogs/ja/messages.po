@@ -1,0 +1,85 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-19 20:19+0800\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: ja\n"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:79
+msgid "ssr.series.description"
+msgstr "{author}によるシリーズ - Logic Pad"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:80
+msgid "ssr.collection.description"
+msgstr "{author}によるコレクション - Logic Pad"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:305
+msgid "image.puzzle.kind"
+msgstr "パズル"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:356
+msgid "image.difficulty.unrated"
+msgstr "未評価"
+
+#. js-lingui-explicit-id
+#. The number is drawn before the label, so these read as「42 解決」.
+#: src/ssr/routes/image.ts:386
+msgid "image.stats.solves"
+msgstr "{count, plural, other {解決}}"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:398
+msgid "image.stats.loves"
+msgstr "{count, plural, other {いいね}}"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:416
+msgid "image.collection.kind"
+msgstr "コレクション"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:473
+msgid "image.stats.puzzles"
+msgstr "{count, plural, other {パズル}}"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:488
+msgid "image.stats.follows"
+msgstr "{count, plural, other {フォロー}}"
+
+#. js-lingui-explicit-id
+#. On the profile card the label is drawn before the number.
+#: src/ssr/routes/image.ts:565
+msgid "image.stats.solved"
+msgstr "解決"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/image.ts:577
+msgid "image.stats.created"
+msgstr "作成"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:54
+msgid "ssr.solve.title"
+msgstr "{title} - Logic Pad"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:59
+msgid "ssr.solve.description"
+msgstr "{author}によるパズル - Logic Pad"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:87
+msgid "ssr.collection.title"
+msgstr "{title} - Logic Pad"
+
+#. js-lingui-explicit-id
+#: src/ssr/routes/ssr.ts:109
+msgid "ssr.profile.title"
+msgstr "{name} - Logic Pad"

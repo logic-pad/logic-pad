@@ -6,14 +6,16 @@
 #
 # After pulling translations, regenerate the runtime artifacts:
 #
-#   bun run locales:extract        # frontend UI catalogs
+#   bun run locales:extract        # frontend UI + SSR catalogs
 #   bun run locales:compile        # frontend UI catalogs (CI/bundler alternative)
+#                                # SSR catalogs are compiled to committed .ts
 #   bun run --cwd packages/logic-core locales:extract
 #   bun run --cwd packages/logic-core locales:compile
 #
 # The Vite plugin compiles the frontend `.po` files on demand, so only the
-# core catalogs strictly need a `locales:compile` step (their compiled `.ts`
-# output is committed and shipped inside the package).
+# core and SSR catalogs strictly need a `locales:compile` step (their compiled
+# `.ts` output is committed: core ships it inside the package, and the SSR
+# server runs from source with no bundler to compile on the fly).
 
 "project_id": ""
 "api_token_env": CROWDIN_PERSONAL_ACCESS_TOKEN
@@ -24,6 +26,14 @@
   -
     "source": "/src/client/locales/en/messages.po"
     "translation": "/src/client/locales/%locale%/%original_file_name%"
+    "type": po
+    "update_option": update_as_untranslated
+    "languages_mapping":
+      "locale":
+        "ja": "ja"
+  -
+    "source": "/src/ssr/locales/catalogs/en/messages.po"
+    "translation": "/src/ssr/locales/catalogs/%locale%/%original_file_name%"
     "type": po
     "update_option": update_as_untranslated
     "languages_mapping":
