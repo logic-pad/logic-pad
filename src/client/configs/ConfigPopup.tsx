@@ -17,6 +17,7 @@ import { ControlLine, Row } from '@logic-pad/core/data/rules/musicControlLine';
 import AnnotatedText from '../components/AnnotatedText.tsx';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { tip } from '../components/Tooltip.tsx';
+import { useActiveLocale } from '../router/useLocale.ts';
 
 const gap = 8;
 
@@ -83,6 +84,9 @@ function containsPoint(element: HTMLElement, clientX: number, clientY: number) {
 }
 
 export default memo(function ConfigPopup() {
+  // `configurable.title` originates in @logic-pad/core, outside lingui's
+  // provider: subscribe explicitly so it re-renders on locale switch.
+  useActiveLocale();
   const location = useAtomValue(configLocationAtom);
   const ref = useAtomValue(configRefAtom);
   const setLocation = useSetAtom(configLocationAtom);

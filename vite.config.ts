@@ -5,6 +5,7 @@ import { tanstackRouter } from '@tanstack/router-vite-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import { replaceCodePlugin } from 'vite-plugin-replace';
+import { lingui } from '@lingui/vite-plugin';
 import { execSync } from 'child_process';
 
 const commitHash = (() => {
@@ -34,6 +35,7 @@ export default defineConfig({
       ],
     }),
     react(),
+    lingui({ macroTransform: true }),
     tanstackRouter({
       routesDirectory: './src/client/routes',
       generatedRouteTree: './src/client/router/routeTree.gen.ts',

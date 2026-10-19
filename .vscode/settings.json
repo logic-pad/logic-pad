@@ -1,4 +1,8 @@
 {
   "js/ts.experimental.useTsgo": false,
-  "js/ts.tsdk.path": "./node_modules/typescript"
+  "js/ts.tsdk.path": "./node_modules/typescript",
+  "i18n-ally.localesPaths": [
+    "src/client/locales",
+    "packages/logic-core/src/locale"
+  ]
 }

@@ -11,6 +11,7 @@ import { PartPlacement } from './parts/types.ts';
 import InstructionPartOutlet from './InstructionPartOutlet.tsx';
 import GridZoneOverlay from '../grid/GridZoneOverlay.tsx';
 import { useMediaQuery } from 'react-responsive';
+import { useActiveLocale } from '../router/useLocale.ts';
 
 export interface InstructionProps {
   id: string | number;
@@ -42,6 +43,9 @@ export default memo(function Instruction({
   className,
   size,
 }: InstructionProps) {
+  // `instruction.explanation` originates in @logic-pad/core, outside lingui's
+  // provider: subscribe explicitly so it re-renders on locale switch.
+  useActiveLocale();
   state = state ?? State.Incomplete;
   size = size ?? 'responsive';
   const exampleGrid = useMemo(

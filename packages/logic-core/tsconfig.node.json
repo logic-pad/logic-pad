@@ -13,7 +13,8 @@
     "strict": true
   },
   "include": [
-    "scripts"
+    "scripts",
+    "lingui.config.ts"
   ],
   "exclude": [
     "scripts/temp",

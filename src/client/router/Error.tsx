@@ -1,7 +1,11 @@
 import { ErrorComponentProps, Link } from '@tanstack/react-router';
 import { memo } from 'react';
 
-export default memo(function Error({ error, info }: ErrorComponentProps) {
+export default memo(function ErrorPage({ error, info }: ErrorComponentProps) {
+  const detail =
+    error instanceof Error
+      ? { name: error.name, message: error.message, stack: error.stack }
+      : { name: 'Error', message: String(error), stack: undefined };
   return (
     <div className="flex flex-col items-center justify-center self-stretch flex-1 gap-4">
       <meta name="robots" content="noindex" />
@@ -12,10 +16,10 @@ export default memo(function Error({ error, info }: ErrorComponentProps) {
       </div>
       <div className="w-full max-w-[1000px] max-h-1/2 overflow-auto border border-base-100">
         <div className="flex flex-col gap-2 p-4 w-fit">
-          <div className="text-lg text-accent">{error.name}</div>
-          <pre>{error.message}</pre>
+          <div className="text-lg text-accent">{detail.name}</div>
+          <pre>{detail.message}</pre>
           <div className="uppercase font-semibold text-accent">Stack trace</div>
-          <pre>{error.stack ?? 'None'}</pre>
+          <pre>{detail.stack ?? 'None'}</pre>
           <div className="uppercase font-semibold text-accent">
             Component stack
           </div>

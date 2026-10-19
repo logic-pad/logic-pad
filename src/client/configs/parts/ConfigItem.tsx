@@ -2,6 +2,7 @@ import { AnyConfig } from '@logic-pad/core/data/config';
 import React, { memo, useState } from 'react';
 import { cn } from '../../uiHelper';
 import { FaChevronUp, FaInfoCircle } from 'react-icons/fa';
+import { useActiveLocale } from '../../router/useLocale.ts';
 
 export interface ConfigItemProps {
   config: AnyConfig;
@@ -9,6 +10,9 @@ export interface ConfigItemProps {
 }
 
 export default memo(function ConfigItem({ config, children }: ConfigItemProps) {
+  // `description`/`explanation` originate in @logic-pad/core, so they are
+  // outside lingui's provider: subscribe explicitly to re-render on switch.
+  useActiveLocale();
   const [showExplanation, setShowExplanation] = useState(false);
   return (
     <div className="flex flex-col gap-2">

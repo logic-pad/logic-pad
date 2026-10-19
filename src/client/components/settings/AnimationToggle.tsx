@@ -1,9 +1,11 @@
 import { memo } from 'react';
+import { useLingui } from '@lingui/react/macro';
 import { externalReducedMotion } from '../../uiHelper';
 import { useSettings } from '../../state/settings.ts';
 import { tip } from '../Tooltip.tsx';
 
 export default memo(function AnimationToggle() {
+  const { t } = useLingui();
   const [enableFancyAnimations, setEnableFancyAnimations] = useSettings(
     'enableFancyAnimations'
   );
@@ -12,14 +14,14 @@ export default memo(function AnimationToggle() {
     <div
       {...tip(
         external
-          ? 'Fancy animations are disabled by the browser'
-          : 'Toggle fancy animations',
+          ? t`Fancy animations are disabled by the browser`
+          : t`Toggle fancy animations`,
         'bottom'
       )}
     >
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">
-          <span className="label-text">Enable fancy animations</span>
+          <span className="label-text">{t`Enable fancy animations`}</span>
           <input
             type="checkbox"
             className="toggle"

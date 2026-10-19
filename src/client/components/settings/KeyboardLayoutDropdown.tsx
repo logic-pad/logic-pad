@@ -1,14 +1,16 @@
 import { memo } from 'react';
+import { useLingui } from '@lingui/react/macro';
 import { useSettings } from '../../state/settings.ts';
 import { tip } from '../Tooltip.tsx';
 
 export default memo(function KeyboardLayoutDropdown() {
+  const { t } = useLingui();
   const [keyboardLayout, setKeyboardLayout] = useSettings('keyboardLayout');
   return (
-    <div {...tip('Select your keyboard layout for hotkeys', 'bottom')}>
+    <div {...tip(t`Select your keyboard layout for hotkeys`, 'bottom')}>
       <fieldset className="fieldset">
         <label className="label w-full justify-between cursor-pointer">
-          <span className="label-text">Keyboard Layout</span>
+          <span className="label-text">{t`Keyboard Layout`}</span>
           <select
             className="select select-md w-fit select-bordered"
             value={keyboardLayout}

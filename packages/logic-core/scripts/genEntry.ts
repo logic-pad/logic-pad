@@ -119,7 +119,7 @@ ${modules
 
 await generateEntry({
   dataPath: 'src/data',
-  generatedPath: 'src/index.ts',
+  generatedPath: 'src/index.gen.ts',
 });
 
 process.exit(0); // workaround for a Bun bug

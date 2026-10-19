@@ -1,16 +1,18 @@
 import { memo } from 'react';
+import { useLingui } from '@lingui/react/macro';
 import { useSettings } from '../../state/settings.ts';
 import { cn } from '../../uiHelper';
 import { tip } from '../Tooltip.tsx';
 
 export default memo(function ResetEditorTour() {
+  const { t } = useLingui();
   const [runEditorTour, setRunEditorTour] = useSettings('runEditorTour');
   return (
     <div
       {...tip(
         runEditorTour
-          ? 'Open the editor to see the tour'
-          : 'Show the tour in the editor',
+          ? t`Open the editor to see the tour`
+          : t`Show the tour in the editor`,
         'left'
       )}
     >
@@ -20,7 +22,7 @@ export default memo(function ResetEditorTour() {
           setRunEditorTour(true);
         }}
       >
-        Reset Editor Tour
+        {t`Reset Editor Tour`}
       </button>
     </div>
   );

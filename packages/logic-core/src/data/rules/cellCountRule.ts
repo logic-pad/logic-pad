@@ -1,3 +1,4 @@
+import { i18n } from '../../locale/index.js';
 import { AnyConfig, ConfigType } from '../config.js';
 import GridData from '../grid.js';
 import { Color, RuleState, State } from '../primitives.js';
@@ -5,7 +6,9 @@ import AreaNumberSymbol from '../symbols/areaNumberSymbol.js';
 import Rule, { SearchVariant } from './rule.js';
 
 export default class CellCountRule extends Rule {
-  public readonly title = 'Total Count';
+  public get title(): string {
+    return i18n.t('rule.cell_count.title');
+  }
 
   private static readonly CONFIGS: readonly AnyConfig[] = Object.freeze([
     {
@@ -13,7 +16,9 @@ export default class CellCountRule extends Rule {
       default: Color.Light,
       allowGray: false,
       field: 'color',
-      description: 'Color',
+      get description(): string {
+        return i18n.t('common.color');
+      },
       configurable: true,
     },
     {
@@ -21,7 +26,9 @@ export default class CellCountRule extends Rule {
       default: 10,
       min: 0,
       field: 'count',
-      description: 'Count',
+      get description(): string {
+        return i18n.t('common.count');
+      },
       configurable: true,
     },
   ]);
@@ -97,7 +104,10 @@ export default class CellCountRule extends Rule {
   }
 
   public get explanation(): string {
-    return `There ${this.count === 1 ? 'is' : 'are'} ${this.count} ${this.color} cell${this.count === 1 ? '' : 's'} *in total*`;
+    return i18n.t('rule.cell_count.explanation', {
+      count: this.count,
+      color: this.color,
+    });
   }
 
   public get configs(): readonly AnyConfig[] | null {

@@ -1,5 +1,6 @@
 import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
+import { localeRewrite } from './localeRewrite.ts';
 import NotFound from './NotFound';
 import Error from './Error';
 import Loading from '../components/Loading';
@@ -7,6 +8,7 @@ import * as Sentry from '@sentry/react';
 
 export const router = createRouter({
   routeTree,
+  rewrite: localeRewrite,
   defaultNotFoundComponent: NotFound,
   defaultErrorComponent: Error,
   defaultPendingComponent: () => <Loading />,

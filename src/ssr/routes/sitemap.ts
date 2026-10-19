@@ -1,6 +1,11 @@
 import Elysia from 'elysia';
 import { SitemapEntry } from '../../client/online/data';
-import { SitemapStream, streamToPromise } from 'sitemap';
+import {
+  EnumChangefreq,
+  SitemapItemLoose,
+  SitemapStream,
+  streamToPromise,
+} from 'sitemap';
 import { createGzip } from 'node:zlib';
 import { api } from '../../client/online/api';
 import { SECURITY_HEADERS, SITE_URL } from '../config';
@@ -12,6 +17,34 @@ function lastMod(updatedAt: string) {
   return updatedDate > lastSitemapModification
     ? updatedAt
     : lastSitemapModification.toISOString();
+}
+
+/** The Japanese counterpart of an unprefixed path. */
+function jaPath(path: string): string {
+  return path === '/' ? '/ja' : `/ja${path}`;
+}
+
+/**
+ * Write one page together with its hreflang alternates.
+ *
+ * Every URL is declared in all locales it exists in (plus `x-default`, which
+ * points at the unprefixed canonical form), so that the locale prefixes are
+ * discovered as a language cluster rather than as unrelated pages.
+ */
+function writeEntry(
+  stream: SitemapStream,
+  path: string,
+  opts: Omit<SitemapItemLoose, 'url' | 'links'>
+) {
+  stream.write({
+    ...opts,
+    url: path,
+    links: [
+      { lang: 'en', url: path },
+      { lang: 'ja', url: jaPath(path) },
+      { lang: 'x-default', url: path },
+    ],
+  });
 }
 
 export const sitemap = new Elysia()
@@ -33,23 +66,42 @@ export const sitemap = new Elysia()
     const pipeline = smStream.pipe(createGzip());
 
     // pipe your entries or directly write them.
-    smStream.write({ url: '/', changefreq: 'hourly', priority: 1 });
-    smStream.write({ url: '/create', changefreq: 'monthly', priority: 0.4 });
-    smStream.write({
-      url: '/search/puzzles',
-      changefreq: 'hourly',
+    writeEntry(smStream, '/', {
+      changefreq: EnumChangefreq.HOURLY,
       priority: 1,
     });
-    smStream.write({ url: '/uploader', changefreq: 'monthly', priority: 0.3 });
-    smStream.write({ url: '/rules', changefreq: 'monthly', priority: 0.2 });
-    smStream.write({ url: '/terms', changefreq: 'monthly', priority: 0.2 });
-    smStream.write({
-      url: '/privacy-policy',
-      changefreq: 'monthly',
+    writeEntry(smStream, '/create', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.4,
+    });
+    writeEntry(smStream, '/search/puzzles', {
+      changefreq: EnumChangefreq.HOURLY,
+      priority: 1,
+    });
+    writeEntry(smStream, '/uploader', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.3,
+    });
+    writeEntry(smStream, '/rules', {
+      changefreq: EnumChangefreq.MONTHLY,
       priority: 0.2,
     });
-    smStream.write({ url: '/auth', changefreq: 'monthly', priority: 0.5 });
-    smStream.write({ url: '/support', changefreq: 'monthly', priority: 0.5 });
+    writeEntry(smStream, '/terms', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.2,
+    });
+    writeEntry(smStream, '/privacy-policy', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.2,
+    });
+    writeEntry(smStream, '/auth', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.5,
+    });
+    writeEntry(smStream, '/support', {
+      changefreq: EnumChangefreq.MONTHLY,
+      priority: 0.5,
+    });
 
     let puzzles: SitemapEntry[] | null = null;
     let puzzleCount = 0;
@@ -60,10 +112,9 @@ export const sitemap = new Elysia()
         puzzles?.at(-1)?.id
       );
       for (const puzzle of puzzles) {
-        smStream.write({
-          url: `/solve/${puzzle.id}`,
+        writeEntry(smStream, `/solve/${puzzle.id}`, {
           lastmod: lastMod(puzzle.updatedAt),
-          changefreq: 'weekly',
+          changefreq: EnumChangefreq.WEEKLY,
           priority: 0.6,
         });
         puzzleCount++;
@@ -80,10 +131,9 @@ export const sitemap = new Elysia()
         collections?.at(-1)?.id
       );
       for (const collection of collections) {
-        smStream.write({
-          url: `/collection/${collection.id}`,
+        writeEntry(smStream, `/collection/${collection.id}`, {
           lastmod: lastMod(collection.updatedAt),
-          changefreq: 'weekly',
+          changefreq: EnumChangefreq.WEEKLY,
           priority: 0.5,
         });
         collectionCount++;
@@ -96,10 +146,9 @@ export const sitemap = new Elysia()
     usersLoop: while (users === null || users.length > 0) {
       users = await api.listSitemap('users', undefined, users?.at(-1)?.id);
       for (const user of users) {
-        smStream.write({
-          url: `/profile/${user.id}`,
+        writeEntry(smStream, `/profile/${user.id}`, {
           lastmod: lastMod(user.updatedAt),
-          changefreq: 'weekly',
+          changefreq: EnumChangefreq.WEEKLY,
           priority: 0.4,
         });
         userCount++;

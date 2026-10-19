@@ -21,7 +21,7 @@ export const Route = createFileRoute('/auth')({
     })
   ),
   remountDeps: ({ search }) =>
-    `redirect=${search.search?.redirect},error=${String(search.search?.error)}`,
+    `redirect=${search.redirect},error=${String(search.error)}`,
   component: function Auth() {
     const { isOnline, me } = useOnline();
     const navigate = useNavigate();

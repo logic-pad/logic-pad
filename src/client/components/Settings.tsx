@@ -12,6 +12,7 @@ import KeyboardLayoutDropdown from './settings/KeyboardLayoutDropdown';
 import SfxVolumeSlider from './settings/SfxVolumeSlider';
 import AppTooltips, { tip } from './Tooltip.tsx';
 import GridInsightToggle from './settings/GridInsightToggle.tsx';
+import LocaleDropdown from './settings/LocaleDropdown.tsx';
 
 export default memo(function Settings() {
   return (
@@ -39,6 +40,10 @@ export default memo(function Settings() {
               </form>
             </div>
             <div className="flex flex-col shrink-0 gap-2 max-w-[350px] w-full">
+              <h3 className="text-xl opacity-80 font-semibold self-start mt-2">
+                General
+              </h3>
+              <LocaleDropdown />
               <h3 className="text-xl opacity-80 font-semibold self-start mt-2">
                 Input
               </h3>

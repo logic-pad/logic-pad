@@ -1,3 +1,4 @@
+import { i18n } from '../../locale/index.js';
 import { AnyConfig, ConfigType } from '../config.js';
 import GridData from '../grid.js';
 import { Color, RuleState, State } from '../primitives.js';
@@ -5,7 +6,9 @@ import RegionShapeRule from './regionShapeRule.js';
 import { SearchVariant } from './rule.js';
 
 export default class UniqueShapeRule extends RegionShapeRule {
-  public readonly title = 'Unique Shape Areas';
+  public get title(): string {
+    return i18n.t('rule.unique_shape.title');
+  }
 
   private static readonly CONFIGS: readonly AnyConfig[] = Object.freeze([
     {
@@ -13,7 +16,9 @@ export default class UniqueShapeRule extends RegionShapeRule {
       default: Color.Light,
       allowGray: false,
       field: 'color',
-      description: 'Color',
+      get description(): string {
+        return i18n.t('common.color');
+      },
       configurable: true,
     },
   ]);
@@ -45,7 +50,9 @@ export default class UniqueShapeRule extends RegionShapeRule {
   }
 
   public get explanation(): string {
-    return `No two ${this.color} areas have the same shape and size`;
+    return i18n.t('rule.unique_shape.explanation', {
+      color: this.color,
+    });
   }
 
   public get configs(): readonly AnyConfig[] | null {

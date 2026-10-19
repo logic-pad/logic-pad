@@ -11,62 +11,109 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './../routes/__root'
-import { Route as RedirectRouteImport } from './../routes/redirect'
-import { Route as AuthRouteImport } from './../routes/auth'
 import { Route as IndexRouteImport } from './../routes/index'
-import { Route as LayoutUploaderRouteImport } from './../routes/_layout.uploader'
-import { Route as LayoutTermsRouteImport } from './../routes/_layout.terms'
-import { Route as LayoutSupportRouteImport } from './../routes/_layout.support'
-import { Route as LayoutSettingsRouteImport } from './../routes/_layout.settings'
-import { Route as LayoutSearchRouteImport } from './../routes/_layout.search'
-import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
-import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
-import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
-import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
+import { Route as AuthRouteImport } from './../routes/auth'
+import { Route as RedirectRouteImport } from './../routes/redirect'
 import { Route as localLayoutRouteImport } from './../routes/(local)._layout'
-import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
-import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
-import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
-import { Route as LayoutMyStuffIndexRouteImport } from './../routes/_layout.my-stuff.index'
-import { Route as LayoutCreateIndexRouteImport } from './../routes/_layout.create.index'
-import { Route as LayoutSolvePuzzleIdRouteImport } from './../routes/_layout.solve.$puzzleId'
-import { Route as LayoutSearchPuzzlesRouteImport } from './../routes/_layout.search.puzzles'
-import { Route as LayoutSearchCollectionsRouteImport } from './../routes/_layout.search.collections'
-import { Route as LayoutProfileUserIdRouteImport } from './../routes/_layout.profile.$userId'
-import { Route as LayoutPerfectionPuzzleIdRouteImport } from './../routes/_layout.perfection.$puzzleId'
-import { Route as LayoutMyStuffPuzzlesRouteImport } from './../routes/_layout.my-stuff.puzzles'
-import { Route as LayoutMyStuffCollectionsRouteImport } from './../routes/_layout.my-stuff.collections'
-import { Route as LayoutCreatePuzzleIdRouteImport } from './../routes/_layout.create.$puzzleId'
+import { Route as LayoutMyFollowsRouteImport } from './../routes/_layout.my-follows'
+import { Route as LayoutMyStuffRouteImport } from './../routes/_layout.my-stuff'
+import { Route as LayoutPrivacyPolicyRouteImport } from './../routes/_layout.privacy-policy'
+import { Route as LayoutRulesRouteImport } from './../routes/_layout.rules'
+import { Route as LayoutSearchRouteImport } from './../routes/_layout.search'
+import { Route as LayoutSettingsRouteImport } from './../routes/_layout.settings'
+import { Route as LayoutSupportRouteImport } from './../routes/_layout.support'
+import { Route as LayoutTermsRouteImport } from './../routes/_layout.terms'
+import { Route as LayoutUploaderRouteImport } from './../routes/_layout.uploader'
 import { Route as LayoutCollectionCollectionIdRouteImport } from './../routes/_layout.collection.$collectionId'
-import { Route as moderatorModProfileUserIdRouteImport } from './../routes/(moderator).mod.profile.$userId'
-import { Route as localLayoutDevPuzzlesRouteImport } from './../routes/(local)._layout.dev.puzzles'
+import { Route as LayoutCreateIndexRouteImport } from './../routes/_layout.create.index'
+import { Route as LayoutCreatePuzzleIdRouteImport } from './../routes/_layout.create.$puzzleId'
+import { Route as LayoutMyStuffIndexRouteImport } from './../routes/_layout.my-stuff.index'
+import { Route as LayoutMyStuffCollectionsRouteImport } from './../routes/_layout.my-stuff.collections'
+import { Route as LayoutMyStuffPuzzlesRouteImport } from './../routes/_layout.my-stuff.puzzles'
+import { Route as LayoutPerfectionIndexRouteImport } from './../routes/_layout.perfection.index'
+import { Route as LayoutPerfectionPuzzleIdRouteImport } from './../routes/_layout.perfection.$puzzleId'
+import { Route as LayoutProfileUserIdRouteImport } from './../routes/_layout.profile.$userId'
+import { Route as LayoutSearchIndexRouteImport } from './../routes/_layout.search.index'
+import { Route as LayoutSearchCollectionsRouteImport } from './../routes/_layout.search.collections'
+import { Route as LayoutSearchPuzzlesRouteImport } from './../routes/_layout.search.puzzles'
+import { Route as LayoutSolveIndexRouteImport } from './../routes/_layout.solve.index'
+import { Route as LayoutSolvePuzzleIdRouteImport } from './../routes/_layout.solve.$puzzleId'
 import { Route as localLayoutDevColorRouteImport } from './../routes/(local)._layout.dev.color'
+import { Route as localLayoutDevPuzzlesRouteImport } from './../routes/(local)._layout.dev.puzzles'
+import { Route as moderatorModProfileUserIdRouteImport } from './../routes/(moderator).mod.profile.$userId'
 
-const localRouteImport = createFileRoute('/(local)')()
 const LayoutLazyRouteImport = createFileRoute('/_layout')()
 
-const localRoute = localRouteImport.update({
-  id: '/(local)',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutLazyRoute = LayoutLazyRouteImport.update({
   id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./../routes/_layout.lazy').then((d) => d.Route))
-const RedirectRoute = RedirectRouteImport.update({
-  id: '/redirect',
-  path: '/redirect',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const RedirectRoute = RedirectRouteImport.update({
+  id: '/redirect',
+  path: '/redirect',
   getParentRoute: () => rootRouteImport,
+} as any)
+const localLayoutRoute = localLayoutRouteImport
+  .update({
+    id: '/(local)/_layout',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+  .lazy(() => import('./../routes/(local)._layout.lazy').then((d) => d.Route))
+const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
+  id: '/my-follows',
+  path: '/my-follows',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
+)
+const LayoutMyStuffRoute = LayoutMyStuffRouteImport.update({
+  id: '/my-stuff',
+  path: '/my-stuff',
+  getParentRoute: () => LayoutLazyRoute,
+} as any)
+const LayoutPrivacyPolicyRoute = LayoutPrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => LayoutLazyRoute,
+} as any)
+const LayoutRulesRoute = LayoutRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => LayoutLazyRoute,
+} as any)
+const LayoutSearchRoute = LayoutSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => LayoutLazyRoute,
+} as any)
+const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.settings.lazy').then((d) => d.Route),
+)
+const LayoutSupportRoute = LayoutSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.support.lazy').then((d) => d.Route),
+)
+const LayoutTermsRoute = LayoutTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => LayoutLazyRoute,
 } as any)
 const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
   id: '/uploader',
@@ -75,82 +122,16 @@ const LayoutUploaderRoute = LayoutUploaderRouteImport.update({
 } as any).lazy(() =>
   import('./../routes/_layout.uploader.lazy').then((d) => d.Route),
 )
-const LayoutTermsRoute = LayoutTermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => LayoutLazyRoute,
-} as any)
-const LayoutSupportRoute = LayoutSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.support.lazy').then((d) => d.Route),
-)
-const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.settings.lazy').then((d) => d.Route),
-)
-const LayoutSearchRoute = LayoutSearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => LayoutLazyRoute,
-} as any)
-const LayoutRulesRoute = LayoutRulesRouteImport.update({
-  id: '/rules',
-  path: '/rules',
-  getParentRoute: () => LayoutLazyRoute,
-} as any)
-const LayoutPrivacyPolicyRoute = LayoutPrivacyPolicyRouteImport.update({
-  id: '/privacy-policy',
-  path: '/privacy-policy',
-  getParentRoute: () => LayoutLazyRoute,
-} as any)
-const LayoutMyStuffRoute = LayoutMyStuffRouteImport.update({
-  id: '/my-stuff',
-  path: '/my-stuff',
-  getParentRoute: () => LayoutLazyRoute,
-} as any)
-const LayoutMyFollowsRoute = LayoutMyFollowsRouteImport.update({
-  id: '/my-follows',
-  path: '/my-follows',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.my-follows.lazy').then((d) => d.Route),
-)
-const localLayoutRoute = localLayoutRouteImport
-  .update({
-    id: '/_layout',
-    getParentRoute: () => localRoute,
-  } as any)
-  .lazy(() => import('./../routes/(local)._layout.lazy').then((d) => d.Route))
-const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
-  id: '/solve/',
-  path: '/solve/',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.solve.index.lazy').then((d) => d.Route),
-)
-const LayoutSearchIndexRoute = LayoutSearchIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => LayoutSearchRoute,
-} as any)
-const LayoutPerfectionIndexRoute = LayoutPerfectionIndexRouteImport.update({
-  id: '/perfection/',
-  path: '/perfection/',
-  getParentRoute: () => LayoutLazyRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.perfection.index.lazy').then((d) => d.Route),
-)
-const LayoutMyStuffIndexRoute = LayoutMyStuffIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => LayoutMyStuffRoute,
-} as any)
+const LayoutCollectionCollectionIdRoute =
+  LayoutCollectionCollectionIdRouteImport.update({
+    id: '/collection/$collectionId',
+    path: '/collection/$collectionId',
+    getParentRoute: () => LayoutLazyRoute,
+  } as any).lazy(() =>
+    import('./../routes/_layout.collection.$collectionId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 const LayoutCreateIndexRoute = LayoutCreateIndexRouteImport.update({
   id: '/create/',
   path: '/create/',
@@ -158,33 +139,41 @@ const LayoutCreateIndexRoute = LayoutCreateIndexRouteImport.update({
 } as any).lazy(() =>
   import('./../routes/_layout.create.index.lazy').then((d) => d.Route),
 )
-const LayoutSolvePuzzleIdRoute = LayoutSolvePuzzleIdRouteImport.update({
-  id: '/solve/$puzzleId',
-  path: '/solve/$puzzleId',
+const LayoutCreatePuzzleIdRoute = LayoutCreatePuzzleIdRouteImport.update({
+  id: '/create/$puzzleId',
+  path: '/create/$puzzleId',
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
-  import('./../routes/_layout.solve.$puzzleId.lazy').then((d) => d.Route),
+  import('./../routes/_layout.create.$puzzleId.lazy').then((d) => d.Route),
 )
-const LayoutSearchPuzzlesRoute = LayoutSearchPuzzlesRouteImport.update({
+const LayoutMyStuffIndexRoute = LayoutMyStuffIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutMyStuffRoute,
+} as any)
+const LayoutMyStuffCollectionsRoute =
+  LayoutMyStuffCollectionsRouteImport.update({
+    id: '/collections',
+    path: '/collections',
+    getParentRoute: () => LayoutMyStuffRoute,
+  } as any).lazy(() =>
+    import('./../routes/_layout.my-stuff.collections.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+const LayoutMyStuffPuzzlesRoute = LayoutMyStuffPuzzlesRouteImport.update({
   id: '/puzzles',
   path: '/puzzles',
-  getParentRoute: () => LayoutSearchRoute,
+  getParentRoute: () => LayoutMyStuffRoute,
 } as any).lazy(() =>
-  import('./../routes/_layout.search.puzzles.lazy').then((d) => d.Route),
+  import('./../routes/_layout.my-stuff.puzzles.lazy').then((d) => d.Route),
 )
-const LayoutSearchCollectionsRoute = LayoutSearchCollectionsRouteImport.update({
-  id: '/collections',
-  path: '/collections',
-  getParentRoute: () => LayoutSearchRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.search.collections.lazy').then((d) => d.Route),
-)
-const LayoutProfileUserIdRoute = LayoutProfileUserIdRouteImport.update({
-  id: '/profile/$userId',
-  path: '/profile/$userId',
+const LayoutPerfectionIndexRoute = LayoutPerfectionIndexRouteImport.update({
+  id: '/perfection/',
+  path: '/perfection/',
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
-  import('./../routes/_layout.profile.$userId.lazy').then((d) => d.Route),
+  import('./../routes/_layout.perfection.index.lazy').then((d) => d.Route),
 )
 const LayoutPerfectionPuzzleIdRoute =
   LayoutPerfectionPuzzleIdRouteImport.update({
@@ -196,39 +185,63 @@ const LayoutPerfectionPuzzleIdRoute =
       (d) => d.Route,
     ),
   )
-const LayoutMyStuffPuzzlesRoute = LayoutMyStuffPuzzlesRouteImport.update({
-  id: '/puzzles',
-  path: '/puzzles',
-  getParentRoute: () => LayoutMyStuffRoute,
-} as any).lazy(() =>
-  import('./../routes/_layout.my-stuff.puzzles.lazy').then((d) => d.Route),
-)
-const LayoutMyStuffCollectionsRoute =
-  LayoutMyStuffCollectionsRouteImport.update({
-    id: '/collections',
-    path: '/collections',
-    getParentRoute: () => LayoutMyStuffRoute,
-  } as any).lazy(() =>
-    import('./../routes/_layout.my-stuff.collections.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-const LayoutCreatePuzzleIdRoute = LayoutCreatePuzzleIdRouteImport.update({
-  id: '/create/$puzzleId',
-  path: '/create/$puzzleId',
+const LayoutProfileUserIdRoute = LayoutProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
   getParentRoute: () => LayoutLazyRoute,
 } as any).lazy(() =>
-  import('./../routes/_layout.create.$puzzleId.lazy').then((d) => d.Route),
+  import('./../routes/_layout.profile.$userId.lazy').then((d) => d.Route),
 )
-const LayoutCollectionCollectionIdRoute =
-  LayoutCollectionCollectionIdRouteImport.update({
-    id: '/collection/$collectionId',
-    path: '/collection/$collectionId',
-    getParentRoute: () => LayoutLazyRoute,
-  } as any).lazy(() =>
-    import('./../routes/_layout.collection.$collectionId.lazy').then(
-      (d) => d.Route,
-    ),
+const LayoutSearchIndexRoute = LayoutSearchIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LayoutSearchRoute,
+} as any)
+const LayoutSearchCollectionsRoute = LayoutSearchCollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => LayoutSearchRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.search.collections.lazy').then((d) => d.Route),
+)
+const LayoutSearchPuzzlesRoute = LayoutSearchPuzzlesRouteImport.update({
+  id: '/puzzles',
+  path: '/puzzles',
+  getParentRoute: () => LayoutSearchRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.search.puzzles.lazy').then((d) => d.Route),
+)
+const LayoutSolveIndexRoute = LayoutSolveIndexRouteImport.update({
+  id: '/solve/',
+  path: '/solve/',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.solve.index.lazy').then((d) => d.Route),
+)
+const LayoutSolvePuzzleIdRoute = LayoutSolvePuzzleIdRouteImport.update({
+  id: '/solve/$puzzleId',
+  path: '/solve/$puzzleId',
+  getParentRoute: () => LayoutLazyRoute,
+} as any).lazy(() =>
+  import('./../routes/_layout.solve.$puzzleId.lazy').then((d) => d.Route),
+)
+const localLayoutDevColorRoute = localLayoutDevColorRouteImport
+  .update({
+    id: '/dev/color',
+    path: '/dev/color',
+    getParentRoute: () => localLayoutRoute,
+  } as any)
+  .lazy(() =>
+    import('./../routes/(local)._layout.dev.color.lazy').then((d) => d.Route),
+  )
+const localLayoutDevPuzzlesRoute = localLayoutDevPuzzlesRouteImport
+  .update({
+    id: '/dev/puzzles',
+    path: '/dev/puzzles',
+    getParentRoute: () => localLayoutRoute,
+  } as any)
+  .lazy(() =>
+    import('./../routes/(local)._layout.dev.puzzles.lazy').then((d) => d.Route),
   )
 const moderatorModProfileUserIdRoute = moderatorModProfileUserIdRouteImport
   .update({
@@ -241,27 +254,9 @@ const moderatorModProfileUserIdRoute = moderatorModProfileUserIdRouteImport
       (d) => d.Route,
     ),
   )
-const localLayoutDevPuzzlesRoute = localLayoutDevPuzzlesRouteImport
-  .update({
-    id: '/dev/puzzles',
-    path: '/dev/puzzles',
-    getParentRoute: () => localLayoutRoute,
-  } as any)
-  .lazy(() =>
-    import('./../routes/(local)._layout.dev.puzzles.lazy').then((d) => d.Route),
-  )
-const localLayoutDevColorRoute = localLayoutDevColorRouteImport
-  .update({
-    id: '/dev/color',
-    path: '/dev/color',
-    getParentRoute: () => localLayoutRoute,
-  } as any)
-  .lazy(() =>
-    import('./../routes/(local)._layout.dev.color.lazy').then((d) => d.Route),
-  )
 
 export interface FileRoutesByFullPath {
-  '/': typeof localLayoutRouteWithChildren
+  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/my-follows': typeof LayoutMyFollowsRoute
@@ -282,17 +277,17 @@ export interface FileRoutesByFullPath {
   '/search/collections': typeof LayoutSearchCollectionsRoute
   '/search/puzzles': typeof LayoutSearchPuzzlesRoute
   '/solve/$puzzleId': typeof LayoutSolvePuzzleIdRoute
-  '/create': typeof LayoutCreateIndexRoute
+  '/create/': typeof LayoutCreateIndexRoute
   '/my-stuff/': typeof LayoutMyStuffIndexRoute
-  '/perfection': typeof LayoutPerfectionIndexRoute
+  '/perfection/': typeof LayoutPerfectionIndexRoute
   '/search/': typeof LayoutSearchIndexRoute
-  '/solve': typeof LayoutSolveIndexRoute
+  '/solve/': typeof LayoutSolveIndexRoute
   '/dev/color': typeof localLayoutDevColorRoute
   '/dev/puzzles': typeof localLayoutDevPuzzlesRoute
   '/mod/profile/$userId': typeof moderatorModProfileUserIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof localLayoutRouteWithChildren
+  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/my-follows': typeof LayoutMyFollowsRoute
@@ -326,7 +321,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/redirect': typeof RedirectRoute
   '/_layout': typeof LayoutLazyRouteWithChildren
-  '/(local)': typeof localRouteWithChildren
   '/(local)/_layout': typeof localLayoutRouteWithChildren
   '/_layout/my-follows': typeof LayoutMyFollowsRoute
   '/_layout/my-stuff': typeof LayoutMyStuffRouteWithChildren
@@ -379,11 +373,11 @@ export interface FileRouteTypes {
     | '/search/collections'
     | '/search/puzzles'
     | '/solve/$puzzleId'
-    | '/create'
+    | '/create/'
     | '/my-stuff/'
-    | '/perfection'
+    | '/perfection/'
     | '/search/'
-    | '/solve'
+    | '/solve/'
     | '/dev/color'
     | '/dev/puzzles'
     | '/mod/profile/$userId'
@@ -422,7 +416,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/redirect'
     | '/_layout'
-    | '/(local)'
     | '/(local)/_layout'
     | '/_layout/my-follows'
     | '/_layout/my-stuff'
@@ -457,31 +450,24 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   RedirectRoute: typeof RedirectRoute
   LayoutLazyRoute: typeof LayoutLazyRouteWithChildren
-  localRoute: typeof localRouteWithChildren
+  localLayoutRoute: typeof localLayoutRouteWithChildren
   moderatorModProfileUserIdRoute: typeof moderatorModProfileUserIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/(local)': {
-      id: '/(local)'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof localRouteImport
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
       id: '/_layout'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LayoutLazyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/redirect': {
-      id: '/redirect'
-      path: '/redirect'
-      fullPath: '/redirect'
-      preLoaderRoute: typeof RedirectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -491,60 +477,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/redirect': {
+      id: '/redirect'
+      path: '/redirect'
+      fullPath: '/redirect'
+      preLoaderRoute: typeof RedirectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/uploader': {
-      id: '/_layout/uploader'
-      path: '/uploader'
-      fullPath: '/uploader'
-      preLoaderRoute: typeof LayoutUploaderRouteImport
-      parentRoute: typeof LayoutLazyRoute
+    '/(local)/_layout': {
+      id: '/(local)/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof localLayoutRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_layout/terms': {
-      id: '/_layout/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof LayoutTermsRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/support': {
-      id: '/_layout/support'
-      path: '/support'
-      fullPath: '/support'
-      preLoaderRoute: typeof LayoutSupportRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/settings': {
-      id: '/_layout/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof LayoutSettingsRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/search': {
-      id: '/_layout/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof LayoutSearchRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/rules': {
-      id: '/_layout/rules'
-      path: '/rules'
-      fullPath: '/rules'
-      preLoaderRoute: typeof LayoutRulesRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/privacy-policy': {
-      id: '/_layout/privacy-policy'
-      path: '/privacy-policy'
-      fullPath: '/privacy-policy'
-      preLoaderRoute: typeof LayoutPrivacyPolicyRouteImport
+    '/_layout/my-follows': {
+      id: '/_layout/my-follows'
+      path: '/my-follows'
+      fullPath: '/my-follows'
+      preLoaderRoute: typeof LayoutMyFollowsRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/my-stuff': {
@@ -554,109 +505,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutMyStuffRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/my-follows': {
-      id: '/_layout/my-follows'
-      path: '/my-follows'
-      fullPath: '/my-follows'
-      preLoaderRoute: typeof LayoutMyFollowsRouteImport
+    '/_layout/privacy-policy': {
+      id: '/_layout/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof LayoutPrivacyPolicyRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/(local)/_layout': {
-      id: '/(local)/_layout'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof localLayoutRouteImport
-      parentRoute: typeof localRoute
-    }
-    '/_layout/solve/': {
-      id: '/_layout/solve/'
-      path: '/solve'
-      fullPath: '/solve'
-      preLoaderRoute: typeof LayoutSolveIndexRouteImport
+    '/_layout/rules': {
+      id: '/_layout/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof LayoutRulesRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/search/': {
-      id: '/_layout/search/'
-      path: '/'
-      fullPath: '/search/'
-      preLoaderRoute: typeof LayoutSearchIndexRouteImport
-      parentRoute: typeof LayoutSearchRoute
-    }
-    '/_layout/perfection/': {
-      id: '/_layout/perfection/'
-      path: '/perfection'
-      fullPath: '/perfection'
-      preLoaderRoute: typeof LayoutPerfectionIndexRouteImport
+    '/_layout/search': {
+      id: '/_layout/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof LayoutSearchRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/my-stuff/': {
-      id: '/_layout/my-stuff/'
-      path: '/'
-      fullPath: '/my-stuff/'
-      preLoaderRoute: typeof LayoutMyStuffIndexRouteImport
-      parentRoute: typeof LayoutMyStuffRoute
-    }
-    '/_layout/create/': {
-      id: '/_layout/create/'
-      path: '/create'
-      fullPath: '/create'
-      preLoaderRoute: typeof LayoutCreateIndexRouteImport
+    '/_layout/settings': {
+      id: '/_layout/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/solve/$puzzleId': {
-      id: '/_layout/solve/$puzzleId'
-      path: '/solve/$puzzleId'
-      fullPath: '/solve/$puzzleId'
-      preLoaderRoute: typeof LayoutSolvePuzzleIdRouteImport
+    '/_layout/support': {
+      id: '/_layout/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof LayoutSupportRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/search/puzzles': {
-      id: '/_layout/search/puzzles'
-      path: '/puzzles'
-      fullPath: '/search/puzzles'
-      preLoaderRoute: typeof LayoutSearchPuzzlesRouteImport
-      parentRoute: typeof LayoutSearchRoute
-    }
-    '/_layout/search/collections': {
-      id: '/_layout/search/collections'
-      path: '/collections'
-      fullPath: '/search/collections'
-      preLoaderRoute: typeof LayoutSearchCollectionsRouteImport
-      parentRoute: typeof LayoutSearchRoute
-    }
-    '/_layout/profile/$userId': {
-      id: '/_layout/profile/$userId'
-      path: '/profile/$userId'
-      fullPath: '/profile/$userId'
-      preLoaderRoute: typeof LayoutProfileUserIdRouteImport
+    '/_layout/terms': {
+      id: '/_layout/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof LayoutTermsRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/_layout/perfection/$puzzleId': {
-      id: '/_layout/perfection/$puzzleId'
-      path: '/perfection/$puzzleId'
-      fullPath: '/perfection/$puzzleId'
-      preLoaderRoute: typeof LayoutPerfectionPuzzleIdRouteImport
-      parentRoute: typeof LayoutLazyRoute
-    }
-    '/_layout/my-stuff/puzzles': {
-      id: '/_layout/my-stuff/puzzles'
-      path: '/puzzles'
-      fullPath: '/my-stuff/puzzles'
-      preLoaderRoute: typeof LayoutMyStuffPuzzlesRouteImport
-      parentRoute: typeof LayoutMyStuffRoute
-    }
-    '/_layout/my-stuff/collections': {
-      id: '/_layout/my-stuff/collections'
-      path: '/collections'
-      fullPath: '/my-stuff/collections'
-      preLoaderRoute: typeof LayoutMyStuffCollectionsRouteImport
-      parentRoute: typeof LayoutMyStuffRoute
-    }
-    '/_layout/create/$puzzleId': {
-      id: '/_layout/create/$puzzleId'
-      path: '/create/$puzzleId'
-      fullPath: '/create/$puzzleId'
-      preLoaderRoute: typeof LayoutCreatePuzzleIdRouteImport
+    '/_layout/uploader': {
+      id: '/_layout/uploader'
+      path: '/uploader'
+      fullPath: '/uploader'
+      preLoaderRoute: typeof LayoutUploaderRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
     '/_layout/collection/$collectionId': {
@@ -666,12 +561,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCollectionCollectionIdRouteImport
       parentRoute: typeof LayoutLazyRoute
     }
-    '/(moderator)/mod/profile/$userId': {
-      id: '/(moderator)/mod/profile/$userId'
-      path: '/mod/profile/$userId'
-      fullPath: '/mod/profile/$userId'
-      preLoaderRoute: typeof moderatorModProfileUserIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/create/': {
+      id: '/_layout/create/'
+      path: '/create'
+      fullPath: '/create/'
+      preLoaderRoute: typeof LayoutCreateIndexRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/create/$puzzleId': {
+      id: '/_layout/create/$puzzleId'
+      path: '/create/$puzzleId'
+      fullPath: '/create/$puzzleId'
+      preLoaderRoute: typeof LayoutCreatePuzzleIdRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/my-stuff/': {
+      id: '/_layout/my-stuff/'
+      path: '/'
+      fullPath: '/my-stuff/'
+      preLoaderRoute: typeof LayoutMyStuffIndexRouteImport
+      parentRoute: typeof LayoutMyStuffRoute
+    }
+    '/_layout/my-stuff/collections': {
+      id: '/_layout/my-stuff/collections'
+      path: '/collections'
+      fullPath: '/my-stuff/collections'
+      preLoaderRoute: typeof LayoutMyStuffCollectionsRouteImport
+      parentRoute: typeof LayoutMyStuffRoute
+    }
+    '/_layout/my-stuff/puzzles': {
+      id: '/_layout/my-stuff/puzzles'
+      path: '/puzzles'
+      fullPath: '/my-stuff/puzzles'
+      preLoaderRoute: typeof LayoutMyStuffPuzzlesRouteImport
+      parentRoute: typeof LayoutMyStuffRoute
+    }
+    '/_layout/perfection/': {
+      id: '/_layout/perfection/'
+      path: '/perfection'
+      fullPath: '/perfection/'
+      preLoaderRoute: typeof LayoutPerfectionIndexRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/perfection/$puzzleId': {
+      id: '/_layout/perfection/$puzzleId'
+      path: '/perfection/$puzzleId'
+      fullPath: '/perfection/$puzzleId'
+      preLoaderRoute: typeof LayoutPerfectionPuzzleIdRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/profile/$userId': {
+      id: '/_layout/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof LayoutProfileUserIdRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/search/': {
+      id: '/_layout/search/'
+      path: '/'
+      fullPath: '/search/'
+      preLoaderRoute: typeof LayoutSearchIndexRouteImport
+      parentRoute: typeof LayoutSearchRoute
+    }
+    '/_layout/search/collections': {
+      id: '/_layout/search/collections'
+      path: '/collections'
+      fullPath: '/search/collections'
+      preLoaderRoute: typeof LayoutSearchCollectionsRouteImport
+      parentRoute: typeof LayoutSearchRoute
+    }
+    '/_layout/search/puzzles': {
+      id: '/_layout/search/puzzles'
+      path: '/puzzles'
+      fullPath: '/search/puzzles'
+      preLoaderRoute: typeof LayoutSearchPuzzlesRouteImport
+      parentRoute: typeof LayoutSearchRoute
+    }
+    '/_layout/solve/': {
+      id: '/_layout/solve/'
+      path: '/solve'
+      fullPath: '/solve/'
+      preLoaderRoute: typeof LayoutSolveIndexRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/_layout/solve/$puzzleId': {
+      id: '/_layout/solve/$puzzleId'
+      path: '/solve/$puzzleId'
+      fullPath: '/solve/$puzzleId'
+      preLoaderRoute: typeof LayoutSolvePuzzleIdRouteImport
+      parentRoute: typeof LayoutLazyRoute
+    }
+    '/(local)/_layout/dev/color': {
+      id: '/(local)/_layout/dev/color'
+      path: '/dev/color'
+      fullPath: '/dev/color'
+      preLoaderRoute: typeof localLayoutDevColorRouteImport
+      parentRoute: typeof localLayoutRoute
     }
     '/(local)/_layout/dev/puzzles': {
       id: '/(local)/_layout/dev/puzzles'
@@ -680,12 +666,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof localLayoutDevPuzzlesRouteImport
       parentRoute: typeof localLayoutRoute
     }
-    '/(local)/_layout/dev/color': {
-      id: '/(local)/_layout/dev/color'
-      path: '/dev/color'
-      fullPath: '/dev/color'
-      preLoaderRoute: typeof localLayoutDevColorRouteImport
-      parentRoute: typeof localLayoutRoute
+    '/(moderator)/mod/profile/$userId': {
+      id: '/(moderator)/mod/profile/$userId'
+      path: '/mod/profile/$userId'
+      fullPath: '/mod/profile/$userId'
+      preLoaderRoute: typeof moderatorModProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -780,22 +766,12 @@ const localLayoutRouteWithChildren = localLayoutRoute._addFileChildren(
   localLayoutRouteChildren,
 )
 
-interface localRouteChildren {
-  localLayoutRoute: typeof localLayoutRouteWithChildren
-}
-
-const localRouteChildren: localRouteChildren = {
-  localLayoutRoute: localLayoutRouteWithChildren,
-}
-
-const localRouteWithChildren = localRoute._addFileChildren(localRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   RedirectRoute: RedirectRoute,
   LayoutLazyRoute: LayoutLazyRouteWithChildren,
-  localRoute: localRouteWithChildren,
+  localLayoutRoute: localLayoutRouteWithChildren,
   moderatorModProfileUserIdRoute: moderatorModProfileUserIdRoute,
 }
 export const routeTree = rootRouteImport

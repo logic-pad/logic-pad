@@ -16,9 +16,18 @@ class StoredRedirect {
     const serialized = sessionStorage.getItem('redirect');
     sessionStorage.removeItem('redirect');
     if (!serialized) return false;
-    const location = JSON.parse(serialized) as NavigateOptions;
+    const location = JSON.parse(serialized) as NavigateOptions & {
+      publicHref?: string;
+    };
     try {
-      await router.navigate(location);
+      // The stored `href` is router-internal, so it carries no locale prefix:
+      // navigating with it would silently drop the language the user signed in
+      // from. Re-enter through `publicHref` instead — the rewrite strips it back
+      // down to the same route while restoring the locale.
+      await router.navigate({
+        ...location,
+        ...(location.publicHref ? { href: location.publicHref } : {}),
+      });
       return true;
     } catch {
       return false;

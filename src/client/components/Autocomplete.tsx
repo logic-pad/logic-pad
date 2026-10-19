@@ -3,13 +3,23 @@ import fuzzysort from 'fuzzysort-esm';
 import { cn } from '../../client/uiHelper.ts';
 import AnnotatedText from './AnnotatedText';
 
+interface Target {
+  label: string;
+  index: number;
+}
+
 export interface AutocompleteProps {
   items: string[];
   value: string;
   all?: boolean;
   placeholder?: string;
   onChange?: (value: string) => void;
-  onConfirm?: (value: string) => void;
+  /**
+   * Called with the chosen label and its index into `items`.
+   *
+   * Prefer `index` when `items` may contain possible duplicates.
+   */
+  onConfirm?: (value: string, index: number) => void;
   className?: string;
 }
 
@@ -25,14 +35,21 @@ export default memo(function Autocomplete({
 }: AutocompleteProps) {
   all = all ?? false;
 
-  const results = useMemo(
-    () => fuzzysort.go(value, items, { limit: 50, all }),
-    [value, items, all]
+  // Carry the source index alongside each label so a selection can be resolved
+  // without relying on label uniqueness.
+  const targets = useMemo<Target[]>(
+    () => items.map((label, index) => ({ label, index })),
+    [items]
   );
 
-  const confirm = (value: string) => {
-    onChange?.(value);
-    onConfirm?.(value);
+  const results = useMemo(
+    () => fuzzysort.go(value, targets, { key: 'label', limit: 50, all }),
+    [value, targets, all]
+  );
+
+  const confirm = (target: Target) => {
+    onChange?.(target.label);
+    onConfirm?.(target.label, target.index);
   };
 
   return (
@@ -47,8 +64,8 @@ export default memo(function Autocomplete({
           onChange={e => onChange?.(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
-              const result = results[0]?.target;
-              if (result) confirm(result);
+              const target = results[0]?.obj;
+              if (target) confirm(target);
             } else if (e.key === 'Escape') {
               onChange?.('');
             }
@@ -62,12 +79,12 @@ export default memo(function Autocomplete({
           )}
         >
           {results.map(result => (
-            <li key={result.target}>
+            <li key={result.obj.index}>
               <a
                 className="overflow-hidden"
-                onClick={() => confirm(result.target)}
+                onClick={() => confirm(result.obj)}
               >
-                <AnnotatedText>{result.target}</AnnotatedText>
+                <AnnotatedText>{result.obj.label}</AnnotatedText>
               </a>
             </li>
           ))}

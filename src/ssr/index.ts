@@ -8,7 +8,9 @@ import { indexHtml, SECURITY_HEADERS } from './config';
 const port = Number(process.env.PORT ?? 3000);
 
 // Routes owned by the ssr/image/sitemap plugins, which set their own headers.
-const pluginRoutes = /^\/(?:solve|collection|profile|api)\/|^\/sitemap\.xml$/;
+// The `ja/` alternative covers the locale-prefixed twins of the SSR pages.
+const pluginRoutes =
+  /^\/(?:api\/|sitemap\.xml$|(?:ja\/)?(?:solve|collection|profile)\/)/;
 
 // Filenames under /assets, and the workbox runtime, carry a content hash, so a
 // given URL always maps to the same bytes and may be cached indefinitely.
@@ -35,6 +37,17 @@ const isDocumentRequest = (request: Request) => {
 };
 
 const app = new Elysia()
+  .onRequest(({ request }) => {
+    // Permanent redirect for `/en` pages to root (default locale)
+    const url = new URL(request.url);
+    const prefix = /^\/en(?=\/|$)/i.exec(url.pathname);
+    if (!prefix) return;
+    const rest = url.pathname.slice(prefix[0].length) || '/';
+    return new Response(null, {
+      status: 301,
+      headers: { location: rest + url.search + url.hash },
+    });
+  })
   .mapResponse(({ path, response, set }) => {
     if (pluginRoutes.test(path)) return;
     const cacheControl = cacheControlFor(path);

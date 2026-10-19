@@ -1,6 +1,7 @@
 import { HeadContent, Outlet, createRootRoute } from '@tanstack/react-router';
 import ThemeSynchronizer from '../state/theme.ts';
 import TanStackDevTools from '../router/TanStackDevTools';
+import LocaleBridge from '../router/LocaleBridge.tsx';
 import { memo } from 'react';
 import { Toaster } from 'react-hot-toast';
 import AppTooltips from '../components/Tooltip.tsx';
@@ -17,6 +18,7 @@ export const Route = createRootRoute({
     return (
       <div className="h-dvh w-dvw overflow-y-auto overflow-x-hidden bg-base-100 text-base-content">
         <ThemeSynchronizer />
+        <LocaleBridge />
         <HeadContent />
         <Toaster
           toastOptions={{

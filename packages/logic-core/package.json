@@ -40,6 +40,10 @@
     "./assets/*": {
       "import": "./assets/*",
       "require": "./assets/*"
+    },
+    "./locale/*": {
+      "import": "./dist/src/locale/*.js",
+      "require": "./dist/src/locale/*.js"
     }
   },
   "scripts": {
@@ -52,6 +56,8 @@
     "bench:prepare:lp": "bun bench:prepare universal -f all_puzzles_logic_pad.json -n lp",
     "bench:run:lp": "bun bench:run universal universal_dev -n lp",
     "insight-eval": "bun ./benchmark/insightEval.ts",
+    "locales:extract": "bun x --bun lingui extract --config lingui.config.ts",
+    "locales:compile": "bun x --bun lingui compile --config lingui.config.ts --typescript",
     "prepublishOnly": "bun run build"
   },
   "engines": {
@@ -59,6 +65,7 @@
     "node": ">=23.11.0"
   },
   "dependencies": {
+    "@lingui/core": "^6.10.0",
     "@logic-pad/cspuz-solver": "^0.2.1",
     "compression-streams-polyfill": "^0.1.7",
     "event-iterator": "^2.0.0",
@@ -66,6 +73,7 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@lingui/cli": "^6.10.0",
     "@microsoft/api-extractor": "^7.59.4",
     "@types/bun": "^1.2.20",
     "@types/glob": "^9.0.0",

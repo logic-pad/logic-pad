@@ -1,0 +1,39 @@
+# Crowdin manifest — logic-pad (frontend + @logic-pad/core)
+#
+# Every catalog in this repository is a GetText `.po` file, which Crowdin
+# handles natively. `en` is the source language that is uploaded; Crowdin
+# returns the other locales into the mirrored paths below.
+#
+# After pulling translations, regenerate the runtime artifacts:
+#
+#   bun run locales:extract        # frontend UI catalogs
+#   bun run locales:compile        # frontend UI catalogs (CI/bundler alternative)
+#   bun run --cwd packages/logic-core locales:extract
+#   bun run --cwd packages/logic-core locales:compile
+#
+# The Vite plugin compiles the frontend `.po` files on demand, so only the
+# core catalogs strictly need a `locales:compile` step (their compiled `.ts`
+# output is committed and shipped inside the package).
+
+"project_id": ""
+"api_token_env": CROWDIN_PERSONAL_ACCESS_TOKEN
+"base_path": "."
+"base_url": "https://api.crowdin.com"
+
+"files":
+  -
+    "source": "/src/client/locales/en/messages.po"
+    "translation": "/src/client/locales/%locale%/%original_file_name%"
+    "type": po
+    "update_option": update_as_untranslated
+    "languages_mapping":
+      "locale":
+        "ja": "ja"
+  -
+    "source": "/packages/logic-core/src/locale/catalogs/en/messages.po"
+    "translation": "/packages/logic-core/src/locale/catalogs/%locale%/%original_file_name%"
+    "type": po
+    "update_option": update_as_untranslated
+    "languages_mapping":
+      "locale":
+        "ja": "ja"

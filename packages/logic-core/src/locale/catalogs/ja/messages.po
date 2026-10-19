@@ -1,0 +1,39 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-18 21:13+0800\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: ja\n"
+
+#. js-lingui-explicit-id
+#: src/data/rules/cellCountRule.ts:10
+msgid "rule.cell_count.title"
+msgstr "総数カウント"
+
+#. js-lingui-explicit-id
+#: src/data/rules/cellCountRule.ts:20
+#: src/data/rules/uniqueShapeRule.ts:20
+msgid "common.color"
+msgstr "色"
+
+#. js-lingui-explicit-id
+#: src/data/rules/cellCountRule.ts:30
+msgid "common.count"
+msgstr "カウント"
+
+#. js-lingui-explicit-id
+#: src/data/rules/cellCountRule.ts:107
+msgid "rule.cell_count.explanation"
+msgstr "{count, plural, other {{color}のセルは全部で{count}個あります}}"
+
+#. js-lingui-explicit-id
+#: src/data/rules/uniqueShapeRule.ts:10
+msgid "rule.unique_shape.title"
+msgstr "ユニークな形のエリア"
+
+#. js-lingui-explicit-id
+#: src/data/rules/uniqueShapeRule.ts:53
+msgid "rule.unique_shape.explanation"
+msgstr "同じ形と大きさの{color}エリアは2つ以上存在しません"
