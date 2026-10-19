@@ -32,13 +32,15 @@ const coreCatalogs: Record<Locale, () => Promise<{ default: CoreLocale }>> = {
   ja: () => import('@logic-pad/core/locale/ja'),
 };
 
-const inFlight = new Map<Locale, Promise<void>>();
+type Catalogs = {
+  messages: Record<string, string>;
+  core: CoreLocale;
+};
 
-/**
- * Make `locale` active for both the UI and `@logic-pad/core` strings.
- */
-export function activateLocale(locale: Locale): Promise<void> {
-  const pending = inFlight.get(locale);
+const loaded = new Map<Locale, Promise<Catalogs>>();
+
+function loadCatalogs(locale: Locale): Promise<Catalogs> {
+  const pending = loaded.get(locale);
   if (pending) return pending;
 
   const task = (async () => {
@@ -46,14 +48,25 @@ export function activateLocale(locale: Locale): Promise<void> {
       loadUiCatalog(locale),
       coreCatalogs[locale](),
     ]);
-    i18n.load(locale, messages);
-    i18n.activate(locale);
-    setCoreLocale(core.default);
+    return { messages, core: core.default };
   })();
 
-  inFlight.set(locale, task);
+  loaded.set(locale, task);
   task.catch(() => {
-    if (inFlight.get(locale) === task) inFlight.delete(locale);
+    // A failed load must not be cached, or the locale is dead for the session.
+    if (loaded.get(locale) === task) loaded.delete(locale);
   });
   return task;
+}
+
+/**
+ * Make `locale` active for both the UI and `@logic-pad/core` strings.
+ *
+ * Safe to call repeatedly, including for the locale that is already active.
+ */
+export async function activateLocale(locale: Locale): Promise<void> {
+  const { messages, core } = await loadCatalogs(locale);
+  i18n.load(locale, messages);
+  i18n.activate(locale);
+  setCoreLocale(core);
 }

@@ -65,8 +65,17 @@ for non-React modules.
 
 `activateLocale(locale)` loads the `.po` catalog and the matching
 `@logic-pad/core` locale bundle in parallel, then activates lingui and installs
-the core locale (see [§2.4](#24-bridging-the-frontend-and-core-locale)). Calls
-are de-duplicated, so StrictMode's double render cannot fetch a catalog twice.
+the core locale (see [§2.4](#24-bridging-the-frontend-and-core-locale)).
+
+**Memoize loading, never activation.** Concurrent calls for the same locale share
+one import promise (`loadCatalogs`), so StrictMode's double render cannot fetch a
+catalog twice — but `i18n.activate()` / `setCoreLocale()` run on *every* call.
+Caching the activation alongside the load is a subtle bug: the first visit to a
+locale works, and returning to it later silently keeps the previous language,
+because the cached promise resolves without re-applying it. The symptom is
+confusing precisely because everything else stays correct — the URL prefix,
+`<html lang>`, the select's value and the rendered route all update; only the
+translated text is stale.
 
 Untranslated ids do **not** need manual handling: lingui resolves a missing
 translation to the source-locale text at compile time

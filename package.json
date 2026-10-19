@@ -10,9 +10,9 @@
   },
   "license": "AGPL-3.0-only",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "bun x --bun vite --host",
     "scan": "react-scan localhost:5173",
-    "build": "bunx --bun tsc && bunx --bun vite build",
+    "build": "bun x --bun tsc && bun x --bun vite build",
     "start": "bun --smol src/ssr/index.ts",
     "lint": "eslint",
     "preview": "vite preview --host",

@@ -62,8 +62,8 @@ export function addLocalePrefix(locale: Locale, href: string): string {
  *
  * Note that a prefix-only change cannot be committed with `navigate`/
  * `commitLocation`: those compare the *internal* href, which is identical with
- * and without the prefix, so the write is skipped. Switch locale with `useLocale()`
- * in `state/locale.ts` instead.
+ * and without the prefix, so the write is skipped. Switch locale with
+ * `useLocale()` in `router/useLocale.ts` instead.
  */
 export const localeRewrite: LocationRewrite = {
   input: ({ url }) => {
