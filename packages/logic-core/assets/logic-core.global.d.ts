@@ -758,7 +758,7 @@ declare class CspuzSolver extends EventIteratingSolver {
     readonly description = "A blazingly fast WebAssembly solver that supports most rules and symbols (including underclued).";
     protected createWorker(): Worker;
     isGridSupported(grid: GridData): boolean;
-    isInstructionSupported(grid: GridData, instruction: Instruction): boolean;
+    isInstructionSupported(_grid: GridData, instruction: Instruction): boolean;
     isEnvironmentSupported(): Promise<boolean>;
 }
 
@@ -1955,6 +1955,14 @@ declare class ImpossibleSymbolAreaColor extends InsightLemma {
 declare class InsightContext {
     private _grid;
     tileHistory: TileChange[];
+    /**
+     * Optional progress reporter installed by the driver so that expensive lemmas
+     * can report finer-grained progress than "one lemma attempt". It is
+     * deliberately not carried over by {@link copy}, so the speculative
+     * sub-solves that lemmas run on copied contexts stay quiet and only the
+     * outermost attempt reports.
+     */
+    onProgress?: (progress: number, total: number) => void;
     constructor(grid: GridData);
     /**
      * Current grid state observed by lemmas and stores.
@@ -2006,7 +2014,7 @@ declare class InsightSolver extends Solver {
     process(grid: GridData, options: {
         completeSolve: boolean;
         reportProof: boolean;
-        onProgress?: (progress: number, total: number) => void;
+        onProgress?: (progress: number, total: number, phase: ProgressPhase) => void;
         abortSignal?: AbortSignal;
     }): Promise<{
         grid: GridData | null | undefined;
@@ -2709,6 +2717,14 @@ declare const positionSymbol: unique symbol;
 declare type PositionValue = number & {
     [positionSymbol]: 'position';
 };
+
+/**
+ * `lemmas` reports progress across lemma attempts (or filled tiles in
+ * complete-solve mode); `speculation` reports the tiles inspected by the
+ * speculative-solve lemma, which runs much longer than a single lemma attempt
+ * and is therefore worth showing separately.
+ */
+declare type ProgressPhase = 'lemmas' | 'speculation';
 
 declare class Proof {
     readonly root: ProofNode;
