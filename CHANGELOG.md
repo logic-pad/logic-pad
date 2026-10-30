@@ -1,3 +1,17 @@
+# 31/10/2026
+
+**Welcome to UI v2**
+
+- Reworked solve and edit UI
+- Reworked comment UI
+- Reworked color themes
+- Improved touchscreen support
+- Added Grid Insights: automatic hints with explanations for newcomers
+- Updated cspuz solver to support extensions of existing rules and symbols
+- Puzzle cards now show seen/solve status
+- Internal UI optimizations
+- Logic Pad frontend is now hosted on Railway instead of Vercel
+
 # 18/10/2026
 
 **PREVIEW BRANCH**
